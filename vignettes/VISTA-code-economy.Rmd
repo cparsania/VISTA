@@ -79,31 +79,20 @@ ensure_pkgs_available(
 
 # Motivation
 
-A standard RNA-seq differential expression analysis -- from raw counts to
-publication-ready figures and enrichment results -- requires assembling 6--10
-packages, each with its own data structures, naming conventions, and implicit
-assumptions.  The user is responsible for:
+A standard RNA-seq differential expression analysis -- from raw counts to publication-ready figures and enrichment results -- requires assembling 6--10 packages, each with its own data structures, naming conventions, and implicit assumptions. The user is responsible for:
 
-- **Data plumbing**: converting between `DESeqDataSet`, `DGEList`, data frames,
-  matrices, and tibbles at every interface boundary
-- **Identifier management**: gene IDs must be stripped, mapped, and re-mapped
-  at each stage (DE, annotation, enrichment, visualisation)
-- **State tracking**: cutoffs, method settings, comparison names, and color
-  schemes are scattered across script variables with no structured persistence
-- **Visual consistency**: colours, axis labels, and themes must be manually
-  coordinated across dozens of ggplot2 calls
+-   **Data plumbing**: converting between `DESeqDataSet`, `DGEList`, data frames, matrices, and tibbles at every interface boundary
+-   **Identifier management**: gene IDs must be stripped, mapped, and re-mapped at each stage (DE, annotation, enrichment, visualisation)
+-   **State tracking**: cutoffs, method settings, comparison names, and color schemes are scattered across script variables with no structured persistence
+-   **Visual consistency**: colours, axis labels, and themes must be manually coordinated across dozens of ggplot2 calls
 
-None of these steps involve scientific reasoning.  They are engineering
-overhead.  VISTA eliminates them.
+None of these steps involve scientific reasoning. They are engineering overhead. VISTA eliminates them.
 
-This vignette makes that claim concrete: we perform the **same analysis** twice
-on the **same data** -- once with standard packages, once with VISTA -- and
-measure the difference.
+This vignette makes that claim concrete: we perform the **same analysis** twice on the **same data** -- once with standard packages, once with VISTA -- and measure the difference.
 
 # Data
 
-We use the airway dataset (Himes et al. 2014): 8 samples of human airway
-smooth muscle cells, 4 treated with dexamethasone, 4 untreated.
+We use the airway dataset (Himes et al. 2014): 8 samples of human airway smooth muscle cells, 4 treated with dexamethasone, 4 untreated.
 
 ```{r load-data}
 library(airway)
@@ -118,10 +107,7 @@ sample_meta$treatment <- ifelse(sample_meta$dex == "trt", "Dexamethasone", "Untr
 
 # Workflow A: Standard Packages
 
-The code below uses **only** established Bioconductor and CRAN packages --
-DESeq2, ggplot2, ComplexHeatmap, clusterProfiler, msigdbr, and AnnotationDbi.
-This is representative of real analysis scripts found in published
-supplementary materials.
+The code below uses **only** established Bioconductor and CRAN packages -- DESeq2, ggplot2, ComplexHeatmap, clusterProfiler, msigdbr, and AnnotationDbi. This is representative of real analysis scripts found in published supplementary materials.
 
 ```{r standard-packages}
 library(DESeq2)
@@ -170,9 +156,7 @@ res_df <- as.data.frame(res) %>%
 norm_mat <- counts(dds, normalized = TRUE)
 ```
 
-**18 lines.**  The user must know: `DESeqDataSetFromMatrix`, formula syntax,
-manual filtering logic, `results()` contrast specification, fold-change and
-p-value cutoff application, and regulation classification.
+**18 lines.** The user must know: `DESeqDataSetFromMatrix`, formula syntax, manual filtering logic, `results()` contrast specification, fold-change and p-value cutoff application, and regulation classification.
 
 ## Step 2: Gene Annotation (Standard)
 
@@ -189,8 +173,7 @@ gene_symbols <- mapIds(
 res_df$SYMBOL <- gene_symbols[res_df$gene_id]
 ```
 
-**8 lines.**  The user must handle `mapIds()`, know the correct keytype, and
-deal with multi-mapping.
+**8 lines.** The user must handle `mapIds()`, know the correct keytype, and deal with multi-mapping.
 
 ## Step 3: PCA Plot (Standard)
 
@@ -214,9 +197,7 @@ ggplot(pca_data, aes(x = PC1, y = PC2, color = treatment)) +
   theme_minimal(base_size = 14)
 ```
 
-**14 lines.**  The user must know: `vst()`, `plotPCA()` with `returnData`,
-how to extract percent variance from attributes, manual ggplot2 construction,
-and hardcoded colour assignment.
+**14 lines.** The user must know: `vst()`, `plotPCA()` with `returnData`, how to extract percent variance from attributes, manual ggplot2 construction, and hardcoded colour assignment.
 
 ## Step 4: Volcano Plot (Standard)
 
@@ -240,8 +221,7 @@ ggplot(volcano_df, aes(x = log2FoldChange, y = neg_log10_p, color = regulation))
   theme_minimal(base_size = 14)
 ```
 
-**16 lines.**  Manual data preparation, manual label logic, manual threshold
-lines, manual colour mapping.
+**16 lines.** Manual data preparation, manual label logic, manual threshold lines, manual colour mapping.
 
 ## Step 5: Expression Heatmap (Standard)
 
@@ -288,9 +268,7 @@ if (requireNamespace("ComplexHeatmap", quietly = TRUE)) {
 }
 ```
 
-**30 lines.**  The user must: load 2 more packages, manually select top genes,
-compute z-scores, construct `HeatmapAnnotation` with manually repeated colours,
-map gene symbols for row labels, and configure `Heatmap()` with 8 parameters.
+**30 lines.** The user must: load 2 more packages, manually select top genes, compute z-scores, construct `HeatmapAnnotation` with manually repeated colours, map gene symbols for row labels, and configure `Heatmap()` with 8 parameters.
 
 ## Step 6: MSigDB Enrichment (Standard)
 
@@ -314,9 +292,7 @@ enrich_result <- enricher(
 )
 ```
 
-**14 lines.**  The user must: filter and extract gene symbols manually, know
-the msigdbr column names, construct the TERM2GENE data frame, and call
-`enricher()` with correct parameters.
+**14 lines.** The user must: filter and extract gene symbols manually, know the msigdbr column names, construct the TERM2GENE data frame, and call `enricher()` with correct parameters.
 
 ## Step 7: Enrichment Plot (Standard)
 
@@ -338,8 +314,7 @@ if (!is.null(enrich_result) && nrow(enrich_result@result) > 0) {
 }
 ```
 
-**14 lines.**  Manual slot extraction, manual factor reordering, manual
-ggplot2 construction.
+**14 lines.** Manual slot extraction, manual factor reordering, manual ggplot2 construction.
 
 ## Standard Workflow: Summary
 
@@ -373,13 +348,12 @@ knitr::kable(
 
 Additional cognitive costs not captured in line count:
 
-- **5 data structure conversions** (matrix -> DESeqDataSet -> results ->
-  data.frame -> filtered subset)
-- **2 manual ID mappings** (Ensembl -> Symbol for annotation and enrichment)
-- **3 hardcoded color vectors** (one per plot type, manually kept consistent)
-- **0 structured persistence** (all state lives in script variables)
+-   **5 data structure conversions** (matrix -\> DESeqDataSet -\> results -\> data.frame -\> filtered subset)
+-   **2 manual ID mappings** (Ensembl -\> Symbol for annotation and enrichment)
+-   **3 hardcoded color vectors** (one per plot type, manually kept consistent)
+-   **0 structured persistence** (all state lives in script variables)
 
----
+------------------------------------------------------------------------
 
 # Workflow B: VISTA
 
@@ -432,10 +406,7 @@ vista <- set_rowdata(
 
 **23 lines** (including data preparation shared with both workflows).
 
-`create_vista()` performed: count filtering, DESeq2 pipeline execution,
-normalized count extraction, fold-change/p-value thresholding, regulation
-classification, colour palette assignment, and metadata persistence -- in one
-call.  `set_rowdata()` handled all ID mapping.
+`create_vista()` performed: count filtering, DESeq2 pipeline execution, normalized count extraction, fold-change/p-value thresholding, regulation classification, colour palette assignment, and metadata persistence -- in one call. `set_rowdata()` handled all ID mapping.
 
 ## Step 3: PCA Plot
 
@@ -443,12 +414,11 @@ call.  `set_rowdata()` handled all ID mapping.
 get_pca_plot(vista, label_replicates = TRUE)
 ```
 
-**1 line.**  Colors are inherited from the VISTA object.  Axis labels with
-variance percentages are generated automatically.
+**1 line.** Colors are inherited from the VISTA object. Axis labels with variance percentages are generated automatically.
 
 ## Step 4: Volcano Plot
 
-```{r vista-volcano, fig.width=7, fig.height=5}
+```{r vista-volcano, fig.width=7, fig.height=8}
 get_volcano_plot(
   vista,
   sample_comparison = names(comparisons(vista))[1],
@@ -456,12 +426,11 @@ get_volcano_plot(
 )
 ```
 
-**4 lines.**  Threshold lines, gene labels, and colour scheme are derived
-from the stored cutoffs and palette.
+**4 lines.** Threshold lines, gene labels, and colour scheme are derived from the stored cutoffs and palette.
 
 ## Step 5: Expression Heatmap
 
-```{r vista-heatmap, fig.width=7, fig.height=7, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+```{r vista-heatmap, fig.width=7, fig.height=10, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 # Select top 50 DE genes using VISTA accessor
 comp_name <- names(comparisons(vista))[1]
 de_tbl    <- comparisons(vista)[[comp_name]]
@@ -476,12 +445,12 @@ get_expression_heatmap(
   value_transform  = "zscore",
   display_id       = "SYMBOL",
   annotate_columns = TRUE,
-  show_row_names   = TRUE
+  show_row_names   = TRUE,
+  summarise_replicates  = F  
 )
 ```
 
-**13 lines.**  Z-score transformation, column annotation with consistent
-colours, and symbol mapping are handled internally.
+**13 lines.** Z-score transformation, column annotation with consistent colours, and symbol mapping are handled internally.
 
 ## Step 6: MSigDB Enrichment
 
@@ -496,8 +465,7 @@ msig_up <- get_msigdb_enrichment(
 )
 ```
 
-**7 lines.**  Gene extraction, ID conversion, TERM2GENE construction, and
-enrichment execution are handled internally.
+**7 lines.** Gene extraction, ID conversion, TERM2GENE construction, and enrichment execution are handled internally.
 
 ## Step 7: Enrichment Plot
 
@@ -537,7 +505,7 @@ knitr::kable(
 
 **Total: `r total_vista` lines of code, `r total_pkg_vista` package loaded.**
 
----
+------------------------------------------------------------------------
 
 # Side-by-Side Comparison
 
@@ -588,36 +556,35 @@ ggplot(plot_df, aes(x = Lines, y = Step, fill = Workflow)) +
 
 # Beyond Line Count
 
-Line count is a proxy.  The deeper value is in what the user **does not
-have to think about**:
+Line count is a proxy. The deeper value is in what the user **does not have to think about**:
 
 ## Data structure conversions eliminated
 
 | Standard workflow | VISTA |
-|---|---|
-| matrix -> `DESeqDataSet` | Handled internally |
-| `DESeqResults` -> data.frame | Stored in metadata |
-| data.frame -> filtered tibble | Accessor: `comparisons()` |
-| matrix -> z-score matrix | `value_transform = "zscore"` |
-| tibble -> gene vector for enrichment | Handled by `get_msigdb_enrichment()` |
+|------------------------------------|------------------------------------|
+| matrix -\> `DESeqDataSet` | Handled internally |
+| `DESeqResults` -\> data.frame | Stored in metadata |
+| data.frame -\> filtered tibble | Accessor: `comparisons()` |
+| matrix -\> z-score matrix | `value_transform = "zscore"` |
+| tibble -\> gene vector for enrichment | Handled by `get_msigdb_enrichment()` |
 
-**5 manual conversions -> 0.**
+**5 manual conversions -\> 0.**
 
 ## Identifier mappings eliminated
 
 | Standard workflow | VISTA |
-|---|---|
+|------------------------------------|------------------------------------|
 | `mapIds(org.Hs.eg.db, keys, "ENSEMBL", "SYMBOL")` | `set_rowdata(orgdb, keytype)` (once) |
 | Manual symbol extraction for enrichment | `from_type = "ENSEMBL"` (auto-converted) |
 | Manual symbol lookup for plot labels | `display_id = "SYMBOL"` (every plot) |
 
-**3 manual ID operations -> 1 setup call + a parameter.**
+**3 manual ID operations -\> 1 setup call + a parameter.**
 
 ## Color consistency: guaranteed vs. manual
 
 In the standard workflow, the user defines colours in each plot:
 
-```r
+``` r
 # PCA: manually set
 scale_color_manual(values = c("Untreated" = "#4575B4", "Dexamethasone" = "#D73027"))
 
@@ -628,13 +595,11 @@ col = list(Treatment = c("Untreated" = "#4575B4", "Dexamethasone" = "#D73027"))
 scale_color_manual(values = c(Up = "#D73027", Down = "#1A9850", Other = "grey70"))
 ```
 
-If any of these diverge, figures become inconsistent.  In VISTA, group colours
-are set once at object creation and propagated to every downstream plot
-automatically.
+If any of these diverge, figures become inconsistent. In VISTA, group colours are set once at object creation and propagated to every downstream plot automatically.
 
 ## State persistence: object vs. variables
 
-```r
+``` r
 # Standard: state is scattered
 dds            # DESeqDataSet
 res            # DESeqResults
@@ -644,16 +609,14 @@ gene_symbols   # named character vector
 vsd            # variance-stabilised transform
 ```
 
-Six separate variables.  If the script is interrupted and restarted, the user
-must re-run everything from the top.
+Six separate variables. If the script is interrupted and restarted, the user must re-run everything from the top.
 
-```r
+``` r
 # VISTA: state is in one object
 vista          # everything
 ```
 
-One object.  `saveRDS(vista, "analysis.rds")` preserves the full analysis
-state.  Any plot or enrichment can be reproduced from this object alone.
+One object. `saveRDS(vista, "analysis.rds")` preserves the full analysis state. Any plot or enrichment can be reproduced from this object alone.
 
 # Summary
 
@@ -675,12 +638,7 @@ knitr::kable(
 )
 ```
 
-VISTA does not introduce new statistical methods.  DESeq2 and edgeR perform
-the same computations inside `create_vista()` as they do standalone.  What
-VISTA eliminates is the engineering overhead between these computations:
-the data reshaping, identifier juggling, colour coordination, and state
-management that consume the majority of analysis scripting time without
-contributing to scientific reasoning.
+VISTA does not introduce new statistical methods. DESeq2 and edgeR perform the same computations inside `create_vista()` as they do standalone. What VISTA eliminates is the engineering overhead between these computations: the data reshaping, identifier juggling, colour coordination, and state management that consume the majority of analysis scripting time without contributing to scientific reasoning.
 
 # Session Information
 
@@ -690,12 +648,7 @@ sessionInfo()
 
 # References
 
-- Himes BE et al. (2014). "RNA-Seq transcriptome profiling identifies
-  CRISPLD2 as a glucocorticoid responsive gene that modulates cytokine
-  function in airway smooth muscle cells." *PLoS One* 9(6): e99625.
-- Love MI, Huber W, Anders S (2014). "Moderated estimation of fold change
-  and dispersion for RNA-seq data with DESeq2." *Genome Biology* 15:550.
-- Gu Z et al. (2016). "Complex heatmaps reveal patterns and correlations
-  in multidimensional genomic data." *Bioinformatics* 32(18):2847--2849.
-- Wu T et al. (2021). "clusterProfiler 4.0: A universal enrichment tool for
-  interpreting omics data." *The Innovation* 2(3):100141.
+-   Himes BE et al. (2014). "RNA-Seq transcriptome profiling identifies CRISPLD2 as a glucocorticoid responsive gene that modulates cytokine function in airway smooth muscle cells." *PLoS One* 9(6): e99625.
+-   Love MI, Huber W, Anders S (2014). "Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2." *Genome Biology* 15:550.
+-   Gu Z et al. (2016). "Complex heatmaps reveal patterns and correlations in multidimensional genomic data." *Bioinformatics* 32(18):2847--2849.
+-   Wu T et al. (2021). "clusterProfiler 4.0: A universal enrichment tool for interpreting omics data." *The Innovation* 2(3):100141.
