@@ -1,0 +1,102 @@
+# VISTA publication-style report configuration template
+# ---------------------------------------------------------------------
+# Set this file once, then run:
+#   run_vista_report("path/to/config.yml")
+#
+# You can provide either:
+#   1) `vista_rds` (precomputed VISTA object), OR
+#   2) counts + sample metadata + DE settings.
+# ---------------------------------------------------------------------
+
+# =========================
+# Report metadata / layout
+# =========================
+report_title: "VISTA RNA-seq Analysis Report"
+report_subtitle: "Single-comparison publication workflow"
+report_author: "Your Name / Lab"
+
+side_menu: true
+sidebar_position: left      # left or right
+toc_depth: 3
+html_theme: cosmo
+embed_resources: false      # keep false to preserve downloadable assets
+
+output_format: html         # html or pdf
+output_file: vista-report.html
+assets_dir: vista_report_assets
+
+# =========================
+# Input data
+# =========================
+# Option A (preferred if already computed):
+vista_rds: null             # e.g. "results/vista_object.rds"
+
+# Option B (used when vista_rds is null):
+counts_file: path/to/counts.csv
+sample_info_file: path/to/sample_info.csv
+column_geneid: gene_id
+
+group_column: groups
+group_numerator: [GroupA]
+group_denominator: [GroupB]
+
+# =========================
+# Differential expression
+# =========================
+de_method: deseq2           # deseq2, edger, or both
+de_source: null             # null -> auto (consensus for both, else method)
+min_counts: 10
+min_replicates: 1
+log2fc_cutoff: 1
+pval_cutoff: 0.05
+p_value_type: padj
+covariates: []              # e.g. ["cell", "batch"]
+design_formula: null        # e.g. "~ cell + cond_long"
+consensus_mode: intersection # intersection or union (used when de_method = both)
+consensus_log2fc: mean      # mean, deseq2, edger
+group_palette: "Dark 2"
+
+# Optional: explicitly choose the comparison to profile in depth.
+# Default is the first available comparison.
+primary_comparison: null
+
+# =========================
+# Enrichment settings
+# =========================
+species: "Homo sapiens"     # Homo sapiens or Mus musculus
+from_type: ENSEMBL          # ENSEMBL, SYMBOL, ENTREZID (or null for auto)
+display_id: SYMBOL          # optional rowData label column for plots
+
+include_msigdb: true
+include_go: true
+include_kegg: true
+
+msigdb_category: H
+msigdb_subcategory: null
+top_n_enrich: 15
+
+# Optional pathway-level expression layer
+include_pathway_heatmap: true
+pathway_top_n: 3
+pathway_gene_mode: union    # union or intersection
+pathway_max_genes: 80
+
+# =========================
+# Visualization scope
+# =========================
+top_genes_plot: 20
+top_table_n: 200
+include_deg_pie: true
+include_deg_donut: true
+
+heatmap_genes: 60
+heatmap_kmeans: 4
+annotate_columns: true
+summarise_replicates: false
+
+# Optional user-defined genes for expression panels.
+# If empty, report auto-selects top DE genes.
+expression_genes: []
+
+# Optional large export
+export_norm_counts: false

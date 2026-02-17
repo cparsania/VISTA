@@ -1,0 +1,334 @@
+---
+title: "Color and Palette Design with VISTA"
+author: "VISTA Development Team"
+package: VISTA
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Color and Palette Design with VISTA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+```
+
+# Overview
+
+A common challenge in RNA-seq analysis is visual consistency: the same biological
+group should keep the same color across PCA, MDS, expression, and summary plots.
+When this is not controlled, interpretation becomes harder and figure legends can
+become confusing.
+
+This vignette focuses on VISTA's color system and shows how to:
+
+1. Discover all built-in palette options.
+2. Keep colors consistent across different plot families.
+3. Change global color style in one place.
+4. Apply manual group/comparison color maps when required.
+
+The floating table of contents on the side provides a quick-scroll panel for
+navigating sections.
+
+# Load Packages and Data
+
+```{r load-packages}
+library(VISTA)
+library(ggplot2)
+library(dplyr)
+library(tibble)
+library(colorspace)
+
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+# Keep vignette runtime moderate while preserving signal
+count_small <- count_data[1:1500, ]
+
+# Use all available samples
+table(sample_metadata$cond_long)
+```
+
+# Build a Baseline VISTA Object
+
+```{r create-vista-baseline}
+vista_dark <- create_vista(
+  counts = count_small,
+  sample_info = sample_metadata,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  group_palette = "Dark 2",
+  comparison_palette = "Dark 3",
+  min_counts = 5,
+  min_replicates = 1
+)
+
+vista_dark
+```
+
+Inspect the stored palette metadata:
+
+```{r inspect-color-metadata}
+group_palette(vista_dark)
+group_colors(vista_dark)
+```
+
+# Built-In Palette Choices
+
+VISTA group palettes are based on colorspace qualitative HCL palettes.
+
+```{r palette-choices}
+palette_table <- colorspace::hcl_palettes(type = "qualitative") |>
+  as.data.frame() |>
+  tibble::rownames_to_column("palette") |>
+  dplyr::select(palette)
+
+n_palettes <- nrow(palette_table)
+
+cat("Number of built-in qualitative palettes available in VISTA:", n_palettes, "\n\n")
+palette_table
+```
+
+Create a visual palette atlas:
+
+```{r palette-atlas, fig.width=10, fig.height=6}
+palette_grid <- do.call(
+  rbind,
+  lapply(palette_table$palette, function(pal) {
+    cols <- colorspace::qualitative_hcl(8, palette = pal)
+    data.frame(
+      palette = pal,
+      idx = seq_along(cols),
+      col = cols,
+      stringsAsFactors = FALSE
+    )
+  })
+)
+
+palette_grid$palette <- factor(palette_grid$palette, levels = rev(palette_table$palette))
+
+ggplot(palette_grid, aes(x = idx, y = palette, fill = col)) +
+  geom_tile(color = "white", linewidth = 0.3) +
+  scale_fill_identity() +
+  scale_x_continuous(breaks = 1:8) +
+  labs(
+    x = "Color index within palette",
+    y = NULL,
+    title = "VISTA Palette Atlas (Qualitative HCL)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(panel.grid = element_blank())
+```
+
+# Consistency Across Plot Families
+
+Use the same `VISTA` object and verify that group colors are preserved across
+multiple visualization types.
+
+```{r prep-genes}
+comp_name <- names(comparisons(vista_dark))[1]
+up_genes <- get_genes_by_regulation(
+  vista_dark,
+  sample_comparisons = comp_name,
+  regulation = "Up"
+)[[comp_name]]
+
+if (length(up_genes) < 6) {
+  genes_demo <- head(rownames(vista_dark), 6)
+} else {
+  genes_demo <- head(up_genes, 6)
+}
+
+genes_demo
+```
+
+## PCA (group colors from object metadata)
+
+```{r pca-consistent, fig.width=8, fig.height=6}
+get_pca_plot(
+  vista_dark,
+  label_replicates = TRUE,
+  shape_by = "cell",
+  circle_size = 5
+)
+```
+
+## MDS (same group colors)
+
+```{r mds-consistent, fig.width=8, fig.height=6}
+get_mds_plot(
+  vista_dark,
+  label_replicates = TRUE,
+  shape_by = "cell",
+  circle_size = 5
+)
+```
+
+## Expression barplot (same group colors)
+
+```{r expr-bar-consistent, fig.width=9, fig.height=6}
+get_expression_barplot(
+  vista_dark,
+  genes = genes_demo[1:4],
+  log_transform = TRUE
+)
+```
+
+## Expression boxplot (same group colors)
+
+```{r expr-box-consistent, fig.width=10, fig.height=6}
+get_expression_boxplot(
+  vista_dark,
+  genes = genes_demo[1:4],
+  log_transform = TRUE,
+  pool_genes = FALSE,
+  x_by = "gene",
+  facet_by = "none",
+  fill_by = "group"
+)
+```
+
+# Switching Global Style in One Argument
+
+Rebuild with a different global palette. No plot-specific color edits are needed.
+
+```{r create-vista-warm}
+vista_warm <- create_vista(
+  counts = count_small,
+  sample_info = sample_metadata,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  group_palette = "Warm",
+  comparison_palette = "Set 3",
+  min_counts = 5,
+  min_replicates = 1
+)
+
+group_palette(vista_warm)
+group_colors(vista_warm)
+```
+
+```{r pca-palette-compare, fig.width=12, fig.height=5}
+p_dark <- get_pca_plot(vista_dark, label_replicates = FALSE, circle_size = 5) +
+  ggtitle("Dark 2")
+
+p_warm <- get_pca_plot(vista_warm, label_replicates = FALSE, circle_size = 5) +
+  ggtitle("Warm")
+
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  patchwork::wrap_plots(p_dark, p_warm, ncol = 2)
+} else {
+  p_dark
+  p_warm
+}
+```
+
+# Comparison-Level Colors
+
+For multi-comparison workflows, VISTA also stores comparison colors.
+
+```{r create-vista-multi}
+# Build two directed comparisons to demonstrate comparison color mapping
+vista_multi <- create_vista(
+  counts = count_small,
+  sample_info = sample_metadata,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = c("treatment1", "control"),
+  group_denominator = c("control", "treatment1"),
+  group_palette = "Dark 2",
+  comparison_palette = "Set 3",
+  min_counts = 5,
+  min_replicates = 1
+)
+
+S4Vectors::metadata(vista_multi)$comparison$colors
+```
+
+```{r fc-bar-comparison-colors, fig.width=10, fig.height=6}
+get_foldchange_barplot(
+  vista_multi,
+  genes = head(rownames(vista_multi), 6),
+  facet = FALSE
+)
+```
+
+# Manual Color Maps (Advanced)
+
+If your lab or journal has fixed brand colors, you can set explicit named
+vectors using built-in VISTA setters.
+
+Available manual setters:
+
+- `set_vista_group_colors(vista, color_map)`
+- `set_vista_comparison_colors(vista, color_map)`
+
+```{r apply-manual-colors}
+custom_group_cols <- c(
+  control = "#264653",
+  treatment1 = "#E76F51"
+)
+
+custom_comp_cols <- c(
+  treatment1_VS_control = "#6C5CE7",
+  control_VS_treatment1 = "#00A896"
+)
+
+vista_custom <- set_vista_group_colors(vista_dark, custom_group_cols)
+vista_multi_custom <- set_vista_comparison_colors(vista_multi, custom_comp_cols)
+
+group_colors(vista_custom)
+S4Vectors::metadata(vista_multi_custom)$comparison$colors
+```
+
+```{r custom-color-plots, fig.width=12, fig.height=5}
+p_custom_group <- get_pca_plot(
+  vista_custom,
+  label_replicates = FALSE,
+  circle_size = 5
+) + ggtitle("Custom group colors")
+
+p_custom_comp <- get_foldchange_barplot(
+  vista_multi_custom,
+  genes = head(rownames(vista_multi_custom), 6),
+  facet = FALSE
+) + ggtitle("Custom comparison colors")
+
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  patchwork::wrap_plots(p_custom_group, p_custom_comp, ncol = 2)
+} else {
+  p_custom_group
+  p_custom_comp
+}
+```
+
+# Practical Guidance
+
+- Use `group_palette` and `comparison_palette` in `create_vista()` for fast, global styling.
+- Use `group_colors(vista)` to audit mapping before generating publication panels.
+- Keep one palette per manuscript/project to preserve interpretation consistency.
+- Switch to manual named vectors only when you need strict journal or brand colors.
+
+# Session Information
+
+```{r session-info}
+sessionInfo()
+```

@@ -1,0 +1,1401 @@
+---
+title: "Complete RNA-seq Analysis Workflow with VISTA"
+author: "VISTA Development Team"
+package: VISTA
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Complete RNA-seq Analysis Workflow with VISTA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+```
+
+# Introduction
+
+This vignette demonstrates a complete RNA-seq differential expression workflow using **VISTA** (Visualization and Integrated System for Transcriptomic Analysis). We'll use the well-known **airway** dataset from Bioconductor, which contains RNA-seq data from airway smooth muscle cells treated with dexamethasone.
+
+## What is VISTA?
+
+VISTA streamlines RNA-seq analysis by:
+
+- **Unifying DE workflows**: Wraps DESeq2 and edgeR with consistent output
+- **Simplifying visualization**: 28+ publication-ready plotting functions
+- **Integrating enrichment**: Built-in MSigDB, GO, and KEGG analysis
+- **Ensuring reproducibility**: S4 class structure with comprehensive metadata
+
+## Dataset Overview
+
+The **airway** dataset (Himes et al. 2014) includes:
+
+- **Samples**: 8 human airway smooth muscle cell lines
+- **Treatment**: 4 treated with dexamethasone, 4 untreated
+- **Sequencing**: Illumina HiSeq 2000
+- **Features**: ~64,000 genes
+
+**Reference**: Himes BE et al. (2014). "RNA-Seq transcriptome profiling identifies CRISPLD2 as a glucocorticoid responsive gene that modulates cytokine function in airway smooth muscle cells." *PLoS One* 9(6): e99625.
+
+# Installation and Setup
+
+```{r load-packages}
+# Load required packages
+library(magrittr)
+library(VISTA)
+library(ggplot2)         # For plotting functions
+library(airway)          # Dataset
+library(org.Hs.eg.db)    # Human gene annotations
+```
+
+If you don't have the required packages:
+
+```{r install-packages, eval=FALSE}
+# Install VISTA from Bioconductor
+BiocManager::install("VISTA")
+
+# Install supporting packages
+BiocManager::install(c("airway", "org.Hs.eg.db"))
+```
+
+# Data Preparation
+
+## Load the airway dataset
+
+```{r load-data}
+# Load the SummarizedExperiment object
+data("airway", package = "airway")
+
+# Examine the structure
+airway
+```
+
+## Extract counts and metadata
+
+```{r extract-data}
+# Extract count matrix
+counts_matrix <- assay(airway, "counts")
+
+# Preview counts (first 5 genes, first 4 samples)
+counts_matrix[1:5, 1:4]
+
+# Extract sample metadata
+sample_metadata <- as.data.frame(colData(airway))
+sample_metadata
+
+# Simplify treatment labels for clarity
+sample_metadata$treatment <- ifelse(
+  sample_metadata$dex == "trt",
+  "Dexamethasone",
+  "Untreated"
+)
+```
+
+## Prepare data for VISTA
+
+VISTA requires a count data.frame with a gene ID column:
+
+```{r prepare-counts}
+# Create count data.frame with gene_id column
+count_data <- as.data.frame(counts_matrix) %>% tibble::as_tibble()
+count_data$gene_id <- rownames(counts_matrix)
+
+# Reorder columns: gene_id first, then samples
+count_data <- count_data[, c("gene_id", colnames(counts_matrix))]
+
+# Preview
+count_data[1:5, 1:5]
+```
+
+Prepare sample info with proper rownames:
+
+```{r prepare-samples}
+# Sample info must have rownames matching count column names
+sample_info <- sample_metadata %>% tibble::as_tibble()
+sample_info %<>% dplyr::rename("sample_names"= "Run") %>% dplyr::mutate(sample_names = as.character(sample_names))
+
+# Key columns for VISTA
+sample_info[, c("sample_names", "cell", "treatment", "dex")]
+```
+
+# Create VISTA Object
+
+## Using DESeq2 backend
+
+The primary method for creating a VISTA object:
+
+```{r create-vista}
+# Create VISTA object with DESeq2 backend
+vista <- create_vista(
+  counts = count_data,
+  sample_info = sample_info,
+  column_geneid = "gene_id",
+  group_column = "treatment",
+  group_numerator = "Dexamethasone",
+  group_denominator = "Untreated",
+  method = "deseq2",
+  min_counts = 10,
+  min_replicates = 2,
+  log2fc_cutoff = 1.0,
+  pval_cutoff = 0.05,
+  p_value_type = "padj"
+)
+
+# Examine the VISTA object
+vista
+```
+
+The VISTA object stores:
+
+- **Normalized counts** in `assays`
+- **Sample metadata** in `colData`
+- **Gene annotations** in `rowData`
+- **DE results** in `metadata`
+
+## Alternative: Using edgeR backend
+
+```{r create-vista-edger, eval=FALSE}
+# Create VISTA object with edgeR backend
+vista_edger <- create_vista(
+  counts = count_data,
+  sample_info = sample_info,
+  column_geneid = "gene_id",
+  group_column = "treatment",
+  group_numerator = "Dexamethasone",
+  group_denominator = "Untreated",
+  method = "edger",  # Use edgeR instead of DESeq2
+  min_counts = 10,
+  min_replicates = 2,
+  log2fc_cutoff = 1.0,
+  pval_cutoff = 0.05,
+  p_value_type = "padj"
+)
+```
+
+## Advanced: covariates, design formula, and consensus mode
+
+```{r advanced-design-consensus, eval=FALSE}
+# Covariate-adjusted model (additive design)
+vista_cov <- create_vista(
+  counts = count_data,
+  sample_info = sample_info,
+  column_geneid = "gene_id",
+  group_column = "treatment",
+  group_numerator = "Dexamethasone",
+  group_denominator = "Untreated",
+  method = "deseq2",
+  covariates = c("cell")
+)
+
+# Equivalent explicit model formula
+vista_formula <- create_vista(
+  counts = count_data,
+  sample_info = sample_info,
+  column_geneid = "gene_id",
+  group_column = "treatment",
+  group_numerator = "Dexamethasone",
+  group_denominator = "Untreated",
+  method = "deseq2",
+  design_formula = "~ cell + treatment"
+)
+
+# Run both DESeq2 and edgeR and keep consensus as active source
+vista_both <- create_vista(
+  counts = count_data,
+  sample_info = sample_info,
+  column_geneid = "gene_id",
+  group_column = "treatment",
+  group_numerator = "Dexamethasone",
+  group_denominator = "Untreated",
+  method = "both",
+  consensus_mode = "intersection",  # or "union"
+  result_source = "consensus"       # or "deseq2"/"edger"
+)
+
+# Access source-specific outputs
+comparisons(vista_both, source = "consensus")
+comparisons(vista_both, source = "deseq2")
+comparisons(vista_both, source = "edger")
+
+# Switch the active source used by plotting functions
+vista_both <- set_de_source(vista_both, "edger")
+```
+
+## Add gene annotations
+
+Enhance the object with gene symbols and descriptions:
+
+```{r add-annotations}
+vista <- set_rowdata(
+  vista,
+  orgdb = org.Hs.eg.db,
+  columns = c("SYMBOL", "GENENAME", "ENTREZID"),
+  keytype = "ENSEMBL"
+)
+
+# View updated gene annotations
+head(rowData(vista))
+```
+
+# Explore the Results
+
+## Access differential expression results
+
+```{r access-results}
+# Get comparison names
+comp_names <- names(comparisons(vista))
+comp_names
+
+# Get DE results for the comparison
+de_results <- comparisons(vista)[[1]]
+head(de_results)
+
+# Get DEG summary
+deg_summary(vista)
+
+# Get analysis cutoffs
+cutoffs(vista)
+```
+
+## Count significant genes
+
+```{r count-degs}
+# Extract upregulated genes
+up_genes <- get_genes_by_regulation(
+  vista,
+  sample_comparisons = comp_names[1],
+  regulation = "Up"
+)
+
+# Extract downregulated genes
+down_genes <- get_genes_by_regulation(
+  vista,
+  sample_comparisons = comp_names[1],
+  regulation = "Down"
+)
+
+# Summary
+cat("Upregulated genes:", length(up_genes[[1]]), "\n")
+cat("Downregulated genes:", length(down_genes[[1]]), "\n")
+```
+
+# Quality Control Visualizations
+
+## Sample Correlation Heatmap
+
+Check sample relationships and potential batch effects.
+
+### Basic correlation heatmap
+
+```{r corr-heatmap-basic, fig.width=7, fig.height=6}
+get_corr_heatmap(vista)
+```
+
+### Customize color scheme
+
+```{r corr-heatmap-colors, fig.width=7, fig.height=6}
+# Reverse viridis color direction
+get_corr_heatmap(
+  vista,
+  viridis_direction = -1,
+  viridis_option = "plasma"
+)
+```
+
+### Show correlation values
+
+```{r corr-heatmap-values, fig.width=7, fig.height=6}
+# Display correlation coefficients
+get_corr_heatmap(
+  vista,
+  show_corr_values = TRUE,col_corr_values = 'white',
+  viridis_option = "mako",
+) 
+```
+
+## Principal Component Analysis (PCA)
+
+Visualize sample clustering and variation.
+
+### Basic PCA with labels
+
+```{r pca-basic, fig.width=8, fig.height=6}
+get_pca_plot(
+  vista,
+  label_replicates = TRUE
+) + theme_minimal(base_size = 16)
+```
+
+### PCA colored by different metadata
+
+```{r pca-shape, fig.width=8, fig.height=6}
+# Shape points by cell line
+get_pca_plot(
+  vista,
+  label_replicates = TRUE,
+  shape_by = "cell"
+)
+```
+
+### PCA with top variable genes
+
+```{r pca-top-genes, fig.width=8, fig.height=6}
+# Use top 500 most variable genes
+get_pca_plot(
+  vista,
+  top_n_genes = 500,
+  show_clusters = TRUE,
+  shape_by = "cell"
+)
+```
+
+### PCA with custom circle size
+
+```{r pca-circle-size, fig.width=8, fig.height=6}
+# Larger points for better visibility
+get_pca_plot(
+  vista,
+  label_replicates = TRUE,
+  circle_size = 15
+)
+```
+
+### PCA without labels
+
+```{r pca-no-labels, fig.width=8, fig.height=6}
+# Clean plot without sample labels
+get_pca_plot(
+  vista,
+  label_replicates = FALSE,
+  circle_size = 12
+)
+```
+
+## Multidimensional Scaling (MDS)
+
+Alternative dimensionality reduction method.
+
+### Basic MDS plot
+
+```{r mds-basic, fig.width=8, fig.height=6}
+get_mds_plot(
+  vista,
+  label_replicates = TRUE
+)
+```
+
+### MDS with top variable genes
+
+```{r mds-top-genes, fig.width=8, fig.height=6}
+get_mds_plot(
+  vista,
+  top_n_genes = 500,
+  label_replicates = TRUE
+)
+```
+
+### MDS with custom shapes
+
+```{r mds-shapes, fig.width=8, fig.height=6}
+# Shape points by cell line
+get_mds_plot(
+  vista,
+  label_replicates = TRUE,
+  shape_by = "cell"
+)
+```
+
+# Differential Expression Visualizations
+
+## DEG Count Summary
+
+### Basic count barplot
+
+```{r deg-count-basic, fig.width=7, fig.height=5}
+get_deg_count_barplot(vista)
+```
+
+### Faceted by regulation
+
+```{r deg-count-facet, fig.width=8, fig.height=5}
+get_deg_count_barplot(
+  vista,
+  facet_by = "regulation"
+)
+```
+
+## Volcano Plot
+
+Classic volcano plot showing log2FC vs -log10(p-value).
+
+### Basic volcano plot
+
+```{r volcano-basic, fig.width=8, fig.height=7, eval=requireNamespace("EnhancedVolcano", quietly=TRUE)}
+get_volcano_plot(
+  vista,
+  sample_comparison = comp_names[1]
+)
+```
+
+### Customize cutoffs and labels
+
+```{r volcano-custom, fig.width=8, fig.height=7, eval=requireNamespace("EnhancedVolcano", quietly=TRUE)}
+get_volcano_plot(
+  vista,
+  sample_comparison = comp_names[1],
+  log2fc_cutoff = 1.5,
+  pval_cutoff = 0.01,
+  lab_size = 3,
+  display_id = "SYMBOL"
+)
+```
+
+### Custom colors
+
+```{r volcano-colors, fig.width=8, fig.height=7, eval=requireNamespace("EnhancedVolcano", quietly=TRUE)}
+# Custom colors for up/down regulated genes
+get_volcano_plot(
+  vista,
+  sample_comparison = comp_names[1],
+  col_up = "red",
+  col_down = "blue",
+  display_id = "SYMBOL"
+)
+```
+
+## MA Plot
+
+Mean expression vs log2 fold-change.
+
+### Basic MA plot
+
+```{r ma-basic, fig.width=8, fig.height=6}
+get_ma_plot(
+  vista,
+  sample_comparison = comp_names[1]
+)
+```
+
+### Label top genes
+
+```{r ma-labeled, fig.width=8, fig.height=6}
+get_ma_plot(
+  vista,
+  sample_comparison = comp_names[1],
+  topn = 10,
+  point_size = 2,
+  display_id = "SYMBOL"
+)
+```
+
+### Custom cutoffs
+
+```{r ma-custom, fig.width=8, fig.height=6}
+get_ma_plot(
+  vista,
+  sample_comparison = comp_names[1],
+  topn = 5,
+  display_id = "SYMBOL",
+  point_size = 1.5,
+  alpha = 0.8
+)
+```
+
+# Expression Pattern Analysis
+
+## Prepare gene sets
+
+```{r prep-gene-sets}
+# Get top 50 DEGs by adjusted p-value
+de_table <- comparisons(vista)[[1]]
+top_degs <- de_table[order(de_table$padj), ][1:50, "gene_id"]
+
+# Select genes with known symbols
+de_with_symbols <- merge(
+  de_results,
+  as.data.frame(rowData(vista)),
+  by.x = "gene_id",
+  by.y = "row.names"
+)
+
+# Top upregulated genes
+top_up <- de_with_symbols[
+  de_with_symbols$regulation == "Up" & !is.na(de_with_symbols$SYMBOL),
+][1:6, c("gene_id", "SYMBOL", "log2fc", "padj")]
+
+# Top downregulated genes
+top_down <- de_with_symbols[
+  de_with_symbols$regulation == "Down" & !is.na(de_with_symbols$SYMBOL),
+][1:6, c("gene_id", "SYMBOL", "log2fc", "padj")]
+
+cat("Top upregulated genes:\n")
+print(top_up)
+cat("\nTop downregulated genes:\n")
+print(top_down)
+```
+
+## Expression Heatmaps
+
+### Basic heatmap
+
+```{r heatmap-basic, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+get_expression_heatmap(
+  vista,
+  samples = levels(colData(vista)$treatment),
+  genes = top_degs,
+  display_id = "SYMBOL"
+)
+```
+
+### Heatmap with k-means clustering
+
+```{r heatmap-kmeans, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+get_expression_heatmap(
+  vista,
+  samples = levels(colData(vista)$treatment),
+  genes = top_degs,
+  display_id = "SYMBOL",
+  kmeans_k = 3,
+  show_row_names = FALSE
+)
+```
+
+### Heatmap with column annotations
+
+```{r heatmap-annotated, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+get_expression_heatmap(
+  vista,
+  samples = levels(colData(vista)$treatment),
+  genes = top_degs,
+  show_row_names = FALSE,
+  display_id = "SYMBOL",
+  kmeans_k = 3,
+  cluster_row_slice = FALSE,
+  summarise_replicates = FALSE,
+  annotate_columns = TRUE
+)
+```
+
+### Heatmap with summarized replicates
+
+```{r heatmap-summarized, fig.width=7, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+get_expression_heatmap(
+  vista,
+  samples = levels(colData(vista)$treatment),
+  genes = top_degs,
+  display_id = "SYMBOL",
+  summarise_replicates = TRUE,
+  show_row_names = FALSE,
+  kmeans_k = 2
+)
+```
+
+### Heatmap showing gene names
+
+```{r heatmap-gene-names, fig.width=8, fig.height=10, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+# Smaller gene set to show names
+get_expression_heatmap(
+  vista,
+  samples = levels(colData(vista)$treatment),
+  genes = top_degs[1:25],
+  display_id = "SYMBOL",
+  show_row_names = TRUE,
+  row_names_font_size = 8
+)
+```
+
+## Expression Barplots
+
+### Basic barplot
+
+```{r barplot-basic, fig.width=9, fig.height=6}
+get_expression_barplot(
+  vista,
+  genes = top_up$gene_id[1:4],
+  display_id = "SYMBOL"
+)
+```
+
+### Log-transformed with statistics
+
+```{r barplot-log-stats, fig.width=9, fig.height=6}
+# Add statistical comparisons between groups
+get_expression_barplot(
+  vista,
+  genes = top_up$gene_id[1:4],
+  display_id = "SYMBOL",
+  log_transform = TRUE,
+  stats_group = TRUE  # Enable statistical annotations
+)
+```
+
+### Compare up and down regulated genes
+
+```{r barplot-comparison, fig.width=10, fig.height=6}
+# Compare expression of both up- and down-regulated genes
+selected_genes <- c(top_up$gene_id[1:3], top_down$gene_id[1:3])
+get_expression_barplot(
+  vista,
+  genes = selected_genes,
+  display_id = "SYMBOL",
+  log_transform = TRUE,
+  stats_group = TRUE
+)
+```
+
+## Expression Boxplots
+
+### Basic boxplot
+
+```{r boxplot-basic, fig.width=9, fig.height=6}
+get_expression_boxplot(
+  vista,
+  genes = top_up$gene_id[1:4],
+  display_id = "SYMBOL"
+)
+```
+
+### Boxplot without faceting
+
+```{r boxplot-no-facet, fig.width=9, fig.height=6}
+# All genes overlaid on same plot
+get_expression_boxplot(
+  vista,
+  genes = top_up$gene_id[1:3],
+  display_id = "SYMBOL",
+  facet = FALSE
+)
+```
+
+### Boxplot with faceting by gene
+
+```{r boxplot-facets, fig.width=9, fig.height=6}
+# Each gene in separate panel - must specify facet_by = "gene"
+get_expression_boxplot(
+  vista,
+  genes = top_up$gene_id[1:3],
+  display_id = "SYMBOL",
+  facet_by = "gene",
+  facet_scales = "free_y"
+)
+```
+
+### Boxplot with gene facets AND statistics
+
+```{r boxplot-facets-stats, fig.width=10, fig.height=7}
+# Each gene in separate panel WITH statistical comparisons
+get_expression_boxplot(
+  vista,
+  genes = top_up$gene_id[1:4],
+  display_id = "SYMBOL",
+  log_transform = TRUE,
+  facet_by = "gene",
+  facet_scales = "free_y",
+  stats_group = TRUE,  # Add statistics to each gene panel
+  p.label = "p.signif"
+)
+```
+
+### Pooled genes with statistics
+
+```{r boxplot-pooled, fig.width=8, fig.height=6}
+# Pool all genes together for group comparison with statistical test
+get_expression_boxplot(
+  vista,
+  genes = top_up$gene_id[1:5],
+  display_id = "SYMBOL",
+  log_transform = TRUE,
+  pool_genes = TRUE,
+  stats_group = TRUE,  # Required for statistical annotations
+  p.label = "p.signif"
+)
+```
+
+### Log-transformed with p-values
+
+```{r boxplot-pvalues, fig.width=9, fig.height=6}
+# Show statistical comparisons between treatment groups
+get_expression_boxplot(
+  vista,
+  genes = top_up$gene_id[1:4],
+  display_id = "SYMBOL",
+  log_transform = TRUE,
+  stats_group = TRUE,  # Enable statistical annotations
+  p.label = "p.signif"
+)
+```
+
+## Expression Violin Plots
+
+### Basic violin plot
+
+```{r violin-basic, fig.width=9, fig.height=6}
+get_expression_violinplot(
+  vista,
+  genes = top_up$gene_id[1:4]
+)
+```
+
+### Violin with log2 transformation
+
+```{r violin-log, fig.width=9, fig.height=6}
+get_expression_violinplot(
+  vista,
+  genes = top_up$gene_id[1:3],
+  value_transform = "log2"
+)
+```
+
+### Violin with z-score transformation
+
+```{r violin-zscore, fig.width=8, fig.height=6}
+get_expression_violinplot(
+  vista,
+  genes = top_up$gene_id[1:3],
+  value_transform = "zscore"
+)
+```
+
+## Additional Expression Plots
+
+### Density plot
+
+```{r density-plot, fig.width=9, fig.height=6}
+get_expression_density(
+  vista,
+  genes = top_up$gene_id[1:4],
+  log_transform = TRUE
+)
+```
+
+### Scatter plot (sample vs sample)
+
+```{r scatter-plot, fig.width=8, fig.height=7}
+# Compare two samples
+samples <- colnames(vista)
+get_expression_scatter(
+  vista,
+  sample_x = samples[1],
+  sample_y = samples[2],
+  log_transform = TRUE,
+  label_top_n = 10
+)
+```
+
+### Line plot (expression across samples)
+
+```{r line-plot, fig.width=9, fig.height=6}
+get_expression_lineplot(
+  vista,
+  genes = top_up$gene_id[1:3],
+  value_transform = "log2"
+)
+```
+
+### Lollipop plot
+
+```{r lollipop-plot, fig.width=9, fig.height=6}
+get_expression_lollipop(
+  vista,
+  genes = top_up$gene_id[1:4],
+  display_id = "SYMBOL",
+  log_transform = TRUE
+)
+```
+
+### Joyplot by treatment group
+
+```{r joyplot, fig.width=8, fig.height=7, eval=requireNamespace("ggridges", quietly=TRUE)}
+# Ridges by treatment group - shows distribution for each group
+get_expression_joyplot(
+  vista,
+  genes = top_up$gene_id[1:5],
+  log_transform = TRUE,
+  y_by = "group",      # Each treatment group gets a ridge
+  color_by = "group"   # Color by treatment group
+)
+```
+
+### Joyplot by sample
+
+```{r joyplot-sample, fig.width=8, fig.height=9, eval=requireNamespace("ggridges", quietly=TRUE)}
+# Ridges by individual sample - shows distribution for each sample
+get_expression_joyplot(
+  vista,
+  genes = top_up$gene_id[1:3],
+  log_transform = TRUE,
+  y_by = "sample",     # Each sample gets a ridge
+  color_by = "group"   # Color by treatment group
+)
+```
+
+# Functional Enrichment Analysis
+
+## MSigDB Enrichment
+
+### Hallmark gene sets - Upregulated
+
+```{r msigdb-up, eval=requireNamespace("msigdbr", quietly=TRUE)}
+msig_up <- get_msigdb_enrichment(
+  vista,
+  sample_comparison = comp_names[1],
+  regulation = "Up",
+  msigdb_category = "H",  # Hallmark gene sets
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+# View top enriched pathways
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  head(msig_up$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
+}
+```
+
+### Hallmark gene sets - Downregulated
+
+```{r msigdb-down, eval=requireNamespace("msigdbr", quietly=TRUE)}
+msig_down <- get_msigdb_enrichment(
+  vista,
+  sample_comparison = comp_names[1],
+  regulation = "Down",
+  msigdb_category = "H",
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
+  head(msig_down$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
+}
+```
+
+### C2 Canonical Pathways
+
+```{r msigdb-c2, eval=requireNamespace("msigdbr", quietly=TRUE)}
+msig_c2 <- get_msigdb_enrichment(
+  vista,
+  sample_comparison = comp_names[1],
+  regulation = "Up",
+  msigdb_category = "C2",  # Curated gene sets
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
+  head(msig_c2$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
+}
+```
+
+## Enrichment Visualizations
+
+### VISTA dotplot (default)
+
+```{r enrichment-dotplot, fig.width=9, fig.height=7, eval=requireNamespace("msigdbr", quietly=TRUE)}
+# VISTA's wrapper function
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  get_enrichment_plot(msig_up$enrich, top_n = 15)
+}
+```
+
+### Barplot (clusterProfiler native)
+
+```{r enrichment-barplot, fig.width=9, fig.height=6, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("enrichplot", quietly=TRUE)}
+# Use generic barplot with enrichResult method
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  barplot(msig_up$enrich, showCategory = 15)
+}
+```
+
+### Dotplot with customization
+
+```{r enrichment-dotplot-native, fig.width=9, fig.height=7, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("enrichplot", quietly=TRUE)}
+# Customized dotplot with more categories
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  enrichplot::dotplot(msig_up$enrich, showCategory = 20, font.size = 10)
+}
+```
+
+### Network plot (clusterProfiler native)
+
+```{r enrichment-network, fig.width=10, fig.height=9, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("enrichplot", quietly=TRUE)}
+# Gene-concept network showing gene-pathway relationships
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  enrichplot::cnetplot(msig_up$enrich, showCategory = 5)
+}
+```
+
+### Chord diagram (gene--pathway relationships)
+
+The chord diagram reveals which **hub genes** drive multiple enriched pathways
+and how much redundancy exists across terms.  Chords can be coloured by fold-change
+when a VISTA object is supplied.
+
+```{r enrichment-chord-pathway, fig.width=8, fig.height=8, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("circlize", quietly=TRUE)}
+# Pathway-coloured chord diagram (no VISTA object needed)
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  get_enrichment_chord(
+    msig_up,
+    top_n    = 6,
+    color_by = "pathway",
+    title    = "Gene-Pathway Membership (Up-regulated, Hallmark)"
+  )
+}
+```
+
+```{r enrichment-chord-fc, fig.width=8, fig.height=8, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("circlize", quietly=TRUE)}
+# Fold-change coloured chords
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  get_enrichment_chord(
+    msig_up,
+    vista_obj  = vista,
+    comparison = names(comparisons(vista))[1],
+    top_n      = 6,
+    color_by   = "foldchange",
+    display_id = "SYMBOL",
+    title      = "Gene-Pathway Chord (coloured by log2FC)"
+  )
+}
+```
+
+```{r enrichment-chord-hub, fig.width=8, fig.height=8, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("circlize", quietly=TRUE)}
+# Show only hub genes shared across 2+ pathways
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  chord_result <- get_enrichment_chord(
+    msig_up,
+    vista_obj    = vista,
+    comparison   = names(comparisons(vista))[1],
+    top_n        = 8,
+    min_pathways = 2,
+    color_by     = "regulation",
+    display_id   = "SYMBOL",
+    title        = "Hub Genes Bridging Multiple Pathways"
+  )
+
+  # Inspect hub genes returned invisibly
+  if (length(chord_result$hub_genes)) {
+    cat("Hub genes:", paste(head(chord_result$hub_genes, 10), collapse = ", "), "\n")
+  }
+}
+```
+
+## Pathway-Specific Expression Heatmaps
+
+Use enrichment output to extract pathway genes and visualize their expression directly.
+
+### Extract genes from top pathways
+
+```{r pathway-genes, eval=requireNamespace("msigdbr", quietly=TRUE)}
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  pathway_gene_list <- get_pathway_genes(
+    msig_up$enrich,
+    top_n = 3,
+    return_type = "list"
+  )
+
+  # Preview first few genes per pathway
+  lapply(pathway_gene_list, head, n = 5)
+}
+```
+
+### Heatmap of genes from top enriched pathways
+
+```{r pathway-heatmap, fig.width=8, fig.height=10, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("ComplexHeatmap", quietly=TRUE)}
+if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
+  get_pathway_heatmap(
+    vista_obj = vista,
+    enrichment = msig_up$enrich,
+    samples = c("Untreated", "Dexamethasone"),
+    top_n = 2,
+    gene_mode = "union",
+    max_genes = 60,
+    value_transform = "zscore",
+    display_id = "SYMBOL",
+    annotate_columns = TRUE,
+    summarise_replicates = FALSE,
+    show_row_names = FALSE
+  )
+}
+```
+
+## GO Enrichment
+
+### Biological Process
+
+```{r go-bp, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+go_bp <- get_go_enrichment(
+  vista,
+  sample_comparison = comp_names[1],
+  regulation = "Up",
+  ont = "BP",  # Biological Process
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+if (!is.null(go_bp$enrich) && nrow(go_bp$enrich@result) > 0) {
+  head(go_bp$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
+}
+```
+
+### Molecular Function
+
+```{r go-mf, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+go_mf <- get_go_enrichment(
+  vista,
+  sample_comparison = comp_names[1],
+  regulation = "Up",
+  ont = "MF",  # Molecular Function
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+if (!is.null(go_mf$enrich) && nrow(go_mf$enrich@result) > 0) {
+  head(go_mf$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
+}
+```
+
+### Cellular Component
+
+```{r go-cc, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+go_cc <- get_go_enrichment(
+  vista,
+  sample_comparison = comp_names[1],
+  regulation = "Up",
+  ont = "CC",  # Cellular Component
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+if (!is.null(go_cc$enrich) && nrow(go_cc$enrich@result) > 0) {
+  head(go_cc$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
+}
+```
+
+### GO Visualization
+
+```{r go-plot, fig.width=9, fig.height=7, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+if (!is.null(go_bp$enrich) && nrow(go_bp$enrich@result) > 0) {
+  get_enrichment_plot(go_bp$enrich, top_n = 20)
+}
+```
+
+## Gene Set Enrichment Analysis (GSEA)
+
+GSEA uses ranked gene lists to identify pathways enriched at the top or bottom of the ranking. VISTA automatically prepares the ranked list from your differential expression results.
+
+### GSEA with MSigDB Hallmark gene sets
+
+```{r gsea-hallmark, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("clusterProfiler", quietly=TRUE)}
+# Run GSEA using VISTA's native function
+gsea_results <- get_gsea(
+  vista,
+  sample_comparison = comp_names[1],
+  set_type = "msigdb",
+  from_type = "ENSEMBL",
+  species = "Homo sapiens",
+  msigdb_category = "H",  # Hallmark gene sets
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH"
+)
+
+# Show results
+if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
+  head(gsea_results$enrich@result[, c("Description", "NES", "pvalue", "p.adjust")], n = 10)
+}
+```
+
+### GSEA with GO Biological Process
+
+```{r gsea-go, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+# Run GSEA with GO terms
+gsea_go <- get_gsea(
+  vista,
+  sample_comparison = comp_names[1],
+  set_type = "go",
+  from_type = "ENSEMBL",
+  orgdb = org.Hs.eg.db,
+  ont = "BP",  # Biological Process
+  pvalueCutoff = 0.05
+)
+
+# Show results
+if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
+  head(gsea_go$enrich@result[, c("Description", "NES", "pvalue", "p.adjust")], n = 10)
+}
+```
+
+### GSEA enrichment overview
+
+```{r gsea-dotplot, fig.width=9, fig.height=7, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("clusterProfiler", quietly=TRUE)}
+# Show all significant pathways using VISTA's visualization
+if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
+  get_enrichment_plot(gsea_results$enrich, top_n = 15)
+}
+```
+
+### GSEA plot for top pathway
+
+```{r gsea-pathway, fig.width=10, fig.height=6, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("enrichplot", quietly=TRUE)}
+# Show enrichment plot for the top pathway
+if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
+  # Create GSEA enrichment plot with running enrichment score
+  enrichplot::gseaplot2(
+    gsea_results$enrich,
+    geneSetID = 1,  # Top pathway
+    title = gsea_results$enrich@result$Description[1],
+    pvalue_table = TRUE
+  )
+}
+```
+
+### GSEA plot for multiple pathways
+
+```{r gsea-multi, fig.width=10, fig.height=8, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("enrichplot", quietly=TRUE)}
+# Show top 3 pathways together
+if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
+  enrichplot::gseaplot2(
+    gsea_results$enrich,
+    geneSetID = 1:3,  # Top 3 pathways
+    pvalue_table = TRUE,
+    ES_geom = "line"
+  )
+}
+```
+
+### GSEA with GO visualization
+
+```{r gsea-go-plot, fig.width=9, fig.height=7, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+# Visualize GO GSEA results
+if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
+  get_enrichment_plot(gsea_go$enrich, top_n = 15)
+}
+```
+
+## KEGG Pathway Enrichment
+
+### KEGG upregulated genes
+
+```{r kegg-up, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+kegg_up <- get_kegg_enrichment(
+  vista,
+  sample_comparison = comp_names[1],
+  regulation = "Up",
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
+  head(kegg_up$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
+}
+```
+
+### KEGG downregulated genes
+
+```{r kegg-down, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+kegg_down <- get_kegg_enrichment(
+  vista,
+  sample_comparison = comp_names[1],
+  regulation = "Down",
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+if (!is.null(kegg_down$enrich) && nrow(kegg_down$enrich@result) > 0) {
+  head(kegg_down$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
+}
+```
+
+### KEGG Visualization
+
+```{r kegg-plot, fig.width=9, fig.height=6, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
+  get_enrichment_plot(kegg_up$enrich, top_n = 15)
+}
+```
+
+# Fold-Change Analysis
+
+## Fold-change Matrix
+
+Useful for comparing multiple comparisons:
+
+```{r foldchange-matrix}
+fc_matrix <- get_foldchange_matrix(vista)
+head(fc_matrix, n = 10)
+```
+
+## Fold-change Heatmap
+
+### Basic FC heatmap
+
+```{r fc-heatmap-basic, fig.width=7, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+# Select genes with large fold-changes
+fc_genes <- rownames(fc_matrix)[abs(fc_matrix[, 1]) > 2][1:30]
+
+get_foldchange_heatmap(
+  vista,
+  sample_comparisons = comp_names,
+  genes = fc_genes,
+  display_id = "SYMBOL"
+)
+```
+
+### FC heatmap with gene names
+
+```{r fc-heatmap-names, fig.width=7, fig.height=10, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+get_foldchange_heatmap(
+  vista,
+  sample_comparisons = comp_names,
+  genes = fc_genes[1:25],
+  show_row_names = TRUE,
+  display_id = "SYMBOL"
+)
+```
+
+### FC heatmap for specific gene set
+
+```{r fc-heatmap-custom, fig.width=7, fig.height=8, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+# Use top upregulated genes
+get_foldchange_heatmap(
+  vista,
+  sample_comparisons = comp_names,
+  genes = top_up$gene_id,
+  show_row_names = TRUE,
+  display_id = "SYMBOL"
+)
+```
+
+# Export Results
+
+## Export DE results to file
+
+```{r export-results, eval=FALSE}
+# Export complete DE table with annotations
+de_annotated <- merge(
+  comparisons(vista)[[1]],
+  as.data.frame(rowData(vista)),
+  by.x = "gene_id",
+  by.y = "row.names"
+)
+
+# Write to CSV
+write.csv(
+  de_annotated,
+  file = "airway_dexamethasone_vs_untreated_DE_results.csv",
+  row.names = FALSE
+)
+
+# Export significant genes only
+sig_genes <- de_annotated[de_annotated$regulation %in% c("Up", "Down"), ]
+write.csv(
+  sig_genes,
+  file = "airway_significant_DEGs.csv",
+  row.names = FALSE
+)
+```
+
+## Save VISTA object
+
+```{r save-vista, eval=FALSE}
+# Save the complete VISTA object for later use
+saveRDS(vista, file = "airway_vista_object.rds")
+
+# Load it back
+# vista <- readRDS("airway_vista_object.rds")
+```
+
+# Summary
+
+## Workflow Completed
+
+In this workflow, we:
+
+1. ✅ Loaded the airway RNA-seq dataset
+2. ✅ Created a VISTA object with DESeq2 analysis
+3. ✅ Added gene annotations from org.Hs.eg.db
+4. ✅ Performed quality control (PCA, MDS, correlation)
+5. ✅ Visualized differential expression (volcano, MA plots)
+6. ✅ Analyzed expression patterns (heatmaps, barplots, boxplots, violin plots, and more)
+7. ✅ Performed functional enrichment (MSigDB, GO, KEGG)
+8. ✅ Explored fold-change patterns
+9. ✅ Generated publication-ready visualizations
+
+## Key Features Demonstrated
+
+- **Single-function workflow**: `create_vista()` handles DE analysis
+- **Consistent interface**: All plot functions follow the same pattern
+- **Flexible visualizations**: Easy to customize colors, labels, thresholds
+- **Multiple plot types**: 28+ plotting functions for every analysis need
+- **Integrated enrichment**: No need to wrangle gene IDs manually
+- **Publication-ready**: All plots are ggplot2/ComplexHeatmap objects
+
+## Plotting Functions Used
+
+### QC Plots
+- `get_corr_heatmap()` - Sample correlation
+- `get_pca_plot()` - Principal component analysis
+- `get_mds_plot()` - Multidimensional scaling
+
+### DE Visualization
+- `get_deg_count_barplot()` - DEG summary counts
+- `get_volcano_plot()` - Volcano plots
+- `get_ma_plot()` - MA plots
+
+### Expression Plots
+- `get_expression_heatmap()` - Expression heatmaps
+- `get_expression_barplot()` - Expression barplots
+- `get_expression_boxplot()` - Expression boxplots
+- `get_expression_violinplot()` - Violin plots
+- `get_expression_density()` - Density plots
+- `get_expression_scatter()` - Sample-vs-sample scatter
+- `get_expression_lineplot()` - Expression across samples
+- `get_expression_lollipop()` - Lollipop plots
+- `get_expression_joyplot()` - Ridgeline plots
+
+### Enrichment Plots
+- `get_enrichment_plot()` - Generic enrichment visualization
+- `get_msigdb_enrichment()` - MSigDB enrichment
+- `get_go_enrichment()` - GO enrichment
+- `get_kegg_enrichment()` - KEGG pathway enrichment
+- `get_pathway_genes()` - Extract genes driving enriched pathways
+- `get_pathway_heatmap()` - Plot pathway-derived expression heatmaps
+- `get_enrichment_chord()` - Chord diagram of gene-pathway relationships
+
+### Fold-Change
+- `get_foldchange_matrix()` - Extract FC matrix
+- `get_foldchange_heatmap()` - Visualize FC patterns
+
+## Next Steps
+
+- Try with your own data
+- Explore edgeR backend: `method = "edger"`
+- Test multiple comparisons simultaneously
+- Customize plots with ggplot2 themes
+- Generate automated reports with `run_vista_report()`
+- Integrate with downstream tools
+
+# Session Information
+
+```{r session-info}
+sessionInfo()
+```
+
+# References
+
+- Himes BE et al. (2014). RNA-Seq Transcriptome Profiling Identifies CRISPLD2 as a Glucocorticoid Responsive Gene that Modulates Cytokine Function in Airway Smooth Muscle Cells. *PLoS One*, 9(6), e99625.
+- Love MI, Huber W, Anders S (2014). Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. *Genome Biology*, 15, 550.
+- Robinson MD, McCarthy DJ, Smyth GK (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. *Bioinformatics*, 26(1), 139-140.
+- Subramanian A et al. (2005). Gene set enrichment analysis: a knowledge-based approach for interpreting genome-wide expression profiles. *PNAS*, 102(43), 15545-15550.
+- Yu G et al. (2012). clusterProfiler: an R package for comparing biological themes among gene clusters. *OMICS*, 16(5), 284-287.

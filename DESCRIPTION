@@ -1,0 +1,70 @@
+Package: VISTA
+Type: Package
+Title: Visualization and Integrated System for Transcriptomic Analysis
+Version: 0.99.0
+Authors@R: c(
+    person(given = "Chirag", family = "Parsania", email = "chirag.parsania@gmail.com", role = c("aut", "cre"))
+  )
+Description: The VISTA (Visualization and Integrated System for Transcriptomic Analysis) platform streamlines
+    differential expression workflows by wrapping DESeq2 and edgeR into a
+    SummarizedExperiment-based container with consistent metadata. The package
+    includes visualization utilities, MSigDB enrichment helpers, and optional
+    deconvolution support to simplify interactive exploration of RNA-seq
+    experiments.
+License: GPL-3
+Encoding: UTF-8
+Depends: R (>= 4.3)
+Imports:
+    AnnotationDbi,
+    cli,
+    clusterProfiler,
+    colorspace,
+    DESeq2,
+    dplyr,
+    edgeR,
+    forcats,
+    ggplot2,
+    ggrepel,
+    GGally,
+    ggpubr,
+    grid,
+    matrixStats,
+    methods,
+    msigdbr,
+    purrr,
+    rlang,
+    S4Vectors,
+    scales,
+    stringr,
+    SummarizedExperiment,
+    tibble,
+    tidyr,
+    tidyselect,
+    viridis
+Suggests:
+    BiocStyle,
+    circlize,
+    ComplexHeatmap,
+    DT,
+    EnhancedVolcano,
+    ggpointdensity,
+    ggplot2,
+    ggridges,
+    dplyr,
+    ggalluvial,
+    ggcorrplot,
+    ggvenn,
+    knitr,
+    patchwork,
+    quarto,
+    rmarkdown,
+    yaml,
+    testthat (>= 3.0.0),
+    xCell2
+Additional_repositories: https://bioconductor.org/packages/3.18/bioc
+biocViews: RNASeq, DifferentialExpression, GeneExpression, Transcriptomics, Visualization
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+LazyData: false
+Config/testthat/edition: 3

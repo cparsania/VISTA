@@ -1,0 +1,124 @@
+url: ~
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [search, github]
+
+reference:
+  - title: "VISTA Class & Constructors"
+    desc: >
+      Create and manage VISTA objects for differential expression analysis.
+    contents:
+      - VISTA-class
+      - create_vista
+      - vista
+      - run_deseq_analysis
+      - run_edger_analysis
+      - set_rowdata
+      - print.VISTA
+
+  - title: "Accessor Functions"
+    desc: >
+      Extract components from a VISTA object.
+    contents:
+      - VISTA-accessors
+      - comparisons
+      - deg_summary
+      - cutoffs
+      - norm_counts
+      - row_data
+      - group_colors
+      - group_palette
+      - set_de_source
+      - set_vista_group_colors
+      - set_vista_comparison_colors
+
+  - title: "Quality Control Plots"
+    desc: >
+      Sample-level quality control and exploratory visualizations.
+    contents:
+      - get_pca_plot
+      - get_mds_plot
+      - get_corr_heatmap
+      - get_pairwise_corr_plot
+
+  - title: "Differential Expression Plots"
+    desc: >
+      Visualize differential expression results across comparisons.
+    contents:
+      - get_volcano_plot
+      - get_ma_plot
+      - get_deg_count_barplot
+      - get_deg_count_pieplot
+      - get_deg_count_donutplot
+      - get_deg_venn_diagram
+      - plot_deg_alluvial
+      - get_genes_by_regulation
+
+  - title: "Expression Plots"
+    desc: >
+      Visualize gene expression patterns across samples and groups.
+    contents:
+      - get_expression_heatmap
+      - get_expression_barplot
+      - get_expression_boxplot
+      - get_expression_violinplot
+      - get_expression_density
+      - get_expression_scatter
+      - get_expression_lineplot
+      - get_expression_lollipop
+      - get_expression_joyplot
+      - get_expression_raincloud
+      - get_expression_matrix
+      - get_expression_chromosome_plot
+
+  - title: "Fold-Change Plots"
+    desc: >
+      Visualize and compare log2 fold-changes across comparisons.
+    contents:
+      - get_foldchange_heatmap
+      - get_foldchange_scatter
+      - get_foldchange_barplot
+      - get_foldchange_boxplot
+      - get_foldchange_lineplot
+      - get_foldchange_lollipop
+      - get_foldchange_matrix
+      - get_foldchange_chromosome_plot
+
+  - title: "Functional Enrichment"
+    desc: >
+      Gene set enrichment and pathway analysis.
+    contents:
+      - get_msigdb_enrichment
+      - get_go_enrichment
+      - get_kegg_enrichment
+      - get_gsea
+      - enrichMsigDB
+      - get_enrichment_plot
+      - get_pathway_genes
+      - get_pathway_heatmap
+      - get_enrichment_chord
+
+  - title: "Cell-Type Deconvolution"
+    desc: >
+      Estimate and visualize cell-type composition from bulk RNA-seq.
+    contents:
+      - run_cell_deconvolution
+      - get_cell_fractions
+      - plot_celltype_barplot
+
+  - title: "Reporting"
+    desc: >
+      Generate automated analysis reports.
+    contents:
+      - run_vista_report
+
+  - title: "Example Data"
+    desc: >
+      Built-in datasets for examples and testing.
+    contents:
+      - count_data
+      - sample_metadata

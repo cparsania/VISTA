@@ -1,0 +1,93 @@
+# Extract genes from enriched pathways
+
+Parses pathway-level gene members from an enrichment result and returns
+either a long table, pathway-indexed list, or a unique vector of genes.
+
+## Usage
+
+``` r
+get_pathway_genes(
+  x,
+  pathways = NULL,
+  top_n = 10,
+  pathway_column = c("Description", "ID"),
+  gene_column = c("auto", "geneID", "core_enrichment"),
+  gene_sep = "/",
+  return_type = c("long", "list", "vector")
+)
+```
+
+## Arguments
+
+- x:
+
+  An `enrichResult`/`gseaResult`, or a list containing element `enrich`
+  (e.g. output from
+  [`get_msigdb_enrichment()`](get_msigdb_enrichment.md)).
+
+- pathways:
+
+  Optional character vector of pathway names to keep. Matches against
+  `pathway_column`.
+
+- top_n:
+
+  Number of top pathways to use when `pathways` is `NULL`. Ranking uses
+  `p.adjust` (then `pvalue`) when available. Default: `10`.
+
+- pathway_column:
+
+  Which enrichment column to match pathway names against:
+  `"Description"` (default) or `"ID"`.
+
+- gene_column:
+
+  Which column stores pathway members. `"auto"` (default) uses
+  `"geneID"` when present, otherwise `"core_enrichment"`.
+
+- gene_sep:
+
+  Delimiter used in pathway gene strings (default `"/"`).
+
+- return_type:
+
+  One of `"long"`, `"list"`, or `"vector"`.
+
+## Value
+
+Depending on `return_type`:
+
+- `"long"`: data frame with `pathway_id`, `pathway`, and `gene`.
+
+- `"list"`: named list of character vectors (genes per pathway).
+
+- `"vector"`: unique character vector of genes.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+vista <- create_vista(
+  counts = count_data,
+  sample_info = sample_metadata,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control"
+)
+
+msig <- get_msigdb_enrichment(
+  vista,
+  sample_comparison = names(comparisons(vista))[1],
+  regulation = "Up",
+  species = "Homo sapiens",
+  from_type = "ENSEMBL"
+)
+
+pathway_tbl <- get_pathway_genes(msig, top_n = 5, return_type = "long")
+head(pathway_tbl)
+} # }
+```

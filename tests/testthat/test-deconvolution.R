@@ -1,0 +1,10 @@
+test_that("run_cell_deconvolution requires xCell2", {
+  vista <- make_small_vista()
+  expect_error(run_cell_deconvolution(vista, method = "MuSiC"), '"xCell2"')
+  skip_if_not_installed("xCell2")
+  vista_cf <- run_cell_deconvolution(vista, method = "xCell2")
+  expect_s4_class(vista_cf, "VISTA")
+  fractions <- get_cell_fractions(vista_cf)
+  expect_s3_class(fractions, "data.frame")
+  expect_equal(nrow(fractions), ncol(norm_counts(vista_cf)))
+})

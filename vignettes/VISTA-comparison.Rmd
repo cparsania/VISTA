@@ -1,0 +1,621 @@
+---
+title: "Comparing DESeq2 and edgeR with VISTA"
+author: "VISTA Development Team"
+package: VISTA
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Comparing DESeq2 and edgeR with VISTA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+```
+
+# Introduction
+
+DESeq2 and edgeR are the two most widely used tools for differential expression
+(DE) analysis of RNA-seq data. Both use negative binomial models but differ in
+normalization, dispersion estimation, and statistical testing, which can lead to
+different sets of differentially expressed genes (DEGs).
+
+This vignette demonstrates how to use **VISTA** to run both methods on the same
+dataset and systematically compare their results using built-in visualization
+functions.
+
+## What you will learn
+
+- How to create VISTA objects with DESeq2 and edgeR backends
+- How to compare DEG counts, fold-change estimates, and significance calls
+- How to identify concordant and discordant genes between methods
+- How to visualize method agreement with volcano plots, scatter plots, Venn
+  diagrams, and heatmaps
+
+# Setup
+
+```{r load-packages}
+library(VISTA)
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+
+# Set a global theme with larger fonts for all ggplot2 plots
+theme_set(theme_minimal(base_size = 16))
+```
+
+# Data
+
+We use the built-in VISTA example data derived from the **airway** dataset
+(Himes et al. 2014), which contains RNA-seq counts from human airway smooth
+muscle cells treated with dexamethasone.
+
+```{r load-data}
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+dim(count_data)
+head(sample_metadata[, c("sample_names", "cond_long")])
+```
+
+# Create VISTA Objects
+
+We create two VISTA objects from the same data --- one using DESeq2 and one
+using edgeR --- with identical cutoffs so that any differences in results are
+attributable to the method.
+
+```{r create-deseq2}
+vista_deseq <- create_vista(
+  counts        = count_data,
+  sample_info   = sample_metadata,
+  column_geneid = "gene_id",
+  group_column  = "dex",
+  group_numerator   = "trt",
+  group_denominator = "untrt",
+  method        = "deseq2",
+  log2fc_cutoff = 1,
+  pval_cutoff   = 0.05,
+  min_counts    = 10,
+  min_replicates = 1
+)
+vista_deseq
+```
+
+```{r create-edger}
+vista_edger <- create_vista(
+  counts        = count_data,
+  sample_info   = sample_metadata,
+  column_geneid = "gene_id",
+  group_column  = "dex",
+  group_numerator   = "trt",
+  group_denominator = "untrt",
+  method        = "edger",
+  log2fc_cutoff = 1,
+  pval_cutoff   = 0.05,
+  min_counts    = 10,
+  min_replicates = 1
+)
+vista_edger
+```
+
+Both objects contain the same comparison (treated vs untreated):
+
+```{r comparison-names}
+names(comparisons(vista_deseq))
+names(comparisons(vista_edger))
+```
+
+# DEG Summary Comparison
+
+## DEG counts per method
+
+A quick way to compare the methods is to count the number of up- and
+down-regulated genes detected by each.
+
+```{r deg-barplots, fig.width=12, fig.height=6}
+p_deseq <- get_deg_count_barplot(vista_deseq) +
+  ggtitle("DESeq2") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+p_edger <- get_deg_count_barplot(vista_edger) +
+  ggtitle("edgeR") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+p_deseq + p_edger +
+  plot_annotation(title = "Number of DEGs by Method")
+```
+
+## DEG composition (pie and donut)
+
+```{r deg-circular, fig.width=12, fig.height=8}
+pie_deseq <- get_deg_count_pieplot(vista_deseq, facet_by = "none") +
+  ggtitle("DESeq2 (Pie)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+pie_edger <- get_deg_count_pieplot(vista_edger, facet_by = "none") +
+  ggtitle("edgeR (Pie)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+donut_deseq <- get_deg_count_donutplot(vista_deseq, facet_by = "none") +
+  ggtitle("DESeq2 (Donut)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+donut_edger <- get_deg_count_donutplot(vista_edger, facet_by = "none") +
+  ggtitle("edgeR (Donut)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+(pie_deseq + pie_edger) / (donut_deseq + donut_edger)
+```
+
+## Tabular summary
+
+```{r deg-table}
+summarise_degs <- function(vista, method_name) {
+  comps <- comparisons(vista)
+  do.call(rbind, lapply(names(comps), function(comp) {
+    de <- as.data.frame(comps[[comp]])
+    n_up   <- sum(de$regulation == "Up", na.rm = TRUE)
+    n_down <- sum(de$regulation == "Down", na.rm = TRUE)
+    data.frame(
+      Method     = method_name,
+      Comparison = comp,
+      Up         = n_up,
+      Down       = n_down,
+      Total_DEG  = n_up + n_down,
+      Tested     = nrow(de)
+    )
+  }))
+}
+
+deg_summary_table <- rbind(
+  summarise_degs(vista_deseq, "DESeq2"),
+  summarise_degs(vista_edger, "edgeR")
+)
+
+knitr::kable(deg_summary_table, row.names = FALSE,
+             caption = "DEG counts by method and comparison")
+```
+
+# Volcano Plots
+
+Volcano plots show the relationship between fold-change magnitude and
+statistical significance. Comparing them side-by-side reveals differences in
+how each method distributes p-values and fold-change estimates.
+
+```{r volcano-plots, fig.width=14, fig.height=7}
+comp1 <- names(comparisons(vista_deseq))[1]
+
+v_deseq <- get_volcano_plot(vista_deseq, sample_comparison = comp1) +
+  ggtitle(paste("DESeq2 -", comp1))
+
+v_edger <- get_volcano_plot(vista_edger, sample_comparison = comp1) +
+  ggtitle(paste("edgeR -", comp1))
+
+v_deseq + v_edger
+```
+
+# MA Plots
+
+MA plots display fold-change as a function of mean expression. They are useful
+for assessing whether low-expression genes show inflated fold-changes and how
+each method handles shrinkage.
+
+```{r ma-plots, fig.width=14, fig.height=7}
+ma_deseq <- get_ma_plot(vista_deseq, sample_comparison = comp1) +
+  ggtitle(paste("DESeq2 -", comp1))
+
+ma_edger <- get_ma_plot(vista_edger, sample_comparison = comp1) +
+  ggtitle(paste("edgeR -", comp1))
+
+ma_deseq + ma_edger
+```
+
+# Fold-Change Concordance
+
+## Log2 fold-change scatter plot
+
+A direct comparison of fold-change estimates between methods reveals their
+overall concordance. Genes on the diagonal have identical estimates; deviations
+indicate method-specific differences.
+
+```{r fc-scatter, fig.width=7, fig.height=6}
+# Extract DE results for the first comparison
+de_deseq <- as.data.frame(comparisons(vista_deseq)[[comp1]])
+de_edger <- as.data.frame(comparisons(vista_edger)[[comp1]])
+
+# Merge on gene_id
+merged <- merge(
+  de_deseq[, c("gene_id", "log2fc", "padj", "regulation")],
+  de_edger[, c("gene_id", "log2fc", "padj", "regulation")],
+  by = "gene_id",
+  suffixes = c("_deseq2", "_edger")
+)
+
+# Concordance category
+merged$concordance <- case_when(
+  merged$regulation_deseq2 == "Up" & merged$regulation_edger == "Up"     ~ "Both Up",
+  merged$regulation_deseq2 == "Down" & merged$regulation_edger == "Down" ~ "Both Down",
+  merged$regulation_deseq2 == "Other" & merged$regulation_edger == "Other" ~ "Not DE",
+  TRUE ~ "Discordant"
+)
+
+conc_colors <- c(
+  "Both Up"    = "#D73027",
+  "Both Down"  = "#4575B4",
+  "Discordant" = "#FFC107",
+  "Not DE"     = "grey80"
+)
+
+# Correlation
+r_val <- cor(merged$log2fc_deseq2, merged$log2fc_edger,
+             use = "complete.obs", method = "pearson")
+
+ggplot(merged, aes(x = log2fc_deseq2, y = log2fc_edger, color = concordance)) +
+  geom_point(alpha = 0.4, size = 0.8) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  scale_color_manual(values = conc_colors) +
+  annotate("text", x = -Inf, y = Inf, hjust = -0.1, vjust = 1.3,
+           label = paste0("Pearson r = ", round(r_val, 3)),
+           fontface = "italic", size = 4) +
+  labs(
+    x = "log2 Fold Change (DESeq2)",
+    y = "log2 Fold Change (edgeR)",
+    color = "Concordance",
+    title = paste("Fold-Change Agreement:", comp1)
+  ) +
+  theme_minimal(base_size = 16) +
+  theme(legend.position = "bottom")
+```
+
+## Concordance summary table
+
+```{r concordance-table}
+conc_table <- merged %>%
+  count(concordance) %>%
+  mutate(pct = round(n / sum(n) * 100, 1)) %>%
+  arrange(desc(n))
+
+knitr::kable(conc_table, col.names = c("Category", "Genes", "Percent"),
+             caption = "Concordance between DESeq2 and edgeR calls")
+```
+
+# P-value Comparison
+
+## P-value scatter plot
+
+Comparing adjusted p-values (on the -log10 scale) shows whether both methods
+agree on which genes are most significant.
+
+```{r pvalue-scatter, fig.width=7, fig.height=6}
+merged$neg_log10_padj_deseq2 <- -log10(merged$padj_deseq2 + 1e-300)
+merged$neg_log10_padj_edger  <- -log10(merged$padj_edger + 1e-300)
+
+ggplot(merged, aes(x = neg_log10_padj_deseq2, y = neg_log10_padj_edger,
+                   color = concordance)) +
+  geom_point(alpha = 0.3, size = 0.8) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +
+  scale_color_manual(values = conc_colors) +
+  labs(
+    x = "-log10(padj) DESeq2",
+    y = "-log10(padj) edgeR",
+    color = "Concordance",
+    title = paste("Adjusted P-value Agreement:", comp1)
+  ) +
+  theme_minimal(base_size = 16) +
+  theme(legend.position = "bottom")
+```
+
+## P-value distribution
+
+The distribution of raw p-values provides a diagnostic for each method. A
+well-calibrated test produces a uniform distribution under the null, with a
+spike near zero for truly DE genes.
+
+```{r pvalue-histogram, fig.width=10, fig.height=4}
+pval_df <- rbind(
+  data.frame(pvalue = de_deseq$pvalue, Method = "DESeq2"),
+  data.frame(pvalue = de_edger$pvalue, Method = "edgeR")
+)
+
+ggplot(pval_df, aes(x = pvalue, fill = Method)) +
+  geom_histogram(bins = 50, alpha = 0.7, position = "identity") +
+  facet_wrap(~Method) +
+  scale_fill_manual(values = c("DESeq2" = "#1B9E77", "edgeR" = "#D95F02")) +
+  labs(
+    x = "Raw P-value",
+    y = "Count",
+    title = "P-value Distribution by Method"
+  ) +
+  theme_minimal(base_size = 16) +
+  theme(legend.position = "none")
+```
+
+# Venn Diagram of DEGs
+
+VISTA provides `get_deg_venn_diagram()` for comparing DEG overlap across
+comparisons within a single object. For cross-method comparison (DESeq2 vs
+edgeR), we use `get_genes_by_regulation()` to extract gene lists from each
+VISTA object, then pass them to `ggvenn`.
+
+## Upregulated genes
+
+```{r venn-up, fig.width=7, fig.height=5}
+# Extract upregulated gene sets using VISTA's accessor
+up_deseq <- get_genes_by_regulation(
+  vista_deseq, sample_comparisons = comp1, regulation = "Up"
+)[[1]]
+
+up_edger <- get_genes_by_regulation(
+  vista_edger, sample_comparisons = comp1, regulation = "Up"
+)[[1]]
+
+venn_up <- list(DESeq2 = up_deseq, edgeR = up_edger)
+ggvenn::ggvenn(venn_up, fill_color = c("#1B9E77", "#D95F02")) +
+  ggtitle(paste("Upregulated Genes:", comp1))
+```
+
+## Downregulated genes
+
+```{r venn-down, fig.width=7, fig.height=5}
+down_deseq <- get_genes_by_regulation(
+  vista_deseq, sample_comparisons = comp1, regulation = "Down"
+)[[1]]
+
+down_edger <- get_genes_by_regulation(
+  vista_edger, sample_comparisons = comp1, regulation = "Down"
+)[[1]]
+
+venn_down <- list(DESeq2 = down_deseq, edgeR = down_edger)
+ggvenn::ggvenn(venn_down, fill_color = c("#1B9E77", "#D95F02")) +
+  ggtitle(paste("Downregulated Genes:", comp1))
+```
+
+## All DEGs (Up + Down)
+
+```{r venn-all, fig.width=7, fig.height=5}
+all_deseq <- union(up_deseq, down_deseq)
+all_edger <- union(up_edger, down_edger)
+venn_all  <- list(DESeq2 = all_deseq, edgeR = all_edger)
+
+ggvenn::ggvenn(venn_all, fill_color = c("#1B9E77", "#D95F02")) +
+  ggtitle(paste("All DEGs:", comp1))
+```
+
+# Normalization Comparison
+
+DESeq2 uses median-of-ratios normalization while edgeR uses TMM
+(trimmed mean of M-values). Comparing the resulting normalized count
+distributions helps assess whether normalization choices drive
+downstream differences.
+
+```{r normalization-density, fig.width=10, fig.height=5}
+nc_deseq <- norm_counts(vista_deseq)
+nc_edger <- norm_counts(vista_edger)
+
+# Use common genes
+common_genes <- intersect(rownames(nc_deseq), rownames(nc_edger))
+sample_cols  <- intersect(colnames(nc_deseq), colnames(nc_edger))
+
+norm_df <- rbind(
+  data.frame(
+    log2_count = as.vector(log2(nc_deseq[common_genes, sample_cols] + 1)),
+    Method = "DESeq2"
+  ),
+  data.frame(
+    log2_count = as.vector(log2(nc_edger[common_genes, sample_cols] + 1)),
+    Method = "edgeR"
+  )
+)
+
+ggplot(norm_df, aes(x = log2_count, fill = Method)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_manual(values = c("DESeq2" = "#1B9E77", "edgeR" = "#D95F02")) +
+  labs(
+    x = "log2(Normalized Count + 1)",
+    y = "Density",
+    title = "Normalized Count Distribution"
+  ) +
+  theme_minimal(base_size = 16)
+```
+
+## Sample-level comparison
+
+```{r norm-scatter-samples, fig.width=10, fig.height=8}
+# Compare normalized counts for each sample
+sample_norm_df <- data.frame(
+  DESeq2 = as.vector(log2(nc_deseq[common_genes, sample_cols] + 1)),
+  edgeR  = as.vector(log2(nc_edger[common_genes, sample_cols] + 1)),
+  Sample = rep(sample_cols, each = length(common_genes))
+)
+
+ggplot(sample_norm_df, aes(x = DESeq2, y = edgeR)) +
+  geom_point(alpha = 0.05, size = 0.3) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  facet_wrap(~Sample, ncol = 3) +
+  labs(
+    x = "log2(DESeq2 Normalized + 1)",
+    y = "log2(edgeR Normalized + 1)",
+    title = "Per-Sample Normalized Counts"
+  ) +
+  theme_minimal(base_size = 16)
+```
+
+# PCA Comparison
+
+Principal component analysis reveals whether the two normalization
+strategies preserve the same sample-level structure.
+
+```{r pca-comparison, fig.width=14, fig.height=7}
+pca_deseq <- get_pca_plot(vista_deseq) +
+  ggtitle("PCA: DESeq2 Normalization")
+
+pca_edger <- get_pca_plot(vista_edger) +
+  ggtitle("PCA: edgeR Normalization")
+
+pca_deseq + pca_edger
+```
+
+# Expression of Discordant Genes
+
+Genes called as DEG by one method but not the other are of particular
+interest. Visualizing their expression patterns helps assess whether
+method-specific calls are biologically meaningful.
+
+```{r discordant-genes}
+deseq_only <- setdiff(all_deseq, all_edger)
+edger_only <- setdiff(all_edger, all_deseq)
+
+cat("DEGs unique to DESeq2:", length(deseq_only), "\n")
+cat("DEGs unique to edgeR:", length(edger_only), "\n")
+cat("DEGs shared:", length(intersect(all_deseq, all_edger)), "\n")
+```
+
+## Expression of DESeq2-only genes
+
+```{r deseq-only-boxplot, fig.width=8, fig.height=5}
+if (length(deseq_only) >= 3) {
+  # Show top genes by fold change
+  deseq_only_de <- de_deseq[de_deseq$gene_id %in% deseq_only, ]
+  top_deseq_only <- head(
+    deseq_only_de[order(-abs(deseq_only_de$log2fc)), "gene_id"],
+    6
+  )
+  get_expression_boxplot(vista_deseq, genes = top_deseq_only) +
+    ggtitle("Top DESeq2-Only DEGs (by |log2FC|)")
+}
+```
+
+## Expression of edgeR-only genes
+
+```{r edger-only-boxplot, fig.width=8, fig.height=5}
+if (length(edger_only) >= 3) {
+  edger_only_de <- de_edger[de_edger$gene_id %in% edger_only, ]
+  top_edger_only <- head(
+    edger_only_de[order(-abs(edger_only_de$log2fc)), "gene_id"],
+    6
+  )
+  get_expression_boxplot(vista_edger, genes = top_edger_only) +
+    ggtitle("Top edgeR-Only DEGs (by |log2FC|)")
+}
+```
+
+# Sensitivity Analysis: Effect of Cutoffs
+
+Different significance and fold-change thresholds can shift the balance between
+methods. Here we sweep across a range of cutoffs.
+
+```{r cutoff-sweep, fig.width=9, fig.height=5}
+sweep_cutoffs <- function(de_deseq, de_edger, fc_vals, pval_cut = 0.05) {
+  results <- lapply(fc_vals, function(fc) {
+    n_deseq <- sum(
+      abs(de_deseq$log2fc) >= fc & de_deseq$padj < pval_cut,
+      na.rm = TRUE
+    )
+    n_edger <- sum(
+      abs(de_edger$log2fc) >= fc & de_edger$padj < pval_cut,
+      na.rm = TRUE
+    )
+    data.frame(
+      log2fc_cutoff = fc,
+      DESeq2 = n_deseq,
+      edgeR  = n_edger
+    )
+  })
+  do.call(rbind, results)
+}
+
+fc_vals <- seq(0.5, 3, by = 0.25)
+sweep_df <- sweep_cutoffs(de_deseq, de_edger, fc_vals)
+
+sweep_long <- tidyr::pivot_longer(
+  sweep_df,
+  cols = c("DESeq2", "edgeR"),
+  names_to = "Method",
+  values_to = "n_DEGs"
+)
+
+ggplot(sweep_long, aes(x = log2fc_cutoff, y = n_DEGs, color = Method)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("DESeq2" = "#1B9E77", "edgeR" = "#D95F02")) +
+  labs(
+    x = "|log2FC| Cutoff",
+    y = "Number of DEGs",
+    title = "DEG Sensitivity to Fold-Change Threshold",
+    subtitle = paste("Adjusted p-value <", 0.05)
+  ) +
+  theme_minimal(base_size = 16)
+```
+
+# Correlation Heatmaps
+
+Sample-sample correlation heatmaps can reveal whether both normalization
+approaches preserve the same correlation structure.
+
+```{r corr-heatmaps, fig.width=14, fig.height=7}
+corr_deseq <- get_corr_heatmap(vista_deseq) +
+  ggtitle("DESeq2: Sample Correlation")
+
+corr_edger <- get_corr_heatmap(vista_edger) +
+  ggtitle("edgeR: Sample Correlation")
+
+corr_deseq + corr_edger
+```
+
+# Summary and Recommendations
+
+```{r summary-metrics}
+overlap    <- length(intersect(all_deseq, all_edger))
+union_size <- length(union(all_deseq, all_edger))
+jaccard    <- round(overlap / union_size, 3)
+
+cat("━━━ Method Comparison Summary ━━━\n")
+cat("Comparison:", comp1, "\n\n")
+cat("DESeq2 DEGs:", length(all_deseq), "\n")
+cat("edgeR DEGs:", length(all_edger), "\n")
+cat("Shared DEGs:", overlap, "\n")
+cat("DESeq2-only:", length(deseq_only), "\n")
+cat("edgeR-only:", length(edger_only), "\n")
+cat("Jaccard index:", jaccard, "\n")
+cat("Fold-change Pearson r:", round(r_val, 3), "\n")
+```
+
+## Key takeaways
+
+1. **Fold-change estimates are highly correlated** between DESeq2 and edgeR, as
+   both methods model similar biological effects.
+
+2. **Significance calls differ at the margins**. Genes near the decision
+   boundary (p-value or fold-change cutoff) are more likely to be called by one
+   method but not the other.
+
+3. **Core DEG sets overlap substantially**. Genes with large fold-changes and
+   low p-values are consistently identified by both methods.
+
+4. **Method-specific DEGs tend to have borderline statistics**. Inspecting
+   discordant genes (unique to one method) often reveals marginal significance
+   in the other method as well.
+
+5. **For robust results**, consider requiring DEGs to be called by both methods,
+   or use the intersection as a high-confidence set and the union as a
+   discovery set.
+
+# Session Info
+
+```{r session-info}
+sessionInfo()
+```
