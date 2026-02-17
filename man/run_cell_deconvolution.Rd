@@ -9,7 +9,8 @@ run_cell_deconvolution(
   method = c("xCell2"),
   single_cell_reference = NULL,
   reference_labels = NULL,
-  gene_id_type = c("symbol", "ensembl", "ensembl_symbol"),
+  gene_id_type = c("auto", "symbol", "ensembl", "ensembl_symbol"),
+  xcell2_reference = NULL,
   transform = c("log2", "raw"),
   ...
 )
@@ -23,7 +24,10 @@ run_cell_deconvolution(
 
 \item{reference_labels}{Reserved for future reference-based methods (ignored).}
 
-\item{gene_id_type}{Type of gene identifiers: "symbol", "ensembl", or "ensembl_symbol".}
+\item{gene_id_type}{Type of gene identifiers: \code{"auto"}, \code{"symbol"}, \code{"ensembl"}, or \code{"ensembl_symbol"}.}
+
+\item{xcell2_reference}{Optional xCell2 reference object or dataset name
+(e.g., \code{"DICE_demo.xCell2Ref"}). Used when xCell2 exposes \code{xCell2Analysis()}.}
 
 \item{transform}{Expression transformation: "log2" or "raw".}
 
