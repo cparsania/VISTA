@@ -1,31 +1,32 @@
-# VISTA <img src="man/figures/logo.png" align="right" height="240" />
+# VISTA <img src="man/figures/logo.png" align="right" height="240"/>
 
 > **V**isualization and **I**ntegrated **S**ystem for **T**ranscriptomic **A**nalysis
 
 <!-- badges: start -->
-[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![R-CMD-check](https://img.shields.io/badge/R%20CMD%20check-passing-brightgreen)](https://github.com/chiragparsania/VISTA/actions/workflows/R-CMD-check.yaml)
+
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable) [![R-CMD-check](https://github.com/cparsania/VISTA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cparsania/VISTA/actions/workflows/R-CMD-check.yaml)
+
 <!-- badges: end -->
 
 ## Overview
 
 VISTA streamlines differential expression (DE) analysis workflows for RNA-seq data by providing a unified, **SummarizedExperiment**-based framework that wraps **DESeq2** and **edgeR**. The package offers:
 
-- 🧬 **Unified DE workflow** - Single interface for both DESeq2 and edgeR methods
-- ⚖️ **Consensus DE mode** - Optional intersection/union consensus across DESeq2 and edgeR
-- 🧪 **Design-aware modeling** - Add covariates or explicit model formula in DE analysis
-- 📊 **30+ visualization functions** - PCA, volcano plots, heatmaps, expression plots, and more
-- 🔬 **Functional enrichment** - Integrated MSigDB, GO, and KEGG pathway analysis
-- 🎨 **Consistent aesthetics** - Harmonized color palettes and publication-ready themes
-- 📝 **Automated reporting** - Generate comprehensive analysis reports with Quarto
-- ✅ **Extensive validation** - Input checking and clear error messages
-- 🧪 **Comprehensive tests** - Broad test coverage for core workflows
+-   🧬 **Unified DE workflow** - Single interface for both DESeq2 and edgeR methods
+-   ⚖️ **Consensus DE mode** - Optional intersection/union consensus across DESeq2 and edgeR
+-   🧪 **Design-aware modeling** - Add covariates or explicit model formula in DE analysis
+-   📊 **30+ visualization functions** - PCA, volcano plots, heatmaps, expression plots, and more
+-   🔬 **Functional enrichment** - Integrated MSigDB, GO, and KEGG pathway analysis
+-   🎨 **Consistent aesthetics** - Harmonized color palettes and publication-ready themes
+-   📝 **Automated reporting** - Generate comprehensive analysis reports with Quarto
+-   ✅ **Extensive validation** - Input checking and clear error messages
+-   🧪 **Comprehensive tests** - Broad test coverage for core workflows
 
 ## Installation
 
 ### From Bioconductor (Recommended - when available)
 
-```r
+``` r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
@@ -34,17 +35,17 @@ BiocManager::install("VISTA")
 
 ### Development Version
 
-```r
+``` r
 # Install from GitHub
 if (!requireNamespace("pak", quietly = TRUE))
     install.packages("pak")
 
-pak::pak("chiragparsania/VISTA")
+pak::pak("cparsania/VISTA")
 ```
 
 ## Quick Start
 
-```r
+``` r
 library(VISTA)
 
 # Load your count matrix and sample metadata
@@ -135,7 +136,7 @@ get_enrichment_plot(enrichment_results$enrich)
 
 ### 🎯 Complete Analysis Workflow
 
-```r
+``` r
 # 1. Set up analysis
 vista <- create_vista(counts, sample_info, ...)
 
@@ -167,34 +168,19 @@ gsea_results <- get_gsea(vista, sample_comparison = "A_VS_B")
 
 ### 📊 Visualization Suite
 
-**Dimension Reduction:**
-- `get_pca_plot()` - Principal component analysis
-- `get_mds_plot()` - Multidimensional scaling
+**Dimension Reduction:** - `get_pca_plot()` - Principal component analysis - `get_mds_plot()` - Multidimensional scaling
 
-**DE Results:**
-- `get_volcano_plot()` - Volcano plots with EnhancedVolcano integration
-- `get_ma_plot()` - MA plots with customizable labeling
-- `get_deg_count_barplot()` - DEG summary statistics
-- `get_deg_count_pieplot()`, `get_deg_count_donutplot()` - Circular DEG composition summaries
+**DE Results:** - `get_volcano_plot()` - Volcano plots with EnhancedVolcano integration - `get_ma_plot()` - MA plots with customizable labeling - `get_deg_count_barplot()` - DEG summary statistics - `get_deg_count_pieplot()`, `get_deg_count_donutplot()` - Circular DEG composition summaries
 
-**Expression Patterns:**
-- `get_expression_barplot()`, `get_expression_boxplot()`, `get_expression_violinplot()`
-- `get_expression_density()`, `get_expression_joyplot()`, `get_expression_raincloud()`
-- `get_expression_heatmap()` - Complex heatmaps with k-means clustering
-- `get_expression_scatter()`, `get_expression_lineplot()`, `get_expression_lollipop()`
+**Expression Patterns:** - `get_expression_barplot()`, `get_expression_boxplot()`, `get_expression_violinplot()` - `get_expression_density()`, `get_expression_joyplot()`, `get_expression_raincloud()` - `get_expression_heatmap()` - Complex heatmaps with k-means clustering - `get_expression_scatter()`, `get_expression_lineplot()`, `get_expression_lollipop()`
 
-**Comparisons:**
-- `get_corr_heatmap()` - Sample correlation heatmaps
-- `get_deg_venn_diagram()` - Overlap between comparisons
-- `plot_deg_alluvial()` - Alluvial plots for DEG transitions
+**Comparisons:** - `get_corr_heatmap()` - Sample correlation heatmaps - `get_deg_venn_diagram()` - Overlap between comparisons - `plot_deg_alluvial()` - Alluvial plots for DEG transitions
 
-**Fold-change Analysis:**
-- `get_foldchange_scatter()`, `get_foldchange_barplot()`, `get_foldchange_matrix()`
-- `get_foldchange_heatmap()`, `get_foldchange_chromosome_plot()`
+**Fold-change Analysis:** - `get_foldchange_scatter()`, `get_foldchange_barplot()`, `get_foldchange_matrix()` - `get_foldchange_heatmap()`, `get_foldchange_chromosome_plot()`
 
 ### 🔬 Functional Enrichment
 
-```r
+``` r
 # MSigDB enrichment (Hallmark, C2, C5, etc.)
 msig <- get_msigdb_enrichment(
   vista,
@@ -226,7 +212,7 @@ enrichplot::cnetplot(kegg$enrich)
 
 ### 🎨 Customizable Aesthetics
 
-```r
+``` r
 # Use different color palettes
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
@@ -271,7 +257,7 @@ get_pca_plot(vista, sample_colors = TRUE)
 
 VISTA extends `SummarizedExperiment`, making it compatible with Bioconductor workflows:
 
-```r
+``` r
 # Standard SummarizedExperiment methods work
 assay(vista, "norm_counts")[1:5, 1:5]
 colData(vista)
@@ -287,21 +273,21 @@ norm_counts(vista, summarise = TRUE)  # Group-averaged expression
 
 ## Documentation
 
-- **Vignettes:**
-  - [Introduction to VISTA](vignettes/VISTA-airway.Rmd) - Complete workflow tutorial
-  - [Color and Palette Design](vignettes/VISTA-colors.Rmd) - Consistent and customizable color workflows
-  - [Function Reference](vignettes/VISTA-reference.Rmd) - Comprehensive function guide
+-   **Vignettes:**
 
-- **Help Pages:** `?create_vista`, `?get_pca_plot`, `?get_msigdb_enrichment`, etc.
+    -   [Introduction to VISTA](vignettes/VISTA-airway.Rmd) - Complete workflow tutorial
+    -   [Color and Palette Design](vignettes/VISTA-colors.Rmd) - Consistent and customizable color workflows
+    -   [Function Reference](vignettes/VISTA-reference.Rmd) - Comprehensive function guide
 
-- **Example Data:** `data("count_data")`, `data("sample_metadata")`
+-   **Help Pages:** `?create_vista`, `?get_pca_plot`, `?get_msigdb_enrichment`, etc.
+
+-   **Example Data:** `data("count_data")`, `data("sample_metadata")`
 
 ## Automated Report Template
 
-VISTA ships with a YAML-driven report workflow template for publication-ready
-single-comparison analysis reports.
+VISTA ships with a YAML-driven report workflow template for publication-ready single-comparison analysis reports.
 
-```r
+``` r
 # 1) Copy and edit the template
 file.copy(
   system.file("reports", "vista-report-template.yml", package = "VISTA"),
@@ -312,41 +298,30 @@ file.copy(
 run_vista_report("vista-report.yml")
 ```
 
-The generated HTML report includes:
-- QC plots (PCA, MDS, correlation heatmap)
-- Differential expression views (volcano, MA, DEG summaries)
-- Expression heatmap and fold-change views
-- MSigDB/GO/KEGG enrichment (when available)
-- Downloadable tables and plot assets
-- Interactive tables with export buttons when `DT` is installed
+The generated HTML report includes: - QC plots (PCA, MDS, correlation heatmap) - Differential expression views (volcano, MA, DEG summaries) - Expression heatmap and fold-change views - MSigDB/GO/KEGG enrichment (when available) - Downloadable tables and plot assets - Interactive tables with export buttons when `DT` is installed
 
 ## Citation
 
 If you use VISTA in published research, please cite:
 
-```
+```         
 Parsania C (2025). VISTA: Visualization Toolkit for Transcriptomic Analysis.
 R package version 0.99.0.
 ```
 
 ## Getting Help
 
-- **Issues:** [GitHub Issues](https://github.com/chiragparsania/VISTA/issues)
-- **Questions:** Open a discussion or issue on GitHub
-- **Bioconductor Support:** [support.bioconductor.org](https://support.bioconductor.org)
+-   **Issues:** [GitHub Issues](https://github.com/chiragparsania/VISTA/issues)
+-   **Questions:** Open a discussion or issue on GitHub
+-   **Bioconductor Support:** [support.bioconductor.org](https://support.bioconductor.org)
 
 ## Development
 
-VISTA is actively developed with:
-- ✅ Comprehensive input validation
-- ✅ Broad test coverage
-- ✅ Complete roxygen2 documentation
-- ✅ BiocCheck compliance
-- ✅ CI/CD integration ready
+VISTA is actively developed with: - ✅ Comprehensive input validation - ✅ Broad test coverage - ✅ Complete roxygen2 documentation - ✅ BiocCheck compliance - ✅ CI/CD integration ready
 
 ### Package Structure
 
-```
+```         
 VISTA/
 ├── R/                      # R source code
 │   ├── VISTA-class.R      # S4 class definition
@@ -367,17 +342,12 @@ GPL-3
 
 ## Contributing
 
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure `R CMD check` passes
-5. Submit a pull request
+Contributions are welcome! Please: 1. Fork the repository 2. Create a feature branch 3. Add tests for new functionality 4. Ensure `R CMD check` passes 5. Submit a pull request
 
 ## Code of Conduct
 
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
 
----
+------------------------------------------------------------------------
 
 **Built with** ❤️ **for the Bioconductor community**
