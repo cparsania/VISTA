@@ -3784,8 +3784,19 @@ get_expression_heatmap <- function(vista_obj,
   sample_info <- as.data.frame(SummarizedExperiment::colData(vista_obj)) |>
     tibble::rownames_to_column("sample")
 
-  stopifnot(group_col %in% names(sample_info))
-  stopifnot(all(samples %in% sample_info[[group_col]]))
+  if (!(group_col %in% names(sample_info))) {
+    cli::cli_abort("{.arg group_column} '{group_col}' not found in {.arg sample_info}.")
+  }
+  missing_groups <- setdiff(samples, unique(sample_info[[group_col]]))
+  if (length(missing_groups) > 0) {
+    cli::cli_abort(
+      c(
+        "Unknown group labels in {.arg samples}.",
+        "x" = "Missing: {.val {missing_groups}}",
+        "i" = "Available: {.val {unique(sample_info[[group_col]])}}"
+      )
+    )
+  }
 
   sample_ids <- unlist(purrr::map(samples, function(grp) {
     sample_info$sample[sample_info[[group_col]] == grp]
@@ -3821,7 +3832,6 @@ get_expression_heatmap <- function(vista_obj,
   if (convert_rowmeans) mat <- mat - rowMeans(mat, na.rm = TRUE)
 
   if (summarise_replicates) {
-    stopifnot(!annotate_columns)
     groups <- sample_info |>
       dplyr::filter(sample %in% colnames(mat)) |>
       dplyr::select(sample, !!group_col)
@@ -3884,17 +3894,27 @@ get_expression_heatmap <- function(vista_obj,
 
   col_anno <- NULL
   if (annotate_columns) {
-    col_df <- SummarizedExperiment::colData(vista_obj) |>
-      as.data.frame() |>
-      tibble::rownames_to_column("sample") |>
-      dplyr::filter(sample %in% colnames(mat)) |>
-      dplyr::select(sample, !!group_col) |>
-      tibble::column_to_rownames("sample")
+    if (summarise_replicates) {
+      col_df <- data.frame(
+        group = colnames(mat),
+        row.names = colnames(mat),
+        stringsAsFactors = FALSE
+      )
+      names(col_df) <- group_col
+    } else {
+      col_df <- SummarizedExperiment::colData(vista_obj) |>
+        as.data.frame() |>
+        tibble::rownames_to_column("sample") |>
+        dplyr::filter(sample %in% colnames(mat)) |>
+        dplyr::select(sample, !!group_col) |>
+        tibble::column_to_rownames("sample")
+    }
 
     # Ensure annotation rows align with the heatmap column order
     col_df <- col_df[colnames(mat), , drop = FALSE]
 
-    col_df[[group_col]] <- factor(col_df[[group_col]])
+    col_levels <- unique(as.character(col_df[[group_col]]))
+    col_df[[group_col]] <- factor(as.character(col_df[[group_col]]), levels = col_levels)
     group_levels <- levels(col_df[[group_col]])
     group_colors <- colorspace::qualitative_hcl(length(group_levels), palette = column_anno_palette)
     names(group_colors) <- group_levels
