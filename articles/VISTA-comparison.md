@@ -779,7 +779,7 @@ sessionInfo()
 #> [123] rlang_1.1.7                 crayon_1.5.3               
 #> [125] ggsignif_0.6.4              labeling_0.4.3             
 #> [127] plyr_1.8.9                  fs_1.6.6                   
-#> [129] ggiraph_0.9.4               stringi_1.8.7              
+#> [129] ggiraph_0.9.5               stringi_1.8.7              
 #> [131] viridisLite_0.4.3           BiocParallel_1.44.0        
 #> [133] assertthat_0.2.1            babelgene_22.9             
 #> [135] Biostrings_2.78.0           lazyeval_0.2.2             

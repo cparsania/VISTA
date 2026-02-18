@@ -457,7 +457,7 @@ sessionInfo()
 #> [133] parallel_4.5.2              pkgdown_2.2.0              
 #> [135] assertthat_0.2.1            blob_1.3.0                 
 #> [137] clusterProfiler_4.18.4      DOSE_4.4.0                 
-#> [139] tidytree_0.4.7              ggiraph_0.9.4              
+#> [139] tidytree_0.4.7              ggiraph_0.9.5              
 #> [141] scales_1.4.0                purrr_1.2.1                
 #> [143] crayon_1.5.3                rlang_1.1.7                
 #> [145] cowplot_1.2.0               fastmatch_1.1-8            

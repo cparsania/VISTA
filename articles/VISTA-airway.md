@@ -1598,27 +1598,27 @@ if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
   head(kegg_up$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
 }
 #>                                                   Description       pvalue
-#> hsa04820                         Cytoskeleton in muscle cells 7.023401e-07
-#> hsa04512                             ECM-receptor interaction 1.294412e-04
-#> hsa00350                                  Tyrosine metabolism 1.305492e-04
-#> hsa04923                Regulation of lipolysis in adipocytes 2.724747e-04
-#> hsa04978                                   Mineral absorption 3.358922e-04
-#> hsa04518                                   Integrin signaling 5.261430e-04
-#> hsa04310                                Wnt signaling pathway 1.442529e-03
-#> hsa04933 AGE-RAGE signaling pathway in diabetic complications 1.568231e-03
-#> hsa04977                     Vitamin digestion and absorption 2.234264e-03
-#> hsa04068                               FoxO signaling pathway 2.437399e-03
+#> hsa04820                         Cytoskeleton in muscle cells 7.012486e-07
+#> hsa04512                             ECM-receptor interaction 1.293399e-04
+#> hsa00350                                  Tyrosine metabolism 1.304751e-04
+#> hsa04923                Regulation of lipolysis in adipocytes 2.723027e-04
+#> hsa04978                                   Mineral absorption 3.356814e-04
+#> hsa04518                                   Integrin signaling 5.256878e-04
+#> hsa04310                                Wnt signaling pathway 1.441337e-03
+#> hsa04933 AGE-RAGE signaling pathway in diabetic complications 1.567203e-03
+#> hsa04977                     Vitamin digestion and absorption 2.233418e-03
+#> hsa04068                               FoxO signaling pathway 2.435698e-03
 #>              p.adjust Count
-#> hsa04820 0.0001889295    19
-#> hsa04512 0.0117059161     9
-#> hsa00350 0.0117059161     6
-#> hsa04923 0.0180709990     7
-#> hsa04978 0.0180709990     7
-#> hsa04518 0.0235887438    11
-#> hsa04310 0.0527317586    11
-#> hsa04933 0.0527317586     8
-#> hsa04977 0.0655660252     4
-#> hsa04068 0.0655660252     9
+#> hsa04820 0.0001886359    19
+#> hsa04512 0.0116992644     9
+#> hsa00350 0.0116992644     6
+#> hsa04923 0.0180596595     7
+#> hsa04978 0.0180596595     7
+#> hsa04518 0.0235683369    11
+#> hsa04310 0.0526971976    11
+#> hsa04933 0.0526971976     8
+#> hsa04977 0.0655202690     4
+#> hsa04068 0.0655202690     9
 ```
 
 #### KEGG downregulated genes
@@ -1636,19 +1636,19 @@ if (!is.null(kegg_down$enrich) && nrow(kegg_down$enrich@result) > 0) {
   head(kegg_down$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
 }
 #>                                               Description       pvalue
-#> hsa04060           Cytokine-cytokine receptor interaction 9.227337e-07
-#> hsa04750 Inflammatory mediator regulation of TRP channels 7.823032e-06
-#> hsa04713                            Circadian entrainment 4.461382e-05
-#> hsa04360                                    Axon guidance 8.316610e-05
-#> hsa04926                        Relaxin signaling pathway 4.220265e-04
-#> hsa04024                           cAMP signaling pathway 5.607676e-04
+#> hsa04060           Cytokine-cytokine receptor interaction 9.213061e-07
+#> hsa04750 Inflammatory mediator regulation of TRP channels 7.815944e-06
+#> hsa04713                            Circadian entrainment 4.457795e-05
+#> hsa04360                                    Axon guidance 8.308429e-05
+#> hsa04926                        Relaxin signaling pathway 4.217086e-04
+#> hsa04024                           cAMP signaling pathway 5.602527e-04
 #>              p.adjust Count
-#> hsa04060 0.0002537518    19
-#> hsa04750 0.0010756669    10
-#> hsa04713 0.0040896000     9
-#> hsa04360 0.0057176695    12
-#> hsa04926 0.0232114556     9
-#> hsa04024 0.0257018483    12
+#> hsa04060 0.0002533592    19
+#> hsa04750 0.0010746923    10
+#> hsa04713 0.0040863121     9
+#> hsa04360 0.0057120448    12
+#> hsa04926 0.0231939738     9
+#> hsa04024 0.0256782507    12
 ```
 
 #### KEGG Visualization
@@ -1952,7 +1952,7 @@ sessionInfo()
 #> [121] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        
 #> [124] compiler_4.5.2          rlang_1.1.7             crayon_1.5.3           
 #> [127] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          
-#> [130] plyr_1.8.9              fs_1.6.6                ggiraph_0.9.4          
+#> [130] plyr_1.8.9              fs_1.6.6                ggiraph_0.9.5          
 #> [133] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    
 #> [136] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
 #> [139] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       

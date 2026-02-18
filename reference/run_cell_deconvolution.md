@@ -11,7 +11,8 @@ run_cell_deconvolution(
   method = c("xCell2"),
   single_cell_reference = NULL,
   reference_labels = NULL,
-  gene_id_type = c("symbol", "ensembl", "ensembl_symbol"),
+  gene_id_type = c("auto", "symbol", "ensembl", "ensembl_symbol"),
+  xcell2_reference = NULL,
   transform = c("log2", "raw"),
   ...
 )
@@ -37,7 +38,13 @@ run_cell_deconvolution(
 
 - gene_id_type:
 
-  Type of gene identifiers: "symbol", "ensembl", or "ensembl_symbol".
+  Type of gene identifiers: `"auto"`, `"symbol"`, `"ensembl"`, or
+  `"ensembl_symbol"`.
+
+- xcell2_reference:
+
+  Optional xCell2 reference object or dataset name (e.g.,
+  `"DICE_demo.xCell2Ref"`). Used when xCell2 exposes `xCell2Analysis()`.
 
 - transform:
 
