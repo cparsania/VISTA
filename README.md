@@ -4,7 +4,7 @@
 
 <!-- badges: start -->
 
-[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable) [![R-CMD-check](https://github.com/cparsania/VISTA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cparsania/VISTA/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle: maturing](https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg)](https://lifecycle.r-lib.org/articles/stages.html#maturing) [![R-CMD-check](https://github.com/cparsania/VISTA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cparsania/VISTA/actions/workflows/R-CMD-check.yaml) [![codecov](https://codecov.io/gh/cparsania/VISTA/graph/badge.svg)](https://app.codecov.io/gh/cparsania/VISTA) [![pkgdown site](https://img.shields.io/badge/pkgdown-site-blue)](https://cparsania.github.io/VISTA/)
 
 <!-- badges: end -->
 
