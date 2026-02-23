@@ -11,121 +11,251 @@
 #'   \item \code{$de_cutoffs}: named list of thresholds (log2FC, p-value type/cutoff, method settings).
 #'   \item \code{$group}: list with \code{column}, \code{palette}, \code{colors} describing the grouping/fill scheme.
 #'   \item \code{$provenance}: list with constructor version, timestamp, session info.
+#'   \item \code{$vista_schema_version}: metadata schema tag used for compatibility checks.
 #' }
 #' Feature-level annotations live in \code{rowData(v)}, sample metadata in
 #' \code{colData(v)}, and normalized counts (and any additional assays) in
-#' \code{assay(v, "norm_counts")} by default. Use \code{create_vista()} for
-#' standard construction from counts + sample_info; use \code{vista()} for
-#' low-level instantiation when you already have normalized assays/metadata.
+#' \code{assay(v, "norm_counts")} by default. Use \code{create_vista()} as the
+#' primary end-user constructor. Advanced users can convert an existing
+#' \code{SummarizedExperiment} with \code{as_vista()}.
+#' @name VISTA-class
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 #' @exportClass VISTA
+#' @seealso \code{\link{create_vista}}, \code{\link{as_vista}}, \code{\link{validate_vista}}
+NULL
+
+#' @keywords internal
+#' @noRd
+.VISTA_SCHEMA_VERSION <- "1.0.0"
+
+.vista_validity_messages <- function(object) {
+  msgs <- character()
+
+  an <- SummarizedExperiment::assayNames(object)
+  if (!"norm_counts" %in% an) {
+    msgs <- c(msgs, "Assay 'norm_counts' is required.")
+    return(msgs)
+  }
+
+  mat <- SummarizedExperiment::assay(object, "norm_counts")
+  if (!is.numeric(mat)) {
+    msgs <- c(msgs, "Assay 'norm_counts' must be numeric.")
+  }
+
+  rn <- rownames(mat)
+  cn <- colnames(mat)
+  if (is.null(rn) || any(!nzchar(rn)) || anyDuplicated(rn)) {
+    msgs <- c(msgs, "'norm_counts' rownames must be unique, non-empty gene IDs.")
+  }
+  if (is.null(cn) || any(!nzchar(cn)) || anyDuplicated(cn)) {
+    msgs <- c(msgs, "'norm_counts' colnames must be unique, non-empty sample IDs.")
+  }
+
+  cd <- as.data.frame(SummarizedExperiment::colData(object), stringsAsFactors = FALSE)
+  rd <- as.data.frame(SummarizedExperiment::rowData(object), stringsAsFactors = FALSE)
+  cd_rn <- rownames(cd)
+  rd_rn <- rownames(rd)
+
+  if (is.null(cd_rn) || any(!nzchar(cd_rn)) || anyDuplicated(cd_rn)) {
+    msgs <- c(msgs, "colData rownames must be unique, non-empty sample IDs.")
+  }
+  if (is.null(rd_rn) || any(!nzchar(rd_rn)) || anyDuplicated(rd_rn)) {
+    msgs <- c(msgs, "rowData rownames must be unique, non-empty feature IDs.")
+  }
+
+  if (!is.null(cn) && !is.null(cd_rn) && !identical(cd_rn, cn)) {
+    msgs <- c(msgs, "colData rownames must exactly match colnames(norm_counts).")
+  }
+  if (!is.null(rn) && !is.null(rd_rn) && !identical(rd_rn, rn)) {
+    msgs <- c(msgs, "rowData rownames must exactly match rownames(norm_counts).")
+  }
+
+  md <- S4Vectors::metadata(object)
+  required_md <- c("de_results", "de_summary", "de_cutoffs", "group", "provenance", "vista_schema_version")
+  missing_md <- setdiff(required_md, names(md))
+  if (length(missing_md) > 0) {
+    msgs <- c(msgs, paste0("Missing metadata key(s): ", paste(missing_md, collapse = ", "), "."))
+  }
+
+  if ("group" %in% names(md) && is.list(md$group)) {
+    gcol <- md$group$column
+    if (!is.character(gcol) || length(gcol) != 1L || !nzchar(gcol)) {
+      msgs <- c(msgs, "metadata(x)$group$column must be a non-empty character scalar.")
+    } else if (!gcol %in% colnames(cd)) {
+      msgs <- c(msgs, sprintf("Grouping column '%s' is not present in colData.", gcol))
+    } else {
+      grp <- cd[[gcol]]
+      if (anyNA(grp)) {
+        msgs <- c(msgs, sprintf("Grouping column '%s' contains NA values.", gcol))
+      }
+      gcols <- md$group$colors
+      if (!is.null(gcols)) {
+        if (!is.character(gcols) || is.null(names(gcols))) {
+          msgs <- c(msgs, "metadata(x)$group$colors must be a named character vector.")
+        } else {
+          missing_colors <- setdiff(unique(as.character(grp)), names(gcols))
+          if (length(missing_colors) > 0) {
+            msgs <- c(msgs, paste0("Missing group color(s) for: ", paste(missing_colors, collapse = ", "), "."))
+          }
+        }
+      }
+    }
+  } else if ("group" %in% names(md)) {
+    msgs <- c(msgs, "metadata(x)$group must be a list.")
+  }
+
+  if (!is.null(md$vista_schema_version) &&
+      (!is.character(md$vista_schema_version) || length(md$vista_schema_version) != 1L || !nzchar(md$vista_schema_version))) {
+    msgs <- c(msgs, "metadata(x)$vista_schema_version must be a non-empty character scalar.")
+  }
+
+  if (length(msgs) == 0) TRUE else msgs
+}
+
 setClass(
   Class = "VISTA",
   contains = "SummarizedExperiment"
 )
 
+setValidity("VISTA", .vista_validity_messages)
 
 
-
-#' @title VISTA constructor
-#' @description Create a VISTA object that extends `SummarizedExperiment`.
+#' @title Coerce SummarizedExperiment to VISTA
+#' @description Convert a pre-existing `SummarizedExperiment` into a valid
+#'   `VISTA` object.
 #'
-#' @param norm_counts A normalized expression matrix (or \code{data.frame})
-#'   with genes as rows and samples as columns. Must have rownames.
-#' @param sample_info A \code{data.frame} with sample metadata. Row names must
-#'   match \code{colnames(norm_counts)}.
-#' @param row_data A \code{data.frame} with feature metadata. Row names must
-#'   match \code{rownames(norm_counts)}.
-#' @param comparisons A named list of differential expression result tables
-#'   (e.g. \code{S4Vectors::DataFrame}s) keyed by comparison name. Default: empty list.
-#' @param deg_summary A named list of per-comparison DEG summary tables. Default: empty list.
-#' @param cutoffs A named list of thresholds used for DEG classification (e.g. \code{alpha}, \code{lfc}). Default: empty list.
-#' @param group_column A **non-empty** character scalar naming the grouping column in \code{sample_info}.
-#'   This is **required** and must exist in \code{sample_info}.
-#' @param group_palette A colorspace qualitative palette name used to assign colors to groups in \code{group_column}.
-#'   One of \code{c("Pastel 1","Dark 2","Dark 3","Set 2","Set 3","Warm","Cold","Harmonic","Dynamic")}.
-#'   Default: \code{"Dark 3"}.
+#' @param se A `SummarizedExperiment` object.
+#' @param assay_name Assay in `se` to use as `norm_counts` (default: `"norm_counts"`).
+#' @param group_column Grouping column in `colData(se)`.
+#' @param comparisons Optional named list of differential expression tables.
+#' @param deg_summary Optional named list of DEG summary tables.
+#' @param cutoffs Optional named list of threshold metadata.
+#' @param group_palette Palette name for group colors.
+#' @param validate Logical; run object validation before returning.
 #'
-#' @return A \code{VISTA} object. The following keys are stored in \code{metadata(vista)}:
-#' \itemize{
-#'   \item \code{$de_results}: named \code{SimpleList} of DE result tables.
-#'   \item \code{$de_summary}: named \code{SimpleList} of DEG summary tables.
-#'   \item \code{$de_cutoffs}: named list of thresholds.
-#'   \item \code{$group}: list with \code{column}, \code{palette}, \code{colors}.
-#'   \item \code{$provenance}: list with constructor version, timestamp, session info.
-#' }
-#'
+#' @return A `VISTA` object.
 #' @examples
-#' # Low-level constructor (advanced usage)
-#' # Most users should use create_vista() instead
-#'
-#' # Create sample data
-#' norm_counts_mat <- matrix(
-#'   rnorm(100), nrow = 10, ncol = 10,
-#'   dimnames = list(
-#'     paste0("gene", 1:10),
-#'     paste0("sample", 1:10)
+#' mat <- matrix(rnorm(60), nrow = 10)
+#' rownames(mat) <- paste0("gene", seq_len(nrow(mat)))
+#' colnames(mat) <- paste0("sample", seq_len(ncol(mat)))
+#' se <- SummarizedExperiment::SummarizedExperiment(
+#'   assays = list(norm_counts = mat),
+#'   colData = S4Vectors::DataFrame(
+#'     cond = rep(c("A", "B"), each = 3),
+#'     row.names = colnames(mat)
+#'   ),
+#'   rowData = S4Vectors::DataFrame(
+#'     gene_id = rownames(mat),
+#'     row.names = rownames(mat)
 #'   )
 #' )
-#'
-#' sample_info_df <- data.frame(
-#'   groups = rep(c("A", "B"), each = 5),
-#'   row.names = colnames(norm_counts_mat)
-#' )
-#'
-#' row_data_df <- data.frame(
-#'   gene_id = rownames(norm_counts_mat),
-#'   row.names = rownames(norm_counts_mat)
-#' )
-#'
-#' # Create VISTA object
-#' v <- vista(
-#'   norm_counts = norm_counts_mat,
-#'   sample_info = sample_info_df,
-#'   row_data = row_data_df,
-#'   group_column = "groups"
-#' )
-#'
-#' # Examine object
+#' v <- as_vista(se, group_column = "cond")
 #' v
-#' norm_counts(v)[1:5, 1:5]
-#'
-#' @import SummarizedExperiment S4Vectors methods
+#' @import methods
 #' @export
-vista <- function(norm_counts,
-                  sample_info,
-                  row_data,
-                  comparisons  = list(),
-                  deg_summary  = list(),
-                  cutoffs      = list(),
-                  group_column = character(1),
-                  group_palette = "Dark 3") {
+as_vista <- function(se,
+                     assay_name = "norm_counts",
+                     group_column,
+                     comparisons = list(),
+                     deg_summary = list(),
+                     cutoffs = list(),
+                     group_palette = "Dark 3",
+                     validate = TRUE) {
+  if (!inherits(se, "SummarizedExperiment")) {
+    cli::cli_abort("{.arg se} must inherit from {.cls SummarizedExperiment}.")
+  }
+  if (!assay_name %in% SummarizedExperiment::assayNames(se)) {
+    cli::cli_abort(
+      "Assay {.val {assay_name}} not found. Available assays: {.val {SummarizedExperiment::assayNames(se)}}"
+    )
+  }
 
+  mat <- SummarizedExperiment::assay(se, assay_name)
+  if (!is.numeric(mat)) {
+    cli::cli_abort("Assay {.val {assay_name}} must be numeric.")
+  }
+  if (is.null(rownames(mat)) || any(!nzchar(rownames(mat))) || anyDuplicated(rownames(mat))) {
+    cli::cli_abort("Assay rownames must be unique, non-empty gene identifiers.")
+  }
+  if (is.null(colnames(mat)) || any(!nzchar(colnames(mat))) || anyDuplicated(colnames(mat))) {
+    cli::cli_abort("Assay colnames must be unique, non-empty sample identifiers.")
+  }
 
+  sample_info <- as.data.frame(SummarizedExperiment::colData(se), stringsAsFactors = FALSE)
+  if (is.null(rownames(sample_info)) || any(!nzchar(rownames(sample_info))) || anyDuplicated(rownames(sample_info))) {
+    rownames(sample_info) <- colnames(mat)
+  }
+  if (!identical(rownames(sample_info), colnames(mat))) {
+    if (all(colnames(mat) %in% rownames(sample_info))) {
+      sample_info <- sample_info[colnames(mat), , drop = FALSE]
+    } else {
+      cli::cli_abort("`colData(se)` rownames must match assay column names.")
+    }
+  }
+  sample_info$sample_names <- rownames(sample_info)
 
+  row_data <- as.data.frame(SummarizedExperiment::rowData(se), stringsAsFactors = FALSE)
+  if (is.null(rownames(row_data)) || any(!nzchar(rownames(row_data))) || anyDuplicated(rownames(row_data))) {
+    rownames(row_data) <- rownames(mat)
+  }
+  if (!identical(rownames(row_data), rownames(mat))) {
+    if (all(rownames(mat) %in% rownames(row_data))) {
+      row_data <- row_data[rownames(mat), , drop = FALSE]
+    } else {
+      cli::cli_abort("`rowData(se)` rownames must match assay row names.")
+    }
+  }
+  if (!"gene_id" %in% colnames(row_data)) {
+    row_data$gene_id <- rownames(row_data)
+  }
+
+  .vista(
+    norm_counts = mat,
+    sample_info = sample_info,
+    row_data = row_data,
+    comparisons = comparisons,
+    deg_summary = deg_summary,
+    cutoffs = cutoffs,
+    group_column = group_column,
+    group_palette = group_palette,
+    validate = validate
+  )
+}
+
+#' @keywords internal
+#' @noRd
+.vista <- function(norm_counts,
+                   sample_info,
+                   row_data,
+                   comparisons = list(),
+                   deg_summary = list(),
+                   cutoffs = list(),
+                   group_column = character(1),
+                   group_palette = "Dark 3",
+                   validate = TRUE) {
   # ---- Basic structure checks ----
   if (is.null(rownames(norm_counts)))
-    stop("norm_counts must have rownames.")
+    cli::cli_abort("norm_counts must have rownames.")
   if (is.null(colnames(norm_counts)))
-    stop("norm_counts must have colnames (sample names).")
+    cli::cli_abort("norm_counts must have colnames (sample names).")
   if (is.null(rownames(sample_info)))
-    stop("sample_info must have rownames (sample names).")
+    cli::cli_abort("sample_info must have rownames (sample names).")
   if (is.null(rownames(row_data)))
-    stop("row_data must have rownames (feature IDs).")
+    cli::cli_abort("row_data must have rownames (feature IDs).")
 
   # match dimensions / identities
   if (!identical(rownames(row_data), rownames(norm_counts))) {
-    stop("row_data rownames must exactly match rownames(norm_counts).")
+    cli::cli_abort("row_data rownames must exactly match rownames(norm_counts).")
   }
   if (!identical(rownames(sample_info), colnames(norm_counts))) {
-    stop("sample_info rownames must exactly match colnames(norm_counts).")
+    cli::cli_abort("sample_info rownames must exactly match colnames(norm_counts).")
   }
 
   # ---- group_column (required) ----
   if (length(group_column) != 1L || is.na(group_column) || nchar(group_column) == 0)
-    stop("'group_column' is required and cannot be empty.")
+    cli::cli_abort("'group_column' is required and cannot be empty.")
   if (!group_column %in% colnames(sample_info)) {
-    stop("The specified group_column '", group_column, "' is not found in sample_info.")
+    cli::cli_abort("The specified group_column '{group_column}' is not found in sample_info.")
   }
 
   # ---- palette selection ----
@@ -135,51 +265,61 @@ vista <- function(norm_counts,
 
   # ---- compute group colors ----
   grp <- sample_info[[group_column]]
-  if (anyNA(grp))
-    stop("group_column contains NA values; please fix sample_info.")
+  if (anyNA(grp)) {
+    cli::cli_abort("group_column contains NA values; please fix sample_info.")
+  }
   groups <- unique(as.character(grp))
   group_colors <- colorspace::qualitative_hcl(length(groups), palette = group_palette)
   names(group_colors) <- groups
 
   # ---- build SE core ----
   se <- SummarizedExperiment::SummarizedExperiment(
-    assays  = list(norm_counts = as.matrix(norm_counts)),
+    assays = list(norm_counts = as.matrix(norm_counts)),
     colData = S4Vectors::DataFrame(sample_info),
     rowData = S4Vectors::DataFrame(row_data)
   )
 
   # ---- coerce lists for metadata ----
-  # Prefer SimpleList so it's light and plays nicely with Bioc serialization
   de_results_sl <- if (length(comparisons)) S4Vectors::SimpleList(comparisons) else S4Vectors::SimpleList()
   de_summary_sl <- if (length(deg_summary)) S4Vectors::SimpleList(deg_summary) else S4Vectors::SimpleList()
 
-  # (optional) validate each DE table's rownames align with features
+  # validate each DE table's rownames align with features
   if (length(de_results_sl)) {
     rn <- rownames(se)
     for (nm in names(de_results_sl)) {
       dfi <- de_results_sl[[nm]]
       if (is.null(rownames(dfi)) || !identical(rownames(dfi), rn)) {
-        stop("Each DE result ('", nm, "') must have rownames identical to rownames(norm_counts).")
+        cli::cli_abort("Each DE result ('{nm}') must have rownames identical to rownames(norm_counts).")
       }
     }
   }
 
-  # ---- stuff everything into metadata() ----
   S4Vectors::metadata(se) <- list(
     de_results = de_results_sl,
     de_summary = de_summary_sl,
     de_cutoffs = cutoffs,
     group = list(
-      column  = group_column,
+      column = group_column,
       palette = group_palette,
-      colors  = group_colors
+      colors = group_colors
     ),
     provenance = list(
-      constructor = "vista()",
+      constructor = ".vista()",
       created_at = as.character(Sys.time())
-    )
+    ),
+    vista_schema_version = .VISTA_SCHEMA_VERSION
   )
 
-  # ---- return as VISTA ----
-  methods::new("VISTA", se)
+  v <- methods::new("VISTA", se)
+  if (isTRUE(validate)) {
+    validate_vista(v, level = "core", error = TRUE)
+  }
+  v
+}
+
+# Backward-compatibility internal alias; not exported.
+#' @keywords internal
+#' @noRd
+vista <- function(...) {
+  .vista(...)
 }

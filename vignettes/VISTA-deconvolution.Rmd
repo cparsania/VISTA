@@ -1,0 +1,243 @@
+---
+title: "Cell-Type Deconvolution with VISTA (airway)"
+author: "VISTA Development Team"
+package: VISTA
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 9
+    fig_height: 6
+vignette: >
+  %\VignetteIndexEntry{Cell-Type Deconvolution with VISTA (airway)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+
+required_pkgs <- c(
+  "VISTA",
+  "airway",
+  "SummarizedExperiment",
+  "dplyr",
+  "tibble",
+  "tidyr",
+  "ggplot2",
+  "org.Hs.eg.db"
+)
+missing_pkgs <- required_pkgs[!vapply(required_pkgs, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+  stop("Missing required packages: ", paste(missing_pkgs, collapse = ", "))
+}
+
+has_xcell2 <- requireNamespace("xCell2", quietly = TRUE)
+has_deconv <- FALSE
+```
+
+# Overview
+
+This vignette demonstrates how to run **cell-type deconvolution** with VISTA using the Bioconductor `airway` dataset.
+
+Workflow covered:
+
+1.  Build a `VISTA` object from airway counts and metadata.
+2.  Run `run_cell_deconvolution()` (xCell2 backend).
+3.  Extract cell-fraction estimates with `get_cell_fractions()`.
+4.  Visualize sample-level composition with `plot_celltype_barplot()`.
+5.  Compare treatment groups with `get_celltype_group_dotplot()`.
+6.  Inspect cell-type/sample structure with `get_celltype_heatmap()`.
+
+# Load Packages
+
+```{r load-packages}
+library(VISTA)
+library(airway)
+library(SummarizedExperiment)
+library(dplyr)
+library(tibble)
+library(tidyr)
+library(ggplot2)
+library(org.Hs.eg.db)
+```
+
+# Prepare Airway Data
+
+```{r prepare-airway}
+data("airway", package = "airway")
+
+counts_matrix <- SummarizedExperiment::assay(airway, "counts")
+sample_metadata <- as.data.frame(SummarizedExperiment::colData(airway))
+
+# Keep sample IDs explicit for VISTA alignment.
+sample_metadata$sample_names <- rownames(sample_metadata)
+sample_metadata$cond_long <- ifelse(sample_metadata$dex == "trt", "dexamethasone", "untreated")
+
+count_data <- as.data.frame(counts_matrix) %>%
+  tibble::rownames_to_column("gene_id")
+
+# Ensure column order follows sample_metadata.
+count_data <- count_data[, c("gene_id", sample_metadata$sample_names)]
+
+dim(count_data)
+sample_metadata[, c("sample_names", "cell", "dex", "cond_long")]
+```
+
+# Create VISTA Object
+
+```{r create-vista}
+vista_airway <- create_vista(
+  counts = count_data,
+  sample_info = sample_metadata,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "dexamethasone",
+  group_denominator = "untreated",
+  covariates = "cell",
+  method = "deseq2",
+  min_counts = 10,
+  min_replicates = 1
+)
+
+# Add gene annotations (used for downstream interpretation and fallback symbol mapping).
+vista_airway <- set_rowdata(
+  vista_airway,
+  orgdb = org.Hs.eg.db,
+  columns = c("SYMBOL", "GENENAME", "ENTREZID"),
+  keytype = "ENSEMBL"
+)
+
+vista_airway
+```
+
+# Run Deconvolution
+
+`run_cell_deconvolution()` currently uses xCell2.\
+If `xCell2` is unavailable, this vignette will skip deconvolution sections.
+
+```{r xcell2-missing, eval=!has_xcell2}
+cat("Package 'xCell2' is not installed; deconvolution steps are skipped.\n")
+cat("Install it to run these sections:\n")
+cat("  BiocManager::install('xCell2')\n")
+```
+
+```{r run-deconvolution, eval=has_xcell2}
+# First try default threshold, then relax minSharedGenes if needed.
+deconv_try <- tryCatch(
+  run_cell_deconvolution(
+    x = vista_airway,
+    method = "xCell2",
+    gene_id_type = "ensembl"
+  ),
+  error = function(e) e
+)
+
+if (inherits(deconv_try, "error")) {
+  msg <- conditionMessage(deconv_try)
+  if (grepl("minSharedGenes", msg, fixed = TRUE)) {
+    message("Retrying xCell2 deconvolution with minSharedGenes = 0.6")
+    deconv_try <- tryCatch(
+      run_cell_deconvolution(
+        x = vista_airway,
+        method = "xCell2",
+        gene_id_type = "ensembl",
+        minSharedGenes = 0.6
+      ),
+      error = function(e) e
+    )
+  }
+}
+
+if (inherits(deconv_try, "error")) {
+  has_deconv <- FALSE
+  message("Deconvolution could not be completed in this environment:\n", conditionMessage(deconv_try))
+} else {
+  vista_deconv <- deconv_try
+  has_deconv <- TRUE
+  vista_deconv
+}
+```
+
+```{r deconvolution-skipped, eval=has_xcell2 && !has_deconv}
+cat("xCell2 is installed, but deconvolution did not complete for this dataset/reference combination.\n")
+cat("Downstream deconvolution plots and tables are skipped.\n")
+cat("Tip: try a lower minSharedGenes or provide a different xcell2_reference.\n")
+```
+
+# Inspect Cell Fractions
+
+```{r inspect-fractions, eval=has_xcell2 && has_deconv}
+cell_fractions <- get_cell_fractions(vista_deconv)
+
+dim(cell_fractions)
+cell_fractions[1:min(4, nrow(cell_fractions)), 1:min(6, ncol(cell_fractions))]
+```
+
+# Plot Cell-Type Composition
+
+```{r celltype-barplot, eval=has_xcell2 && has_deconv, fig.height=8}
+plot_celltype_barplot(
+  x = vista_deconv,
+  group_column = "cond_long",
+  top_n = 12,
+  collapse_other = TRUE,
+  normalize = "sample",
+  facet_by_group = TRUE,
+  font_size = 11
+)
+```
+
+# Group-Level Dot Plot
+
+This plot summarizes deconvolution signal by treatment group while keeping sample-level points visible.
+
+```{r group-summary-plot, eval=has_xcell2 && has_deconv, fig.height=7}
+get_celltype_group_dotplot(
+  x = vista_deconv,
+  group_column = "cond_long",
+  top_n = 12,
+  summary_fun = "mean",
+  error = "se",
+  add_points = TRUE,
+  point_size = 2.5,
+  font_size = 11
+)
+```
+
+# Cell-Type Heatmap
+
+The heatmap is useful to inspect sample-level deconvolution structure and concordance within groups.
+
+```{r celltype-heatmap, eval=has_xcell2 && has_deconv, fig.height=8}
+get_celltype_heatmap(
+  x = vista_deconv,
+  group_column = "cond_long",
+  top_n = 20,
+  transform = "zscore",
+  cluster_rows = TRUE,
+  cluster_columns = FALSE,
+  show_values = FALSE,
+  font_size = 10
+)
+```
+
+# Notes on Interpretation
+
+-   xCell2 outputs are typically **enrichment-like abundance scores** rather than absolute percentages.
+-   Use group-level differences and consistency across replicates as the primary interpretation signal.
+-   Treat results as hypothesis-generating; validate with orthogonal assays when possible.
+
+# Session Info
+
+```{r session-info}
+sessionInfo()
+```

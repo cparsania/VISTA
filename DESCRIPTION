@@ -59,6 +59,7 @@ Suggests:
     quarto,
     rmarkdown,
     yaml,
+    writexl,
     testthat (>= 3.0.0),
     xCell2
 Additional_repositories: https://bioconductor.org/packages/3.18/bioc

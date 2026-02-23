@@ -2,11 +2,24 @@
 % Please edit documentation in R/utils-internal.R
 \name{run_deseq_analysis}
 \alias{run_deseq_analysis}
-\alias{.coerce_design_formula}
 \alias{run_edger_analysis}
 \title{Run Differential Expression Analysis with DESeq2 or edgeR}
 \usage{
-.coerce_design_formula(design_formula)
+run_deseq_analysis(
+  counts,
+  sample_info,
+  column_geneid,
+  group_column,
+  group_numerator,
+  group_denominator,
+  covariates = NULL,
+  design_formula = NULL,
+  min_counts = 10,
+  min_replicates = 1,
+  log2fc_cutoff = 1,
+  pval_cutoff = 0.05,
+  p_value_type = "padj"
+)
 
 run_edger_analysis(
   counts,
@@ -25,10 +38,6 @@ run_edger_analysis(
 )
 }
 \arguments{
-\item{design_formula}{Optional model formula (or formula string). When provided,
-it overrides automatic design construction from \code{group_column} +
-\code{covariates}. Must include \code{group_column}.}
-
 \item{counts}{A data frame or matrix of raw counts with one gene per row.
 Must include a column defined by \code{column_geneid}, and column names
 must match entries in \code{sample_info$sample_names}.}
@@ -45,6 +54,10 @@ the specified grouping column.}
 \item{group_denominator}{A character vector of denominator group(s) for fold-change comparisons.}
 
 \item{covariates}{Optional character vector of additional sample_info columns to adjust for.}
+
+\item{design_formula}{Optional model formula (or formula string). When provided,
+it overrides automatic design construction from \code{group_column} +
+\code{covariates}. Must include \code{group_column}.}
 
 \item{min_counts}{Minimum total read count across all samples to retain a gene. Default: \code{10}.}
 

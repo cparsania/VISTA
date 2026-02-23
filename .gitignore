@@ -1,27 +1,27 @@
-.Rproj.user
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
-.claude
-/.quarto/
-**/*.quarto_ipynb
-
-# OS / editor
 .DS_Store
 
-# R package build/check artifacts
+# Local tooling
+.claude/
+.quarto/
+**/*.quarto_ipynb
+
+# R build/check artifacts
 *.Rcheck/
 *.tar.gz
 
-# Rendered outputs (keep source .Rmd/.qmd only)
+# Rendered vignette/site outputs
 vignettes/*.html
-tmp_render/
-
-# pkgdown outputs (uncomment docs/ only if you do NOT publish GitHub Pages from docs/)
-pkgdown/
+vignettes/*_files/
 docs/
+tmp_render/
 
 # renv local library/cache state
 renv/library/
 renv/staging/
 renv/python/
+
+/.quarto/

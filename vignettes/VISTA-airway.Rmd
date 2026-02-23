@@ -198,6 +198,28 @@ The VISTA object stores:
 - **Gene annotations** in `rowData`
 - **DE results** in `metadata`
 
+## Validate object integrity
+
+`create_vista()` runs validation by default (`validate = TRUE`). You can also
+run it explicitly:
+
+```{r validate-vista}
+validate_vista(vista, level = "full")
+```
+
+For advanced users importing a pre-built `SummarizedExperiment`, use
+`as_vista()` and then validate:
+
+```{r as-vista-example, eval=FALSE}
+se <- SummarizedExperiment::SummarizedExperiment(
+  assays = list(norm_counts = norm_counts(vista)),
+  colData = S4Vectors::DataFrame(sample_info(vista), row.names = sample_info(vista)$sample_names),
+  rowData = S4Vectors::DataFrame(row_data(vista), row.names = rownames(norm_counts(vista)))
+)
+vista2 <- as_vista(se, group_column = "treatment")
+validate_vista(vista2, level = "full")
+```
+
 ## Alternative: Using edgeR backend
 
 ```{r create-vista-edger, eval=FALSE}

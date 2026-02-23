@@ -26,3 +26,121 @@ test_that("run_cell_deconvolution requires xCell2", {
   expect_s3_class(fractions, "data.frame")
   expect_equal(nrow(fractions), ncol(norm_counts(vista_cf)))
 })
+
+make_mock_deconv_vista <- function(include_sample_names = FALSE, include_text_col = FALSE) {
+  norm_mat <- matrix(
+    seq_len(24),
+    nrow = 6,
+    ncol = 4,
+    dimnames = list(
+      paste0("gene", seq_len(6)),
+      paste0("sample", seq_len(4))
+    )
+  )
+
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(norm_counts = norm_mat),
+    colData = S4Vectors::DataFrame(
+      cond_long = c("control", "control", "treated", "treated"),
+      row.names = colnames(norm_mat)
+    ),
+    rowData = S4Vectors::DataFrame(
+      gene_id = rownames(norm_mat),
+      row.names = rownames(norm_mat)
+    )
+  )
+  v <- as_vista(se, group_column = "cond_long")
+
+  frac <- data.frame(
+    smooth_muscle_cell = c(0.8, 0.7, 0.2, 0.3),
+    fibroblast = c(0.1, 0.2, 0.6, 0.5),
+    immune = c(0.1, 0.1, 0.2, 0.2),
+    stringsAsFactors = FALSE
+  )
+  if (isTRUE(include_text_col)) {
+    frac$note <- letters[seq_len(nrow(frac))]
+  }
+  if (isTRUE(include_sample_names)) {
+    frac$sample_names <- colnames(norm_mat)
+  } else {
+    rownames(frac) <- colnames(norm_mat)
+  }
+
+  md <- S4Vectors::metadata(v)
+  md$cell_fractions <- frac
+  S4Vectors::metadata(v) <- md
+  v
+}
+
+test_that("plot_celltype_barplot supports top_n and normalization", {
+  v <- make_mock_deconv_vista()
+
+  p <- plot_celltype_barplot(
+    v,
+    top_n = 2,
+    collapse_other = TRUE,
+    normalize = "sample",
+    facet_by_group = FALSE
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_true("Other" %in% unique(as.character(p$data$cell_type)))
+
+  sample_sums <- tapply(p$data$score, p$data$sample, sum)
+  expect_equal(as.numeric(sample_sums), rep(1, length(sample_sums)))
+})
+
+test_that("plot_celltype_barplot validates group_column", {
+  v <- make_mock_deconv_vista()
+  expect_error(plot_celltype_barplot(v, group_column = "missing_group"), "not found")
+})
+
+test_that("get_celltype_group_dotplot returns ggplot", {
+  v <- make_mock_deconv_vista(include_sample_names = TRUE, include_text_col = TRUE)
+
+  expect_warning(
+    p <- get_celltype_group_dotplot(
+      v,
+      top_n = 2,
+      error = "se",
+      add_points = TRUE
+    ),
+    "Dropping non-numeric columns"
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_equal(length(unique(as.character(p$data$cell_type))), 2)
+})
+
+test_that("get_celltype_group_dotplot requires a resolvable group column", {
+  v <- make_mock_deconv_vista()
+  md <- S4Vectors::metadata(v)
+  md$group <- NULL
+  S4Vectors::metadata(v) <- md
+
+  expect_error(
+    get_celltype_group_dotplot(v, group_column = NULL),
+    "provide"
+  )
+})
+
+test_that("get_celltype_heatmap returns matrix and plot outputs", {
+  v <- make_mock_deconv_vista(include_sample_names = TRUE)
+
+  out <- get_celltype_heatmap(
+    v,
+    top_n = 2,
+    cluster_columns = FALSE,
+    return_type = "both"
+  )
+
+  expect_type(out, "list")
+  expect_s3_class(out$plot, "ggplot")
+  expect_true(is.matrix(out$matrix))
+  expect_equal(nrow(out$matrix), 2)
+  expect_equal(colnames(out$matrix), colnames(norm_counts(v)))
+
+  mat_only <- get_celltype_heatmap(v, top_n = 2, return_type = "matrix")
+  expect_true(is.matrix(mat_only))
+  expect_equal(nrow(mat_only), 2)
+})

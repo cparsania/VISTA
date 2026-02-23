@@ -41,6 +41,8 @@
 #'   Default: \code{"Dark 2"}.
 #' @param comparison_palette Qualitative palette name used to assign colors per
 #'   comparison (stored in \code{metadata(v)$comparison$colors}). Defaults to \code{"Dark 3"}.
+#' @param validate Logical; if \code{TRUE} (default), run full \code{validate_vista()}
+#'   checks before returning the object.
 #'
 #' @return A \code{VISTA} object:
 #'   \itemize{
@@ -56,7 +58,7 @@
 #' When \code{method = "both"}, method-specific and consensus DE tables are stored in
 #' \code{metadata(v)$de_results_by_method} and \code{metadata(v)$de_summary_by_method},
 #' and the active source is tracked in \code{metadata(v)$de_active_source}.
-#' @seealso \link{vista}, \link{VISTA-class}, \link[colorspace]{qualitative_hcl}
+#' @seealso \link{as_vista}, \link{VISTA-class}, \link[colorspace]{qualitative_hcl}
 #'
 #' @examples
 #' # Load example data
@@ -126,7 +128,8 @@ create_vista <- function(counts,
                          consensus_log2fc = c("mean", "deseq2", "edger"),
                          result_source = NULL,
                          group_palette = "Dark 2",
-                         comparison_palette = "Dark 3") {
+                         comparison_palette = "Dark 3",
+                         validate = TRUE) {
 
   method <- match.arg(method)
   p_value_type <- match.arg(p_value_type, c("padj", "pvalue"))
@@ -295,7 +298,7 @@ create_vista <- function(counts,
   active_comparisons <- comparisons_by_source[[result_source]]
   active_deg_summary <- deg_summary_by_source[[result_source]]
 
-  # --- Align core pieces before calling vista() ---
+  # --- Align core pieces before calling .vista() ---
 
   # 1) sample_info: ensure rownames and order == colnames(norm_counts)
   si <- as.data.frame(de_results_base$sample_info, stringsAsFactors = FALSE)
@@ -331,7 +334,7 @@ create_vista <- function(counts,
   rd <- rd[ref_rn, , drop = FALSE]
 
   # --- Now it's safe to construct VISTA ---
-  v <- vista(
+  v <- .vista(
     norm_counts   = de_results_base$norm_counts,
     sample_info   = si,
     row_data      = rd,
@@ -351,7 +354,8 @@ create_vista <- function(counts,
       active_source = result_source
     ),
     group_column  = group_column,
-    group_palette = group_palette
+    group_palette = group_palette,
+    validate      = FALSE
   )
 
   meta <- S4Vectors::metadata(v)
@@ -386,6 +390,10 @@ create_vista <- function(counts,
         warning(sprintf("Rownames mismatch in metadata(v)$de_results[['%s']].", nm))
       }
     }
+  }
+
+  if (isTRUE(validate)) {
+    validate_vista(v, level = "full", error = TRUE)
   }
 
   v

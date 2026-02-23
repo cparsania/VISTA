@@ -23,7 +23,8 @@ create_vista(
   consensus_log2fc = c("mean", "deseq2", "edger"),
   result_source = NULL,
   group_palette = "Dark 2",
-  comparison_palette = "Dark 3"
+  comparison_palette = "Dark 3",
+  validate = TRUE
 )
 }
 \arguments{
@@ -75,6 +76,9 @@ Default: \code{"Dark 2"}.}
 
 \item{comparison_palette}{Qualitative palette name used to assign colors per
 comparison (stored in \code{metadata(v)$comparison$colors}). Defaults to \code{"Dark 3"}.}
+
+\item{validate}{Logical; if \code{TRUE} (default), run full \code{validate_vista()}
+checks before returning the object.}
 }
 \value{
 A \code{VISTA} object:
@@ -150,5 +154,5 @@ vista_multi <- create_vista(
 
 }
 \seealso{
-\link{vista}, \link{VISTA-class}, \link[colorspace]{qualitative_hcl}
+\link{as_vista}, \link{VISTA-class}, \link[colorspace]{qualitative_hcl}
 }

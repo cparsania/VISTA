@@ -14,7 +14,8 @@ reference:
     contents:
       - VISTA-class
       - create_vista
-      - vista
+      - as_vista
+      - validate_vista
       - run_deseq_analysis
       - run_edger_analysis
       - set_rowdata
@@ -109,12 +110,22 @@ reference:
       - run_cell_deconvolution
       - get_cell_fractions
       - plot_celltype_barplot
+      - get_celltype_group_dotplot
+      - get_celltype_heatmap
 
   - title: "Reporting"
     desc: >
       Generate automated analysis reports.
     contents:
       - run_vista_report
+
+  - title: "Exporting"
+    desc: >
+      Save publication-ready plots, tables, and reproducible asset bundles.
+    contents:
+      - save_vista_plot
+      - save_vista_data
+      - export_vista_assets
 
   - title: "Example Data"
     desc: >

@@ -82,8 +82,10 @@
 #' @importFrom stats setNames
 #'
 #' @name run_deseq_analysis
-#' @rdname run_deseq_analysis
-#' @export
+NULL
+
+#' @keywords internal
+#' @noRd
 .coerce_design_formula <- function(design_formula) {
   if (is.null(design_formula)) return(NULL)
   if (inherits(design_formula, "formula")) return(design_formula)
@@ -307,6 +309,8 @@
   contrast
 }
 
+#' @rdname run_deseq_analysis
+#' @export
 run_deseq_analysis <- function(
     counts,
     sample_info,
@@ -1741,5 +1745,6 @@ set_rowdata <- function(x,
     SummarizedExperiment::rowData(x) <- rd_new
   }
 
+  validate_vista(x, level = "core", error = TRUE)
   x
 }

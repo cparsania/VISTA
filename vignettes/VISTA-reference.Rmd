@@ -47,21 +47,32 @@ Arguments:
 - `result_source`: Active DE source (`"consensus"`, `"deseq2"`, `"edger"`).
 - `group_palette`: Colorspace palette name for group colors.
 - `comparison_palette`: Palette name for comparison colors.
+- `validate`: Run full object validation before return.
 
-## `vista()`
+## `as_vista()`
 
-Low‑level constructor for a pre‑normalized `SummarizedExperiment`.
+Advanced constructor for converting a pre-existing `SummarizedExperiment`.
 
 Arguments:
 
-- `norm_counts`: Normalized expression matrix.
-- `sample_info`: Sample metadata.
-- `row_data`: Feature metadata.
+- `se`: Input `SummarizedExperiment`.
+- `assay_name`: Assay to use as normalized expression matrix.
+- `group_column`: Grouping column name in `colData(se)`.
 - `comparisons`: Named list of DE tables.
 - `deg_summary`: Named list of summary tables.
 - `cutoffs`: Named list of thresholds.
-- `group_column`: Grouping column name.
 - `group_palette`: Group palette name.
+- `validate`: Run validation before returning.
+
+## `validate_vista()`
+
+Validation utility for structural and metadata checks.
+
+Arguments:
+
+- `x`: VISTA object.
+- `level`: `"core"` or `"full"`.
+- `error`: Abort on failure (`TRUE`) or return report (`FALSE`).
 
 # Accessors
 
@@ -206,7 +217,9 @@ Common label arguments: `display_id`, `display_from`, `display_orgdb`.
 
 - `run_cell_deconvolution(...)`: xCell2 workflow.
 - `get_cell_fractions(x)`: retrieve stored fractions.
-- `plot_celltype_barplot(...)`: barplot of cell fractions.
+- `plot_celltype_barplot(...)`: stacked composition plot with top-N selection/collapse options.
+- `get_celltype_group_dotplot(...)`: group-level summary (mean/median) with optional sample points.
+- `get_celltype_heatmap(...)`: sample-by-cell-type heatmap with transform/clustering controls.
 
 # Reporting
 

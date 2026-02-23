@@ -129,5 +129,5 @@ vista_both <- set_de_source(vista_both, "edger")
 
 }
 \seealso{
-\code{\link[=vista]{vista()}}, \code{\link[=run_deseq_analysis]{run_deseq_analysis()}}
+\code{\link[=create_vista]{create_vista()}}, \code{\link[=as_vista]{as_vista()}}, \code{\link[=run_deseq_analysis]{run_deseq_analysis()}}
 }

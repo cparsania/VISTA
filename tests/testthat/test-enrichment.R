@@ -137,15 +137,18 @@ test_that("get_go_enrichment validates ontology parameter", {
   vista <- make_small_vista()
   comps <- names(comparisons(vista))
 
-  # Should accept valid ontologies (though might error on orgdb)
-  expect_error(
-    get_go_enrichment(vista, sample_comparison = comps[1], ont = "BP"),
-    "orgdb|annotation"
+  # Valid ontologies should pass argument validation.
+  expect_no_error(
+    get_go_enrichment(vista, sample_comparison = comps[1], ont = "BP")
+  )
+  expect_no_error(
+    get_go_enrichment(vista, sample_comparison = comps[1], ont = "MF")
   )
 
+  # Invalid ontology should fail fast.
   expect_error(
-    get_go_enrichment(vista, sample_comparison = comps[1], ont = "MF"),
-    "orgdb|annotation"
+    get_go_enrichment(vista, sample_comparison = comps[1], ont = "INVALID"),
+    "one of.*BP.*MF.*CC"
   )
 })
 

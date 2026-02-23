@@ -2,3 +2,12 @@
 ^renv\.lock$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.github$
+^\.claude$
+^_pkgdown\.yml$
+^pkgdown$
+^docs$
+^data-raw$
+^tmp_render$
+^GITHUB_ENTRY\.md$
+^VISTA-deconvolution\.R$

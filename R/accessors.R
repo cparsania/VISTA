@@ -87,7 +87,7 @@
 #' }
 #'
 #' @name VISTA-accessors
-#' @seealso [vista()], [run_deseq_analysis()]
+#' @seealso [create_vista()], [as_vista()], [run_deseq_analysis()]
 #' @importFrom SummarizedExperiment assay colData rowData
 #' @import methods
 NULL
@@ -274,6 +274,7 @@ set_vista_group_colors <- function(object, color_map) {
   md$group <- group_info
   S4Vectors::metadata(object) <- md
 
+  validate_vista(object, level = "core", error = TRUE)
   object
 }
 
@@ -315,6 +316,7 @@ set_vista_comparison_colors <- function(object, color_map) {
   md$comparison <- comp_info
   S4Vectors::metadata(object) <- md
 
+  validate_vista(object, level = "core", error = TRUE)
   object
 }
 
@@ -344,5 +346,6 @@ set_de_source <- function(object, source = c("deseq2", "edger", "consensus")) {
     md$de_cutoffs$active_source <- source
   }
   S4Vectors::metadata(object) <- md
+  validate_vista(object, level = "full", error = TRUE)
   object
 }
