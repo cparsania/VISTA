@@ -137,13 +137,30 @@ test_that("get_go_enrichment validates ontology parameter", {
   vista <- make_small_vista()
   comps <- names(comparisons(vista))
 
-  # Valid ontologies should pass argument validation.
-  expect_no_error(
-    get_go_enrichment(vista, sample_comparison = comps[1], ont = "BP")
+  # Valid ontologies should pass ontology argument validation.
+  # Depending on environment this may continue or fail later (e.g., missing orgdb),
+  # but it should not fail because ont is invalid.
+  bp_err <- tryCatch(
+    {
+      get_go_enrichment(vista, sample_comparison = comps[1], ont = "BP")
+      NULL
+    },
+    error = function(e) e
   )
-  expect_no_error(
-    get_go_enrichment(vista, sample_comparison = comps[1], ont = "MF")
+  if (!is.null(bp_err)) {
+    expect_false(grepl("one of.*BP.*MF.*CC|\\bont\\b", conditionMessage(bp_err), ignore.case = TRUE))
+  }
+
+  mf_err <- tryCatch(
+    {
+      get_go_enrichment(vista, sample_comparison = comps[1], ont = "MF")
+      NULL
+    },
+    error = function(e) e
   )
+  if (!is.null(mf_err)) {
+    expect_false(grepl("one of.*BP.*MF.*CC|\\bont\\b", conditionMessage(mf_err), ignore.case = TRUE))
+  }
 
   # Invalid ontology should fail fast.
   expect_error(
