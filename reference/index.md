@@ -7,8 +7,9 @@ Create and manage VISTA objects for differential expression analysis.
 - [`VISTA-class`](VISTA-class.md) : VISTA S4 Class Definition
 - [`create_vista()`](create_vista.md) : Create a VISTA Object with
   Internal DE Analysis
-- [`vista()`](vista.md) : VISTA constructor
-- [`.coerce_design_formula()`](run_deseq_analysis.md)
+- [`as_vista()`](as_vista.md) : Coerce SummarizedExperiment to VISTA
+- [`validate_vista()`](validate_vista.md) : Validate a VISTA object
+- [`run_deseq_analysis()`](run_deseq_analysis.md)
   [`run_edger_analysis()`](run_deseq_analysis.md) : Run Differential
   Expression Analysis with DESeq2 or edgeR
 - [`set_rowdata()`](set_rowdata.md) : Set or append rowData annotations
@@ -149,8 +150,12 @@ Estimate and visualize cell-type composition from bulk RNA-seq.
   Deconvolution on Bulk RNA-seq from VISTA Object
 - [`get_cell_fractions()`](get_cell_fractions.md) : Retrieve stored cell
   fraction estimates
-- [`plot_celltype_barplot()`](plot_celltype_barplot.md) : Plot cell type
-  proportions
+- [`plot_celltype_barplot()`](plot_celltype_barplot.md) : Plot cell-type
+  composition as stacked bars
+- [`get_celltype_group_dotplot()`](get_celltype_group_dotplot.md) : Plot
+  group-level deconvolution scores as dot plot
+- [`get_celltype_heatmap()`](get_celltype_heatmap.md) : Plot cell-type
+  deconvolution heatmap
 
 ## Reporting
 
@@ -158,6 +163,17 @@ Generate automated analysis reports.
 
 - [`run_vista_report()`](run_vista_report.md) : Generate a
   publication-ready VISTA workflow report
+
+## Exporting
+
+Save publication-ready plots, tables, and reproducible asset bundles.
+
+- [`save_vista_plot()`](save_vista_plot.md) : Save a VISTA plot object
+  to disk
+- [`save_vista_data()`](save_vista_data.md) : Save VISTA tabular outputs
+  to disk
+- [`export_vista_assets()`](export_vista_assets.md) : Export a complete
+  VISTA asset bundle
 
 ## Example Data
 

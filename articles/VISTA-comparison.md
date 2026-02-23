@@ -80,7 +80,7 @@ vista_deseq <- create_vista(
 vista_deseq
 #> class: VISTA 
 #> dim: 18086 8 
-#> metadata(11): de_results de_summary ... design comparison
+#> metadata(12): de_results de_summary ... design comparison
 #> assays(1): norm_counts
 #> rownames(18086): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
 #>   ENSG00000273488
@@ -106,7 +106,7 @@ vista_edger <- create_vista(
 vista_edger
 #> class: VISTA 
 #> dim: 15557 8 
-#> metadata(11): de_results de_summary ... design comparison
+#> metadata(12): de_results de_summary ... design comparison
 #> assays(1): norm_counts
 #> rownames(15557): ENSG00000000003 ENSG00000000419 ... ENSG00000273382
 #>   ENSG00000273486
@@ -779,7 +779,7 @@ sessionInfo()
 #> [123] rlang_1.1.7                 crayon_1.5.3               
 #> [125] ggsignif_0.6.4              labeling_0.4.3             
 #> [127] plyr_1.8.9                  fs_1.6.6                   
-#> [129] ggiraph_0.9.5               stringi_1.8.7              
+#> [129] ggiraph_0.9.6               stringi_1.8.7              
 #> [131] viridisLite_0.4.3           BiocParallel_1.44.0        
 #> [133] assertthat_0.2.1            babelgene_22.9             
 #> [135] Biostrings_2.78.0           lazyeval_0.2.2             

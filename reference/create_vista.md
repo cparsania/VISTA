@@ -36,7 +36,8 @@ create_vista(
   consensus_log2fc = c("mean", "deseq2", "edger"),
   result_source = NULL,
   group_palette = "Dark 2",
-  comparison_palette = "Dark 3"
+  comparison_palette = "Dark 3",
+  validate = TRUE
 )
 ```
 
@@ -135,6 +136,12 @@ create_vista(
   Qualitative palette name used to assign colors per comparison (stored
   in `metadata(v)$comparison$colors`). Defaults to `"Dark 3"`.
 
+- validate:
+
+  Logical; if `TRUE` (default), run full
+  [`validate_vista()`](validate_vista.md) checks before returning the
+  object.
+
 ## Value
 
 A `VISTA` object:
@@ -159,7 +166,7 @@ have rownames identical to the final `norm_counts` rownames. When
 
 ## See also
 
-[vista](vista.md), [VISTA-class](VISTA-class.md),
+[as_vista](as_vista.md), [VISTA-class](VISTA-class.md),
 [qualitative_hcl](https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html)
 
 ## Examples
@@ -191,7 +198,7 @@ vista <- create_vista(
 vista
 #> class: SummarizedExperiment 
 #> dim: 85 6 
-#> metadata(11): de_results de_summary ... design comparison
+#> metadata(12): de_results de_summary ... design comparison
 #> assays(1): norm_counts
 #> rownames(85): ENSG00000000003 ENSG00000000419 ... ENSG00000005469
 #>   ENSG00000005471

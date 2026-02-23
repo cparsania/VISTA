@@ -23,6 +23,7 @@
     <li><a class="dropdown-item" href="../articles/VISTA-code-economy.html">Code Economy: VISTA vs. Standard R Workflows</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-colors.html">Color and Palette Design with VISTA</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-comparison.html">Comparing DESeq2 and edgeR with VISTA</a></li>
+    <li><a class="dropdown-item" href="../articles/VISTA-deconvolution.html">Cell-Type Deconvolution with VISTA (airway)</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-reference.html">VISTA Function Reference</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -63,14 +64,21 @@
 
         <dt>
 
-          <code><a href="vista.html">vista()</a></code>
+          <code><a href="as_vista.html">as_vista()</a></code>
 
         </dt>
-        <dd>VISTA constructor</dd>
+        <dd>Coerce SummarizedExperiment to VISTA</dd>
 
         <dt>
 
-          <code><a href="run_deseq_analysis.html">.coerce_design_formula()</a></code> <code><a href="run_deseq_analysis.html">run_edger_analysis()</a></code>
+          <code><a href="validate_vista.html">validate_vista()</a></code>
+
+        </dt>
+        <dd>Validate a VISTA object</dd>
+
+        <dt>
+
+          <code><a href="run_deseq_analysis.html">run_deseq_analysis()</a></code> <code><a href="run_deseq_analysis.html">run_edger_analysis()</a></code>
 
         </dt>
         <dd>Run Differential Expression Analysis with DESeq2 or edgeR</dd>
@@ -486,7 +494,21 @@
           <code><a href="plot_celltype_barplot.html">plot_celltype_barplot()</a></code>
 
         </dt>
-        <dd>Plot cell type proportions</dd>
+        <dd>Plot cell-type composition as stacked bars</dd>
+
+        <dt>
+
+          <code><a href="get_celltype_group_dotplot.html">get_celltype_group_dotplot()</a></code>
+
+        </dt>
+        <dd>Plot group-level deconvolution scores as dot plot</dd>
+
+        <dt>
+
+          <code><a href="get_celltype_heatmap.html">get_celltype_heatmap()</a></code>
+
+        </dt>
+        <dd>Plot cell-type deconvolution heatmap</dd>
       </dl></div><div class="section level2">
       <h2 id="reporting">Reporting<a class="anchor" aria-label="anchor" href="#reporting"></a></h2>
 
@@ -503,6 +525,36 @@
 
         </dt>
         <dd>Generate a publication-ready VISTA workflow report</dd>
+      </dl></div><div class="section level2">
+      <h2 id="exporting">Exporting<a class="anchor" aria-label="anchor" href="#exporting"></a></h2>
+
+      <div class="section-desc"><p>Save publication-ready plots, tables, and reproducible asset bundles.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="save_vista_plot.html">save_vista_plot()</a></code>
+
+        </dt>
+        <dd>Save a VISTA plot object to disk</dd>
+
+        <dt>
+
+          <code><a href="save_vista_data.html">save_vista_data()</a></code>
+
+        </dt>
+        <dd>Save VISTA tabular outputs to disk</dd>
+
+        <dt>
+
+          <code><a href="export_vista_assets.html">export_vista_assets()</a></code>
+
+        </dt>
+        <dd>Export a complete VISTA asset bundle</dd>
       </dl></div><div class="section level2">
       <h2 id="example-data">Example Data<a class="anchor" aria-label="anchor" href="#example-data"></a></h2>
 

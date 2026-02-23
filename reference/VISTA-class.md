@@ -20,9 +20,17 @@ Core elements stored in `metadata(v)`:
 
 - `$provenance`: list with constructor version, timestamp, session info.
 
+- `$vista_schema_version`: metadata schema tag used for compatibility
+  checks.
+
 Feature-level annotations live in `rowData(v)`, sample metadata in
 `colData(v)`, and normalized counts (and any additional assays) in
 `assay(v, "norm_counts")` by default. Use
-[`create_vista()`](create_vista.md) for standard construction from
-counts + sample_info; use [`vista()`](vista.md) for low-level
-instantiation when you already have normalized assays/metadata.
+[`create_vista()`](create_vista.md) as the primary end-user constructor.
+Advanced users can convert an existing `SummarizedExperiment` with
+[`as_vista()`](as_vista.md).
+
+## See also
+
+[`create_vista`](create_vista.md), [`as_vista`](as_vista.md),
+[`validate_vista`](validate_vista.md)

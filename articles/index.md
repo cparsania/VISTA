@@ -7,4 +7,5 @@
 - [Code Economy: VISTA vs. Standard R Workflows](VISTA-code-economy.md):
 - [Color and Palette Design with VISTA](VISTA-colors.md):
 - [Comparing DESeq2 and edgeR with VISTA](VISTA-comparison.md):
+- [Cell-Type Deconvolution with VISTA (airway)](VISTA-deconvolution.md):
 - [VISTA Function Reference](VISTA-reference.md):

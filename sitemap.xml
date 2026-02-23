@@ -6,6 +6,7 @@
 <url><loc>/articles/VISTA-code-economy.html</loc></url>
 <url><loc>/articles/VISTA-colors.html</loc></url>
 <url><loc>/articles/VISTA-comparison.html</loc></url>
+<url><loc>/articles/VISTA-deconvolution.html</loc></url>
 <url><loc>/articles/VISTA-reference.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
 <url><loc>/authors.html</loc></url>
@@ -13,6 +14,7 @@
 <url><loc>/news/index.html</loc></url>
 <url><loc>/reference/VISTA-accessors.html</loc></url>
 <url><loc>/reference/VISTA-class.html</loc></url>
+<url><loc>/reference/as_vista.html</loc></url>
 <url><loc>/reference/count_data.html</loc></url>
 <url><loc>/reference/create_vista.html</loc></url>
 <url><loc>/reference/dot-EnhancedVolcano2.html</loc></url>
@@ -30,7 +32,10 @@
 <url><loc>/reference/dot-run_deseq_comparisons.html</loc></url>
 <url><loc>/reference/dot-tidy_de_results.html</loc></url>
 <url><loc>/reference/enrichMsigDB.html</loc></url>
+<url><loc>/reference/export_vista_assets.html</loc></url>
 <url><loc>/reference/get_cell_fractions.html</loc></url>
+<url><loc>/reference/get_celltype_group_dotplot.html</loc></url>
+<url><loc>/reference/get_celltype_heatmap.html</loc></url>
 <url><loc>/reference/get_chromosome_plot.html</loc></url>
 <url><loc>/reference/get_corr_heatmap.html</loc></url>
 <url><loc>/reference/get_deg_count_barplot.html</loc></url>
@@ -79,10 +84,12 @@
 <url><loc>/reference/run_deseq_analysis.html</loc></url>
 <url><loc>/reference/run_vista_report.html</loc></url>
 <url><loc>/reference/sample_metadata.html</loc></url>
+<url><loc>/reference/save_vista_data.html</loc></url>
+<url><loc>/reference/save_vista_plot.html</loc></url>
 <url><loc>/reference/set_de_source.html</loc></url>
 <url><loc>/reference/set_rowdata.html</loc></url>
 <url><loc>/reference/set_vista_comparison_colors.html</loc></url>
 <url><loc>/reference/set_vista_group_colors.html</loc></url>
-<url><loc>/reference/vista.html</loc></url>
+<url><loc>/reference/validate_vista.html</loc></url>
 </urlset>
 

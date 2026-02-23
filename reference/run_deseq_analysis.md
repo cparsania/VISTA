@@ -13,7 +13,21 @@ summaries.
 ## Usage
 
 ``` r
-.coerce_design_formula(design_formula)
+run_deseq_analysis(
+  counts,
+  sample_info,
+  column_geneid,
+  group_column,
+  group_numerator,
+  group_denominator,
+  covariates = NULL,
+  design_formula = NULL,
+  min_counts = 10,
+  min_replicates = 1,
+  log2fc_cutoff = 1,
+  pval_cutoff = 0.05,
+  p_value_type = "padj"
+)
 
 run_edger_analysis(
   counts,
@@ -33,12 +47,6 @@ run_edger_analysis(
 ```
 
 ## Arguments
-
-- design_formula:
-
-  Optional model formula (or formula string). When provided, it
-  overrides automatic design construction from `group_column` +
-  `covariates`. Must include `group_column`.
 
 - counts:
 
@@ -73,6 +81,12 @@ run_edger_analysis(
 
   Optional character vector of additional sample_info columns to adjust
   for.
+
+- design_formula:
+
+  Optional model formula (or formula string). When provided, it
+  overrides automatic design construction from `group_column` +
+  `covariates`. Must include `group_column`.
 
 - min_counts:
 

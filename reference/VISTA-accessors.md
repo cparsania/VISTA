@@ -92,7 +92,8 @@ The content of the respective slot or processed data:
 
 ## See also
 
-[`vista()`](vista.md), [`run_deseq_analysis()`](run_deseq_analysis.md)
+[`create_vista()`](create_vista.md), [`as_vista()`](as_vista.md),
+[`run_deseq_analysis()`](run_deseq_analysis.md)
 
 ## Examples
 

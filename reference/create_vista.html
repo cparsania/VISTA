@@ -41,6 +41,7 @@ $group: list with column, palette, colors
     <li><a class="dropdown-item" href="../articles/VISTA-code-economy.html">Code Economy: VISTA vs. Standard R Workflows</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-colors.html">Color and Palette Design with VISTA</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-comparison.html">Comparing DESeq2 and edgeR with VISTA</a></li>
+    <li><a class="dropdown-item" href="../articles/VISTA-deconvolution.html">Cell-Type Deconvolution with VISTA (airway)</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-reference.html">VISTA Function Reference</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -88,7 +89,8 @@ all DE outputs and configuration live in <code>metadata(vista)</code>:</p><ul><l
 <span>  consensus_log2fc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"deseq2"</span>, <span class="st">"edger"</span><span class="op">)</span>,</span>
 <span>  result_source <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_palette <span class="op">=</span> <span class="st">"Dark 2"</span>,</span>
-<span>  comparison_palette <span class="op">=</span> <span class="st">"Dark 3"</span></span>
+<span>  comparison_palette <span class="op">=</span> <span class="st">"Dark 3"</span>,</span>
+<span>  validate <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -182,6 +184,11 @@ Default: <code>"Dark 2"</code>.</p></dd>
 <dd><p>Qualitative palette name used to assign colors per
 comparison (stored in <code>metadata(v)$comparison$colors</code>). Defaults to <code>"Dark 3"</code>.</p></dd>
 
+
+<dt id="arg-validate">validate<a class="anchor" aria-label="anchor" href="#arg-validate"></a></dt>
+<dd><p>Logical; if <code>TRUE</code> (default), run full <code><a href="validate_vista.html">validate_vista()</a></code>
+checks before returning the object.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -200,7 +207,7 @@ and the active source is tracked in <code>metadata(v)$de_active_source</code>.</
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><a href="vista.html">vista</a>, <a href="VISTA-class.html">VISTA-class</a>, <a href="https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html" class="external-link">qualitative_hcl</a></p></div>
+    <div class="dont-index"><p><a href="as_vista.html">as_vista</a>, <a href="VISTA-class.html">VISTA-class</a>, <a href="https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html" class="external-link">qualitative_hcl</a></p></div>
     </div>
 
     <div class="section level2">
@@ -231,7 +238,7 @@ and the active source is tracked in <code>metadata(v)$de_active_source</code>.</
 <span class="r-in"><span><span class="va">vista</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> class: SummarizedExperiment </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> dim: 85 6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(11): de_results de_summary ... design comparison</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(12): de_results de_summary ... design comparison</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> assays(1): norm_counts</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rownames(85): ENSG00000000003 ENSG00000000419 ... ENSG00000005469</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ENSG00000005471</span>

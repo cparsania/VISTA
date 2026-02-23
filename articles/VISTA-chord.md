@@ -104,7 +104,7 @@ vista <- set_rowdata(
 vista
 #> class: VISTA 
 #> dim: 17199 8 
-#> metadata(11): de_results de_summary ... design comparison
+#> metadata(12): de_results de_summary ... design comparison
 #> assays(1): norm_counts
 #> rownames(17199): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
 #>   ENSG00000273488
@@ -669,7 +669,7 @@ sessionInfo()
 #>  [82] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
 #>  [85] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
 #>  [88] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          
-#>  [91] bookdown_0.46           fgsea_1.36.2            clue_0.3-66            
+#>  [91] bookdown_0.46           fgsea_1.36.2            clue_0.3-67            
 #>  [94] scales_1.4.0            png_0.1-8               ggfun_0.2.0            
 #>  [97] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
 #> [100] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
@@ -680,7 +680,7 @@ sessionInfo()
 #> [115] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         
 #> [118] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
 #> [121] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
-#> [124] fs_1.6.6                ggiraph_0.9.5           stringi_1.8.7          
+#> [124] fs_1.6.6                ggiraph_0.9.6           stringi_1.8.7          
 #> [127] BiocParallel_1.44.0     assertthat_0.2.1        babelgene_22.9         
 #> [130] Biostrings_2.78.0       lazyeval_0.2.2          GOSemSim_2.36.0        
 #> [133] fontquiver_0.2.1        Matrix_1.7-4            patchwork_1.3.2        

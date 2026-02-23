@@ -46,6 +46,7 @@
     <li><a class="dropdown-item" href="articles/VISTA-code-economy.html">Code Economy: VISTA vs. Standard R Workflows</a></li>
     <li><a class="dropdown-item" href="articles/VISTA-colors.html">Color and Palette Design with VISTA</a></li>
     <li><a class="dropdown-item" href="articles/VISTA-comparison.html">Comparing DESeq2 and edgeR with VISTA</a></li>
+    <li><a class="dropdown-item" href="articles/VISTA-deconvolution.html">Cell-Type Deconvolution with VISTA (airway)</a></li>
     <li><a class="dropdown-item" href="articles/VISTA-reference.html">VISTA Function Reference</a></li>
   </ul>
 </li>
@@ -117,6 +118,9 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">VISTA</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Primary constructor for end users:</span></span>
+<span><span class="co"># use create_vista() for standard workflows.</span></span>
+<span></span>
 <span><span class="co"># Load your count matrix and sample metadata</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"count_data"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sample_metadata"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span>
@@ -136,6 +140,10 @@
 <span>  pval_cutoff <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"deseq2"</span>  <span class="co"># or "edger"</span></span>
 <span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Advanced users can coerce an existing SummarizedExperiment:</span></span>
+<span><span class="co"># vista_from_se &lt;- as_vista(se, group_column = "cond_long")</span></span>
+<span><span class="co"># validate_vista(vista_from_se, level = "full")</span></span>
 <span></span>
 <span><span class="co"># Explore results</span></span>
 <span><span class="va">vista</span></span>

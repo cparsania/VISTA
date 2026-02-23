@@ -52,6 +52,9 @@ pak::pak("cparsania/VISTA")
 ``` r
 library(VISTA)
 
+# Primary constructor for end users:
+# use create_vista() for standard workflows.
+
 # Load your count matrix and sample metadata
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
@@ -71,6 +74,10 @@ vista <- create_vista(
   pval_cutoff = 0.05,
   method = "deseq2"  # or "edger"
 )
+
+# Advanced users can coerce an existing SummarizedExperiment:
+# vista_from_se <- as_vista(se, group_column = "cond_long")
+# validate_vista(vista_from_se, level = "full")
 
 # Explore results
 vista

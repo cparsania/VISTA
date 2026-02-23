@@ -194,7 +194,7 @@ vista <- create_vista(
 vista
 #> class: VISTA 
 #> dim: 17199 8 
-#> metadata(11): de_results de_summary ... design comparison
+#> metadata(12): de_results de_summary ... design comparison
 #> assays(1): norm_counts
 #> rownames(17199): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
 #>   ENSG00000273488
@@ -209,6 +209,28 @@ The VISTA object stores:
 - **Sample metadata** in `colData`
 - **Gene annotations** in `rowData`
 - **DE results** in `metadata`
+
+### Validate object integrity
+
+[`create_vista()`](../reference/create_vista.md) runs validation by
+default (`validate = TRUE`). You can also run it explicitly:
+
+``` r
+validate_vista(vista, level = "full")
+```
+
+For advanced users importing a pre-built `SummarizedExperiment`, use
+[`as_vista()`](../reference/as_vista.md) and then validate:
+
+``` r
+se <- SummarizedExperiment::SummarizedExperiment(
+  assays = list(norm_counts = norm_counts(vista)),
+  colData = S4Vectors::DataFrame(sample_info(vista), row.names = sample_info(vista)$sample_names),
+  rowData = S4Vectors::DataFrame(row_data(vista), row.names = rownames(norm_counts(vista)))
+)
+vista2 <- as_vista(se, group_column = "treatment")
+validate_vista(vista2, level = "full")
+```
 
 ### Alternative: Using edgeR backend
 
@@ -1598,27 +1620,27 @@ if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
   head(kegg_up$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
 }
 #>                                                   Description       pvalue
-#> hsa04820                         Cytoskeleton in muscle cells 7.012486e-07
-#> hsa04512                             ECM-receptor interaction 1.293399e-04
-#> hsa00350                                  Tyrosine metabolism 1.304751e-04
-#> hsa04923                Regulation of lipolysis in adipocytes 2.723027e-04
-#> hsa04978                                   Mineral absorption 3.356814e-04
-#> hsa04518                                   Integrin signaling 5.256878e-04
-#> hsa04310                                Wnt signaling pathway 1.441337e-03
-#> hsa04933 AGE-RAGE signaling pathway in diabetic complications 1.567203e-03
-#> hsa04977                     Vitamin digestion and absorption 2.233418e-03
-#> hsa04068                               FoxO signaling pathway 2.435698e-03
+#> hsa04820                         Cytoskeleton in muscle cells 6.990709e-07
+#> hsa04512                             ECM-receptor interaction 1.291374e-04
+#> hsa00350                                  Tyrosine metabolism 1.303269e-04
+#> hsa04923                Regulation of lipolysis in adipocytes 2.719590e-04
+#> hsa04978                                   Mineral absorption 3.352603e-04
+#> hsa04518                                   Integrin signaling 5.247787e-04
+#> hsa04310                                Wnt signaling pathway 1.438957e-03
+#> hsa04933 AGE-RAGE signaling pathway in diabetic complications 1.565149e-03
+#> hsa04977                     Vitamin digestion and absorption 2.231726e-03
+#> hsa04068                               FoxO signaling pathway 2.432300e-03
 #>              p.adjust Count
-#> hsa04820 0.0001886359    19
-#> hsa04512 0.0116992644     9
-#> hsa00350 0.0116992644     6
-#> hsa04923 0.0180596595     7
-#> hsa04978 0.0180596595     7
-#> hsa04518 0.0235683369    11
-#> hsa04310 0.0526971976    11
-#> hsa04933 0.0526971976     8
-#> hsa04977 0.0655202690     4
-#> hsa04068 0.0655202690     9
+#> hsa04820 0.0001880501    19
+#> hsa04512 0.0116859744     9
+#> hsa00350 0.0116859744     6
+#> hsa04923 0.0180370047     7
+#> hsa04978 0.0180370047     7
+#> hsa04518 0.0235275801    11
+#> hsa04310 0.0526281515    11
+#> hsa04933 0.0526281515     8
+#> hsa04977 0.0654288617     4
+#> hsa04068 0.0654288617     9
 ```
 
 #### KEGG downregulated genes
@@ -1636,19 +1658,19 @@ if (!is.null(kegg_down$enrich) && nrow(kegg_down$enrich@result) > 0) {
   head(kegg_down$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
 }
 #>                                               Description       pvalue
-#> hsa04060           Cytokine-cytokine receptor interaction 9.213061e-07
-#> hsa04750 Inflammatory mediator regulation of TRP channels 7.815944e-06
-#> hsa04713                            Circadian entrainment 4.457795e-05
-#> hsa04360                                    Axon guidance 8.308429e-05
-#> hsa04926                        Relaxin signaling pathway 4.217086e-04
-#> hsa04024                           cAMP signaling pathway 5.602527e-04
+#> hsa04060           Cytokine-cytokine receptor interaction 9.184579e-07
+#> hsa04750 Inflammatory mediator regulation of TRP channels 7.801789e-06
+#> hsa04713                            Circadian entrainment 4.450631e-05
+#> hsa04360                                    Axon guidance 8.292092e-05
+#> hsa04926                        Relaxin signaling pathway 4.210737e-04
+#> hsa04024                           cAMP signaling pathway 5.592246e-04
 #>              p.adjust Count
-#> hsa04060 0.0002533592    19
-#> hsa04750 0.0010746923    10
-#> hsa04713 0.0040863121     9
-#> hsa04360 0.0057120448    12
-#> hsa04926 0.0231939738     9
-#> hsa04024 0.0256782507    12
+#> hsa04060 0.0002525759    19
+#> hsa04750 0.0010727459    10
+#> hsa04713 0.0040797451     9
+#> hsa04360 0.0057008133    12
+#> hsa04926 0.0231590537     9
+#> hsa04024 0.0256311252    12
 ```
 
 #### KEGG Visualization
@@ -1942,7 +1964,7 @@ sessionInfo()
 #>  [91] ComplexHeatmap_2.26.1   S7_0.2.1                XVector_0.50.0         
 #>  [94] clusterProfiler_4.18.4  htmltools_0.5.9         fontBitstreamVera_0.1.1
 #>  [97] carData_3.0-6           bookdown_0.46           fgsea_1.36.2           
-#> [100] clue_0.3-66             scales_1.4.0            png_0.1-8              
+#> [100] clue_0.3-67             scales_1.4.0            png_0.1-8              
 #> [103] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         
 #> [106] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             
 #> [109] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          
@@ -1952,7 +1974,7 @@ sessionInfo()
 #> [121] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        
 #> [124] compiler_4.5.2          rlang_1.1.7             crayon_1.5.3           
 #> [127] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          
-#> [130] plyr_1.8.9              fs_1.6.6                ggiraph_0.9.5          
+#> [130] plyr_1.8.9              fs_1.6.6                ggiraph_0.9.6          
 #> [133] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    
 #> [136] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
 #> [139] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       

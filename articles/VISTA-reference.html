@@ -43,6 +43,7 @@
     <li><a class="dropdown-item" href="../articles/VISTA-code-economy.html">Code Economy: VISTA vs. Standard R Workflows</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-colors.html">Color and Palette Design with VISTA</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-comparison.html">Comparing DESeq2 and edgeR with VISTA</a></li>
+    <li><a class="dropdown-item" href="../articles/VISTA-deconvolution.html">Cell-Type Deconvolution with VISTA (airway)</a></li>
     <li><a class="dropdown-item" href="../articles/VISTA-reference.html">VISTA Function Reference</a></li>
   </ul>
 </li>
@@ -149,22 +150,27 @@ colors.</li>
 <li>
 <code>comparison_palette</code>: Palette name for comparison
 colors.</li>
+<li>
+<code>validate</code>: Run full object validation before
+return.</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="vista">
-<code>vista()</code><a class="anchor" aria-label="anchor" href="#vista"></a>
+<h3 id="as_vista">
+<code>as_vista()</code><a class="anchor" aria-label="anchor" href="#as_vista"></a>
 </h3>
-<p>Low‑level constructor for a pre‑normalized
+<p>Advanced constructor for converting a pre-existing
 <code>SummarizedExperiment</code>.</p>
 <p>Arguments:</p>
 <ul>
 <li>
-<code>norm_counts</code>: Normalized expression matrix.</li>
+<code>se</code>: Input <code>SummarizedExperiment</code>.</li>
 <li>
-<code>sample_info</code>: Sample metadata.</li>
+<code>assay_name</code>: Assay to use as normalized expression
+matrix.</li>
 <li>
-<code>row_data</code>: Feature metadata.</li>
+<code>group_column</code>: Grouping column name in
+<code>colData(se)</code>.</li>
 <li>
 <code>comparisons</code>: Named list of DE tables.</li>
 <li>
@@ -172,9 +178,25 @@ colors.</li>
 <li>
 <code>cutoffs</code>: Named list of thresholds.</li>
 <li>
-<code>group_column</code>: Grouping column name.</li>
-<li>
 <code>group_palette</code>: Group palette name.</li>
+<li>
+<code>validate</code>: Run validation before returning.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="validate_vista">
+<code>validate_vista()</code><a class="anchor" aria-label="anchor" href="#validate_vista"></a>
+</h3>
+<p>Validation utility for structural and metadata checks.</p>
+<p>Arguments:</p>
+<ul>
+<li>
+<code>x</code>: VISTA object.</li>
+<li>
+<code>level</code>: <code>"core"</code> or <code>"full"</code>.</li>
+<li>
+<code>error</code>: Abort on failure (<code>TRUE</code>) or return
+report (<code>FALSE</code>).</li>
 </ul>
 </div>
 </div>
@@ -495,8 +517,14 @@ gene–pathway relationships (requires circlize); supports
 <li>
 <code>get_cell_fractions(x)</code>: retrieve stored fractions.</li>
 <li>
-<code>plot_celltype_barplot(...)</code>: barplot of cell
-fractions.</li>
+<code>plot_celltype_barplot(...)</code>: stacked composition plot
+with top-N selection/collapse options.</li>
+<li>
+<code>get_celltype_group_dotplot(...)</code>: group-level summary
+(mean/median) with optional sample points.</li>
+<li>
+<code>get_celltype_heatmap(...)</code>: sample-by-cell-type heatmap
+with transform/clustering controls.</li>
 </ul>
 </div>
 <div class="section level2">
