@@ -27,6 +27,7 @@ get_expression_heatmap(
   kmeans_k = NULL,
   return_type = c("heatmap", "clusters", "both"),
   annotate_columns = FALSE,
+  cluster_by = NULL,
   column_anno_palette = "Dark 3",
   heatmap_name = NULL,
   display_id = NULL,
@@ -79,7 +80,12 @@ get_expression_heatmap(
 
 \item{return_type}{\code{"heatmap"}, \code{"clusters"}, or \code{"both"} selecting the returned object.}
 
-\item{annotate_columns}{Logical; add a column annotation bar showing group membership.}
+\item{annotate_columns}{Logical or character vector. \code{TRUE} adds one column
+annotation using \code{group_column}; a character vector adds multiple
+annotations from \code{sample_info}.}
+
+\item{cluster_by}{Optional annotation column used to split/cluster columns.
+Defaults to the first annotation column when \code{annotate_columns} is enabled.}
 
 \item{column_anno_palette}{Qualitative palette name used for the column annotation.}
 

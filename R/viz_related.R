@@ -3727,7 +3727,11 @@ plot_deg_alluvial <- function(vista_obj,
 #' @param show_heatmap_legend Logical; display the heatmap legend.
 #' @param kmeans_k Optional integer specifying the number of k-means clusters to compute for rows.
 #' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned object.
-#' @param annotate_columns Logical; add a column annotation bar showing group membership.
+#' @param annotate_columns Logical or character vector. `TRUE` adds one column
+#'   annotation using `group_column`; a character vector adds multiple
+#'   annotations from `sample_info`.
+#' @param cluster_by Optional annotation column used to split/cluster columns.
+#'   Defaults to the first annotation column when `annotate_columns` is enabled.
 #' @param column_anno_palette Qualitative palette name used for the column annotation.
 #' @param heatmap_name Optional legend title.
 #' @param display_id Optional ID/column name to use for row labels. If supplied
@@ -3758,6 +3762,7 @@ get_expression_heatmap <- function(vista_obj,
                                    kmeans_k = NULL,
                                    return_type = c("heatmap", "clusters", "both"),
                                    annotate_columns = FALSE,
+                                   cluster_by = NULL,
                                    column_anno_palette = "Dark 3",
                                    heatmap_name = NULL,
                                    display_id = NULL,
@@ -3786,6 +3791,27 @@ get_expression_heatmap <- function(vista_obj,
 
   if (!(group_col %in% names(sample_info))) {
     cli::cli_abort("{.arg group_column} '{group_col}' not found in {.arg sample_info}.")
+  }
+
+  annotate_cols <- character()
+  if (isTRUE(annotate_columns)) {
+    annotate_cols <- group_col
+  } else if (is.character(annotate_columns) && length(annotate_columns) > 0) {
+    annotate_cols <- unique(annotate_columns)
+  } else if (!isFALSE(annotate_columns)) {
+    cli::cli_abort("{.arg annotate_columns} must be TRUE, FALSE, or a non-empty character vector.")
+  }
+
+  if (length(annotate_cols) > 0) {
+    missing_anno_cols <- setdiff(annotate_cols, colnames(sample_info))
+    if (length(missing_anno_cols) > 0) {
+      cli::cli_abort(
+        c(
+          "Unknown columns requested in {.arg annotate_columns}.",
+          "x" = "Missing: {.val {missing_anno_cols}}"
+        )
+      )
+    }
   }
   missing_groups <- setdiff(samples, unique(sample_info[[group_col]]))
   if (length(missing_groups) > 0) {
@@ -3893,52 +3919,106 @@ get_expression_heatmap <- function(vista_obj,
   }
 
   col_anno <- NULL
-  if (annotate_columns) {
+  column_split <- NULL
+  if (length(annotate_cols) > 0) {
     if (summarise_replicates) {
-      col_df <- data.frame(
-        group = colnames(mat),
-        row.names = colnames(mat),
-        stringsAsFactors = FALSE
-      )
-      names(col_df) <- group_col
+      groups <- sample_info |>
+        dplyr::filter(sample %in% sample_ids) |>
+        dplyr::select(sample, dplyr::all_of(c(group_col, annotate_cols)))
+
+      inconsistent_labels <- character(0)
+
+      summarise_one <- function(x) {
+        ux <- unique(as.character(stats::na.omit(x)))
+        if (length(ux) == 0) return(NA_character_)
+        ux[1]
+      }
+
+      col_df <- lapply(annotate_cols, function(col_nm) {
+        vapply(colnames(mat), function(grp) {
+          vals <- groups[[col_nm]][groups[[group_col]] == grp]
+          if (length(unique(as.character(stats::na.omit(vals)))) > 1) {
+            inconsistent_labels <<- unique(c(inconsistent_labels, col_nm))
+          }
+          summarise_one(vals)
+        }, character(1))
+      })
+      if (length(inconsistent_labels) > 0) {
+        cli::cli_warn(
+          c(
+            "Some annotation columns vary within groups when {.arg summarise_replicates = TRUE}.",
+            "i" = "Using the first non-missing value per group for: {.val {inconsistent_labels}}"
+          )
+        )
+      }
+      names(col_df) <- annotate_cols
+      col_df <- as.data.frame(col_df, stringsAsFactors = FALSE)
+      rownames(col_df) <- colnames(mat)
     } else {
       col_df <- SummarizedExperiment::colData(vista_obj) |>
         as.data.frame() |>
         tibble::rownames_to_column("sample") |>
         dplyr::filter(sample %in% colnames(mat)) |>
-        dplyr::select(sample, !!group_col) |>
+        dplyr::select(sample, dplyr::all_of(annotate_cols)) |>
         tibble::column_to_rownames("sample")
     }
 
     # Ensure annotation rows align with the heatmap column order
     col_df <- col_df[colnames(mat), , drop = FALSE]
 
-    col_levels <- unique(as.character(col_df[[group_col]]))
-    col_df[[group_col]] <- factor(as.character(col_df[[group_col]]), levels = col_levels)
-    group_levels <- levels(col_df[[group_col]])
-    group_colors <- colorspace::qualitative_hcl(length(group_levels), palette = column_anno_palette)
-    names(group_colors) <- group_levels
+    anno_colors <- list()
+    for (col_nm in colnames(col_df)) {
+      col_levels <- unique(as.character(col_df[[col_nm]]))
+      col_df[[col_nm]] <- factor(as.character(col_df[[col_nm]]), levels = col_levels)
+      level_colors <- colorspace::qualitative_hcl(length(col_levels), palette = column_anno_palette)
+      names(level_colors) <- col_levels
+      anno_colors[[col_nm]] <- level_colors
+    }
+
+    split_col <- cluster_by %||% annotate_cols[[1]]
+    if (!split_col %in% colnames(col_df)) {
+      cli::cli_abort(
+        c(
+          "{.arg cluster_by} must be one of the active annotation columns.",
+          "x" = "Received: {.val {split_col}}",
+          "i" = "Available: {.val {colnames(col_df)}}"
+        )
+      )
+    }
+    column_split <- col_df[[split_col]]
 
     col_anno <- ComplexHeatmap::HeatmapAnnotation(
-      df = as.data.frame(col_df[, group_col, drop = FALSE]),
-      col = setNames(list(group_colors), group_col)
+      df = as.data.frame(col_df),
+      col = anno_colors
     )
+  } else if (!is.null(cluster_by)) {
+    cli::cli_abort("{.arg cluster_by} can only be used when {.arg annotate_columns} is enabled.")
   }
 
-  ht <- ComplexHeatmap::Heatmap(as.matrix(mat),
-                                name = heatmap_name,
-                                col = col_fun,
-                                cluster_rows = cluster_rows,
-                                show_row_dend = show_row_dend,
-                                show_row_names = show_row_names,
-                                row_names_gp = grid::gpar(fontsize = row_names_font_size),
-                                show_column_names = show_column_names,
-                                cluster_columns = cluster_columns,
-                                show_heatmap_legend = show_heatmap_legend,
-                                row_km = if (!is.null(kmeans_k)) kmeans_k else NULL,
-                                row_km_repeats = 1,
-                                top_annotation = col_anno,
-                                ...)
+  heatmap_args <- c(
+    list(
+      matrix = as.matrix(mat),
+      name = heatmap_name,
+      col = col_fun,
+      cluster_rows = cluster_rows,
+      show_row_dend = show_row_dend,
+      show_row_names = show_row_names,
+      row_names_gp = grid::gpar(fontsize = row_names_font_size),
+      show_column_names = show_column_names,
+      cluster_columns = cluster_columns,
+      show_heatmap_legend = show_heatmap_legend,
+      row_km = if (!is.null(kmeans_k)) kmeans_k else NULL,
+      row_km_repeats = 1,
+      top_annotation = col_anno
+    ),
+    list(...)
+  )
+
+  if (!is.null(column_split) && is.null(heatmap_args$column_split)) {
+    heatmap_args$column_split <- column_split
+  }
+
+  ht <- do.call(ComplexHeatmap::Heatmap, heatmap_args)
 
   if (!is.null(row_anno)) ht <-  ht + row_anno
 

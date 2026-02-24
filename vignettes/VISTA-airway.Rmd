@@ -67,19 +67,19 @@ This vignette demonstrates a complete RNA-seq differential expression workflow u
 
 VISTA streamlines RNA-seq analysis by:
 
-- **Unifying DE workflows**: Wraps DESeq2 and edgeR with consistent output
-- **Simplifying visualization**: 28+ publication-ready plotting functions
-- **Integrating enrichment**: Built-in MSigDB, GO, and KEGG analysis
-- **Ensuring reproducibility**: S4 class structure with comprehensive metadata
+-   **Unifying DE workflows**: Wraps DESeq2 and edgeR with consistent output
+-   **Simplifying visualization**: 28+ publication-ready plotting functions
+-   **Integrating enrichment**: Built-in MSigDB, GO, and KEGG analysis
+-   **Ensuring reproducibility**: S4 class structure with comprehensive metadata
 
 ## Dataset Overview
 
 The **airway** dataset (Himes et al. 2014) includes:
 
-- **Samples**: 8 human airway smooth muscle cell lines
-- **Treatment**: 4 treated with dexamethasone, 4 untreated
-- **Sequencing**: Illumina HiSeq 2000
-- **Features**: ~64,000 genes
+-   **Samples**: 8 human airway smooth muscle cell lines
+-   **Treatment**: 4 treated with dexamethasone, 4 untreated
+-   **Sequencing**: Illumina HiSeq 2000
+-   **Features**: \~64,000 genes
 
 **Reference**: Himes BE et al. (2014). "RNA-Seq transcriptome profiling identifies CRISPLD2 as a glucocorticoid responsive gene that modulates cytokine function in airway smooth muscle cells." *PLoS One* 9(6): e99625.
 
@@ -193,22 +193,20 @@ vista
 
 The VISTA object stores:
 
-- **Normalized counts** in `assays`
-- **Sample metadata** in `colData`
-- **Gene annotations** in `rowData`
-- **DE results** in `metadata`
+-   **Normalized counts** in `assays`
+-   **Sample metadata** in `colData`
+-   **Gene annotations** in `rowData`
+-   **DE results** in `metadata`
 
 ## Validate object integrity
 
-`create_vista()` runs validation by default (`validate = TRUE`). You can also
-run it explicitly:
+`create_vista()` runs validation by default (`validate = TRUE`). You can also run it explicitly:
 
 ```{r validate-vista}
 validate_vista(vista, level = "full")
 ```
 
-For advanced users importing a pre-built `SummarizedExperiment`, use
-`as_vista()` and then validate:
+For advanced users importing a pre-built `SummarizedExperiment`, use `as_vista()` and then validate:
 
 ```{r as-vista-example, eval=FALSE}
 se <- SummarizedExperiment::SummarizedExperiment(
@@ -644,6 +642,23 @@ get_expression_heatmap(
 )
 ```
 
+### Heatmap with multiple column annotations and `cluster_by`
+
+```{r heatmap-annotated-multi, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+# Use multiple sample-level columns in top annotation.
+# By default, columns are split by the first annotation column.
+get_expression_heatmap(
+  vista,
+  samples = levels(colData(vista)$treatment),
+  genes = top_degs,
+  show_row_names = FALSE,
+  display_id = "SYMBOL",
+  summarise_replicates = FALSE,
+  annotate_columns = c("treatment", "cell"),
+  cluster_by = "cell"
+)
+```
+
 ### Heatmap with summarized replicates
 
 ```{r heatmap-summarized, fig.width=7, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
@@ -936,23 +951,6 @@ if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
 }
 ```
 
-### C2 Canonical Pathways
-
-```{r msigdb-c2, eval=requireNamespace("msigdbr", quietly=TRUE)}
-msig_c2 <- get_msigdb_enrichment(
-  vista,
-  sample_comparison = comp_names[1],
-  regulation = "Up",
-  msigdb_category = "C2",  # Curated gene sets
-  species = "Homo sapiens",
-  from_type = "ENSEMBL"
-)
-
-if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
-  head(msig_c2$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
-}
-```
-
 ## Enrichment Visualizations
 
 ### VISTA dotplot (default)
@@ -993,9 +991,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 
 ### Chord diagram (gene--pathway relationships)
 
-The chord diagram reveals which **hub genes** drive multiple enriched pathways
-and how much redundancy exists across terms.  Chords can be coloured by fold-change
-when a VISTA object is supplied.
+The chord diagram reveals which **hub genes** drive multiple enriched pathways and how much redundancy exists across terms. Chords can be coloured by fold-change when a VISTA object is supplied.
 
 ```{r enrichment-chord-pathway, fig.width=8, fig.height=8, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("circlize", quietly=TRUE)}
 # Pathway-coloured chord diagram (no VISTA object needed)
@@ -1103,40 +1099,6 @@ if (!is.null(go_bp$enrich) && nrow(go_bp$enrich@result) > 0) {
 }
 ```
 
-### Molecular Function
-
-```{r go-mf, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
-go_mf <- get_go_enrichment(
-  vista,
-  sample_comparison = comp_names[1],
-  regulation = "Up",
-  ont = "MF",  # Molecular Function
-  species = "Homo sapiens",
-  from_type = "ENSEMBL"
-)
-
-if (!is.null(go_mf$enrich) && nrow(go_mf$enrich@result) > 0) {
-  head(go_mf$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
-}
-```
-
-### Cellular Component
-
-```{r go-cc, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
-go_cc <- get_go_enrichment(
-  vista,
-  sample_comparison = comp_names[1],
-  regulation = "Up",
-  ont = "CC",  # Cellular Component
-  species = "Homo sapiens",
-  from_type = "ENSEMBL"
-)
-
-if (!is.null(go_cc$enrich) && nrow(go_cc$enrich@result) > 0) {
-  head(go_cc$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
-}
-```
-
 ### GO Visualization
 
 ```{r go-plot, fig.width=9, fig.height=7, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
@@ -1241,7 +1203,7 @@ if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
 
 ### KEGG upregulated genes
 
-```{r kegg-up, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+```{r kegg-up, eval=FALSE}
 kegg_up <- get_kegg_enrichment(
   vista,
   sample_comparison = comp_names[1],
@@ -1257,7 +1219,7 @@ if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
 
 ### KEGG downregulated genes
 
-```{r kegg-down, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+```{r kegg-down, eval=FALSE}
 kegg_down <- get_kegg_enrichment(
   vista,
   sample_comparison = comp_names[1],
@@ -1273,7 +1235,7 @@ if (!is.null(kegg_down$enrich) && nrow(kegg_down$enrich@result) > 0) {
 
 ### KEGG Visualization
 
-```{r kegg-plot, fig.width=9, fig.height=6, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
+```{r kegg-plot, fig.width=9, fig.height=6, eval=FALSE}
 if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
   get_enrichment_plot(kegg_up$enrich, top_n = 15)
 }
@@ -1376,69 +1338,74 @@ saveRDS(vista, file = "airway_vista_object.rds")
 
 In this workflow, we:
 
-1. ✅ Loaded the airway RNA-seq dataset
-2. ✅ Created a VISTA object with DESeq2 analysis
-3. ✅ Added gene annotations from org.Hs.eg.db
-4. ✅ Performed quality control (PCA, MDS, correlation)
-5. ✅ Visualized differential expression (volcano, MA plots)
-6. ✅ Analyzed expression patterns (heatmaps, barplots, boxplots, violin plots, and more)
-7. ✅ Performed functional enrichment (MSigDB, GO, KEGG)
-8. ✅ Explored fold-change patterns
-9. ✅ Generated publication-ready visualizations
+1.  ✅ Loaded the airway RNA-seq dataset
+2.  ✅ Created a VISTA object with DESeq2 analysis
+3.  ✅ Added gene annotations from org.Hs.eg.db
+4.  ✅ Performed quality control (PCA, MDS, correlation)
+5.  ✅ Visualized differential expression (volcano, MA plots)
+6.  ✅ Analyzed expression patterns (heatmaps, barplots, boxplots, violin plots, and more)
+7.  ✅ Performed functional enrichment (MSigDB, GO, KEGG)
+8.  ✅ Explored fold-change patterns
+9.  ✅ Generated publication-ready visualizations
 
 ## Key Features Demonstrated
 
-- **Single-function workflow**: `create_vista()` handles DE analysis
-- **Consistent interface**: All plot functions follow the same pattern
-- **Flexible visualizations**: Easy to customize colors, labels, thresholds
-- **Multiple plot types**: 28+ plotting functions for every analysis need
-- **Integrated enrichment**: No need to wrangle gene IDs manually
-- **Publication-ready**: All plots are ggplot2/ComplexHeatmap objects
+-   **Single-function workflow**: `create_vista()` handles DE analysis
+-   **Consistent interface**: All plot functions follow the same pattern
+-   **Flexible visualizations**: Easy to customize colors, labels, thresholds
+-   **Multiple plot types**: 28+ plotting functions for every analysis need
+-   **Integrated enrichment**: No need to wrangle gene IDs manually
+-   **Publication-ready**: All plots are ggplot2/ComplexHeatmap objects
 
 ## Plotting Functions Used
 
 ### QC Plots
-- `get_corr_heatmap()` - Sample correlation
-- `get_pca_plot()` - Principal component analysis
-- `get_mds_plot()` - Multidimensional scaling
+
+-   `get_corr_heatmap()` - Sample correlation
+-   `get_pca_plot()` - Principal component analysis
+-   `get_mds_plot()` - Multidimensional scaling
 
 ### DE Visualization
-- `get_deg_count_barplot()` - DEG summary counts
-- `get_volcano_plot()` - Volcano plots
-- `get_ma_plot()` - MA plots
+
+-   `get_deg_count_barplot()` - DEG summary counts
+-   `get_volcano_plot()` - Volcano plots
+-   `get_ma_plot()` - MA plots
 
 ### Expression Plots
-- `get_expression_heatmap()` - Expression heatmaps
-- `get_expression_barplot()` - Expression barplots
-- `get_expression_boxplot()` - Expression boxplots
-- `get_expression_violinplot()` - Violin plots
-- `get_expression_density()` - Density plots
-- `get_expression_scatter()` - Sample-vs-sample scatter
-- `get_expression_lineplot()` - Expression across samples
-- `get_expression_lollipop()` - Lollipop plots
-- `get_expression_joyplot()` - Ridgeline plots
+
+-   `get_expression_heatmap()` - Expression heatmaps
+-   `get_expression_barplot()` - Expression barplots
+-   `get_expression_boxplot()` - Expression boxplots
+-   `get_expression_violinplot()` - Violin plots
+-   `get_expression_density()` - Density plots
+-   `get_expression_scatter()` - Sample-vs-sample scatter
+-   `get_expression_lineplot()` - Expression across samples
+-   `get_expression_lollipop()` - Lollipop plots
+-   `get_expression_joyplot()` - Ridgeline plots
 
 ### Enrichment Plots
-- `get_enrichment_plot()` - Generic enrichment visualization
-- `get_msigdb_enrichment()` - MSigDB enrichment
-- `get_go_enrichment()` - GO enrichment
-- `get_kegg_enrichment()` - KEGG pathway enrichment
-- `get_pathway_genes()` - Extract genes driving enriched pathways
-- `get_pathway_heatmap()` - Plot pathway-derived expression heatmaps
-- `get_enrichment_chord()` - Chord diagram of gene-pathway relationships
+
+-   `get_enrichment_plot()` - Generic enrichment visualization
+-   `get_msigdb_enrichment()` - MSigDB enrichment
+-   `get_go_enrichment()` - GO enrichment
+-   `get_kegg_enrichment()` - KEGG pathway enrichment
+-   `get_pathway_genes()` - Extract genes driving enriched pathways
+-   `get_pathway_heatmap()` - Plot pathway-derived expression heatmaps
+-   `get_enrichment_chord()` - Chord diagram of gene-pathway relationships
 
 ### Fold-Change
-- `get_foldchange_matrix()` - Extract FC matrix
-- `get_foldchange_heatmap()` - Visualize FC patterns
+
+-   `get_foldchange_matrix()` - Extract FC matrix
+-   `get_foldchange_heatmap()` - Visualize FC patterns
 
 ## Next Steps
 
-- Try with your own data
-- Explore edgeR backend: `method = "edger"`
-- Test multiple comparisons simultaneously
-- Customize plots with ggplot2 themes
-- Generate automated reports with `run_vista_report()`
-- Integrate with downstream tools
+-   Try with your own data
+-   Explore edgeR backend: `method = "edger"`
+-   Test multiple comparisons simultaneously
+-   Customize plots with ggplot2 themes
+-   Generate automated reports with `run_vista_report()`
+-   Integrate with downstream tools
 
 # Session Information
 
@@ -1448,8 +1415,8 @@ sessionInfo()
 
 # References
 
-- Himes BE et al. (2014). RNA-Seq Transcriptome Profiling Identifies CRISPLD2 as a Glucocorticoid Responsive Gene that Modulates Cytokine Function in Airway Smooth Muscle Cells. *PLoS One*, 9(6), e99625.
-- Love MI, Huber W, Anders S (2014). Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. *Genome Biology*, 15, 550.
-- Robinson MD, McCarthy DJ, Smyth GK (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. *Bioinformatics*, 26(1), 139-140.
-- Subramanian A et al. (2005). Gene set enrichment analysis: a knowledge-based approach for interpreting genome-wide expression profiles. *PNAS*, 102(43), 15545-15550.
-- Yu G et al. (2012). clusterProfiler: an R package for comparing biological themes among gene clusters. *OMICS*, 16(5), 284-287.
+-   Himes BE et al. (2014). RNA-Seq Transcriptome Profiling Identifies CRISPLD2 as a Glucocorticoid Responsive Gene that Modulates Cytokine Function in Airway Smooth Muscle Cells. *PLoS One*, 9(6), e99625.
+-   Love MI, Huber W, Anders S (2014). Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. *Genome Biology*, 15, 550.
+-   Robinson MD, McCarthy DJ, Smyth GK (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. *Bioinformatics*, 26(1), 139-140.
+-   Subramanian A et al. (2005). Gene set enrichment analysis: a knowledge-based approach for interpreting genome-wide expression profiles. *PNAS*, 102(43), 15545-15550.
+-   Yu G et al. (2012). clusterProfiler: an R package for comparing biological themes among gene clusters. *OMICS*, 16(5), 284-287.
