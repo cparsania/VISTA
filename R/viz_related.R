@@ -415,6 +415,192 @@ get_mds_plot <- function(x,
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
+# UMAP
+# ──────────────────────────────────────────────────────────────────────────────
+
+#' Generate a UMAP plot for samples in a VISTA object
+#'
+#' Runs UMAP on normalized counts, optionally restricting to selected groups or
+#' genes. UMAP is intended for exploratory sample-level structure.
+#'
+#' @param x A `VISTA` object.
+#' @param sample_group Optional character vector of groups to include (based on
+#'   `group_column`).
+#' @param group_column Optional column name in `sample_info` used for
+#'   filtering/grouping. Defaults to the stored grouping column.
+#' @param color_by Optional column name in `sample_info` used for point color.
+#'   Defaults to `group_column`.
+#' @param genes Optional character vector of gene identifiers to restrict the matrix.
+#' @param top_n_genes Optional integer selecting top variable genes to include.
+#' @param label_replicates Logical; draw sample labels when `TRUE`.
+#' @param label_size Numeric label size when `label_replicates = TRUE`.
+#' @param circle_size Numeric point size.
+#' @param sample_colors Logical; when `TRUE`, apply VISTA group colors if
+#'   coloring by the grouping column. Otherwise generate a qualitative palette.
+#' @param shape_by Optional column name in `sample_info` used to map point shape.
+#' @param shape_values Optional vector passed to `scale_shape_manual()` when
+#'   `shape_by` is set.
+#' @param n_neighbors UMAP `n_neighbors` parameter.
+#' @param min_dist UMAP `min_dist` parameter.
+#' @param metric UMAP distance metric.
+#' @param seed Integer random seed passed to UMAP.
+#'
+#' @return A ggplot object with UMAP1/UMAP2 coordinates.
+#'
+#' @examples
+#' if (requireNamespace("uwot", quietly = TRUE)) {
+#'   data("count_data", package = "VISTA")
+#'   data("sample_metadata", package = "VISTA")
+#'
+#'   vista <- create_vista(
+#'     counts = count_data[1:200, ],
+#'     sample_info = sample_metadata[1:6, ],
+#'     column_geneid = "gene_id",
+#'     group_column = "cond_long",
+#'     group_numerator = "treatment1",
+#'     group_denominator = "control"
+#'   )
+#'
+#'   get_umap_plot(vista)
+#'   get_umap_plot(vista, color_by = "cell")
+#' }
+#' @export
+get_umap_plot <- function(x,
+                          sample_group = NULL,
+                          group_column = NULL,
+                          color_by = NULL,
+                          genes = NULL,
+                          top_n_genes = NULL,
+                          label_replicates = FALSE,
+                          label_size = 3,
+                          circle_size = 10,
+                          sample_colors = TRUE,
+                          shape_by = NULL,
+                          shape_values = NULL,
+                          n_neighbors = 15,
+                          min_dist = 0.1,
+                          metric = "euclidean",
+                          seed = 123) {
+
+  stopifnot(inherits(x, "VISTA"))
+  if (!requireNamespace("uwot", quietly = TRUE)) {
+    cli::cli_abort("Package {.pkg uwot} must be installed to compute UMAP.")
+  }
+
+  mat <- SummarizedExperiment::assay(x)
+  meta <- .prepare_sample_metadata(x, sample_group, group_column)
+  group_col <- attr(meta, "group_column")
+  color_col <- color_by %||% group_col
+  mat <- mat[, meta$sample, drop = FALSE]
+
+  if (!color_col %in% colnames(meta)) {
+    cli::cli_abort("Column {.val {color_col}} not found in sample_info; cannot map colors.")
+  }
+  if (!is.null(shape_by) && !shape_by %in% colnames(meta)) {
+    cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
+  }
+
+  mat <- .filter_genes(mat, genes, top_n_genes)
+  mat <- mat[matrixStats::rowVars(mat) > 0, , drop = FALSE]
+
+  n_samples <- ncol(mat)
+  if (n_samples < 3) {
+    cli::cli_abort("UMAP needs at least 3 samples; found {.val {n_samples}}.")
+  }
+  if (n_neighbors >= n_samples) {
+    adj <- max(2L, n_samples - 1L)
+    cli::cli_warn(
+      "{.arg n_neighbors} ({n_neighbors}) must be smaller than sample size ({n_samples}); using {adj}."
+    )
+    n_neighbors <- adj
+  }
+
+  um <- uwot::umap(
+    t(mat),
+    n_neighbors = n_neighbors,
+    min_dist = min_dist,
+    metric = metric,
+    n_components = 2,
+    verbose = FALSE,
+    ret_model = FALSE,
+    seed = seed
+  )
+
+  umap_df <- tibble::tibble(
+    sample = colnames(mat),
+    UMAP1 = um[, 1],
+    UMAP2 = um[, 2]
+  ) |>
+    dplyr::left_join(meta, by = "sample")
+
+  umap_df[[color_col]] <- factor(umap_df[[color_col]])
+  if (!is.null(shape_by)) {
+    umap_df[[shape_by]] <- factor(umap_df[[shape_by]])
+  }
+
+  if (is.null(shape_by)) {
+    gp <- ggplot2::ggplot(
+      umap_df,
+      ggplot2::aes(x = UMAP1, y = UMAP2, color = .data[[color_col]], label = sample)
+    )
+  } else {
+    gp <- ggplot2::ggplot(
+      umap_df,
+      ggplot2::aes(x = UMAP1, y = UMAP2, color = .data[[color_col]], shape = .data[[shape_by]], label = sample)
+    )
+  }
+
+  gp <- gp +
+    ggplot2::geom_point(size = circle_size, alpha = 0.85) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::labs(
+      color = color_col,
+      title = "UMAP",
+      x = "UMAP1",
+      y = "UMAP2"
+    )
+
+  if (!is.null(shape_by)) {
+    gp <- gp + ggplot2::labs(shape = shape_by)
+    if (!is.null(shape_values)) {
+      shape_levels <- levels(umap_df[[shape_by]])
+      if (is.null(names(shape_values))) {
+        if (length(shape_values) < length(shape_levels)) {
+          cli::cli_abort("Not enough {.arg shape_values} for {.arg shape_by} levels: {shape_levels}.")
+        }
+        shape_values <- shape_values[seq_along(shape_levels)]
+        names(shape_values) <- shape_levels
+      } else {
+        missing_shapes <- setdiff(shape_levels, names(shape_values))
+        if (length(missing_shapes) > 0) {
+          cli::cli_abort("Missing {.arg shape_values} for levels: {missing_shapes}.")
+        }
+      }
+      gp <- gp + ggplot2::scale_shape_manual(values = shape_values)
+    }
+  }
+
+  if (sample_colors) {
+    cols <- if (identical(color_col, group_col)) {
+      .vista_group_colors(x, groups_present = umap_df[[color_col]])
+    } else {
+      lvls <- levels(umap_df[[color_col]])
+      pal <- colorspace::qualitative_hcl(length(lvls), palette = "Dark 3")
+      stats::setNames(pal, lvls)
+    }
+    if (!is.null(cols) && length(cols) > 0) {
+      gp <- gp + ggplot2::scale_color_manual(values = cols)
+    }
+  }
+
+  if (label_replicates) {
+    gp <- gp + ggrepel::geom_text_repel(ggplot2::aes(label = sample), size = label_size)
+  }
+
+  gp
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Volcano
 # ──────────────────────────────────────────────────────────────────────────────
 

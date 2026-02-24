@@ -471,6 +471,30 @@ get_mds_plot(
 )
 ```
 
+## Uniform Manifold Approximation and Projection (UMAP)
+
+Non-linear sample embedding for exploratory structure.
+
+### Basic UMAP plot
+
+```{r umap-basic, fig.width=8, fig.height=6, eval=requireNamespace("uwot", quietly=TRUE)}
+get_umap_plot(
+  vista,
+  label_replicates = TRUE
+)
+```
+
+### UMAP colored by a user-defined metadata column
+
+```{r umap-color-by-cell, fig.width=8, fig.height=6, eval=requireNamespace("uwot", quietly=TRUE)}
+get_umap_plot(
+  vista,
+  color_by = "cell",
+  shape_by = "treatment",
+  label_replicates = TRUE
+)
+```
+
 # Differential Expression Visualizations
 
 ## DEG Count Summary
@@ -1341,7 +1365,7 @@ In this workflow, we:
 1.  ✅ Loaded the airway RNA-seq dataset
 2.  ✅ Created a VISTA object with DESeq2 analysis
 3.  ✅ Added gene annotations from org.Hs.eg.db
-4.  ✅ Performed quality control (PCA, MDS, correlation)
+4.  ✅ Performed quality control (PCA, MDS, UMAP, correlation)
 5.  ✅ Visualized differential expression (volcano, MA plots)
 6.  ✅ Analyzed expression patterns (heatmaps, barplots, boxplots, violin plots, and more)
 7.  ✅ Performed functional enrichment (MSigDB, GO, KEGG)
@@ -1353,7 +1377,7 @@ In this workflow, we:
 -   **Single-function workflow**: `create_vista()` handles DE analysis
 -   **Consistent interface**: All plot functions follow the same pattern
 -   **Flexible visualizations**: Easy to customize colors, labels, thresholds
--   **Multiple plot types**: 28+ plotting functions for every analysis need
+-   **Multiple plot types**: 29+ plotting functions for every analysis need
 -   **Integrated enrichment**: No need to wrangle gene IDs manually
 -   **Publication-ready**: All plots are ggplot2/ComplexHeatmap objects
 
@@ -1364,6 +1388,7 @@ In this workflow, we:
 -   `get_corr_heatmap()` - Sample correlation
 -   `get_pca_plot()` - Principal component analysis
 -   `get_mds_plot()` - Multidimensional scaling
+-   `get_umap_plot()` - Nonlinear sample embedding
 
 ### DE Visualization
 

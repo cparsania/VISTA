@@ -34,6 +34,20 @@ test_that("get_mds_plot handles top_n_genes parameter", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("get_umap_plot produces valid plot", {
+  skip_if_not_installed("uwot")
+  vista <- make_small_vista()
+  p <- get_umap_plot(vista)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("get_umap_plot supports color_by metadata", {
+  skip_if_not_installed("uwot")
+  vista <- make_small_vista()
+  p <- get_umap_plot(vista, color_by = "cell", shape_by = "cond_long")
+  expect_s3_class(p, "ggplot")
+})
+
 test_that("get_volcano_plot returns ggplot", {
   vista <- make_small_vista()
   comps <- comparisons(vista)
