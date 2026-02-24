@@ -865,9 +865,28 @@ validate:</p>
 <p><img src="VISTA-airway_files/figure-html/heatmap-annotated-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
-<h4 id="heatmap-with-summarized-replicates">Heatmap with summarized replicates<a class="anchor" aria-label="anchor" href="#heatmap-with-summarized-replicates"></a>
+<h4 id="heatmap-with-multiple-column-annotations-and-cluster_by">Heatmap with multiple column annotations and
+<code>cluster_by</code><a class="anchor" aria-label="anchor" href="#heatmap-with-multiple-column-annotations-and-cluster_by"></a>
 </h4>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Use multiple sample-level columns in top annotation.</span></span>
+<span><span class="co"># By default, columns are split by the first annotation column.</span></span>
+<span><span class="fu"><a href="../reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span></span>
+<span>  <span class="va">vista</span>,</span>
+<span>  samples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">$</span><span class="va">treatment</span><span class="op">)</span>,</span>
+<span>  genes <span class="op">=</span> <span class="va">top_degs</span>,</span>
+<span>  show_row_names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  display_id <span class="op">=</span> <span class="st">"SYMBOL"</span>,</span>
+<span>  summarise_replicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  annotate_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"treatment"</span>, <span class="st">"cell"</span><span class="op">)</span>,</span>
+<span>  cluster_by <span class="op">=</span> <span class="st">"cell"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="VISTA-airway_files/figure-html/heatmap-annotated-multi-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
+</div>
+<div class="section level4">
+<h4 id="heatmap-with-summarized-replicates">Heatmap with summarized replicates<a class="anchor" aria-label="anchor" href="#heatmap-with-summarized-replicates"></a>
+</h4>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  samples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">$</span><span class="va">treatment</span><span class="op">)</span>,</span>
@@ -882,7 +901,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="heatmap-showing-gene-names">Heatmap showing gene names<a class="anchor" aria-label="anchor" href="#heatmap-showing-gene-names"></a>
 </h4>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Smaller gene set to show names</span></span>
 <span><span class="fu"><a href="../reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -901,7 +920,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="basic-barplot">Basic barplot<a class="anchor" aria-label="anchor" href="#basic-barplot"></a>
 </h4>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_barplot.html">get_expression_barplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
@@ -912,7 +931,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="log-transformed-with-statistics">Log-transformed with statistics<a class="anchor" aria-label="anchor" href="#log-transformed-with-statistics"></a>
 </h4>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add statistical comparisons between groups</span></span>
 <span><span class="fu"><a href="../reference/get_expression_barplot.html">get_expression_barplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -926,7 +945,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="compare-up-and-down-regulated-genes">Compare up and down regulated genes<a class="anchor" aria-label="anchor" href="#compare-up-and-down-regulated-genes"></a>
 </h4>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare expression of both up- and down-regulated genes</span></span>
 <span><span class="va">selected_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="va">top_down</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/get_expression_barplot.html">get_expression_barplot</a></span><span class="op">(</span></span>
@@ -945,7 +964,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="basic-boxplot">Basic boxplot<a class="anchor" aria-label="anchor" href="#basic-boxplot"></a>
 </h4>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_boxplot.html">get_expression_boxplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
@@ -956,7 +975,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="boxplot-without-faceting">Boxplot without faceting<a class="anchor" aria-label="anchor" href="#boxplot-without-faceting"></a>
 </h4>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># All genes overlaid on same plot</span></span>
 <span><span class="fu"><a href="../reference/get_expression_boxplot.html">get_expression_boxplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -969,7 +988,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="boxplot-with-faceting-by-gene">Boxplot with faceting by gene<a class="anchor" aria-label="anchor" href="#boxplot-with-faceting-by-gene"></a>
 </h4>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Each gene in separate panel - must specify facet_by = "gene"</span></span>
 <span><span class="fu"><a href="../reference/get_expression_boxplot.html">get_expression_boxplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -983,7 +1002,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="boxplot-with-gene-facets-and-statistics">Boxplot with gene facets AND statistics<a class="anchor" aria-label="anchor" href="#boxplot-with-gene-facets-and-statistics"></a>
 </h4>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Each gene in separate panel WITH statistical comparisons</span></span>
 <span><span class="fu"><a href="../reference/get_expression_boxplot.html">get_expression_boxplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -1000,7 +1019,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="pooled-genes-with-statistics">Pooled genes with statistics<a class="anchor" aria-label="anchor" href="#pooled-genes-with-statistics"></a>
 </h4>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pool all genes together for group comparison with statistical test</span></span>
 <span><span class="fu"><a href="../reference/get_expression_boxplot.html">get_expression_boxplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -1016,7 +1035,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="log-transformed-with-p-values">Log-transformed with p-values<a class="anchor" aria-label="anchor" href="#log-transformed-with-p-values"></a>
 </h4>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show statistical comparisons between treatment groups</span></span>
 <span><span class="fu"><a href="../reference/get_expression_boxplot.html">get_expression_boxplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -1035,7 +1054,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="basic-violin-plot">Basic violin plot<a class="anchor" aria-label="anchor" href="#basic-violin-plot"></a>
 </h4>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_violinplot.html">get_expression_violinplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
@@ -1045,7 +1064,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="violin-with-log2-transformation">Violin with log2 transformation<a class="anchor" aria-label="anchor" href="#violin-with-log2-transformation"></a>
 </h4>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_violinplot.html">get_expression_violinplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>,</span>
@@ -1056,7 +1075,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="violin-with-z-score-transformation">Violin with z-score transformation<a class="anchor" aria-label="anchor" href="#violin-with-z-score-transformation"></a>
 </h4>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_violinplot.html">get_expression_violinplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>,</span>
@@ -1071,7 +1090,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="density-plot">Density plot<a class="anchor" aria-label="anchor" href="#density-plot"></a>
 </h4>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_density.html">get_expression_density</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
@@ -1082,7 +1101,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="scatter-plot-sample-vs-sample">Scatter plot (sample vs sample)<a class="anchor" aria-label="anchor" href="#scatter-plot-sample-vs-sample"></a>
 </h4>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare two samples</span></span>
 <span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/get_expression_scatter.html">get_expression_scatter</a></span><span class="op">(</span></span>
@@ -1097,7 +1116,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="line-plot-expression-across-samples">Line plot (expression across samples)<a class="anchor" aria-label="anchor" href="#line-plot-expression-across-samples"></a>
 </h4>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_lineplot.html">get_expression_lineplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>,</span>
@@ -1108,7 +1127,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="lollipop-plot">Lollipop plot<a class="anchor" aria-label="anchor" href="#lollipop-plot"></a>
 </h4>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_lollipop.html">get_expression_lollipop</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">top_up</span><span class="op">$</span><span class="va">gene_id</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
@@ -1120,7 +1139,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="joyplot-by-treatment-group">Joyplot by treatment group<a class="anchor" aria-label="anchor" href="#joyplot-by-treatment-group"></a>
 </h4>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Ridges by treatment group - shows distribution for each group</span></span>
 <span><span class="fu"><a href="../reference/get_expression_joyplot.html">get_expression_joyplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -1134,7 +1153,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="joyplot-by-sample">Joyplot by sample<a class="anchor" aria-label="anchor" href="#joyplot-by-sample"></a>
 </h4>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Ridges by individual sample - shows distribution for each sample</span></span>
 <span><span class="fu"><a href="../reference/get_expression_joyplot.html">get_expression_joyplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -1156,7 +1175,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="hallmark-gene-sets---upregulated">Hallmark gene sets - Upregulated<a class="anchor" aria-label="anchor" href="#hallmark-gene-sets---upregulated"></a>
 </h4>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">msig_up</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_msigdb_enrichment.html">get_msigdb_enrichment</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparison <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
@@ -1188,7 +1207,7 @@ validate:</p>
 <div class="section level4">
 <h4 id="hallmark-gene-sets---downregulated">Hallmark gene sets - Downregulated<a class="anchor" aria-label="anchor" href="#hallmark-gene-sets---downregulated"></a>
 </h4>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">msig_down</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_msigdb_enrichment.html">get_msigdb_enrichment</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparison <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
@@ -1215,56 +1234,6 @@ validate:</p>
 <span><span class="co">#&gt; HALLMARK_MTORC1_SIGNALING                  4.194278e-03 3.607079e-02    11</span></span>
 <span><span class="co">#&gt; HALLMARK_MYOGENESIS                        4.194278e-03 3.607079e-02    11</span></span>
 <span><span class="co">#&gt; HALLMARK_APOPTOSIS                         8.306424e-03 5.952937e-02     9</span></span></code></pre></div>
-</div>
-<div class="section level4">
-<h4 id="c2-canonical-pathways">C2 Canonical Pathways<a class="anchor" aria-label="anchor" href="#c2-canonical-pathways"></a>
-</h4>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">msig_c2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_msigdb_enrichment.html">get_msigdb_enrichment</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista</span>,</span>
-<span>  sample_comparison <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
-<span>  msigdb_category <span class="op">=</span> <span class="st">"C2"</span>,  <span class="co"># Curated gene sets</span></span>
-<span>  species <span class="op">=</span> <span class="st">"Homo sapiens"</span>,</span>
-<span>  from_type <span class="op">=</span> <span class="st">"ENSEMBL"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_c2</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_c2</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">msig_c2</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Description"</span>, <span class="st">"pvalue"</span>, <span class="st">"p.adjust"</span>, <span class="st">"Count"</span><span class="op">)</span><span class="op">]</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt;                                                                                                   Description</span></span>
-<span><span class="co">#&gt; CHEN_LVAD_SUPPORT_OF_FAILING_HEART_UP                                   CHEN_LVAD_SUPPORT_OF_FAILING_HEART_UP</span></span>
-<span><span class="co">#&gt; BOQUEST_STEM_CELL_CULTURED_VS_FRESH_UP                                 BOQUEST_STEM_CELL_CULTURED_VS_FRESH_UP</span></span>
-<span><span class="co">#&gt; VECCHI_GASTRIC_CANCER_EARLY_DN                                                 VECCHI_GASTRIC_CANCER_EARLY_DN</span></span>
-<span><span class="co">#&gt; LINDGREN_BLADDER_CANCER_CLUSTER_2B                                         LINDGREN_BLADDER_CANCER_CLUSTER_2B</span></span>
-<span><span class="co">#&gt; ONDER_CDH1_TARGETS_2_UP                                                               ONDER_CDH1_TARGETS_2_UP</span></span>
-<span><span class="co">#&gt; RIGGI_EWING_SARCOMA_PROGENITOR_UP                                           RIGGI_EWING_SARCOMA_PROGENITOR_UP</span></span>
-<span><span class="co">#&gt; NAKAMURA_ADIPOGENESIS_EARLY_UP                                                 NAKAMURA_ADIPOGENESIS_EARLY_UP</span></span>
-<span><span class="co">#&gt; LIM_MAMMARY_STEM_CELL_UP                                                             LIM_MAMMARY_STEM_CELL_UP</span></span>
-<span><span class="co">#&gt; DAVICIONI_TARGETS_OF_PAX_FOXO1_FUSIONS_UP                           DAVICIONI_TARGETS_OF_PAX_FOXO1_FUSIONS_UP</span></span>
-<span><span class="co">#&gt; TURASHVILI_BREAST_DUCTAL_CARCINOMA_VS_DUCTAL_NORMAL_DN TURASHVILI_BREAST_DUCTAL_CARCINOMA_VS_DUCTAL_NORMAL_DN</span></span>
-<span><span class="co">#&gt;                                                              pvalue</span></span>
-<span><span class="co">#&gt; CHEN_LVAD_SUPPORT_OF_FAILING_HEART_UP                  8.703329e-29</span></span>
-<span><span class="co">#&gt; BOQUEST_STEM_CELL_CULTURED_VS_FRESH_UP                 1.057687e-28</span></span>
-<span><span class="co">#&gt; VECCHI_GASTRIC_CANCER_EARLY_DN                         9.978945e-21</span></span>
-<span><span class="co">#&gt; LINDGREN_BLADDER_CANCER_CLUSTER_2B                     6.355228e-14</span></span>
-<span><span class="co">#&gt; ONDER_CDH1_TARGETS_2_UP                                5.251285e-13</span></span>
-<span><span class="co">#&gt; RIGGI_EWING_SARCOMA_PROGENITOR_UP                      2.059802e-12</span></span>
-<span><span class="co">#&gt; NAKAMURA_ADIPOGENESIS_EARLY_UP                         2.835060e-12</span></span>
-<span><span class="co">#&gt; LIM_MAMMARY_STEM_CELL_UP                               3.863169e-12</span></span>
-<span><span class="co">#&gt; DAVICIONI_TARGETS_OF_PAX_FOXO1_FUSIONS_UP              4.213812e-12</span></span>
-<span><span class="co">#&gt; TURASHVILI_BREAST_DUCTAL_CARCINOMA_VS_DUCTAL_NORMAL_DN 1.243581e-11</span></span>
-<span><span class="co">#&gt;                                                            p.adjust Count</span></span>
-<span><span class="co">#&gt; CHEN_LVAD_SUPPORT_OF_FAILING_HEART_UP                  2.068306e-25    30</span></span>
-<span><span class="co">#&gt; BOQUEST_STEM_CELL_CULTURED_VS_FRESH_UP                 2.068306e-25    52</span></span>
-<span><span class="co">#&gt; VECCHI_GASTRIC_CANCER_EARLY_DN                         1.300922e-17    41</span></span>
-<span><span class="co">#&gt; LINDGREN_BLADDER_CANCER_CLUSTER_2B                     6.213825e-11    33</span></span>
-<span><span class="co">#&gt; ONDER_CDH1_TARGETS_2_UP                                4.107555e-10    26</span></span>
-<span><span class="co">#&gt; RIGGI_EWING_SARCOMA_PROGENITOR_UP                      1.342648e-09    33</span></span>
-<span><span class="co">#&gt; NAKAMURA_ADIPOGENESIS_EARLY_UP                         1.583988e-09    14</span></span>
-<span><span class="co">#&gt; LIM_MAMMARY_STEM_CELL_UP                               1.831135e-09    34</span></span>
-<span><span class="co">#&gt; DAVICIONI_TARGETS_OF_PAX_FOXO1_FUSIONS_UP              1.831135e-09    25</span></span>
-<span><span class="co">#&gt; TURASHVILI_BREAST_DUCTAL_CARCINOMA_VS_DUCTAL_NORMAL_DN 4.863645e-09    22</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -1461,64 +1430,9 @@ expression directly.</p>
 <span><span class="co">#&gt; GO:0030728 2.526439e-03     5</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="molecular-function">Molecular Function<a class="anchor" aria-label="anchor" href="#molecular-function"></a>
-</h4>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">go_mf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_go_enrichment.html">get_go_enrichment</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista</span>,</span>
-<span>  sample_comparison <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
-<span>  ont <span class="op">=</span> <span class="st">"MF"</span>,  <span class="co"># Molecular Function</span></span>
-<span>  species <span class="op">=</span> <span class="st">"Homo sapiens"</span>,</span>
-<span>  from_type <span class="op">=</span> <span class="st">"ENSEMBL"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">go_mf</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">go_mf</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">go_mf</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Description"</span>, <span class="st">"pvalue"</span>, <span class="st">"p.adjust"</span>, <span class="st">"Count"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt;                                                                        Description</span></span>
-<span><span class="co">#&gt; GO:0005201                             extracellular matrix structural constituent</span></span>
-<span><span class="co">#&gt; GO:0071949                                                             FAD binding</span></span>
-<span><span class="co">#&gt; GO:0050660                                     flavin adenine dinucleotide binding</span></span>
-<span><span class="co">#&gt; GO:0004022                                   alcohol dehydrogenase (NAD+) activity</span></span>
-<span><span class="co">#&gt; GO:0003779                                                           actin binding</span></span>
-<span><span class="co">#&gt; GO:0030020 extracellular matrix structural constituent conferring tensile strength</span></span>
-<span><span class="co">#&gt;                  pvalue     p.adjust Count</span></span>
-<span><span class="co">#&gt; GO:0005201 6.436638e-07 0.0004190251    16</span></span>
-<span><span class="co">#&gt; GO:0071949 5.891139e-06 0.0019175657     7</span></span>
-<span><span class="co">#&gt; GO:0050660 2.140762e-05 0.0046454544     9</span></span>
-<span><span class="co">#&gt; GO:0004022 3.904575e-05 0.0055998898     5</span></span>
-<span><span class="co">#&gt; GO:0003779 4.300991e-05 0.0055998898    22</span></span>
-<span><span class="co">#&gt; GO:0030020 2.138508e-04 0.0218907719     6</span></span></code></pre></div>
-</div>
-<div class="section level4">
-<h4 id="cellular-component">Cellular Component<a class="anchor" aria-label="anchor" href="#cellular-component"></a>
-</h4>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">go_cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_go_enrichment.html">get_go_enrichment</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista</span>,</span>
-<span>  sample_comparison <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
-<span>  ont <span class="op">=</span> <span class="st">"CC"</span>,  <span class="co"># Cellular Component</span></span>
-<span>  species <span class="op">=</span> <span class="st">"Homo sapiens"</span>,</span>
-<span>  from_type <span class="op">=</span> <span class="st">"ENSEMBL"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">go_cc</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">go_cc</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">go_cc</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Description"</span>, <span class="st">"pvalue"</span>, <span class="st">"p.adjust"</span>, <span class="st">"Count"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt;                            Description       pvalue     p.adjust Count</span></span>
-<span><span class="co">#&gt; GO:0005604           basement membrane 1.023966e-06 0.0003635081    11</span></span>
-<span><span class="co">#&gt; GO:0031252           cell leading edge 5.944506e-06 0.0010551498    23</span></span>
-<span><span class="co">#&gt; GO:0005788 endoplasmic reticulum lumen 7.347122e-05 0.0086940943    17</span></span>
-<span><span class="co">#&gt; GO:0030027               lamellipodium 1.368277e-04 0.0121434543    13</span></span>
-<span><span class="co">#&gt; GO:0005581             collagen trimer 1.807850e-04 0.0128357382     8</span></span>
-<span><span class="co">#&gt; GO:0098644 complex of collagen trimers 2.377029e-04 0.0139399059     5</span></span></code></pre></div>
-</div>
-<div class="section level4">
 <h4 id="go-visualization">GO Visualization<a class="anchor" aria-label="anchor" href="#go-visualization"></a>
 </h4>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">go_bp</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">go_bp</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_plot.html">get_enrichment_plot</a></span><span class="op">(</span><span class="va">go_bp</span><span class="op">$</span><span class="va">enrich</span>, top_n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -1534,7 +1448,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="gsea-with-msigdb-hallmark-gene-sets">GSEA with MSigDB Hallmark gene sets<a class="anchor" aria-label="anchor" href="#gsea-with-msigdb-hallmark-gene-sets"></a>
 </h4>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run GSEA using VISTA's native function</span></span>
 <span><span class="va">gsea_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_gsea.html">get_gsea</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -1577,7 +1491,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="gsea-with-go-biological-process">GSEA with GO Biological Process<a class="anchor" aria-label="anchor" href="#gsea-with-go-biological-process"></a>
 </h4>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run GSEA with GO terms</span></span>
 <span><span class="va">gsea_go</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_gsea.html">get_gsea</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -1619,7 +1533,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="gsea-enrichment-overview">GSEA enrichment overview<a class="anchor" aria-label="anchor" href="#gsea-enrichment-overview"></a>
 </h4>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show all significant pathways using VISTA's visualization</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_plot.html">get_enrichment_plot</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span>, top_n <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
@@ -1629,7 +1543,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="gsea-plot-for-top-pathway">GSEA plot for top pathway<a class="anchor" aria-label="anchor" href="#gsea-plot-for-top-pathway"></a>
 </h4>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show enrichment plot for the top pathway</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># Create GSEA enrichment plot with running enrichment score</span></span>
@@ -1645,7 +1559,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="gsea-plot-for-multiple-pathways">GSEA plot for multiple pathways<a class="anchor" aria-label="anchor" href="#gsea-plot-for-multiple-pathways"></a>
 </h4>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show top 3 pathways together</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">enrichplot</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/enrichplot/man/gseaplot2.html" class="external-link">gseaplot2</a></span><span class="op">(</span></span>
@@ -1660,7 +1574,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="gsea-with-go-visualization">GSEA with GO visualization<a class="anchor" aria-label="anchor" href="#gsea-with-go-visualization"></a>
 </h4>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize GO GSEA results</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">gsea_go</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">gsea_go</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_plot.html">get_enrichment_plot</a></span><span class="op">(</span><span class="va">gsea_go</span><span class="op">$</span><span class="va">enrich</span>, top_n <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
@@ -1674,7 +1588,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="kegg-upregulated-genes">KEGG upregulated genes<a class="anchor" aria-label="anchor" href="#kegg-upregulated-genes"></a>
 </h4>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kegg_up</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_kegg_enrichment.html">get_kegg_enrichment</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparison <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
@@ -1685,34 +1599,12 @@ from your differential expression results.</p>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">kegg_up</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">kegg_up</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">kegg_up</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Description"</span>, <span class="st">"pvalue"</span>, <span class="st">"p.adjust"</span>, <span class="st">"Count"</span><span class="op">)</span><span class="op">]</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt;                                                   Description       pvalue</span></span>
-<span><span class="co">#&gt; hsa04820                         Cytoskeleton in muscle cells 6.990709e-07</span></span>
-<span><span class="co">#&gt; hsa04512                             ECM-receptor interaction 1.291374e-04</span></span>
-<span><span class="co">#&gt; hsa00350                                  Tyrosine metabolism 1.303269e-04</span></span>
-<span><span class="co">#&gt; hsa04923                Regulation of lipolysis in adipocytes 2.719590e-04</span></span>
-<span><span class="co">#&gt; hsa04978                                   Mineral absorption 3.352603e-04</span></span>
-<span><span class="co">#&gt; hsa04518                                   Integrin signaling 5.247787e-04</span></span>
-<span><span class="co">#&gt; hsa04310                                Wnt signaling pathway 1.438957e-03</span></span>
-<span><span class="co">#&gt; hsa04933 AGE-RAGE signaling pathway in diabetic complications 1.565149e-03</span></span>
-<span><span class="co">#&gt; hsa04977                     Vitamin digestion and absorption 2.231726e-03</span></span>
-<span><span class="co">#&gt; hsa04068                               FoxO signaling pathway 2.432300e-03</span></span>
-<span><span class="co">#&gt;              p.adjust Count</span></span>
-<span><span class="co">#&gt; hsa04820 0.0001880501    19</span></span>
-<span><span class="co">#&gt; hsa04512 0.0116859744     9</span></span>
-<span><span class="co">#&gt; hsa00350 0.0116859744     6</span></span>
-<span><span class="co">#&gt; hsa04923 0.0180370047     7</span></span>
-<span><span class="co">#&gt; hsa04978 0.0180370047     7</span></span>
-<span><span class="co">#&gt; hsa04518 0.0235275801    11</span></span>
-<span><span class="co">#&gt; hsa04310 0.0526281515    11</span></span>
-<span><span class="co">#&gt; hsa04933 0.0526281515     8</span></span>
-<span><span class="co">#&gt; hsa04977 0.0654288617     4</span></span>
-<span><span class="co">#&gt; hsa04068 0.0654288617     9</span></span></code></pre></div>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="kegg-downregulated-genes">KEGG downregulated genes<a class="anchor" aria-label="anchor" href="#kegg-downregulated-genes"></a>
 </h4>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kegg_down</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_kegg_enrichment.html">get_kegg_enrichment</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparison <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
@@ -1723,30 +1615,15 @@ from your differential expression results.</p>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">kegg_down</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">kegg_down</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">kegg_down</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Description"</span>, <span class="st">"pvalue"</span>, <span class="st">"p.adjust"</span>, <span class="st">"Count"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co">#&gt;                                               Description       pvalue</span></span>
-<span><span class="co">#&gt; hsa04060           Cytokine-cytokine receptor interaction 9.184579e-07</span></span>
-<span><span class="co">#&gt; hsa04750 Inflammatory mediator regulation of TRP channels 7.801789e-06</span></span>
-<span><span class="co">#&gt; hsa04713                            Circadian entrainment 4.450631e-05</span></span>
-<span><span class="co">#&gt; hsa04360                                    Axon guidance 8.292092e-05</span></span>
-<span><span class="co">#&gt; hsa04926                        Relaxin signaling pathway 4.210737e-04</span></span>
-<span><span class="co">#&gt; hsa04024                           cAMP signaling pathway 5.592246e-04</span></span>
-<span><span class="co">#&gt;              p.adjust Count</span></span>
-<span><span class="co">#&gt; hsa04060 0.0002525759    19</span></span>
-<span><span class="co">#&gt; hsa04750 0.0010727459    10</span></span>
-<span><span class="co">#&gt; hsa04713 0.0040797451     9</span></span>
-<span><span class="co">#&gt; hsa04360 0.0057008133    12</span></span>
-<span><span class="co">#&gt; hsa04926 0.0231590537     9</span></span>
-<span><span class="co">#&gt; hsa04024 0.0256311252    12</span></span></code></pre></div>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="kegg-visualization">KEGG Visualization<a class="anchor" aria-label="anchor" href="#kegg-visualization"></a>
 </h4>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">kegg_up</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">kegg_up</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_plot.html">get_enrichment_plot</a></span><span class="op">(</span><span class="va">kegg_up</span><span class="op">$</span><span class="va">enrich</span>, top_n <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="VISTA-airway_files/figure-html/kegg-plot-1.png" class="r-plt" alt="" width="864" style="display: block; margin: auto;"></p>
 </div>
 </div>
 </div>
@@ -1757,7 +1634,7 @@ from your differential expression results.</p>
 <h3 id="fold-change-matrix">Fold-change Matrix<a class="anchor" aria-label="anchor" href="#fold-change-matrix"></a>
 </h3>
 <p>Useful for comparing multiple comparisons:</p>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fc_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_foldchange_matrix.html">get_foldchange_matrix</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fc_matrix</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 Dexamethasone_VS_Untreated</span></span>
@@ -1778,7 +1655,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="basic-fc-heatmap">Basic FC heatmap<a class="anchor" aria-label="anchor" href="#basic-fc-heatmap"></a>
 </h4>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Select genes with large fold-changes</span></span>
 <span><span class="va">fc_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">fc_matrix</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">fc_matrix</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">]</span></span>
 <span></span>
@@ -1793,7 +1670,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="fc-heatmap-with-gene-names">FC heatmap with gene names<a class="anchor" aria-label="anchor" href="#fc-heatmap-with-gene-names"></a>
 </h4>
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_foldchange_heatmap.html">get_foldchange_heatmap</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp_names</span>,</span>
@@ -1806,7 +1683,7 @@ from your differential expression results.</p>
 <div class="section level4">
 <h4 id="fc-heatmap-for-specific-gene-set">FC heatmap for specific gene set<a class="anchor" aria-label="anchor" href="#fc-heatmap-for-specific-gene-set"></a>
 </h4>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use top upregulated genes</span></span>
 <span><span class="fu"><a href="../reference/get_foldchange_heatmap.html">get_foldchange_heatmap</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -1825,7 +1702,7 @@ from your differential expression results.</p>
 <div class="section level3">
 <h3 id="export-de-results-to-file">Export DE results to file<a class="anchor" aria-label="anchor" href="#export-de-results-to-file"></a>
 </h3>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Export complete DE table with annotations</span></span>
 <span><span class="va">de_annotated</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,</span>
@@ -1852,7 +1729,7 @@ from your differential expression results.</p>
 <div class="section level3">
 <h3 id="save-vista-object">Save VISTA object<a class="anchor" aria-label="anchor" href="#save-vista-object"></a>
 </h3>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Save the complete VISTA object for later use</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">vista</span>, file <span class="op">=</span> <span class="st">"airway_vista_object.rds"</span><span class="op">)</span></span>
 <span></span>
@@ -2010,7 +1887,7 @@ relationships</li>
 <div class="section level2">
 <h2 id="session-information">Session Information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.5.2 (2025-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
@@ -2046,57 +1923,57 @@ relationships</li>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;   [1] splines_4.5.2           ggplotify_0.1.3         tibble_3.3.1           </span></span>
-<span><span class="co">#&gt;   [4] R.oo_1.27.1             polyclip_1.10-7         httr2_1.2.2            </span></span>
-<span><span class="co">#&gt;   [7] lifecycle_1.0.5         rstatix_0.7.3           edgeR_4.8.2            </span></span>
-<span><span class="co">#&gt;  [10] doParallel_1.0.17       lattice_0.22-7          MASS_7.3-65            </span></span>
-<span><span class="co">#&gt;  [13] backports_1.5.0         limma_3.66.0            sass_0.4.10            </span></span>
-<span><span class="co">#&gt;  [16] rmarkdown_2.30          jquerylib_0.1.4         yaml_2.3.12            </span></span>
-<span><span class="co">#&gt;  [19] otel_0.2.0              ggtangle_0.1.1          EnhancedVolcano_1.28.2 </span></span>
-<span><span class="co">#&gt;  [22] cowplot_1.2.0           DBI_1.2.3               RColorBrewer_1.1-3     </span></span>
-<span><span class="co">#&gt;  [25] abind_1.4-8             purrr_1.2.1             R.utils_2.13.0         </span></span>
-<span><span class="co">#&gt;  [28] msigdbr_25.1.1          yulab.utils_0.2.4       tweenr_2.0.3           </span></span>
-<span><span class="co">#&gt;  [31] rappdirs_0.3.4          gdtools_0.5.0           circlize_0.4.17        </span></span>
-<span><span class="co">#&gt;  [34] enrichplot_1.30.4       ggrepel_0.9.6           tidytree_0.4.7         </span></span>
-<span><span class="co">#&gt;  [37] pkgdown_2.2.0           codetools_0.2-20        DelayedArray_0.36.0    </span></span>
-<span><span class="co">#&gt;  [40] DOSE_4.4.0              ggforce_0.5.0           tidyselect_1.2.1       </span></span>
-<span><span class="co">#&gt;  [43] shape_1.4.6.1           aplot_0.2.9             farver_2.1.2           </span></span>
-<span><span class="co">#&gt;  [46] jsonlite_2.0.0          GetoptLong_1.1.0        Formula_1.2-5          </span></span>
-<span><span class="co">#&gt;  [49] ggridges_0.5.7          iterators_1.0.14        systemfonts_1.3.1      </span></span>
-<span><span class="co">#&gt;  [52] foreach_1.5.2           tools_4.5.2             ggnewscale_0.5.2       </span></span>
-<span><span class="co">#&gt;  [55] treeio_1.34.0           ragg_1.5.0              Rcpp_1.1.1             </span></span>
-<span><span class="co">#&gt;  [58] glue_1.8.0              gridExtra_2.3           SparseArray_1.10.8     </span></span>
-<span><span class="co">#&gt;  [61] xfun_0.56               DESeq2_1.50.2           qvalue_2.42.0          </span></span>
-<span><span class="co">#&gt;  [64] dplyr_1.2.0             withr_3.0.2             BiocManager_1.30.27    </span></span>
-<span><span class="co">#&gt;  [67] fastmap_1.2.0           GGally_2.4.0            ggpointdensity_0.2.1   </span></span>
-<span><span class="co">#&gt;  [70] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     </span></span>
-<span><span class="co">#&gt;  [73] textshaping_1.0.4       colorspace_2.1-2        GO.db_3.22.0           </span></span>
-<span><span class="co">#&gt;  [76] RSQLite_2.4.6           R.methodsS3_1.8.2       utf8_1.2.6             </span></span>
-<span><span class="co">#&gt;  [79] tidyr_1.3.2             fontLiberation_0.1.0    renv_1.1.4             </span></span>
-<span><span class="co">#&gt;  [82] data.table_1.18.2.1     httr_1.4.8              htmlwidgets_1.6.4      </span></span>
-<span><span class="co">#&gt;  [85] S4Arrays_1.10.1         scatterpie_0.2.6        ggstats_0.12.0         </span></span>
-<span><span class="co">#&gt;  [88] pkgconfig_2.0.3         gtable_0.3.6            blob_1.3.0             </span></span>
-<span><span class="co">#&gt;  [91] ComplexHeatmap_2.26.1   S7_0.2.1                XVector_0.50.0         </span></span>
-<span><span class="co">#&gt;  [94] clusterProfiler_4.18.4  htmltools_0.5.9         fontBitstreamVera_0.1.1</span></span>
-<span><span class="co">#&gt;  [97] carData_3.0-6           bookdown_0.46           fgsea_1.36.2           </span></span>
-<span><span class="co">#&gt; [100] clue_0.3-67             scales_1.4.0            png_0.1-8              </span></span>
-<span><span class="co">#&gt; [103] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         </span></span>
-<span><span class="co">#&gt; [106] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             </span></span>
-<span><span class="co">#&gt; [109] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          </span></span>
-<span><span class="co">#&gt; [112] parallel_4.5.2          desc_1.4.3              pillar_1.11.1          </span></span>
-<span><span class="co">#&gt; [115] grid_4.5.2              vctrs_0.7.1             ggpubr_0.6.2           </span></span>
-<span><span class="co">#&gt; [118] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.1        </span></span>
-<span><span class="co">#&gt; [121] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        </span></span>
-<span><span class="co">#&gt; [124] compiler_4.5.2          rlang_1.1.7             crayon_1.5.3           </span></span>
-<span><span class="co">#&gt; [127] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          </span></span>
-<span><span class="co">#&gt; [130] plyr_1.8.9              fs_1.6.6                ggiraph_0.9.6          </span></span>
-<span><span class="co">#&gt; [133] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    </span></span>
-<span><span class="co">#&gt; [136] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      </span></span>
-<span><span class="co">#&gt; [139] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       </span></span>
-<span><span class="co">#&gt; [142] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          </span></span>
-<span><span class="co">#&gt; [145] KEGGREST_1.50.0         statmod_1.5.1           igraph_2.2.2           </span></span>
-<span><span class="co">#&gt; [148] broom_1.0.12            memoise_2.0.1           bslib_0.10.0           </span></span>
-<span><span class="co">#&gt; [151] ggtree_4.0.4            fastmatch_1.1-8         bit_4.6.0              </span></span>
-<span><span class="co">#&gt; [154] ape_5.8-1               gson_0.1.0</span></span></code></pre></div>
+<span><span class="co">#&gt;   [4] R.oo_1.27.1             polyclip_1.10-7         lifecycle_1.0.5        </span></span>
+<span><span class="co">#&gt;   [7] rstatix_0.7.3           edgeR_4.8.2             doParallel_1.0.17      </span></span>
+<span><span class="co">#&gt;  [10] lattice_0.22-7          MASS_7.3-65             backports_1.5.0        </span></span>
+<span><span class="co">#&gt;  [13] limma_3.66.0            sass_0.4.10             rmarkdown_2.30         </span></span>
+<span><span class="co">#&gt;  [16] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             </span></span>
+<span><span class="co">#&gt;  [19] ggtangle_0.1.1          EnhancedVolcano_1.28.2  cowplot_1.2.0          </span></span>
+<span><span class="co">#&gt;  [22] DBI_1.2.3               RColorBrewer_1.1-3      abind_1.4-8            </span></span>
+<span><span class="co">#&gt;  [25] purrr_1.2.1             R.utils_2.13.0          msigdbr_25.1.1         </span></span>
+<span><span class="co">#&gt;  [28] yulab.utils_0.2.4       tweenr_2.0.3            rappdirs_0.3.4         </span></span>
+<span><span class="co">#&gt;  [31] gdtools_0.5.0           circlize_0.4.17         enrichplot_1.30.4      </span></span>
+<span><span class="co">#&gt;  [34] ggrepel_0.9.6           tidytree_0.4.7          pkgdown_2.2.0          </span></span>
+<span><span class="co">#&gt;  [37] codetools_0.2-20        DelayedArray_0.36.0     DOSE_4.4.0             </span></span>
+<span><span class="co">#&gt;  [40] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          </span></span>
+<span><span class="co">#&gt;  [43] aplot_0.2.9             farver_2.1.2            jsonlite_2.0.0         </span></span>
+<span><span class="co">#&gt;  [46] GetoptLong_1.1.0        Formula_1.2-5           ggridges_0.5.7         </span></span>
+<span><span class="co">#&gt;  [49] iterators_1.0.14        systemfonts_1.3.1       foreach_1.5.2          </span></span>
+<span><span class="co">#&gt;  [52] tools_4.5.2             ggnewscale_0.5.2        treeio_1.34.0          </span></span>
+<span><span class="co">#&gt;  [55] ragg_1.5.0              Rcpp_1.1.1              glue_1.8.0             </span></span>
+<span><span class="co">#&gt;  [58] gridExtra_2.3           SparseArray_1.10.8      xfun_0.56              </span></span>
+<span><span class="co">#&gt;  [61] DESeq2_1.50.2           qvalue_2.42.0           dplyr_1.2.0            </span></span>
+<span><span class="co">#&gt;  [64] withr_3.0.2             BiocManager_1.30.27     fastmap_1.2.0          </span></span>
+<span><span class="co">#&gt;  [67] GGally_2.4.0            ggpointdensity_0.2.1    digest_0.6.39          </span></span>
+<span><span class="co">#&gt;  [70] R6_2.6.1                gridGraphics_0.5-1      textshaping_1.0.4      </span></span>
+<span><span class="co">#&gt;  [73] colorspace_2.1-2        GO.db_3.22.0            RSQLite_2.4.6          </span></span>
+<span><span class="co">#&gt;  [76] R.methodsS3_1.8.2       utf8_1.2.6              tidyr_1.3.2            </span></span>
+<span><span class="co">#&gt;  [79] fontLiberation_0.1.0    renv_1.1.4              data.table_1.18.2.1    </span></span>
+<span><span class="co">#&gt;  [82] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.10.1        </span></span>
+<span><span class="co">#&gt;  [85] scatterpie_0.2.6        ggstats_0.12.0          pkgconfig_2.0.3        </span></span>
+<span><span class="co">#&gt;  [88] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  </span></span>
+<span><span class="co">#&gt;  [91] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 </span></span>
+<span><span class="co">#&gt;  [94] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          </span></span>
+<span><span class="co">#&gt;  [97] bookdown_0.46           fgsea_1.36.2            clue_0.3-67            </span></span>
+<span><span class="co">#&gt; [100] scales_1.4.0            png_0.1-8               ggfun_0.2.0            </span></span>
+<span><span class="co">#&gt; [103] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           </span></span>
+<span><span class="co">#&gt; [106] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           </span></span>
+<span><span class="co">#&gt; [109] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.2         </span></span>
+<span><span class="co">#&gt; [112] desc_1.4.3              pillar_1.11.1           grid_4.5.2             </span></span>
+<span><span class="co">#&gt; [115] vctrs_0.7.1             ggpubr_0.6.2            car_3.1-5              </span></span>
+<span><span class="co">#&gt; [118] tidydr_0.0.6            cluster_2.1.8.1         evaluate_1.0.5         </span></span>
+<span><span class="co">#&gt; [121] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         </span></span>
+<span><span class="co">#&gt; [124] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         </span></span>
+<span><span class="co">#&gt; [127] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             </span></span>
+<span><span class="co">#&gt; [130] fs_1.6.6                ggiraph_0.9.6           stringi_1.8.7          </span></span>
+<span><span class="co">#&gt; [133] viridisLite_0.4.3       BiocParallel_1.44.0     assertthat_0.2.1       </span></span>
+<span><span class="co">#&gt; [136] babelgene_22.9          Biostrings_2.78.0       lazyeval_0.2.2         </span></span>
+<span><span class="co">#&gt; [139] GOSemSim_2.36.0         fontquiver_0.2.1        Matrix_1.7-4           </span></span>
+<span><span class="co">#&gt; [142] patchwork_1.3.2         bit64_4.6.0-1           KEGGREST_1.50.0        </span></span>
+<span><span class="co">#&gt; [145] statmod_1.5.1           igraph_2.2.2            broom_1.0.12           </span></span>
+<span><span class="co">#&gt; [148] memoise_2.0.1           bslib_0.10.0            ggtree_4.0.4           </span></span>
+<span><span class="co">#&gt; [151] fastmatch_1.1-8         bit_4.6.0               ape_5.8-1              </span></span>
+<span><span class="co">#&gt; [154] gson_0.1.0</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

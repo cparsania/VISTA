@@ -29,6 +29,7 @@ get_expression_heatmap(
   kmeans_k = NULL,
   return_type = c("heatmap", "clusters", "both"),
   annotate_columns = FALSE,
+  cluster_by = NULL,
   column_anno_palette = "Dark 3",
   heatmap_name = NULL,
   display_id = NULL,
@@ -136,7 +137,14 @@ get_expression_heatmap(
 
 - annotate_columns:
 
-  Logical; add a column annotation bar showing group membership.
+  Logical or character vector. `TRUE` adds one column annotation using
+  `group_column`; a character vector adds multiple annotations from
+  `sample_info`.
+
+- cluster_by:
+
+  Optional annotation column used to split/cluster columns. Defaults to
+  the first annotation column when `annotate_columns` is enabled.
 
 - column_anno_palette:
 

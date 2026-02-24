@@ -780,6 +780,25 @@ get_expression_heatmap(
 
 ![](VISTA-airway_files/figure-html/heatmap-annotated-1.png)
 
+#### Heatmap with multiple column annotations and `cluster_by`
+
+``` r
+# Use multiple sample-level columns in top annotation.
+# By default, columns are split by the first annotation column.
+get_expression_heatmap(
+  vista,
+  samples = levels(colData(vista)$treatment),
+  genes = top_degs,
+  show_row_names = FALSE,
+  display_id = "SYMBOL",
+  summarise_replicates = FALSE,
+  annotate_columns = c("treatment", "cell"),
+  cluster_by = "cell"
+)
+```
+
+![](VISTA-airway_files/figure-html/heatmap-annotated-multi-1.png)
+
 #### Heatmap with summarized replicates
 
 ``` r
@@ -1140,56 +1159,6 @@ if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
 #> HALLMARK_APOPTOSIS                         8.306424e-03 5.952937e-02     9
 ```
 
-#### C2 Canonical Pathways
-
-``` r
-msig_c2 <- get_msigdb_enrichment(
-  vista,
-  sample_comparison = comp_names[1],
-  regulation = "Up",
-  msigdb_category = "C2",  # Curated gene sets
-  species = "Homo sapiens",
-  from_type = "ENSEMBL"
-)
-
-if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
-  head(msig_c2$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
-}
-#>                                                                                                   Description
-#> CHEN_LVAD_SUPPORT_OF_FAILING_HEART_UP                                   CHEN_LVAD_SUPPORT_OF_FAILING_HEART_UP
-#> BOQUEST_STEM_CELL_CULTURED_VS_FRESH_UP                                 BOQUEST_STEM_CELL_CULTURED_VS_FRESH_UP
-#> VECCHI_GASTRIC_CANCER_EARLY_DN                                                 VECCHI_GASTRIC_CANCER_EARLY_DN
-#> LINDGREN_BLADDER_CANCER_CLUSTER_2B                                         LINDGREN_BLADDER_CANCER_CLUSTER_2B
-#> ONDER_CDH1_TARGETS_2_UP                                                               ONDER_CDH1_TARGETS_2_UP
-#> RIGGI_EWING_SARCOMA_PROGENITOR_UP                                           RIGGI_EWING_SARCOMA_PROGENITOR_UP
-#> NAKAMURA_ADIPOGENESIS_EARLY_UP                                                 NAKAMURA_ADIPOGENESIS_EARLY_UP
-#> LIM_MAMMARY_STEM_CELL_UP                                                             LIM_MAMMARY_STEM_CELL_UP
-#> DAVICIONI_TARGETS_OF_PAX_FOXO1_FUSIONS_UP                           DAVICIONI_TARGETS_OF_PAX_FOXO1_FUSIONS_UP
-#> TURASHVILI_BREAST_DUCTAL_CARCINOMA_VS_DUCTAL_NORMAL_DN TURASHVILI_BREAST_DUCTAL_CARCINOMA_VS_DUCTAL_NORMAL_DN
-#>                                                              pvalue
-#> CHEN_LVAD_SUPPORT_OF_FAILING_HEART_UP                  8.703329e-29
-#> BOQUEST_STEM_CELL_CULTURED_VS_FRESH_UP                 1.057687e-28
-#> VECCHI_GASTRIC_CANCER_EARLY_DN                         9.978945e-21
-#> LINDGREN_BLADDER_CANCER_CLUSTER_2B                     6.355228e-14
-#> ONDER_CDH1_TARGETS_2_UP                                5.251285e-13
-#> RIGGI_EWING_SARCOMA_PROGENITOR_UP                      2.059802e-12
-#> NAKAMURA_ADIPOGENESIS_EARLY_UP                         2.835060e-12
-#> LIM_MAMMARY_STEM_CELL_UP                               3.863169e-12
-#> DAVICIONI_TARGETS_OF_PAX_FOXO1_FUSIONS_UP              4.213812e-12
-#> TURASHVILI_BREAST_DUCTAL_CARCINOMA_VS_DUCTAL_NORMAL_DN 1.243581e-11
-#>                                                            p.adjust Count
-#> CHEN_LVAD_SUPPORT_OF_FAILING_HEART_UP                  2.068306e-25    30
-#> BOQUEST_STEM_CELL_CULTURED_VS_FRESH_UP                 2.068306e-25    52
-#> VECCHI_GASTRIC_CANCER_EARLY_DN                         1.300922e-17    41
-#> LINDGREN_BLADDER_CANCER_CLUSTER_2B                     6.213825e-11    33
-#> ONDER_CDH1_TARGETS_2_UP                                4.107555e-10    26
-#> RIGGI_EWING_SARCOMA_PROGENITOR_UP                      1.342648e-09    33
-#> NAKAMURA_ADIPOGENESIS_EARLY_UP                         1.583988e-09    14
-#> LIM_MAMMARY_STEM_CELL_UP                               1.831135e-09    34
-#> DAVICIONI_TARGETS_OF_PAX_FOXO1_FUSIONS_UP              1.831135e-09    25
-#> TURASHVILI_BREAST_DUCTAL_CARCINOMA_VS_DUCTAL_NORMAL_DN 4.863645e-09    22
-```
-
 ### Enrichment Visualizations
 
 #### VISTA dotplot (default)
@@ -1392,61 +1361,6 @@ if (!is.null(go_bp$enrich) && nrow(go_bp$enrich@result) > 0) {
 #> GO:0030728 2.526439e-03     5
 ```
 
-#### Molecular Function
-
-``` r
-go_mf <- get_go_enrichment(
-  vista,
-  sample_comparison = comp_names[1],
-  regulation = "Up",
-  ont = "MF",  # Molecular Function
-  species = "Homo sapiens",
-  from_type = "ENSEMBL"
-)
-
-if (!is.null(go_mf$enrich) && nrow(go_mf$enrich@result) > 0) {
-  head(go_mf$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
-}
-#>                                                                        Description
-#> GO:0005201                             extracellular matrix structural constituent
-#> GO:0071949                                                             FAD binding
-#> GO:0050660                                     flavin adenine dinucleotide binding
-#> GO:0004022                                   alcohol dehydrogenase (NAD+) activity
-#> GO:0003779                                                           actin binding
-#> GO:0030020 extracellular matrix structural constituent conferring tensile strength
-#>                  pvalue     p.adjust Count
-#> GO:0005201 6.436638e-07 0.0004190251    16
-#> GO:0071949 5.891139e-06 0.0019175657     7
-#> GO:0050660 2.140762e-05 0.0046454544     9
-#> GO:0004022 3.904575e-05 0.0055998898     5
-#> GO:0003779 4.300991e-05 0.0055998898    22
-#> GO:0030020 2.138508e-04 0.0218907719     6
-```
-
-#### Cellular Component
-
-``` r
-go_cc <- get_go_enrichment(
-  vista,
-  sample_comparison = comp_names[1],
-  regulation = "Up",
-  ont = "CC",  # Cellular Component
-  species = "Homo sapiens",
-  from_type = "ENSEMBL"
-)
-
-if (!is.null(go_cc$enrich) && nrow(go_cc$enrich@result) > 0) {
-  head(go_cc$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
-}
-#>                            Description       pvalue     p.adjust Count
-#> GO:0005604           basement membrane 1.023966e-06 0.0003635081    11
-#> GO:0031252           cell leading edge 5.944506e-06 0.0010551498    23
-#> GO:0005788 endoplasmic reticulum lumen 7.347122e-05 0.0086940943    17
-#> GO:0030027               lamellipodium 1.368277e-04 0.0121434543    13
-#> GO:0005581             collagen trimer 1.807850e-04 0.0128357382     8
-#> GO:0098644 complex of collagen trimers 2.377029e-04 0.0139399059     5
-```
-
 #### GO Visualization
 
 ``` r
@@ -1619,28 +1533,6 @@ kegg_up <- get_kegg_enrichment(
 if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
   head(kegg_up$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
 }
-#>                                                   Description       pvalue
-#> hsa04820                         Cytoskeleton in muscle cells 6.990709e-07
-#> hsa04512                             ECM-receptor interaction 1.291374e-04
-#> hsa00350                                  Tyrosine metabolism 1.303269e-04
-#> hsa04923                Regulation of lipolysis in adipocytes 2.719590e-04
-#> hsa04978                                   Mineral absorption 3.352603e-04
-#> hsa04518                                   Integrin signaling 5.247787e-04
-#> hsa04310                                Wnt signaling pathway 1.438957e-03
-#> hsa04933 AGE-RAGE signaling pathway in diabetic complications 1.565149e-03
-#> hsa04977                     Vitamin digestion and absorption 2.231726e-03
-#> hsa04068                               FoxO signaling pathway 2.432300e-03
-#>              p.adjust Count
-#> hsa04820 0.0001880501    19
-#> hsa04512 0.0116859744     9
-#> hsa00350 0.0116859744     6
-#> hsa04923 0.0180370047     7
-#> hsa04978 0.0180370047     7
-#> hsa04518 0.0235275801    11
-#> hsa04310 0.0526281515    11
-#> hsa04933 0.0526281515     8
-#> hsa04977 0.0654288617     4
-#> hsa04068 0.0654288617     9
 ```
 
 #### KEGG downregulated genes
@@ -1657,20 +1549,6 @@ kegg_down <- get_kegg_enrichment(
 if (!is.null(kegg_down$enrich) && nrow(kegg_down$enrich@result) > 0) {
   head(kegg_down$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")])
 }
-#>                                               Description       pvalue
-#> hsa04060           Cytokine-cytokine receptor interaction 9.184579e-07
-#> hsa04750 Inflammatory mediator regulation of TRP channels 7.801789e-06
-#> hsa04713                            Circadian entrainment 4.450631e-05
-#> hsa04360                                    Axon guidance 8.292092e-05
-#> hsa04926                        Relaxin signaling pathway 4.210737e-04
-#> hsa04024                           cAMP signaling pathway 5.592246e-04
-#>              p.adjust Count
-#> hsa04060 0.0002525759    19
-#> hsa04750 0.0010727459    10
-#> hsa04713 0.0040797451     9
-#> hsa04360 0.0057008133    12
-#> hsa04926 0.0231590537     9
-#> hsa04024 0.0256311252    12
 ```
 
 #### KEGG Visualization
@@ -1680,8 +1558,6 @@ if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
   get_enrichment_plot(kegg_up$enrich, top_n = 15)
 }
 ```
-
-![](VISTA-airway_files/figure-html/kegg-plot-1.png)
 
 ## Fold-Change Analysis
 
@@ -1932,57 +1808,57 @@ sessionInfo()
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] splines_4.5.2           ggplotify_0.1.3         tibble_3.3.1           
-#>   [4] R.oo_1.27.1             polyclip_1.10-7         httr2_1.2.2            
-#>   [7] lifecycle_1.0.5         rstatix_0.7.3           edgeR_4.8.2            
-#>  [10] doParallel_1.0.17       lattice_0.22-7          MASS_7.3-65            
-#>  [13] backports_1.5.0         limma_3.66.0            sass_0.4.10            
-#>  [16] rmarkdown_2.30          jquerylib_0.1.4         yaml_2.3.12            
-#>  [19] otel_0.2.0              ggtangle_0.1.1          EnhancedVolcano_1.28.2 
-#>  [22] cowplot_1.2.0           DBI_1.2.3               RColorBrewer_1.1-3     
-#>  [25] abind_1.4-8             purrr_1.2.1             R.utils_2.13.0         
-#>  [28] msigdbr_25.1.1          yulab.utils_0.2.4       tweenr_2.0.3           
-#>  [31] rappdirs_0.3.4          gdtools_0.5.0           circlize_0.4.17        
-#>  [34] enrichplot_1.30.4       ggrepel_0.9.6           tidytree_0.4.7         
-#>  [37] pkgdown_2.2.0           codetools_0.2-20        DelayedArray_0.36.0    
-#>  [40] DOSE_4.4.0              ggforce_0.5.0           tidyselect_1.2.1       
-#>  [43] shape_1.4.6.1           aplot_0.2.9             farver_2.1.2           
-#>  [46] jsonlite_2.0.0          GetoptLong_1.1.0        Formula_1.2-5          
-#>  [49] ggridges_0.5.7          iterators_1.0.14        systemfonts_1.3.1      
-#>  [52] foreach_1.5.2           tools_4.5.2             ggnewscale_0.5.2       
-#>  [55] treeio_1.34.0           ragg_1.5.0              Rcpp_1.1.1             
-#>  [58] glue_1.8.0              gridExtra_2.3           SparseArray_1.10.8     
-#>  [61] xfun_0.56               DESeq2_1.50.2           qvalue_2.42.0          
-#>  [64] dplyr_1.2.0             withr_3.0.2             BiocManager_1.30.27    
-#>  [67] fastmap_1.2.0           GGally_2.4.0            ggpointdensity_0.2.1   
-#>  [70] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     
-#>  [73] textshaping_1.0.4       colorspace_2.1-2        GO.db_3.22.0           
-#>  [76] RSQLite_2.4.6           R.methodsS3_1.8.2       utf8_1.2.6             
-#>  [79] tidyr_1.3.2             fontLiberation_0.1.0    renv_1.1.4             
-#>  [82] data.table_1.18.2.1     httr_1.4.8              htmlwidgets_1.6.4      
-#>  [85] S4Arrays_1.10.1         scatterpie_0.2.6        ggstats_0.12.0         
-#>  [88] pkgconfig_2.0.3         gtable_0.3.6            blob_1.3.0             
-#>  [91] ComplexHeatmap_2.26.1   S7_0.2.1                XVector_0.50.0         
-#>  [94] clusterProfiler_4.18.4  htmltools_0.5.9         fontBitstreamVera_0.1.1
-#>  [97] carData_3.0-6           bookdown_0.46           fgsea_1.36.2           
-#> [100] clue_0.3-67             scales_1.4.0            png_0.1-8              
-#> [103] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         
-#> [106] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             
-#> [109] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          
-#> [112] parallel_4.5.2          desc_1.4.3              pillar_1.11.1          
-#> [115] grid_4.5.2              vctrs_0.7.1             ggpubr_0.6.2           
-#> [118] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.1        
-#> [121] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        
-#> [124] compiler_4.5.2          rlang_1.1.7             crayon_1.5.3           
-#> [127] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          
-#> [130] plyr_1.8.9              fs_1.6.6                ggiraph_0.9.6          
-#> [133] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    
-#> [136] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
-#> [139] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       
-#> [142] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          
-#> [145] KEGGREST_1.50.0         statmod_1.5.1           igraph_2.2.2           
-#> [148] broom_1.0.12            memoise_2.0.1           bslib_0.10.0           
-#> [151] ggtree_4.0.4            fastmatch_1.1-8         bit_4.6.0              
-#> [154] ape_5.8-1               gson_0.1.0
+#>   [4] R.oo_1.27.1             polyclip_1.10-7         lifecycle_1.0.5        
+#>   [7] rstatix_0.7.3           edgeR_4.8.2             doParallel_1.0.17      
+#>  [10] lattice_0.22-7          MASS_7.3-65             backports_1.5.0        
+#>  [13] limma_3.66.0            sass_0.4.10             rmarkdown_2.30         
+#>  [16] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             
+#>  [19] ggtangle_0.1.1          EnhancedVolcano_1.28.2  cowplot_1.2.0          
+#>  [22] DBI_1.2.3               RColorBrewer_1.1-3      abind_1.4-8            
+#>  [25] purrr_1.2.1             R.utils_2.13.0          msigdbr_25.1.1         
+#>  [28] yulab.utils_0.2.4       tweenr_2.0.3            rappdirs_0.3.4         
+#>  [31] gdtools_0.5.0           circlize_0.4.17         enrichplot_1.30.4      
+#>  [34] ggrepel_0.9.6           tidytree_0.4.7          pkgdown_2.2.0          
+#>  [37] codetools_0.2-20        DelayedArray_0.36.0     DOSE_4.4.0             
+#>  [40] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          
+#>  [43] aplot_0.2.9             farver_2.1.2            jsonlite_2.0.0         
+#>  [46] GetoptLong_1.1.0        Formula_1.2-5           ggridges_0.5.7         
+#>  [49] iterators_1.0.14        systemfonts_1.3.1       foreach_1.5.2          
+#>  [52] tools_4.5.2             ggnewscale_0.5.2        treeio_1.34.0          
+#>  [55] ragg_1.5.0              Rcpp_1.1.1              glue_1.8.0             
+#>  [58] gridExtra_2.3           SparseArray_1.10.8      xfun_0.56              
+#>  [61] DESeq2_1.50.2           qvalue_2.42.0           dplyr_1.2.0            
+#>  [64] withr_3.0.2             BiocManager_1.30.27     fastmap_1.2.0          
+#>  [67] GGally_2.4.0            ggpointdensity_0.2.1    digest_0.6.39          
+#>  [70] R6_2.6.1                gridGraphics_0.5-1      textshaping_1.0.4      
+#>  [73] colorspace_2.1-2        GO.db_3.22.0            RSQLite_2.4.6          
+#>  [76] R.methodsS3_1.8.2       utf8_1.2.6              tidyr_1.3.2            
+#>  [79] fontLiberation_0.1.0    renv_1.1.4              data.table_1.18.2.1    
+#>  [82] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.10.1        
+#>  [85] scatterpie_0.2.6        ggstats_0.12.0          pkgconfig_2.0.3        
+#>  [88] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
+#>  [91] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
+#>  [94] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          
+#>  [97] bookdown_0.46           fgsea_1.36.2            clue_0.3-67            
+#> [100] scales_1.4.0            png_0.1-8               ggfun_0.2.0            
+#> [103] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
+#> [106] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
+#> [109] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.2         
+#> [112] desc_1.4.3              pillar_1.11.1           grid_4.5.2             
+#> [115] vctrs_0.7.1             ggpubr_0.6.2            car_3.1-5              
+#> [118] tidydr_0.0.6            cluster_2.1.8.1         evaluate_1.0.5         
+#> [121] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         
+#> [124] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
+#> [127] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
+#> [130] fs_1.6.6                ggiraph_0.9.6           stringi_1.8.7          
+#> [133] viridisLite_0.4.3       BiocParallel_1.44.0     assertthat_0.2.1       
+#> [136] babelgene_22.9          Biostrings_2.78.0       lazyeval_0.2.2         
+#> [139] GOSemSim_2.36.0         fontquiver_0.2.1        Matrix_1.7-4           
+#> [142] patchwork_1.3.2         bit64_4.6.0-1           KEGGREST_1.50.0        
+#> [145] statmod_1.5.1           igraph_2.2.2            broom_1.0.12           
+#> [148] memoise_2.0.1           bslib_0.10.0            ggtree_4.0.4           
+#> [151] fastmatch_1.1-8         bit_4.6.0               ape_5.8-1              
+#> [154] gson_0.1.0
 ```
 
 ## References
