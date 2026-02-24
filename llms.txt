@@ -458,6 +458,8 @@ Sample-level quality control and exploratory visualizations.
 - [`get_pca_plot()`](get_pca_plot.md) : PCA plot
 - [`get_mds_plot()`](get_mds_plot.md) : Generate an MDS plot for samples
   in a VISTA object
+- [`get_umap_plot()`](get_umap_plot.md) : Generate a UMAP plot for
+  samples in a VISTA object
 - [`get_corr_heatmap()`](get_corr_heatmap.md) : Draw a sample
   correlation heatmap
 - [`get_pairwise_corr_plot()`](get_pairwise_corr_plot.md) : Plot

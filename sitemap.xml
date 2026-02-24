@@ -75,6 +75,7 @@
 <url><loc>/reference/get_pathway_genes.html</loc></url>
 <url><loc>/reference/get_pathway_heatmap.html</loc></url>
 <url><loc>/reference/get_pca_plot.html</loc></url>
+<url><loc>/reference/get_umap_plot.html</loc></url>
 <url><loc>/reference/get_volcano_plot.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/plot_celltype_barplot.html</loc></url>

@@ -570,6 +570,34 @@ get_mds_plot(
 
 ![](VISTA-airway_files/figure-html/mds-shapes-1.png)
 
+### Uniform Manifold Approximation and Projection (UMAP)
+
+Non-linear sample embedding for exploratory structure.
+
+#### Basic UMAP plot
+
+``` r
+get_umap_plot(
+  vista,
+  label_replicates = TRUE
+)
+```
+
+![](VISTA-airway_files/figure-html/umap-basic-1.png)
+
+#### UMAP colored by a user-defined metadata column
+
+``` r
+get_umap_plot(
+  vista,
+  color_by = "cell",
+  shape_by = "treatment",
+  label_replicates = TRUE
+)
+```
+
+![](VISTA-airway_files/figure-html/umap-color-by-cell-1.png)
+
 ## Differential Expression Visualizations
 
 ### DEG Count Summary
@@ -1399,25 +1427,25 @@ if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
 #>                                                                           Description
 #> HALLMARK_ADIPOGENESIS                                           HALLMARK_ADIPOGENESIS
 #> HALLMARK_TNFA_SIGNALING_VIA_NFKB                     HALLMARK_TNFA_SIGNALING_VIA_NFKB
-#> HALLMARK_OXIDATIVE_PHOSPHORYLATION                 HALLMARK_OXIDATIVE_PHOSPHORYLATION
 #> HALLMARK_ANDROGEN_RESPONSE                                 HALLMARK_ANDROGEN_RESPONSE
 #> HALLMARK_XENOBIOTIC_METABOLISM                         HALLMARK_XENOBIOTIC_METABOLISM
-#> HALLMARK_HYPOXIA                                                     HALLMARK_HYPOXIA
+#> HALLMARK_OXIDATIVE_PHOSPHORYLATION                 HALLMARK_OXIDATIVE_PHOSPHORYLATION
 #> HALLMARK_APICAL_JUNCTION                                     HALLMARK_APICAL_JUNCTION
-#> HALLMARK_IL2_STAT5_SIGNALING                             HALLMARK_IL2_STAT5_SIGNALING
 #> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION
+#> HALLMARK_HYPOXIA                                                     HALLMARK_HYPOXIA
+#> HALLMARK_IL2_STAT5_SIGNALING                             HALLMARK_IL2_STAT5_SIGNALING
 #> HALLMARK_UV_RESPONSE_UP                                       HALLMARK_UV_RESPONSE_UP
 #>                                                 NES       pvalue     p.adjust
-#> HALLMARK_ADIPOGENESIS                      2.008197 6.973961e-08 3.486981e-06
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           1.617805 7.469873e-04 1.867468e-02
-#> HALLMARK_OXIDATIVE_PHOSPHORYLATION         1.508492 1.681108e-03 2.801847e-02
-#> HALLMARK_ANDROGEN_RESPONSE                 1.644943 2.443211e-03 3.054013e-02
-#> HALLMARK_XENOBIOTIC_METABOLISM             1.535616 3.681683e-03 3.272427e-02
-#> HALLMARK_HYPOXIA                           1.438650 3.926912e-03 3.272427e-02
-#> HALLMARK_APICAL_JUNCTION                   1.495903 6.148555e-03 3.525390e-02
-#> HALLMARK_IL2_STAT5_SIGNALING               1.487992 5.129637e-03 3.525390e-02
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.433869 6.345703e-03 3.525390e-02
-#> HALLMARK_UV_RESPONSE_UP                    1.447870 8.345928e-03 4.172964e-02
+#> HALLMARK_ADIPOGENESIS                      1.986707 9.738376e-08 4.869188e-06
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           1.603528 7.821027e-04 1.955257e-02
+#> HALLMARK_ANDROGEN_RESPONSE                 1.655852 2.608251e-03 2.727751e-02
+#> HALLMARK_XENOBIOTIC_METABOLISM             1.526986 2.727751e-03 2.727751e-02
+#> HALLMARK_OXIDATIVE_PHOSPHORYLATION         1.495131 1.754134e-03 2.727751e-02
+#> HALLMARK_APICAL_JUNCTION                   1.479030 4.050758e-03 3.327703e-02
+#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.421169 4.658784e-03 3.327703e-02
+#> HALLMARK_HYPOXIA                           1.427530 5.665552e-03 3.540970e-02
+#> HALLMARK_IL2_STAT5_SIGNALING               1.473815 1.057779e-02 4.808089e-02
+#> HALLMARK_UV_RESPONSE_UP                    1.453486 9.150772e-03 4.808089e-02
 ```
 
 #### GSEA with GO Biological Process
@@ -1439,27 +1467,27 @@ if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
   head(gsea_go$enrich@result[, c("Description", "NES", "pvalue", "p.adjust")], n = 10)
 }
 #>                                                  Description       NES
-#> GO:0032868                               response to insulin  1.821783
-#> GO:0071375     cellular response to peptide hormone stimulus  1.816407
-#> GO:0051962 positive regulation of nervous system development -1.813464
-#> GO:0031589                           cell-substrate adhesion  1.737385
-#> GO:0032869             cellular response to insulin stimulus  1.887883
-#> GO:0097501                      stress response to metal ion  2.066086
-#> GO:0010810             regulation of cell-substrate adhesion  1.812149
-#> GO:0003012                             muscle system process  1.693228
-#> GO:0043434                       response to peptide hormone  1.639321
-#> GO:0071294                     cellular response to zinc ion  2.078796
+#> GO:0071294                     cellular response to zinc ion  2.083461
+#> GO:0097501                      stress response to metal ion  2.046176
+#> GO:0032869             cellular response to insulin stimulus  1.888211
+#> GO:0032868                               response to insulin  1.804969
+#> GO:0071375     cellular response to peptide hormone stimulus  1.802610
+#> GO:0051962 positive regulation of nervous system development -1.797462
+#> GO:0031589                           cell-substrate adhesion  1.724863
+#> GO:0050886                                 endocrine process  2.063075
+#> GO:0061687              detoxification of inorganic compound  2.016962
+#> GO:0006006                         glucose metabolic process  1.858099
 #>                  pvalue    p.adjust
-#> GO:0032868 3.054012e-06 0.004167962
-#> GO:0071375 1.507611e-06 0.004167962
-#> GO:0051962 1.890079e-06 0.004167962
-#> GO:0031589 2.636679e-06 0.004167962
-#> GO:0032869 4.007419e-06 0.004375300
-#> GO:0097501 7.324459e-06 0.005219952
-#> GO:0010810 7.649683e-06 0.005219952
-#> GO:0003012 7.104889e-06 0.005219952
-#> GO:0043434 1.005863e-05 0.006101117
-#> GO:0071294 1.574199e-05 0.006138253
+#> GO:0071294 8.367080e-06 0.006525127
+#> GO:0097501 3.652121e-06 0.006525127
+#> GO:0032869 7.633191e-06 0.006525127
+#> GO:0032868 5.418664e-06 0.006525127
+#> GO:0071375 1.584595e-06 0.006525127
+#> GO:0051962 4.452005e-06 0.006525127
+#> GO:0031589 6.975069e-06 0.006525127
+#> GO:0050886 2.249368e-05 0.012085314
+#> GO:0061687 2.821214e-05 0.012085314
+#> GO:0006006 2.877983e-05 0.012085314
 ```
 
 #### GSEA enrichment overview
@@ -1676,7 +1704,7 @@ In this workflow, we:
 1.  ✅ Loaded the airway RNA-seq dataset
 2.  ✅ Created a VISTA object with DESeq2 analysis
 3.  ✅ Added gene annotations from org.Hs.eg.db
-4.  ✅ Performed quality control (PCA, MDS, correlation)
+4.  ✅ Performed quality control (PCA, MDS, UMAP, correlation)
 5.  ✅ Visualized differential expression (volcano, MA plots)
 6.  ✅ Analyzed expression patterns (heatmaps, barplots, boxplots,
     violin plots, and more)
@@ -1691,7 +1719,7 @@ In this workflow, we:
 - **Consistent interface**: All plot functions follow the same pattern
 - **Flexible visualizations**: Easy to customize colors, labels,
   thresholds
-- **Multiple plot types**: 28+ plotting functions for every analysis
+- **Multiple plot types**: 29+ plotting functions for every analysis
   need
 - **Integrated enrichment**: No need to wrangle gene IDs manually
 - **Publication-ready**: All plots are ggplot2/ComplexHeatmap objects
@@ -1706,6 +1734,8 @@ In this workflow, we:
   analysis
 - [`get_mds_plot()`](../reference/get_mds_plot.md) - Multidimensional
   scaling
+- [`get_umap_plot()`](../reference/get_umap_plot.md) - Nonlinear sample
+  embedding
 
 #### DE Visualization
 
@@ -1818,47 +1848,48 @@ sessionInfo()
 #>  [25] purrr_1.2.1             R.utils_2.13.0          msigdbr_25.1.1         
 #>  [28] yulab.utils_0.2.4       tweenr_2.0.3            rappdirs_0.3.4         
 #>  [31] gdtools_0.5.0           circlize_0.4.17         enrichplot_1.30.4      
-#>  [34] ggrepel_0.9.6           tidytree_0.4.7          pkgdown_2.2.0          
-#>  [37] codetools_0.2-20        DelayedArray_0.36.0     DOSE_4.4.0             
-#>  [40] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          
-#>  [43] aplot_0.2.9             farver_2.1.2            jsonlite_2.0.0         
-#>  [46] GetoptLong_1.1.0        Formula_1.2-5           ggridges_0.5.7         
-#>  [49] iterators_1.0.14        systemfonts_1.3.1       foreach_1.5.2          
-#>  [52] tools_4.5.2             ggnewscale_0.5.2        treeio_1.34.0          
-#>  [55] ragg_1.5.0              Rcpp_1.1.1              glue_1.8.0             
-#>  [58] gridExtra_2.3           SparseArray_1.10.8      xfun_0.56              
-#>  [61] DESeq2_1.50.2           qvalue_2.42.0           dplyr_1.2.0            
-#>  [64] withr_3.0.2             BiocManager_1.30.27     fastmap_1.2.0          
-#>  [67] GGally_2.4.0            ggpointdensity_0.2.1    digest_0.6.39          
-#>  [70] R6_2.6.1                gridGraphics_0.5-1      textshaping_1.0.4      
-#>  [73] colorspace_2.1-2        GO.db_3.22.0            RSQLite_2.4.6          
-#>  [76] R.methodsS3_1.8.2       utf8_1.2.6              tidyr_1.3.2            
-#>  [79] fontLiberation_0.1.0    renv_1.1.4              data.table_1.18.2.1    
-#>  [82] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.10.1        
-#>  [85] scatterpie_0.2.6        ggstats_0.12.0          pkgconfig_2.0.3        
-#>  [88] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
-#>  [91] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
-#>  [94] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          
-#>  [97] bookdown_0.46           fgsea_1.36.2            clue_0.3-67            
-#> [100] scales_1.4.0            png_0.1-8               ggfun_0.2.0            
-#> [103] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
-#> [106] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
-#> [109] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.2         
-#> [112] desc_1.4.3              pillar_1.11.1           grid_4.5.2             
-#> [115] vctrs_0.7.1             ggpubr_0.6.2            car_3.1-5              
-#> [118] tidydr_0.0.6            cluster_2.1.8.1         evaluate_1.0.5         
-#> [121] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         
-#> [124] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
-#> [127] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
-#> [130] fs_1.6.6                ggiraph_0.9.6           stringi_1.8.7          
-#> [133] viridisLite_0.4.3       BiocParallel_1.44.0     assertthat_0.2.1       
-#> [136] babelgene_22.9          Biostrings_2.78.0       lazyeval_0.2.2         
-#> [139] GOSemSim_2.36.0         fontquiver_0.2.1        Matrix_1.7-4           
-#> [142] patchwork_1.3.2         bit64_4.6.0-1           KEGGREST_1.50.0        
-#> [145] statmod_1.5.1           igraph_2.2.2            broom_1.0.12           
-#> [148] memoise_2.0.1           bslib_0.10.0            ggtree_4.0.4           
-#> [151] fastmatch_1.1-8         bit_4.6.0               ape_5.8-1              
-#> [154] gson_0.1.0
+#>  [34] ggrepel_0.9.6           tidytree_0.4.7          RSpectra_0.16-2        
+#>  [37] pkgdown_2.2.0           codetools_0.2-20        DelayedArray_0.36.0    
+#>  [40] DOSE_4.4.0              ggforce_0.5.0           tidyselect_1.2.1       
+#>  [43] shape_1.4.6.1           aplot_0.2.9             farver_2.1.2           
+#>  [46] jsonlite_2.0.0          GetoptLong_1.1.0        Formula_1.2-5          
+#>  [49] ggridges_0.5.7          iterators_1.0.14        systemfonts_1.3.1      
+#>  [52] foreach_1.5.2           tools_4.5.2             ggnewscale_0.5.2       
+#>  [55] treeio_1.34.0           ragg_1.5.0              Rcpp_1.1.1             
+#>  [58] glue_1.8.0              gridExtra_2.3           SparseArray_1.10.8     
+#>  [61] xfun_0.56               DESeq2_1.50.2           qvalue_2.42.0          
+#>  [64] dplyr_1.2.0             withr_3.0.2             BiocManager_1.30.27    
+#>  [67] fastmap_1.2.0           GGally_2.4.0            ggpointdensity_0.2.1   
+#>  [70] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     
+#>  [73] textshaping_1.0.4       colorspace_2.1-2        GO.db_3.22.0           
+#>  [76] RSQLite_2.4.6           R.methodsS3_1.8.2       utf8_1.2.6             
+#>  [79] tidyr_1.3.2             fontLiberation_0.1.0    renv_1.1.4             
+#>  [82] data.table_1.18.2.1     FNN_1.1.4.1             httr_1.4.8             
+#>  [85] htmlwidgets_1.6.4       S4Arrays_1.10.1         scatterpie_0.2.6       
+#>  [88] ggstats_0.12.0          uwot_0.2.4              pkgconfig_2.0.3        
+#>  [91] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
+#>  [94] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
+#>  [97] htmltools_0.5.9         carData_3.0-6           fontBitstreamVera_0.1.1
+#> [100] bookdown_0.46           fgsea_1.36.2            clue_0.3-67            
+#> [103] scales_1.4.0            png_0.1-8               ggfun_0.2.0            
+#> [106] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
+#> [109] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
+#> [112] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.2         
+#> [115] desc_1.4.3              pillar_1.11.1           grid_4.5.2             
+#> [118] vctrs_0.7.1             ggpubr_0.6.2            car_3.1-5              
+#> [121] tidydr_0.0.6            cluster_2.1.8.1         evaluate_1.0.5         
+#> [124] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         
+#> [127] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
+#> [130] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
+#> [133] fs_1.6.6                ggiraph_0.9.6           stringi_1.8.7          
+#> [136] viridisLite_0.4.3       BiocParallel_1.44.0     assertthat_0.2.1       
+#> [139] babelgene_22.9          Biostrings_2.78.0       lazyeval_0.2.2         
+#> [142] GOSemSim_2.36.0         fontquiver_0.2.1        Matrix_1.7-4           
+#> [145] patchwork_1.3.2         bit64_4.6.0-1           KEGGREST_1.50.0        
+#> [148] statmod_1.5.1           igraph_2.2.2            broom_1.0.12           
+#> [151] memoise_2.0.1           bslib_0.10.0            ggtree_4.0.4           
+#> [154] fastmatch_1.1-8         bit_4.6.0               ape_5.8-1              
+#> [157] gson_0.1.0
 ```
 
 ## References
