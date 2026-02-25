@@ -43,7 +43,7 @@ group_denominator: [GroupB]
 # =========================
 # Differential expression
 # =========================
-de_method: deseq2           # deseq2, edger, or both
+de_method: deseq2           # deseq2, edger, limma, or both
 de_source: null             # null -> auto (consensus for both, else method)
 min_counts: 10
 min_replicates: 1

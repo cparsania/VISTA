@@ -10,9 +10,9 @@
 
 ## Overview
 
-VISTA streamlines differential expression (DE) analysis workflows for RNA-seq data by providing a unified, **SummarizedExperiment**-based framework that wraps **DESeq2** and **edgeR**. The package offers:
+VISTA streamlines differential expression (DE) analysis workflows for RNA-seq data by providing a unified, **SummarizedExperiment**-based framework that wraps **DESeq2**, **edgeR**, and **limma-voom**. The package offers:
 
--   🧬 **Unified DE workflow** - Single interface for both DESeq2 and edgeR methods
+-   🧬 **Unified DE workflow** - Single interface for DESeq2, edgeR, and limma-voom
 -   ⚖️ **Consensus DE mode** - Optional intersection/union consensus across DESeq2 and edgeR
 -   🧪 **Design-aware modeling** - Add covariates or explicit model formula in DE analysis
 -   📊 **30+ visualization functions** - PCA, volcano plots, heatmaps, expression plots, and more
@@ -68,7 +68,7 @@ vista <- create_vista(
   group_denominator = "control",
   log2fc_cutoff = 1.0,
   pval_cutoff = 0.05,
-  method = "deseq2"  # or "edger"
+  method = "deseq2"  # or "edger" / "limma"
 )
 
 # Advanced users can coerce an existing SummarizedExperiment:

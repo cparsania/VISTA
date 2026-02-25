@@ -11,7 +11,7 @@ create_vista(
   group_column,
   group_numerator,
   group_denominator,
-  method = c("deseq2", "edger", "both"),
+  method = c("deseq2", "edger", "limma", "both"),
   min_counts = 10,
   min_replicates = 1,
   log2fc_cutoff = 1,
@@ -41,7 +41,7 @@ create_vista(
 
 \item{group_denominator}{Character vector of denominator groups (same length/order as numerator).}
 
-\item{method}{\code{"deseq2"}, \code{"edger"}, or \code{"both"}.}
+\item{method}{\code{"deseq2"}, \code{"edger"}, \code{"limma"}, or \code{"both"}.}
 
 \item{min_counts}{Minimum total counts per gene to retain (default: 10).}
 
@@ -90,7 +90,7 @@ A \code{VISTA} object:
 }
 }
 \description{
-This wrapper performs differential expression (DE) analysis (DESeq2, edgeR, or both)
+This wrapper performs differential expression (DE) analysis (DESeq2, edgeR, limma, or both)
 and returns a fully initialized \code{VISTA} object. The object stores
 expression matrices and annotations in the SummarizedExperiment core, while
 all DE outputs and configuration live in \code{metadata(vista)}:

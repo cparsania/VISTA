@@ -4,12 +4,12 @@
 \alias{set_de_source}
 \title{Set active DE source in a VISTA object}
 \usage{
-set_de_source(object, source = c("deseq2", "edger", "consensus"))
+set_de_source(object, source = c("deseq2", "edger", "limma", "consensus"))
 }
 \arguments{
 \item{object}{A \code{VISTA} object.}
 
-\item{source}{One of \code{"deseq2"}, \code{"edger"}, or \code{"consensus"}.}
+\item{source}{One of \code{"deseq2"}, \code{"edger"}, \code{"limma"}, or \code{"consensus"}.}
 }
 \value{
 A modified \code{VISTA} object with updated active DE source.

@@ -1,6 +1,6 @@
 #' Create a VISTA Object with Internal DE Analysis
 #'
-#' This wrapper performs differential expression (DE) analysis (DESeq2, edgeR, or both)
+#' This wrapper performs differential expression (DE) analysis (DESeq2, edgeR, limma, or both)
 #' and returns a fully initialized \code{VISTA} object. The object stores
 #' expression matrices and annotations in the SummarizedExperiment core, while
 #' all DE outputs and configuration live in \code{metadata(vista)}:
@@ -18,7 +18,7 @@
 #' @param group_column Column in \code{sample_info} used to group samples.
 #' @param group_numerator Character vector of numerator groups for pairwise comparisons.
 #' @param group_denominator Character vector of denominator groups (same length/order as numerator).
-#' @param method \code{"deseq2"}, \code{"edger"}, or \code{"both"}.
+#' @param method \code{"deseq2"}, \code{"edger"}, \code{"limma"}, or \code{"both"}.
 #' @param min_counts Minimum total counts per gene to retain (default: 10).
 #' @param min_replicates Minimum samples per group meeting \code{min_counts} (default: 1).
 #' @param log2fc_cutoff Absolute LFC threshold for DEG calling (default: 1).
@@ -116,7 +116,7 @@ create_vista <- function(counts,
                          group_column,
                          group_numerator,
                          group_denominator,
-                         method = c("deseq2", "edger", "both"),
+                         method = c("deseq2", "edger", "limma", "both"),
                          min_counts = 10,
                          min_replicates = 1,
                          log2fc_cutoff = 1,
@@ -225,6 +225,21 @@ create_vista <- function(counts,
         p_value_type = p_value_type
       ),
       edger = run_edger_analysis(
+        counts = counts,
+        sample_info = sample_info,
+        column_geneid = column_geneid,
+        group_column = group_column,
+        group_numerator = group_numerator,
+        group_denominator = group_denominator,
+        covariates = covariates,
+        design_formula = design_formula,
+        min_counts = min_counts,
+        min_replicates = min_replicates,
+        log2fc_cutoff = log2fc_cutoff,
+        pval_cutoff = pval_cutoff,
+        p_value_type = ifelse(p_value_type == "padj", "FDR", "PValue")
+      ),
+      limma = run_limma_analysis(
         counts = counts,
         sample_info = sample_info,
         column_geneid = column_geneid,

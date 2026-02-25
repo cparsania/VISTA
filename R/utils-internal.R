@@ -1,13 +1,14 @@
-#' Run Differential Expression Analysis with DESeq2 or edgeR
+#' Run Differential Expression Analysis with DESeq2, edgeR, or limma-voom
 #'
 #' Perform differential expression (DE) analysis across multiple group comparisons
-#' using either the DESeq2 or edgeR framework. These functions process raw count data,
+#' using DESeq2, edgeR, or limma-voom. These functions process raw count data,
 #' normalize it, execute pairwise group-level tests, and return standardized DEG outputs
 #' compatible with \code{VISTA}-based visualization and analysis.
 #'
 #' @description
-#' These functions encapsulate the standard RNA-seq analysis workflow using either
-#' DESeq2 (\link{run_deseq_analysis}) or edgeR (\link{run_edger_analysis}), including:
+#' These functions encapsulate the standard RNA-seq analysis workflow using
+#' DESeq2 (\link{run_deseq_analysis}), edgeR (\link{run_edger_analysis}), or
+#' limma-voom (\link{run_limma_analysis}), including:
 #' gene filtering, design matrix setup, normalization, model fitting, differential testing,
 #' DEG classification (\code{"Up"}, \code{"Down"}, \code{"Other"}), and result formatting.
 #'
@@ -31,11 +32,13 @@
 #' @param min_replicates Minimum number of replicates within each group that must exceed \code{min_counts}. Default: \code{1}.
 #' @param log2fc_cutoff Absolute log2 fold-change threshold to define DEGs. Default: \code{1}.
 #' @param pval_cutoff P-value or adjusted p-value cutoff for significance. Default: \code{0.05}.
-#' @param p_value_type For DESeq2: one of \code{"padj"} or \code{"pvalue"}. For edgeR: one of \code{"FDR"} or \code{"PValue"}.
+#' @param p_value_type For DESeq2: one of \code{"padj"} or \code{"pvalue"}.
+#'   For edgeR/limma: one of \code{"FDR"} or \code{"PValue"}.
 #'
 #' @return A named list with components:
 #' \itemize{
-#'   \item \code{norm_counts}: Matrix of normalized expression values (CPM for edgeR, DESeq2-normalized counts).
+#'   \item \code{norm_counts}: Matrix of normalized expression values
+#'     (CPM for edgeR/limma, DESeq2-normalized counts).
 #'   \item \code{sample_info}: Updated sample metadata.
 #'   \item \code{row_data}: Gene-level metadata, including mean expression.
 #'   \item \code{comparisons}: Named list of DEG result tibbles (one per comparison), each containing
@@ -47,6 +50,8 @@
 #' \itemize{
 #'   \item For DESeq2, normalization is performed via \link[DESeq2]{DESeq}, and DE testing uses \link[DESeq2]{results}.
 #'   \item For edgeR, normalization uses \link[edgeR]{calcNormFactors}, and testing uses \link[edgeR]{glmLRT}.
+#'   \item For limma, normalization uses \link[edgeR]{calcNormFactors} + \link[limma]{voom},
+#'     and testing uses \link[limma]{eBayes}.
 #' }
 #' Low-abundance filtering is applied before model fitting.
 #' Gene regulation status is determined via \code{.categorize_deg_results()} based on user thresholds.
@@ -54,7 +59,7 @@
 #' All output comparison results are internally standardized via \code{.tidy_de_results()} to ensure
 #' a uniform column schema compatible with VISTA plotting tools.
 #'
-#' @seealso \link{create_vista}, \link[DESeq2]{DESeq}, \link[edgeR]{glmLRT}
+#' @seealso \link{create_vista}, \link[DESeq2]{DESeq}, \link[edgeR]{glmLRT}, \link[limma]{voom}
 #'
 #' @examples
 #' \dontrun{
@@ -222,14 +227,14 @@ NULL
                                     group_column,
                                     covariates = NULL,
                                     design_formula = NULL,
-                                    backend = c("deseq2", "edger")) {
+                                    backend = c("deseq2", "edger", "limma")) {
   backend <- match.arg(backend)
   design_formula <- .coerce_design_formula(design_formula)
   covariates <- .validate_covariates(sample_info, group_column, covariates)
 
   if (is.null(design_formula)) {
     terms <- unique(c(covariates, group_column))
-    f_txt <- if (backend == "edger") {
+    f_txt <- if (backend %in% c("edger", "limma")) {
       paste("~ 0 +", paste(terms, collapse = " + "))
     } else {
       paste("~", paste(terms, collapse = " + "))
@@ -246,7 +251,7 @@ NULL
     cli::cli_abort("Variable(s) in {.arg design_formula} not found in {.arg sample_info}: {.val {missing_vars}}")
   }
 
-  if (backend == "edger") {
+  if (backend %in% c("edger", "limma")) {
     f_txt <- paste(deparse(design_formula), collapse = "")
     if (grepl("[:*]", f_txt)) {
       cli::cli_abort("Interactions in {.arg design_formula} are not currently supported for edgeR. Use additive terms only.")
@@ -554,6 +559,137 @@ run_edger_analysis <- function(
     norm_counts = norm_counts,
     sample_info = sample_annot,
     row_data = row_data,
+    comparisons = comps,
+    deg_summary = deg_summary
+  )
+}
+
+#' @rdname run_deseq_analysis
+#' @export
+run_limma_analysis <- function(
+    counts,
+    sample_info,
+    column_geneid,
+    group_column,
+    group_numerator,
+    group_denominator,
+    covariates = NULL,
+    design_formula = NULL,
+    min_counts = 10,
+    min_replicates = 1,
+    log2fc_cutoff = 1,
+    pval_cutoff = 0.05,
+    p_value_type = "FDR"
+) {
+  p_value_type <- match.arg(p_value_type, c("FDR", "PValue"))
+  sample_info <- .normalize_sample_info(
+    sample_info = sample_info,
+    counts = counts,
+    column_geneid = column_geneid
+  )
+  if (is.factor(group_numerator)) group_numerator <- as.character(group_numerator)
+  if (is.factor(group_denominator)) group_denominator <- as.character(group_denominator)
+
+  .validate_de_inputs(
+    counts = counts,
+    sample_info = sample_info,
+    column_geneid = column_geneid,
+    group_column = group_column,
+    group_numerator = group_numerator,
+    group_denominator = group_denominator,
+    p_value_type = p_value_type
+  )
+
+  if (!requireNamespace("limma", quietly = TRUE)) {
+    cli::cli_abort("Package {.pkg limma} is required for limma analysis. Please install it or choose another method.")
+  }
+  if (!requireNamespace("edgeR", quietly = TRUE)) {
+    cli::cli_abort("Package {.pkg edgeR} is required for limma-voom analysis. Please install it or choose another method.")
+  }
+
+  count_data <- counts %>%
+    dplyr::select(tidyselect::all_of(c(column_geneid, sample_info$sample_names))) %>%
+    as.data.frame() %>%
+    tibble::as_tibble() %>%
+    tibble::column_to_rownames(column_geneid)
+  count_data[is.na(count_data)] <- 0
+  count_data <- count_data[rowSums(count_data) >= min_counts, , drop = FALSE]
+
+  col_data <- sample_info %>%
+    as.data.frame() %>%
+    tibble::as_tibble() %>%
+    tibble::column_to_rownames("sample_names")
+  col_data[[group_column]] <- factor(col_data[[group_column]])
+
+  de_design <- .resolve_design_formula(
+    sample_info = col_data,
+    group_column = group_column,
+    covariates = covariates,
+    design_formula = design_formula,
+    backend = "limma"
+  )
+
+  design_vars <- intersect(all.vars(de_design), colnames(col_data))
+  for (vv in design_vars) {
+    if (is.character(col_data[[vv]])) {
+      col_data[[vv]] <- factor(col_data[[vv]])
+    }
+  }
+
+  dge <- edgeR::DGEList(counts = count_data)
+  dge <- edgeR::calcNormFactors(dge)
+  keep <- rowSums(edgeR::cpm(dge) > 1) >= min_replicates
+  dge <- dge[keep, , keep.lib.sizes = FALSE]
+
+  design <- stats::model.matrix(de_design, data = col_data)
+  v <- limma::voom(dge, design = design, plot = FALSE)
+  fit <- limma::lmFit(v, design)
+
+  comps <- list()
+  deg_summary <- list()
+
+  for (i in seq_along(group_numerator)) {
+    num <- group_numerator[[i]]
+    den <- group_denominator[[i]]
+    if (identical(num, den)) next
+
+    contrast_vector <- .edgeR_group_contrast(
+      design_colnames = colnames(design),
+      group_column = group_column,
+      numerator = num,
+      denominator = den
+    )
+    contrast_matrix <- matrix(contrast_vector, ncol = 1, dimnames = list(colnames(design), "contrast"))
+    fit2 <- limma::contrasts.fit(fit, contrasts = contrast_matrix)
+    fit2 <- limma::eBayes(fit2)
+    res <- limma::topTable(fit2, coef = 1, number = Inf, sort.by = "none")
+
+    comp_name <- paste(num, den, sep = "_VS_")
+    res$gene_id <- rownames(res)
+    res$PValue <- res$P.Value
+    res$FDR <- res$adj.P.Val
+
+    categorized <- .categorize_deg_results(
+      de_results = res,
+      log2fc_cutoff = log2fc_cutoff,
+      pval_cutoff = pval_cutoff,
+      p_value_type = p_value_type
+    )
+
+    comps[[comp_name]] <- categorized
+    deg_summary[[comp_name]] <- categorized %>%
+      dplyr::count(regulation)
+  }
+
+  norm_counts <- edgeR::cpm(dge, normalized.lib.sizes = TRUE)
+
+  list(
+    norm_counts = norm_counts,
+    sample_info = col_data,
+    row_data = S4Vectors::DataFrame(
+      baseMean = rowMeans(norm_counts),
+      row.names = rownames(dge$counts)
+    ),
     comparisons = comps,
     deg_summary = deg_summary
   )

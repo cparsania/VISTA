@@ -145,6 +145,32 @@ test_that("create_vista works with edgeR method", {
   expect_true("norm_counts" %in% assayNames(vista_edger))
 })
 
+test_that("create_vista works with limma method", {
+  skip_if_not_installed("limma")
+  data("count_data", package = "VISTA", envir = environment())
+  data("sample_metadata", package = "VISTA", envir = environment())
+
+  target_groups <- c("treatment1", "control")
+  sample_subset <- sample_metadata[sample_metadata$cond_long %in% target_groups, ]
+  counts_subset <- count_data[1:150, c("gene_id", sample_subset$sample_names)]
+
+  vista_limma <- create_vista(
+    counts = counts_subset,
+    sample_info = sample_subset,
+    column_geneid = "gene_id",
+    group_column = "cond_long",
+    group_numerator = "treatment1",
+    group_denominator = "control",
+    method = "limma",
+    min_counts = 5,
+    min_replicates = 1
+  )
+
+  expect_s4_class(vista_limma, "VISTA")
+  expect_true("norm_counts" %in% assayNames(vista_limma))
+  expect_named(comparisons(vista_limma))
+})
+
 test_that("create_vista handles multiple comparisons", {
   data("count_data", package = "VISTA", envir = environment())
   data("sample_metadata", package = "VISTA", envir = environment())

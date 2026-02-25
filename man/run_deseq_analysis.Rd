@@ -3,7 +3,8 @@
 \name{run_deseq_analysis}
 \alias{run_deseq_analysis}
 \alias{run_edger_analysis}
-\title{Run Differential Expression Analysis with DESeq2 or edgeR}
+\alias{run_limma_analysis}
+\title{Run Differential Expression Analysis with DESeq2, edgeR, or limma-voom}
 \usage{
 run_deseq_analysis(
   counts,
@@ -22,6 +23,22 @@ run_deseq_analysis(
 )
 
 run_edger_analysis(
+  counts,
+  sample_info,
+  column_geneid,
+  group_column,
+  group_numerator,
+  group_denominator,
+  covariates = NULL,
+  design_formula = NULL,
+  min_counts = 10,
+  min_replicates = 1,
+  log2fc_cutoff = 1,
+  pval_cutoff = 0.05,
+  p_value_type = "FDR"
+)
+
+run_limma_analysis(
   counts,
   sample_info,
   column_geneid,
@@ -67,12 +84,14 @@ it overrides automatic design construction from \code{group_column} +
 
 \item{pval_cutoff}{P-value or adjusted p-value cutoff for significance. Default: \code{0.05}.}
 
-\item{p_value_type}{For DESeq2: one of \code{"padj"} or \code{"pvalue"}. For edgeR: one of \code{"FDR"} or \code{"PValue"}.}
+\item{p_value_type}{For DESeq2: one of \code{"padj"} or \code{"pvalue"}.
+For edgeR/limma: one of \code{"FDR"} or \code{"PValue"}.}
 }
 \value{
 A named list with components:
 \itemize{
-\item \code{norm_counts}: Matrix of normalized expression values (CPM for edgeR, DESeq2-normalized counts).
+\item \code{norm_counts}: Matrix of normalized expression values
+(CPM for edgeR/limma, DESeq2-normalized counts).
 \item \code{sample_info}: Updated sample metadata.
 \item \code{row_data}: Gene-level metadata, including mean expression.
 \item \code{comparisons}: Named list of DEG result tibbles (one per comparison), each containing
@@ -81,8 +100,9 @@ standardized columns: \code{gene_id}, \code{log2fc}, \code{pvalue}, \code{p.adj}
 }
 }
 \description{
-These functions encapsulate the standard RNA-seq analysis workflow using either
-DESeq2 (\link{run_deseq_analysis}) or edgeR (\link{run_edger_analysis}), including:
+These functions encapsulate the standard RNA-seq analysis workflow using
+DESeq2 (\link{run_deseq_analysis}), edgeR (\link{run_edger_analysis}), or
+limma-voom (\link{run_limma_analysis}), including:
 gene filtering, design matrix setup, normalization, model fitting, differential testing,
 DEG classification (\code{"Up"}, \code{"Down"}, \code{"Other"}), and result formatting.
 
@@ -91,13 +111,15 @@ in \link{create_vista} or standalone DEG summaries.
 }
 \details{
 Perform differential expression (DE) analysis across multiple group comparisons
-using either the DESeq2 or edgeR framework. These functions process raw count data,
+using DESeq2, edgeR, or limma-voom. These functions process raw count data,
 normalize it, execute pairwise group-level tests, and return standardized DEG outputs
 compatible with \code{VISTA}-based visualization and analysis.
 
 \itemize{
 \item For DESeq2, normalization is performed via \link[DESeq2]{DESeq}, and DE testing uses \link[DESeq2]{results}.
 \item For edgeR, normalization uses \link[edgeR]{calcNormFactors}, and testing uses \link[edgeR]{glmLRT}.
+\item For limma, normalization uses \link[edgeR]{calcNormFactors} + \link[limma]{voom},
+and testing uses \link[limma]{eBayes}.
 }
 Low-abundance filtering is applied before model fitting.
 Gene regulation status is determined via \code{.categorize_deg_results()} based on user thresholds.
@@ -122,5 +144,5 @@ a uniform column schema compatible with VISTA plotting tools.
 
 }
 \seealso{
-\link{create_vista}, \link[DESeq2]{DESeq}, \link[edgeR]{glmLRT}
+\link{create_vista}, \link[DESeq2]{DESeq}, \link[edgeR]{glmLRT}, \link[limma]{voom}
 }

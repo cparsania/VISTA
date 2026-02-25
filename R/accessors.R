@@ -8,7 +8,7 @@
 #' @param summarise Logical. If TRUE, returns mean-normalized counts grouped by the grouping column
 #' stored in the `VISTA` object (e.g., condition or treatment). Default is FALSE.
 #' @param source Which DE result source to use for `comparisons()`/`deg_summary()`.
-#'   One of `"active"`, `"deseq2"`, `"edger"`, or `"consensus"`.
+#'   One of `"active"`, `"deseq2"`, `"edger"`, `"limma"`, or `"consensus"`.
 #'   `"active"` uses the currently selected source stored in metadata.
 #' @aliases comparisons deg_summary cutoffs norm_counts sample_info row_data group_colors group_palette
 #'
@@ -93,7 +93,7 @@
 NULL
 
 #' @keywords internal
-.resolve_de_source <- function(object, source = c("active", "deseq2", "edger", "consensus"), which = c("results", "summary")) {
+.resolve_de_source <- function(object, source = c("active", "deseq2", "edger", "limma", "consensus"), which = c("results", "summary")) {
   source <- match.arg(source)
   which <- match.arg(which)
   md <- S4Vectors::metadata(object)
@@ -326,11 +326,11 @@ set_vista_comparison_colors <- function(object, color_map) {
 #' accessor functions that read the active metadata slots.
 #'
 #' @param object A `VISTA` object.
-#' @param source One of `"deseq2"`, `"edger"`, or `"consensus"`.
+#' @param source One of `"deseq2"`, `"edger"`, `"limma"`, or `"consensus"`.
 #'
 #' @return A modified `VISTA` object with updated active DE source.
 #' @export
-set_de_source <- function(object, source = c("deseq2", "edger", "consensus")) {
+set_de_source <- function(object, source = c("deseq2", "edger", "limma", "consensus")) {
   stopifnot(inherits(object, "VISTA"))
   source <- match.arg(source)
   md <- S4Vectors::metadata(object)

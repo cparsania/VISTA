@@ -40,7 +40,7 @@
 \item{object}{An object of class \code{VISTA}.}
 
 \item{source}{Which DE result source to use for \code{comparisons()}/\code{deg_summary()}.
-One of \code{"active"}, \code{"deseq2"}, \code{"edger"}, or \code{"consensus"}.
+One of \code{"active"}, \code{"deseq2"}, \code{"edger"}, \code{"limma"}, or \code{"consensus"}.
 \code{"active"} uses the currently selected source stored in metadata.}
 
 \item{summarise}{Logical. If TRUE, returns mean-normalized counts grouped by the grouping column
