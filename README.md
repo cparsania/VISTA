@@ -312,7 +312,7 @@ The generated HTML report includes: - QC plots (PCA, MDS, correlation heatmap) -
 If you use VISTA in published research, please cite:
 
 ```         
-Parsania C (2025). VISTA: Visualization Toolkit for Transcriptomic Analysis.
+Parsania C (2026). VISTA: Visualization and Integrated System for Transcriptomic Analysis.
 R package version 0.99.0.
 ```
 
