@@ -417,7 +417,7 @@ sessionInfo()
 #>  [53] withr_3.0.2                 bit64_4.6.0-1              
 #>  [55] fontquiver_0.2.1            backports_1.5.0            
 #>  [57] S7_0.2.1                    BiocParallel_1.44.0        
-#>  [59] carData_3.0-6               DBI_1.2.3                  
+#>  [59] carData_3.0-6               DBI_1.3.0                  
 #>  [61] ggstats_0.12.0              ggforce_0.5.0              
 #>  [63] R.utils_2.13.0              ggsignif_0.6.4             
 #>  [65] MASS_7.3-65                 rappdirs_0.3.4             
@@ -432,7 +432,7 @@ sessionInfo()
 #>  [83] R.methodsS3_1.8.2           tidyr_1.3.2                
 #>  [85] data.table_1.18.2.1         car_3.1-5                  
 #>  [87] XVector_0.50.0              BiocGenerics_0.56.0        
-#>  [89] ggrepel_0.9.6               pillar_1.11.1              
+#>  [89] ggrepel_0.9.7               pillar_1.11.1              
 #>  [91] stringr_1.6.0               limma_3.66.0               
 #>  [93] yulab.utils_0.2.4           babelgene_22.9             
 #>  [95] splines_4.5.2               tweenr_2.0.3               

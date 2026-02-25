@@ -306,13 +306,13 @@ sessionInfo()
 #>  [19] rmarkdown_2.30              jquerylib_0.1.4            
 #>  [21] yaml_2.3.12                 otel_0.2.0                 
 #>  [23] ggtangle_0.1.1              cowplot_1.2.0              
-#>  [25] DBI_1.2.3                   RColorBrewer_1.1-3         
+#>  [25] DBI_1.3.0                   RColorBrewer_1.1-3         
 #>  [27] abind_1.4-8                 quadprog_1.5-8             
 #>  [29] purrr_1.2.1                 R.utils_2.13.0             
 #>  [31] msigdbr_25.1.1              pracma_2.4.6               
 #>  [33] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [35] rappdirs_0.3.4              gdtools_0.5.0              
-#>  [37] enrichplot_1.30.4           ggrepel_0.9.6              
+#>  [37] enrichplot_1.30.4           ggrepel_0.9.7              
 #>  [39] tidytree_0.4.7              annotate_1.88.0            
 #>  [41] pkgdown_2.2.0               codetools_0.2-20           
 #>  [43] DelayedArray_0.36.0         DOSE_4.4.0                 

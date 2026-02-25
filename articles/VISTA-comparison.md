@@ -726,14 +726,14 @@ sessionInfo()
 #>  [17] yaml_2.3.12                 otel_0.2.0                 
 #>  [19] ggtangle_0.1.1              EnhancedVolcano_1.28.2     
 #>  [21] ggvenn_0.1.19               cowplot_1.2.0              
-#>  [23] DBI_1.2.3                   RColorBrewer_1.1-3         
+#>  [23] DBI_1.3.0                   RColorBrewer_1.1-3         
 #>  [25] abind_1.4-8                 GenomicRanges_1.62.1       
 #>  [27] purrr_1.2.1                 R.utils_2.13.0             
 #>  [29] BiocGenerics_0.56.0         msigdbr_25.1.1             
 #>  [31] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [33] rappdirs_0.3.4              gdtools_0.5.0              
 #>  [35] IRanges_2.44.0              S4Vectors_0.48.0           
-#>  [37] enrichplot_1.30.4           ggrepel_0.9.6              
+#>  [37] enrichplot_1.30.4           ggrepel_0.9.7              
 #>  [39] tidytree_0.4.7              pkgdown_2.2.0              
 #>  [41] codetools_0.2-20            DelayedArray_0.36.0        
 #>  [43] DOSE_4.4.0                  ggforce_0.5.0              

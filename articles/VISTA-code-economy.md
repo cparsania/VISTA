@@ -618,7 +618,7 @@ sessionInfo()
 #>  [1] VISTA_0.99.0                circlize_0.4.17            
 #>  [3] ComplexHeatmap_2.26.1       msigdbr_25.1.1             
 #>  [5] clusterProfiler_4.18.4      tibble_3.3.1               
-#>  [7] dplyr_1.2.0                 ggrepel_0.9.6              
+#>  [7] dplyr_1.2.0                 ggrepel_0.9.7              
 #>  [9] ggplot2_4.0.2               DESeq2_1.50.2              
 #> [11] org.Hs.eg.db_3.22.0         AnnotationDbi_1.72.0       
 #> [13] airway_1.30.0               SummarizedExperiment_1.40.0
@@ -636,7 +636,7 @@ sessionInfo()
 #>  [13] limma_3.66.0            sass_0.4.10             rmarkdown_2.30         
 #>  [16] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             
 #>  [19] ggtangle_0.1.1          EnhancedVolcano_1.28.2  cowplot_1.2.0          
-#>  [22] DBI_1.2.3               RColorBrewer_1.1-3      abind_1.4-8            
+#>  [22] DBI_1.3.0               RColorBrewer_1.1-3      abind_1.4-8            
 #>  [25] purrr_1.2.1             R.utils_2.13.0          yulab.utils_0.2.4      
 #>  [28] tweenr_2.0.3            rappdirs_0.3.4          gdtools_0.5.0          
 #>  [31] enrichplot_1.30.4       tidytree_0.4.7          pkgdown_2.2.0          
