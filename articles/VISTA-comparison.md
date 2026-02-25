@@ -772,7 +772,7 @@ sessionInfo()
 #> [109] parallel_4.5.2              AnnotationDbi_1.72.0       
 #> [111] desc_1.4.3                  pillar_1.11.1              
 #> [113] grid_4.5.2                  vctrs_0.7.1                
-#> [115] ggpubr_0.6.2                car_3.1-5                  
+#> [115] ggpubr_0.6.3                car_3.1-5                  
 #> [117] tidydr_0.0.6                cluster_2.1.8.1            
 #> [119] evaluate_1.0.5              cli_3.6.5                  
 #> [121] locfit_1.5-9.12             compiler_4.5.2             

@@ -76,9 +76,9 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>VISTA streamlines differential expression (DE) analysis workflows for RNA-seq data by providing a unified, <strong>SummarizedExperiment</strong>-based framework that wraps <strong>DESeq2</strong> and <strong>edgeR</strong>. The package offers:</p>
+<p>VISTA streamlines differential expression (DE) analysis workflows for RNA-seq data by providing a unified, <strong>SummarizedExperiment</strong>-based framework that wraps <strong>DESeq2</strong>, <strong>edgeR</strong>, and <strong>limma-voom</strong>. The package offers:</p>
 <ul>
-<li>🧬 <strong>Unified DE workflow</strong> - Single interface for both DESeq2 and edgeR methods</li>
+<li>🧬 <strong>Unified DE workflow</strong> - Single interface for DESeq2, edgeR, and limma-voom</li>
 <li>⚖️ <strong>Consensus DE mode</strong> - Optional intersection/union consensus across DESeq2 and edgeR</li>
 <li>🧪 <strong>Design-aware modeling</strong> - Add covariates or explicit model formula in DE analysis</li>
 <li>📊 <strong>30+ visualization functions</strong> - PCA, volcano plots, heatmaps, expression plots, and more</li>
@@ -138,7 +138,7 @@
 <span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
 <span>  log2fc_cutoff <span class="op">=</span> <span class="fl">1.0</span>,</span>
 <span>  pval_cutoff <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"deseq2"</span>  <span class="co"># or "edger"</span></span>
+<span>  method <span class="op">=</span> <span class="st">"deseq2"</span>  <span class="co"># or "edger" / "limma"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Advanced users can coerce an existing SummarizedExperiment:</span></span>

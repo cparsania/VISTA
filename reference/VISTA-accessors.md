@@ -43,8 +43,8 @@ group_palette(object)
 - source:
 
   Which DE result source to use for `comparisons()`/`deg_summary()`. One
-  of `"active"`, `"deseq2"`, `"edger"`, or `"consensus"`. `"active"`
-  uses the currently selected source stored in metadata.
+  of `"active"`, `"deseq2"`, `"edger"`, `"limma"`, or `"consensus"`.
+  `"active"` uses the currently selected source stored in metadata.
 
 - summarise:
 

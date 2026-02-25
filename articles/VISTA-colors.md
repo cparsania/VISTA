@@ -411,7 +411,7 @@ sessionInfo()
 #>  [41] AnnotationDbi_1.72.0        S4Vectors_0.48.0           
 #>  [43] DESeq2_1.50.2               textshaping_1.0.4          
 #>  [45] GenomicRanges_1.62.1        RSQLite_2.4.6              
-#>  [47] ggpubr_0.6.2                labeling_0.4.3             
+#>  [47] ggpubr_0.6.3                labeling_0.4.3             
 #>  [49] polyclip_1.10-7             httr_1.4.8                 
 #>  [51] abind_1.4-8                 compiler_4.5.2             
 #>  [53] withr_3.0.2                 bit64_4.6.0-1              

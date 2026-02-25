@@ -352,7 +352,7 @@ sessionInfo()
 #> [111] BiocVersion_3.22.0          parallel_4.5.2             
 #> [113] desc_1.4.3                  pillar_1.11.1              
 #> [115] grid_4.5.2                  vctrs_0.7.1                
-#> [117] ggpubr_0.6.2                car_3.1-5                  
+#> [117] ggpubr_0.6.3                car_3.1-5                  
 #> [119] tidydr_0.0.6                dbplyr_2.5.2               
 #> [121] xtable_1.8-8                cluster_2.1.8.1            
 #> [123] singscore_1.30.0            evaluate_1.0.5             

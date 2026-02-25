@@ -112,7 +112,7 @@ comparisons.</li>
 length/order as numerator.</li>
 <li>
 <code>method</code>: <code>"deseq2"</code> (default),
-<code>"edger"</code>, or <code>"both"</code>.</li>
+<code>"edger"</code>, <code>"limma"</code>, or <code>"both"</code>.</li>
 <li>
 <code>min_counts</code>: Minimum total counts per gene to
 retain.</li>
@@ -142,8 +142,8 @@ including <code>group_column</code>.</li>
 <code>log2fc</code> is populated.</li>
 <li>
 <code>result_source</code>: Active DE source
-(<code>"consensus"</code>, <code>"deseq2"</code>,
-<code>"edger"</code>).</li>
+(<code>"consensus"</code>, <code>"deseq2"</code>, <code>"edger"</code>,
+<code>"limma"</code>).</li>
 <li>
 <code>group_palette</code>: Colorspace palette name for group
 colors.</li>
@@ -243,6 +243,9 @@ named comparison colors.</li>
 mirror <code><a href="../reference/create_vista.html">create_vista()</a></code>.</li>
 <li>
 <code>run_edger_analysis(...)</code>: edgeR pipeline; arguments
+mirror <code><a href="../reference/create_vista.html">create_vista()</a></code>.</li>
+<li>
+<code>run_limma_analysis(...)</code>: limma-voom pipeline; arguments
 mirror <code><a href="../reference/create_vista.html">create_vista()</a></code>.</li>
 </ul>
 </div>

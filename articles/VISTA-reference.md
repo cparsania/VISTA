@@ -24,7 +24,7 @@ Arguments:
 - `group_numerator`: Numerator group(s) for comparisons.
 - `group_denominator`: Denominator group(s), same length/order as
   numerator.
-- `method`: `"deseq2"` (default), `"edger"`, or `"both"`.
+- `method`: `"deseq2"` (default), `"edger"`, `"limma"`, or `"both"`.
 - `min_counts`: Minimum total counts per gene to retain.
 - `min_replicates`: Minimum samples per group meeting `min_counts`.
 - `log2fc_cutoff`: Absolute LFC threshold for DEG calling.
@@ -39,7 +39,7 @@ Arguments:
   `"union"`.
 - `consensus_log2fc`: For consensus tables, how `log2fc` is populated.
 - `result_source`: Active DE source (`"consensus"`, `"deseq2"`,
-  `"edger"`).
+  `"edger"`, `"limma"`).
 - `group_palette`: Colorspace palette name for group colors.
 - `comparison_palette`: Palette name for comparison colors.
 - `validate`: Run full object validation before return.
@@ -94,6 +94,8 @@ Arguments:
 - `run_deseq_analysis(...)`: DESeq2 pipeline; arguments mirror
   [`create_vista()`](../reference/create_vista.md).
 - `run_edger_analysis(...)`: edgeR pipeline; arguments mirror
+  [`create_vista()`](../reference/create_vista.md).
+- `run_limma_analysis(...)`: limma-voom pipeline; arguments mirror
   [`create_vista()`](../reference/create_vista.md).
 
 ## Expression matrices

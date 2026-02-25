@@ -10,8 +10,9 @@ Create and manage VISTA objects for differential expression analysis.
 - [`as_vista()`](as_vista.md) : Coerce SummarizedExperiment to VISTA
 - [`validate_vista()`](validate_vista.md) : Validate a VISTA object
 - [`run_deseq_analysis()`](run_deseq_analysis.md)
-  [`run_edger_analysis()`](run_deseq_analysis.md) : Run Differential
-  Expression Analysis with DESeq2 or edgeR
+  [`run_edger_analysis()`](run_deseq_analysis.md)
+  [`run_limma_analysis()`](run_deseq_analysis.md) : Run Differential
+  Expression Analysis with DESeq2, edgeR, or limma-voom
 - [`set_rowdata()`](set_rowdata.md) : Set or append rowData annotations
   on a VISTA object
 - [`print(`*`<VISTA>`*`)`](print.VISTA.md) : Print a VISTA object like a

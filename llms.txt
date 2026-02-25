@@ -7,10 +7,11 @@
 
 VISTA streamlines differential expression (DE) analysis workflows for
 RNA-seq data by providing a unified, **SummarizedExperiment**-based
-framework that wraps **DESeq2** and **edgeR**. The package offers:
+framework that wraps **DESeq2**, **edgeR**, and **limma-voom**. The
+package offers:
 
-- 🧬 **Unified DE workflow** - Single interface for both DESeq2 and
-  edgeR methods
+- 🧬 **Unified DE workflow** - Single interface for DESeq2, edgeR, and
+  limma-voom
 - ⚖️ **Consensus DE mode** - Optional intersection/union consensus
   across DESeq2 and edgeR
 - 🧪 **Design-aware modeling** - Add covariates or explicit model
@@ -72,7 +73,7 @@ vista <- create_vista(
   group_denominator = "control",
   log2fc_cutoff = 1.0,
   pval_cutoff = 0.05,
-  method = "deseq2"  # or "edger"
+  method = "deseq2"  # or "edger" / "limma"
 )
 
 # Advanced users can coerce an existing SummarizedExperiment:
@@ -424,8 +425,9 @@ Create and manage VISTA objects for differential expression analysis.
 - [`as_vista()`](as_vista.md) : Coerce SummarizedExperiment to VISTA
 - [`validate_vista()`](validate_vista.md) : Validate a VISTA object
 - [`run_deseq_analysis()`](run_deseq_analysis.md)
-  [`run_edger_analysis()`](run_deseq_analysis.md) : Run Differential
-  Expression Analysis with DESeq2 or edgeR
+  [`run_edger_analysis()`](run_deseq_analysis.md)
+  [`run_limma_analysis()`](run_deseq_analysis.md) : Run Differential
+  Expression Analysis with DESeq2, edgeR, or limma-voom
 - [`set_rowdata()`](set_rowdata.md) : Set or append rowData annotations
   on a VISTA object
 - [`print(`*`<VISTA>`*`)`](print.VISTA.md) : Print a VISTA object like a

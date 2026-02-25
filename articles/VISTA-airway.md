@@ -252,6 +252,26 @@ vista_edger <- create_vista(
 )
 ```
 
+### Alternative: Using limma-voom backend
+
+``` r
+# Create VISTA object with limma-voom backend
+vista_limma <- create_vista(
+  counts = count_data,
+  sample_info = sample_info,
+  column_geneid = "gene_id",
+  group_column = "treatment",
+  group_numerator = "Dexamethasone",
+  group_denominator = "Untreated",
+  method = "limma",
+  min_counts = 10,
+  min_replicates = 2,
+  log2fc_cutoff = 1.0,
+  pval_cutoff = 0.05,
+  p_value_type = "padj"
+)
+```
+
 ### Advanced: covariates, design formula, and consensus mode
 
 ``` r
@@ -1794,6 +1814,7 @@ In this workflow, we:
 
 - Try with your own data
 - Explore edgeR backend: `method = "edger"`
+- Explore limma-voom backend: `method = "limma"`
 - Test multiple comparisons simultaneously
 - Customize plots with ggplot2 themes
 - Generate automated reports with
@@ -1876,7 +1897,7 @@ sessionInfo()
 #> [109] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
 #> [112] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.2         
 #> [115] desc_1.4.3              pillar_1.11.1           grid_4.5.2             
-#> [118] vctrs_0.7.1             ggpubr_0.6.2            car_3.1-5              
+#> [118] vctrs_0.7.1             ggpubr_0.6.3            car_3.1-5              
 #> [121] tidydr_0.0.6            cluster_2.1.8.1         evaluate_1.0.5         
 #> [124] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         
 #> [127] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         

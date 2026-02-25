@@ -6,7 +6,7 @@ accessor functions that read the active metadata slots.
 ## Usage
 
 ``` r
-set_de_source(object, source = c("deseq2", "edger", "consensus"))
+set_de_source(object, source = c("deseq2", "edger", "limma", "consensus"))
 ```
 
 ## Arguments
@@ -17,7 +17,7 @@ set_de_source(object, source = c("deseq2", "edger", "consensus"))
 
 - source:
 
-  One of `"deseq2"`, `"edger"`, or `"consensus"`.
+  One of `"deseq2"`, `"edger"`, `"limma"`, or `"consensus"`.
 
 ## Value
 

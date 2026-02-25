@@ -1,10 +1,10 @@
-# Run Differential Expression Analysis with DESeq2 or edgeR
+# Run Differential Expression Analysis with DESeq2, edgeR, or limma-voom
 
 These functions encapsulate the standard RNA-seq analysis workflow using
-either DESeq2 (run_deseq_analysis) or edgeR (run_edger_analysis),
-including: gene filtering, design matrix setup, normalization, model
-fitting, differential testing, DEG classification (`"Up"`, `"Down"`,
-`"Other"`), and result formatting.
+DESeq2 (run_deseq_analysis), edgeR (run_edger_analysis), or limma-voom
+(run_limma_analysis), including: gene filtering, design matrix setup,
+normalization, model fitting, differential testing, DEG classification
+(`"Up"`, `"Down"`, `"Other"`), and result formatting.
 
 Both methods return output in a harmonized structure ready for
 downstream use in [create_vista](create_vista.md) or standalone DEG
@@ -30,6 +30,22 @@ run_deseq_analysis(
 )
 
 run_edger_analysis(
+  counts,
+  sample_info,
+  column_geneid,
+  group_column,
+  group_numerator,
+  group_denominator,
+  covariates = NULL,
+  design_formula = NULL,
+  min_counts = 10,
+  min_replicates = 1,
+  log2fc_cutoff = 1,
+  pval_cutoff = 0.05,
+  p_value_type = "FDR"
+)
+
+run_limma_analysis(
   counts,
   sample_info,
   column_geneid,
@@ -108,15 +124,15 @@ run_edger_analysis(
 
 - p_value_type:
 
-  For DESeq2: one of `"padj"` or `"pvalue"`. For edgeR: one of `"FDR"`
-  or `"PValue"`.
+  For DESeq2: one of `"padj"` or `"pvalue"`. For edgeR/limma: one of
+  `"FDR"` or `"PValue"`.
 
 ## Value
 
 A named list with components:
 
-- `norm_counts`: Matrix of normalized expression values (CPM for edgeR,
-  DESeq2-normalized counts).
+- `norm_counts`: Matrix of normalized expression values (CPM for
+  edgeR/limma, DESeq2-normalized counts).
 
 - `sample_info`: Updated sample metadata.
 
@@ -131,9 +147,9 @@ A named list with components:
 ## Details
 
 Perform differential expression (DE) analysis across multiple group
-comparisons using either the DESeq2 or edgeR framework. These functions
-process raw count data, normalize it, execute pairwise group-level
-tests, and return standardized DEG outputs compatible with `VISTA`-based
+comparisons using DESeq2, edgeR, or limma-voom. These functions process
+raw count data, normalize it, execute pairwise group-level tests, and
+return standardized DEG outputs compatible with `VISTA`-based
 visualization and analysis.
 
 - For DESeq2, normalization is performed via
@@ -143,6 +159,11 @@ visualization and analysis.
 - For edgeR, normalization uses
   [calcNormFactors](https://rdrr.io/pkg/edgeR/man/calcNormFactors.html),
   and testing uses [glmLRT](https://rdrr.io/pkg/edgeR/man/glmLRT.html).
+
+- For limma, normalization uses
+  [calcNormFactors](https://rdrr.io/pkg/edgeR/man/calcNormFactors.html) +
+  [voom](https://rdrr.io/pkg/limma/man/voom.html), and testing uses
+  [eBayes](https://rdrr.io/pkg/limma/man/ebayes.html).
 
 Low-abundance filtering is applied before model fitting. Gene regulation
 status is determined via
@@ -157,7 +178,8 @@ column schema compatible with VISTA plotting tools.
 
 [create_vista](create_vista.md),
 [DESeq](https://rdrr.io/pkg/DESeq2/man/DESeq.html),
-[glmLRT](https://rdrr.io/pkg/edgeR/man/glmLRT.html)
+[glmLRT](https://rdrr.io/pkg/edgeR/man/glmLRT.html),
+[voom](https://rdrr.io/pkg/limma/man/voom.html)
 
 ## Examples
 
