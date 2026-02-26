@@ -69,6 +69,7 @@ library(VISTA)
 library(ggplot2)         # For plotting functions
 library(airway)          # Dataset
 library(org.Hs.eg.db)    # Human gene annotations
+library(magrittr)    # %>% 
 ```
 
 If required packages are missing, install them before rendering this vignette.
