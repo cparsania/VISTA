@@ -65,7 +65,7 @@ fetching from an \code{OrgDb}, only columns available in that database will be
 filled.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load example VISTA object
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")

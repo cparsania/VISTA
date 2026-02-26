@@ -90,7 +90,7 @@
 #' cutoffs(vista)
 #'
 #' # Multiple comparisons example
-#' \dontrun{
+#' \donttest{
 #' vista_multi <- create_vista(
 #'   counts = count_data,
 #'   sample_info = sample_metadata,

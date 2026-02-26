@@ -88,17 +88,18 @@ NULL
     tibble::as_tibble()
   stopifnot(group_col %in% colnames(meta))
 
+  meta$sample <- factor(meta$sample, levels = rownames(SummarizedExperiment::colData(x)))
+
   if (!is.null(sample_group)) {
     meta <- dplyr::filter(meta, .data[[group_col]] %in% sample_group)
     # preserve requested group order when provided
     meta[[group_col]] <- factor(meta[[group_col]], levels = sample_group)
+    meta <- dplyr::arrange(meta, .data[[group_col]], .data$sample)
   } else {
     meta[[group_col]] <- factor(meta[[group_col]], levels = unique(meta[[group_col]]))
+    meta <- dplyr::arrange(meta, .data$sample)
   }
 
-  # preserve original colData sample order
-  meta$sample <- factor(meta$sample, levels = rownames(SummarizedExperiment::colData(x)))
-  meta <- dplyr::arrange(meta, sample)
   meta$sample <- as.character(meta$sample)
   attr(meta, "group_column") <- group_col
   meta
@@ -628,9 +629,10 @@ get_umap_plot <- function(x,
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #'   `display_id` is set but not found in `rowData`.
 #' @param ... Additional parameters forwarded to `EnhancedVolcano::EnhancedVolcano()`.
+#' @return A `ggplot2` object.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Create VISTA object
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
@@ -963,7 +965,8 @@ get_expression_boxplot <- function(x,
     if (length(missing_genes) == length(gene_ids)) {
       cli::cli_abort("None of the specified {.arg genes} were found in the data.")
     }
-    mat <- mat[rownames(mat) %in% gene_ids, , drop = FALSE]
+    keep_genes <- intersect(gene_ids, rownames(mat))
+    mat <- mat[keep_genes, , drop = FALSE]
   } else if (!pool_genes && facet_by == "gene") {
     gene_vars <- matrixStats::rowVars(mat)
     if (all(is.na(gene_vars)) || all(gene_vars == 0)) {
@@ -2123,7 +2126,8 @@ get_expression_lollipop <- function(x,
 
   missing_genes <- setdiff(gene_ids, underlying_ids)
   if (length(missing_genes) == length(gene_ids)) cli::cli_abort("None of the specified {.arg genes} were found.")
-  mat <- mat[rownames(mat) %in% gene_ids, , drop = FALSE]
+  keep_genes <- intersect(gene_ids, rownames(mat))
+  mat <- mat[keep_genes, , drop = FALSE]
 
   df <- mat |>
     as.data.frame() |>
@@ -2360,12 +2364,51 @@ get_expression_violinplot <- function(x,
 
 #' Raincloud plot of expression values
 #'
-#' Combines a violin, boxplot, and jittered points per sample/group to show
-#' distribution, summary, and individual values.
+#' Uses `ggrain::geom_rain()` to combine a half-violin, boxplot, and jittered
+#' points per sample/group to show distribution, summary, and individual values.
 #'
 #' @inheritParams get_expression_violinplot
+#' @param rain_side Side specification passed to `ggrain::geom_rain()`; one of
+#'   `"r"`, `"l"`, `"f"`, `"f1x1"`, or `"f2x2"`.
+#' @param id.long.var Optional column name passed to `ggrain::geom_rain()` as
+#'   `id.long.var` to identify repeated measurements.
 #' @param point_alpha Alpha for jittered points.
 #' @param point_size Point size for jittered points.
+#' @param p.label Label type passed to `ggpubr::stat_compare_means()`.
+#' @param stats_group Logical; add pairwise statistical tests when `TRUE`.
+#' @param stats_method Statistical method passed to `ggpubr::stat_compare_means()`.
+#' @param label_points Logical; add text labels to points using `ggrepel`.
+#' @param label_column Column name in the plotting data used for labels.
+#'   Defaults to `"gene"` for expression raincloud plots.
+#' @param label_size Text size for point labels.
+#' @param label_max_overlaps Maximum overlaps passed to `ggrepel::geom_text_repel()`.
+#' @param display_id Optional ID/column name to use for labels. If supplied and
+#'   present in `rowData(x)`, those values are used; otherwise falls back to ID mapping.
+#' @param display_from Optional source ID type for mapping (used when
+#'   `display_id` is not found in `rowData`).
+#' @param display_orgdb Optional `OrgDb` object used for ID mapping when
+#'   `display_id` is set but not found in `rowData`.
+#'
+#' @details
+#' `id.long.var` controls which repeated unit is connected by lines in
+#' `ggrain::geom_rain()`.
+#'
+#' Recommended usage for expression raincloud plots:
+#' \itemize{
+#'   \item `id.long.var = NULL` (default): best for clean distribution summaries.
+#'   \item `id.long.var = "gene"`: best when plotting a small number of genes and
+#'   showing gene-level trajectories across x levels.
+#'   \item `id.long.var = "<subject_id_column>"`: best for paired/repeated-measure
+#'   designs when a subject ID exists in `sample_info`.
+#'   \item `id.long.var = "sample"` or the grouping variable is usually less
+#'   informative and can over-connect points.
+#'   \item Point labels (`label_points = TRUE`) work best with `facet = FALSE` or
+#'   a small number of genes.
+#' }
+#'
+#' For identifier display consistency with other VISTA plotting functions, set
+#' `display_id` (for example, `"SYMBOL"`). When provided, `genes` can be given
+#' in that ID space, and default point labels use the mapped display IDs.
 #'
 #' @return A `ggplot2` object.
 #' @export
@@ -2376,26 +2419,132 @@ get_expression_raincloud <- function(x,
                                      value_transform = c("log2", "zscore", "none"),
                                      summarise = FALSE,
                                      facet = TRUE,
+                                     rain_side = c("r", "l", "f", "f1x1", "f2x2"),
+                                     id.long.var = NULL,
                                      point_alpha = 0.5,
-                                     point_size = 1.5) {
+                                     point_size = 1.5,
+                                     p.label = "p.signif",
+                                     stats_group = FALSE,
+                                     stats_method = "t.test",
+                                     label_points = FALSE,
+                                     label_column = "gene",
+                                     label_size = 3,
+                                     label_max_overlaps = 50,
+                                     display_id = NULL,
+                                     display_from = NULL,
+                                     display_orgdb = NULL) {
   stopifnot(inherits(x, "VISTA"))
-  prep <- .vista_expression_long(x, genes, sample_group, group_column, value_transform, summarise)
+  if (!requireNamespace("ggrain", quietly = TRUE)) {
+    cli::cli_abort("Package {.pkg ggrain} must be installed to use `get_expression_raincloud()`.")
+  }
+  rain_side <- match.arg(rain_side)
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
+
+  genes_use <- genes
+  if (!is.null(genes) && !is.null(display_id)) {
+    if (!is.null(rd) && display_id %in% colnames(rd)) {
+      map <- rd[[display_id]]
+      names(map) <- rownames(x)
+      mapped <- names(map)[match(genes, map)]
+      mapped <- unique(mapped[!is.na(mapped)])
+      if (length(mapped)) genes_use <- mapped
+    } else if (!is.null(display_from) && !is.null(display_orgdb)) {
+      genes_use <- .map_gene_ids(
+        ids = genes,
+        from_type = display_id,
+        to_type = display_from,
+        orgdb = display_orgdb
+      )
+    }
+  }
+
+  prep <- .vista_expression_long(x, genes_use, sample_group, group_column, value_transform, summarise)
   df <- prep$df; group_col <- prep$group_col; ylab <- prep$ylab
+
+  if (!is.null(display_id)) {
+    if (!is.null(rd) && display_id %in% colnames(rd)) {
+      map <- rd[[display_id]]
+      names(map) <- rownames(x)
+      mapped <- map[match(df$gene, names(map))]
+      df$gene_label <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, df$gene)
+    } else {
+      df$gene_label <- .map_gene_ids(
+        ids = df$gene,
+        from_type = display_from,
+        to_type = display_id,
+        orgdb = display_orgdb
+      )
+    }
+  } else {
+    df$gene_label <- df$gene
+  }
+
+  label_column_effective <- label_column
+  if (!is.null(display_id) && identical(label_column, "gene")) {
+    label_column_effective <- "gene_label"
+  }
+
+  if (!is.null(id.long.var) && !id.long.var %in% colnames(df)) {
+    cli::cli_abort("{.arg id.long.var} must be a column in the plotting data. Available columns: {.val {colnames(df)}}.")
+  }
+  if (!label_column_effective %in% colnames(df)) {
+    cli::cli_abort("{.arg label_column} must be a column in the plotting data. Available columns: {.val {colnames(df)}}.")
+  }
   cols <- .vista_group_colors(x, df[[group_col]])
+
+  rain_args <- list(
+    rain.side = rain_side,
+    point.args = list(alpha = point_alpha, size = point_size),
+    boxplot.args = list(outlier.shape = NA, alpha = 0.7, color = "gray30"),
+    violin.args = list(alpha = 0.6, color = NA)
+  )
+  if (!is.null(id.long.var)) {
+    rain_args$id.long.var <- id.long.var
+  }
 
   plt <- ggplot2::ggplot(
     df,
     ggplot2::aes(x = sample, y = expression,
                  fill = factor(.data[[group_col]], levels = unique(df[[group_col]])))
   ) +
-    ggplot2::geom_violin(trim = FALSE, alpha = 0.6, color = NA, width = 0.9) +
-    ggplot2::geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.7, color = "gray30") +
-    ggplot2::geom_jitter(width = 0.15, alpha = point_alpha, size = point_size) +
+    do.call(ggrain::geom_rain, rain_args) +
     ggplot2::labs(x = NULL, y = ylab, fill = group_col) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
   if (!is.null(cols)) plt <- plt + ggplot2::scale_fill_manual(values = cols)
   if (facet) plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste0("~", group_col)), scales = "free_x")
+
+  if (label_points) {
+    if (!requireNamespace("ggrepel", quietly = TRUE)) {
+      cli::cli_abort("Package {.pkg ggrepel} must be installed when {.arg label_points = TRUE}.")
+    }
+    if (facet && nrow(df) > 120) {
+      cli::cli_warn("`label_points = TRUE` with `facet = TRUE` can create crowded labels. Consider fewer genes or `facet = FALSE`.")
+    }
+    label_df <- unique(df[, c("sample", "expression", label_column_effective, group_col), drop = FALSE])
+    plt <- plt + ggrepel::geom_text_repel(
+      data = label_df,
+      ggplot2::aes(label = .data[[label_column_effective]]),
+      size = label_size,
+      max.overlaps = label_max_overlaps,
+      show.legend = FALSE
+    )
+  }
+
+  if (stats_group) {
+    if (facet) {
+      cli::cli_warn("Statistical comparison is only supported when `facet = FALSE`. Skipping stats.")
+    } else if (length(unique(df$sample)) < 2) {
+      cli::cli_warn("At least two sample groups are required for statistical testing.")
+    } else {
+      plt <- plt + ggpubr::stat_compare_means(
+        ggplot2::aes(group = sample),
+        method = stats_method,
+        label = p.label
+      )
+    }
+  }
+
   plt
 }
 
@@ -2415,6 +2564,7 @@ get_expression_raincloud <- function(x,
 #' @param facet Logical; facet each comparison when `TRUE`.
 #' @param p.label Label type passed to `ggpubr::stat_compare_means()`.
 #' @param stats_group Logical; add pairwise statistical tests when `TRUE`.
+#' @param stats_method Statistical method passed to `ggpubr::stat_compare_means()`.
 #'
 #' @export
 #' @aliases get_foldchange_boxplot
@@ -2424,7 +2574,8 @@ get_foldchange_boxplot <- function(x,
                                    sample_comparison = NULL,
                                    facet = TRUE,
                                    p.label = "p.signif",
-                                   stats_group = FALSE) {
+                                   stats_group = FALSE,
+                                   stats_method = "t.test") {
   stopifnot(inherits(x, "VISTA"))
 
   # Build fold-change matrix from stored DE results
@@ -2478,7 +2629,218 @@ get_foldchange_boxplot <- function(x,
     } else {
       plt <- plt + ggpubr::stat_compare_means(
         ggplot2::aes(group = comparison),
-        method = "t.test",
+        method = stats_method,
+        label = p.label
+      )
+    }
+  }
+
+  plt
+}
+
+#' Raincloud plot of fold-change distributions across comparisons
+#'
+#' Uses `ggrain::geom_rain()` to display log2 fold-change distributions for
+#' selected comparisons, with optional statistical testing across comparisons.
+#'
+#' @param x A `VISTA` object containing differential expression results.
+#' @param genes Optional character vector of gene IDs to include.
+#' @param sample_comparisons Optional character vector of comparison names to plot.
+#' @param sample_comparison Deprecated alias for `sample_comparisons`.
+#' @param facet Logical; facet each comparison when `TRUE`.
+#' @param rain_side Side specification passed to `ggrain::geom_rain()`; one of
+#'   `"r"`, `"l"`, `"f"`, `"f1x1"`, or `"f2x2"`.
+#' @param id.long.var Optional column name passed to `ggrain::geom_rain()` as
+#'   `id.long.var` to identify repeated measurements.
+#' @param point_alpha Alpha for jittered points.
+#' @param point_size Point size for jittered points.
+#' @param p.label Label type passed to `ggpubr::stat_compare_means()`.
+#' @param stats_group Logical; add pairwise statistical tests when `TRUE`.
+#' @param stats_method Statistical method passed to `ggpubr::stat_compare_means()`.
+#' @param label_points Logical; add text labels to points using `ggrepel`.
+#' @param label_column Column name in the plotting data used for labels.
+#'   Defaults to `"gene_id"` for fold-change raincloud plots.
+#' @param label_size Text size for point labels.
+#' @param label_max_overlaps Maximum overlaps passed to `ggrepel::geom_text_repel()`.
+#' @param display_id Optional ID/column name to use for labels. If supplied and
+#'   present in `rowData(x)`, those values are used; otherwise falls back to ID mapping.
+#' @param display_from Optional source ID type for mapping (used when
+#'   `display_id` is not found in `rowData`).
+#' @param display_orgdb Optional `OrgDb` object used for ID mapping when
+#'   `display_id` is set but not found in `rowData`.
+#'
+#' @details
+#' `id.long.var` controls which repeated unit is connected by lines in
+#' `ggrain::geom_rain()`.
+#'
+#' Recommended usage for fold-change raincloud plots:
+#' \itemize{
+#'   \item `id.long.var = NULL` (default): best for clean distribution summaries.
+#'   \item `id.long.var = "gene_id"`: most useful option; connects each gene
+#'   across comparisons.
+#'   \item `id.long.var = "comparison"` is generally not useful because
+#'   comparison is already on the x-axis.
+#'   \item Continuous value columns (e.g. `log2FoldChange`) are not suitable
+#'   identifiers for line connections.
+#'   \item Point labels (`label_points = TRUE`) work best with `facet = FALSE`
+#'   unless only a small set of genes is shown.
+#' }
+#'
+#' For identifier display consistency with other VISTA plotting functions, set
+#' `display_id` (for example, `"SYMBOL"`). When provided, `genes` can be given
+#' in that ID space, and default point labels use the mapped display IDs.
+#'
+#' @return A `ggplot2` object.
+#' @export
+get_foldchange_raincloud <- function(x,
+                                     genes = NULL,
+                                     sample_comparisons = NULL,
+                                     sample_comparison = NULL,
+                                     facet = TRUE,
+                                     rain_side = c("r", "l", "f", "f1x1", "f2x2"),
+                                     id.long.var = NULL,
+                                     point_alpha = 0.5,
+                                     point_size = 1.5,
+                                     p.label = "p.signif",
+                                     stats_group = FALSE,
+                                     stats_method = "t.test",
+                                     label_points = FALSE,
+                                     label_column = "gene_id",
+                                     label_size = 3,
+                                     label_max_overlaps = 50,
+                                     display_id = NULL,
+                                     display_from = NULL,
+                                     display_orgdb = NULL) {
+  stopifnot(inherits(x, "VISTA"))
+  if (!requireNamespace("ggrain", quietly = TRUE)) {
+    cli::cli_abort("Package {.pkg ggrain} must be installed to use `get_foldchange_raincloud()`.")
+  }
+  rain_side <- match.arg(rain_side)
+
+  comps <- .vista_comparisons(x)
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
+  if (!is.null(sample_comparison)) {
+    cli::cli_warn("`sample_comparison` is deprecated; use `sample_comparisons`.")
+    if (is.null(sample_comparisons)) {
+      sample_comparisons <- sample_comparison
+    }
+  }
+  if (is.null(sample_comparisons)) sample_comparisons <- names(comps)
+
+  all_genes <- unique(unlist(lapply(comps[sample_comparisons], \(d) d$gene_id)))
+  genes_use <- genes
+  if (!is.null(genes) && !is.null(display_id)) {
+    if (!is.null(rd) && display_id %in% colnames(rd)) {
+      map <- rd[[display_id]]
+      names(map) <- rownames(x)
+      mapped <- names(map)[match(genes, map)]
+      mapped <- unique(mapped[!is.na(mapped)])
+      if (length(mapped)) genes_use <- mapped
+    } else if (!is.null(display_from) && !is.null(display_orgdb)) {
+      genes_use <- .map_gene_ids(
+        ids = genes,
+        from_type = display_id,
+        to_type = display_from,
+        orgdb = display_orgdb
+      )
+    }
+  }
+  if (!is.null(genes_use)) all_genes <- intersect(all_genes, genes_use)
+  if (!length(all_genes)) cli::cli_abort("No genes found for the requested comparisons.")
+
+  fc_mat <- vapply(sample_comparisons, function(nm) {
+    dd <- comps[[nm]][, c("gene_id", "log2fc")]
+    dd$log2fc[match(all_genes, dd$gene_id)]
+  }, FUN.VALUE = numeric(length(all_genes)))
+  colnames(fc_mat) <- sample_comparisons
+  df <- tibble::tibble(gene_id = all_genes) |>
+    dplyr::bind_cols(as.data.frame(fc_mat)) |>
+    tidyr::pivot_longer(-gene_id, names_to = "comparison", values_to = "log2FoldChange") |>
+    dplyr::filter(!is.na(log2FoldChange))
+
+  if (!is.null(display_id)) {
+    if (!is.null(rd) && display_id %in% colnames(rd)) {
+      map <- rd[[display_id]]
+      names(map) <- rownames(x)
+      mapped <- map[match(df$gene_id, names(map))]
+      df$gene_label <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, df$gene_id)
+    } else {
+      df$gene_label <- .map_gene_ids(
+        ids = df$gene_id,
+        from_type = display_from,
+        to_type = display_id,
+        orgdb = display_orgdb
+      )
+    }
+  } else {
+    df$gene_label <- df$gene_id
+  }
+
+  label_column_effective <- label_column
+  if (!is.null(display_id) && identical(label_column, "gene_id")) {
+    label_column_effective <- "gene_label"
+  }
+
+  if (!is.null(id.long.var) && !id.long.var %in% colnames(df)) {
+    cli::cli_abort("{.arg id.long.var} must be a column in the plotting data. Available columns: {.val {colnames(df)}}.")
+  }
+  if (!label_column_effective %in% colnames(df)) {
+    cli::cli_abort("{.arg label_column} must be a column in the plotting data. Available columns: {.val {colnames(df)}}.")
+  }
+
+  df$comparison <- factor(df$comparison, levels = sample_comparisons)
+
+  pal <- .vista_comparison_colors(x, sample_comparisons)
+  if (is.null(pal)) {
+    pal <- colorspace::qualitative_hcl(length(sample_comparisons), palette = "Dark 3")
+  }
+  if (is.null(names(pal))) names(pal) <- sample_comparisons
+
+  rain_args <- list(
+    rain.side = rain_side,
+    point.args = list(alpha = point_alpha, size = point_size),
+    boxplot.args = list(outlier.shape = NA, alpha = 0.8),
+    violin.args = list(alpha = 0.6, color = NA)
+  )
+  if (!is.null(id.long.var)) {
+    rain_args$id.long.var <- id.long.var
+  }
+
+  plt <- ggplot2::ggplot(df, ggplot2::aes(x = comparison, y = log2FoldChange, fill = comparison)) +
+    do.call(ggrain::geom_rain, rain_args) +
+    ggplot2::scale_fill_manual(values = pal) +
+    ggplot2::labs(x = NULL, y = "log2 Fold Change", fill = "Comparison") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+  if (facet) plt <- plt + ggplot2::facet_wrap(~comparison, scales = "free_x")
+
+  if (label_points) {
+    if (!requireNamespace("ggrepel", quietly = TRUE)) {
+      cli::cli_abort("Package {.pkg ggrepel} must be installed when {.arg label_points = TRUE}.")
+    }
+    if (facet && nrow(df) > 120) {
+      cli::cli_warn("`label_points = TRUE` with `facet = TRUE` can create crowded labels. Consider fewer genes or `facet = FALSE`.")
+    }
+    label_df <- unique(df[, c("comparison", "log2FoldChange", label_column_effective), drop = FALSE])
+    plt <- plt + ggrepel::geom_text_repel(
+      data = label_df,
+      ggplot2::aes(label = .data[[label_column_effective]]),
+      size = label_size,
+      max.overlaps = label_max_overlaps,
+      show.legend = FALSE
+    )
+  }
+
+  if (stats_group) {
+    if (facet) {
+      cli::cli_warn("Statistical comparison is only supported when `facet = FALSE`. Skipping stats.")
+    } else if (length(unique(df$comparison)) < 2) {
+      cli::cli_warn("At least two comparisons are required for statistical testing.")
+    } else {
+      plt <- plt + ggpubr::stat_compare_means(
+        ggplot2::aes(group = comparison),
+        method = stats_method,
         label = p.label
       )
     }
@@ -2654,6 +3016,7 @@ get_foldchange_scatter <- function(x,
 #'   is not found in `rowData`).
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #'   `display_id` is set but not found in `rowData`.
+#' @return A `ggplot2` object.
 #'
 #' @examples
 #' # Create VISTA object
@@ -2726,7 +3089,8 @@ get_expression_barplot <- function(x,
 
   missing_genes <- setdiff(gene_ids, underlying_ids)
   if (length(missing_genes) == length(gene_ids)) cli::cli_abort("None of the specified {.arg genes} were found.")
-  mat <- mat[rownames(mat) %in% gene_ids, , drop = FALSE]
+  keep_genes <- intersect(gene_ids, rownames(mat))
+  mat <- mat[keep_genes, , drop = FALSE]
 
   df <- mat |>
     as.data.frame() |>

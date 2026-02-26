@@ -86,6 +86,7 @@ reference:
       - get_foldchange_scatter
       - get_foldchange_barplot
       - get_foldchange_boxplot
+      - get_foldchange_raincloud
       - get_foldchange_lineplot
       - get_foldchange_lollipop
       - get_foldchange_matrix

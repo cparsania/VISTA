@@ -306,7 +306,7 @@ get_enrichment_plot <- function(x, top_n = 10, title = NULL) {
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
 #'
@@ -497,7 +497,7 @@ get_pathway_genes <- function(x,
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
 #'
@@ -662,42 +662,43 @@ get_pathway_heatmap <- function(vista_obj,
 #' @return A list with `enrich` containing an `enrichResult`.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Create VISTA object
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
 #'
 #' vista <- create_vista(
-#'   counts = count_data,
-#'   sample_info = sample_metadata,
+#'   counts = count_data[1:200, ],
+#'   sample_info = sample_metadata[1:6, ],
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
 #'   group_numerator = "treatment1",
 #'   group_denominator = "control"
 #' )
+#' comp <- names(comparisons(vista))[1]
 #'
 #' # Run MSigDB enrichment on upregulated genes
 #' msig_up <- get_msigdb_enrichment(
 #'   vista,
-#'   sample_comparison = "treatment1_VS_control",
+#'   sample_comparison = comp,
 #'   regulation = "Up",
 #'   msigdb_category = "H",  # Hallmark gene sets
 #'   from_type = "ENSEMBL"
 #' )
 #'
-#' # View results
-#' head(msig_up$enrich)
-#'
-#' # Visualize enrichment
-#' get_enrichment_plot(msig_up$enrich)
+#' if (!is.null(msig_up$enrich)) {
+#'   # View results
+#'   head(msig_up$enrich)
+#'   # Visualize enrichment
+#'   get_enrichment_plot(msig_up$enrich)
+#' }
 #'
 #' # Enrichment for downregulated genes
 #' msig_down <- get_msigdb_enrichment(
 #'   vista,
-#'   sample_comparison = "treatment1_VS_control",
+#'   sample_comparison = comp,
 #'   regulation = "Down",
-#'   msigdb_category = "C2",  # Curated gene sets
-#'   msigdb_subcategory = "CP:KEGG"  # KEGG pathways
+#'   msigdb_category = "C2"  # Curated gene sets
 #' )
 #' }
 #'
@@ -996,9 +997,22 @@ get_gsea <- function(x,
 #'   The chord diagram is drawn as a side effect.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' data("count_data", package = "VISTA")
+#' data("sample_metadata", package = "VISTA")
+#'
+#' vista <- create_vista(
+#'   counts = count_data[1:200, ],
+#'   sample_info = sample_metadata[1:6, ],
+#'   column_geneid = "gene_id",
+#'   group_column = "cond_long",
+#'   group_numerator = "treatment1",
+#'   group_denominator = "control"
+#' )
+#'
 #' msig <- get_msigdb_enrichment(
-#'   vista, sample_comparison = "treatment_VS_control",
+#'   vista,
+#'   sample_comparison = names(comparisons(vista))[1],
 #'   regulation = "Up", from_type = "ENSEMBL"
 #' )
 #'
@@ -1008,12 +1022,15 @@ get_gsea <- function(x,
 #' # With fold-change colouring
 #' get_enrichment_chord(
 #'   msig, vista_obj = vista,
-#'   comparison = "treatment_VS_control",
+#'   comparison = names(comparisons(vista))[1],
 #'   color_by = "foldchange"
 #' )
 #'
 #' # Hub genes only (shared across 2+ pathways)
-#' get_enrichment_chord(msig, min_pathways = 2)
+#' pw_long <- get_pathway_genes(msig, return_type = "long")
+#' if (any(table(pw_long$gene) >= 2)) {
+#'   get_enrichment_chord(msig, min_pathways = 2)
+#' }
 #' }
 #'
 #' @export

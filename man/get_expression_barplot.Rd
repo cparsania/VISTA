@@ -51,6 +51,9 @@ is not found in \code{rowData}).}
 \item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when
 \code{display_id} is set but not found in \code{rowData}.}
 }
+\value{
+A \code{ggplot2} object.
+}
 \description{
 Summarizes expression per group for a handful of genes via barplots with
 optional ggpubr comparisons.

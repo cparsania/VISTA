@@ -111,7 +111,7 @@ group_colors(vista)
 group_palette(vista)
 
 # For method = "both", inspect method-specific outputs
-\dontrun{
+\donttest{
 vista_both <- create_vista(
   counts = count_data,
   sample_info = sample_metadata,

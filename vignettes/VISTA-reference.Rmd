@@ -199,6 +199,7 @@ Common label arguments: `display_id`, `display_from`, `display_orgdb`.
 - `get_foldchange_heatmap(...)`: heatmap of log2FC.
 - `get_foldchange_lineplot(...)`: line plot across comparisons.
 - `get_foldchange_boxplot(...)`: distribution across comparisons.
+- `get_foldchange_raincloud(...)`: raincloud distribution across comparisons.
 - `get_foldchange_barplot(...)`: barplot for selected genes.
 - `get_foldchange_scatter(...)`: comparison‑comparison scatter with concordance colors.
 

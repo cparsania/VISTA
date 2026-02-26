@@ -68,7 +68,7 @@ genes from selected pathways (via \code{\link[=get_pathway_genes]{get_pathway_ge
 \code{VISTA} feature IDs, and forwards to \code{\link[=get_expression_heatmap]{get_expression_heatmap()}}.
 }
 \examples{
-\dontrun{
+\donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 

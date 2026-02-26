@@ -128,14 +128,22 @@ All output comparison results are internally standardized via \code{.tidy_de_res
 a uniform column schema compatible with VISTA plotting tools.
 }
 \examples{
-\dontrun{
+\donttest{
+  data("count_data", package = "VISTA")
+  data("sample_metadata", package = "VISTA")
+
+  counts_small <- count_data[1:200, ]
+  subset_samples <- sample_metadata[
+    sample_metadata$sample_names \%in\% colnames(counts_small)[-1],
+  ]
+
   deseq_results <- run_deseq_analysis(
     counts = counts_small,
     sample_info = subset_samples,
     column_geneid = "gene_id",
-    group_column = "groups",
-    group_numerator = c("ZNF219_sh5KD", "ZNF219_sh6KD"),
-    group_denominator = c("shCTRL_1", "shCTRL_1"),
+    group_column = "cond_long",
+    group_numerator = "treatment1",
+    group_denominator = "control",
     min_counts = 5,
     min_replicates = 1
   )

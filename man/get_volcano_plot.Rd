@@ -57,12 +57,15 @@ is not found in \code{rowData}).}
 
 \item{...}{Additional parameters forwarded to \code{EnhancedVolcano::EnhancedVolcano()}.}
 }
+\value{
+A \code{ggplot2} object.
+}
 \description{
 Wraps EnhancedVolcano to visualize log2FC vs p-values for a selected
 comparison.
 }
 \examples{
-\dontrun{
+\donttest{
 # Create VISTA object
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")

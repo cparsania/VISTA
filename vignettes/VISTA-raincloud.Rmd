@@ -1,0 +1,299 @@
+---
+title: "Raincloud Plots in VISTA"
+author: "VISTA Development Team"
+package: VISTA
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Raincloud Plots in VISTA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+
+has_ggrain <- requireNamespace("ggrain", quietly = TRUE)
+```
+
+# Overview
+
+Raincloud plots combine three visual layers:
+
+1. distribution shape (half-violin),
+2. robust summary (boxplot), and
+3. individual observations (jittered points).
+
+This vignette shows raincloud plotting for both expression and fold-change data
+in VISTA, including line-connection control with `id.long.var` and optional
+statistical annotations.
+
+# Create a VISTA object
+
+```{r create-vista}
+library(VISTA)
+library(ggplot2)
+
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+# Keep runtime modest for vignette rendering
+count_small <- count_data[1:1000, ]
+
+vista <- create_vista(
+  counts = count_small,
+  sample_info = sample_metadata,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  method = "deseq2",
+  min_counts = 10,
+  min_replicates = 1
+)
+
+comp_names <- names(comparisons(vista))
+top_up <- get_genes_by_regulation(
+  vista,
+  sample_comparisons = comp_names[1],
+  regulation = "Up"
+)
+n_select_genes = 50
+selected_genes <- stats::na.omit(utils::head(top_up$gene_id, n_select_genes))
+if (!length(selected_genes)) {
+  selected_genes <- rownames(vista)[1:n_select_genes]
+}
+```
+
+```{r ggrain-missing, eval=!has_ggrain}
+cat("Package 'ggrain' is not installed; raincloud examples are skipped.\n")
+```
+
+# Expression Raincloud
+
+## Basic expression raincloud
+
+```{r expr-rain-basic, fig.width=9, fig.height=6, eval=has_ggrain}
+get_expression_raincloud(
+  vista,
+  genes = selected_genes,
+  value_transform = "log2",
+  summarise = TRUE,
+  facet = FALSE
+)
+```
+
+## `summarise = FALSE` vs `summarise = TRUE`
+
+Use `summarise = FALSE` to show per-sample distributions, and
+`summarise = TRUE` to aggregate replicate-level values by group.
+
+```{r expr-rain-nosummarise, fig.width=10, fig.height=6, eval=has_ggrain}
+get_expression_raincloud(
+  vista,
+  genes = selected_genes,
+  value_transform = "log2",
+  summarise = FALSE,
+  facet = FALSE,
+  id.long.var = "gene"
+)
+```
+
+```{r expr-rain-summarise, fig.width=10, fig.height=6, eval=has_ggrain}
+get_expression_raincloud(
+  vista,
+  genes = selected_genes,
+  value_transform = "log2",
+  summarise = TRUE,
+  facet = FALSE,
+  id.long.var = "gene"
+)
+```
+
+## Expression raincloud with lines and p-values
+
+```{r expr-rain-lines-stats, fig.width=9, fig.height=6, eval=has_ggrain}
+get_expression_raincloud(
+  vista,
+  genes = selected_genes,
+  value_transform = "log2",
+  summarise = TRUE,
+  facet = FALSE,
+  id.long.var = "gene",
+  stats_group = TRUE,
+  stats_method = "wilcox.test",
+  p.label = "p.format"
+)
+```
+
+## Label dots by gene ID (`facet = FALSE`)
+
+```{r expr-rain-labels, fig.width=10, fig.height=6, eval=has_ggrain}
+get_expression_raincloud(
+  vista,
+  genes = selected_genes,
+  value_transform = "log2",
+  summarise = TRUE,
+  facet = FALSE,
+  label_points = TRUE,
+  label_column = "gene",
+  label_size = 3
+)
+```
+
+If your object has symbol annotations in `rowData(vista)` (or you provide
+`display_from`/`display_orgdb`), you can label directly in symbol space:
+
+```{r expr-rain-symbol-demo, eval=FALSE}
+get_expression_raincloud(
+  vista,
+  genes = c("NFKBIA", "KLF6", "PER1"),
+  value_transform = "log2",
+  summarise = TRUE,
+  facet = FALSE,
+  label_points = TRUE,
+  display_id = "SYMBOL"
+)
+```
+
+When `facet = TRUE`, labels can still be added, but readability usually drops
+quickly as the number of genes/points increases. Keep the gene set small.
+
+```{r expr-rain-labels-facet, fig.width=10, fig.height=6, eval=has_ggrain}
+get_expression_raincloud(
+  vista,
+  genes = selected_genes[1:2],
+  value_transform = "log2",
+  summarise = TRUE,
+  facet = TRUE,
+  label_points = TRUE,
+  label_column = "gene",
+  label_size = 2.8
+)
+```
+
+## Flipped expression raincloud
+
+Raincloud plots can be visually emphasized in a horizontal layout by combining a
+left-side raincloud with `coord_flip()`.
+
+```{r expr-rain-flipped, fig.width=10, fig.height=6, eval=has_ggrain}
+get_expression_raincloud(
+  vista,
+  genes = selected_genes,
+  value_transform = "log2",
+  summarise = TRUE,
+  facet = FALSE,
+  rain_side = "r",
+  id.long.var = "gene"
+) +
+  ggplot2::coord_flip()
+```
+
+# Fold-Change Raincloud
+
+## Basic fold-change raincloud
+
+```{r fc-rain-basic, fig.width=9, fig.height=6, eval=has_ggrain}
+get_foldchange_raincloud(
+  vista,
+  sample_comparisons = comp_names,
+  facet = TRUE
+)
+```
+
+## Fold-change raincloud with gene trajectories and p-values
+
+```{r fc-rain-lines-stats, fig.width=9, fig.height=6, eval=has_ggrain}
+get_foldchange_raincloud(
+  vista,
+  sample_comparisons = comp_names,
+  facet = FALSE,
+  id.long.var = "gene_id",
+  stats_group = TRUE,
+  stats_method = "t.test"
+)
+```
+
+## Label dots by gene ID for fold-change raincloud
+
+```{r fc-rain-labels, fig.width=10, fig.height=6, eval=has_ggrain}
+get_foldchange_raincloud(
+  vista,
+  sample_comparisons = comp_names,
+  facet = FALSE,
+  label_points = TRUE,
+  label_column = "gene_id",
+  label_size = 2.8
+)
+```
+
+```{r fc-rain-symbol-demo, eval=FALSE}
+get_foldchange_raincloud(
+  vista,
+  genes = c("NFKBIA", "KLF6", "PER1"),
+  sample_comparisons = comp_names,
+  facet = FALSE,
+  label_points = TRUE,
+  display_id = "SYMBOL"
+)
+```
+
+## Flipped fold-change raincloud
+
+```{r fc-rain-flipped, fig.width=10, fig.height=6, eval=has_ggrain}
+get_foldchange_raincloud(
+  vista,
+  sample_comparisons = comp_names,
+  facet = FALSE,
+  rain_side = "r",
+  id.long.var = "gene_id"
+) +
+  ggplot2::coord_flip()
+```
+
+# Why this is harder outside VISTA
+
+Outside VISTA, producing equivalent raincloud plots is more involved because you
+must manually:
+
+1. extract and harmonize DE tables per comparison,
+2. reshape to long format for plotting,
+3. track grouping and palette consistency,
+4. map repeated-measure identifiers for line connections, and
+5. add and control statistical annotations per plotting context.
+
+A minimal non-VISTA workflow typically requires custom wrangling and multiple
+plot-specific settings:
+
+```{r outside-vista-sketch, eval=FALSE}
+# 1) Build long expression/fold-change tables manually
+# 2) Join sample metadata and comparison metadata
+# 3) Validate IDs for repeated measures (id.long.var)
+# 4) Create raincloud layers and palette mapping
+# 5) Add statistical comparisons and label formatting
+# 6) Repeat the process for each analysis object/comparison set
+```
+
+In VISTA, these steps are encapsulated in `get_expression_raincloud()` and
+`get_foldchange_raincloud()` while staying consistent with the rest of the
+plotting API.
+
+## Session information
+
+```{r session-info}
+sessionInfo()
+```

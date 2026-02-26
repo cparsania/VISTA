@@ -47,7 +47,7 @@ Parses pathway-level gene members from an enrichment result and returns
 either a long table, pathway-indexed list, or a unique vector of genes.
 }
 \examples{
-\dontrun{
+\donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 

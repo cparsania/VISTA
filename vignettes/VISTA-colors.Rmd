@@ -26,24 +26,6 @@ knitr::opts_chunk$set(
   fig.align = "center"
 )
 
-install_missing_pkgs <- function(pkgs, bioc = FALSE) {
-  missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
-  if (!length(missing)) {
-    return(invisible(NULL))
-  }
-
-  if (bioc) {
-    if (!requireNamespace("BiocManager", quietly = TRUE)) {
-      install.packages("BiocManager", repos = "https://cloud.r-project.org")
-    }
-    BiocManager::install(missing, ask = FALSE, update = FALSE)
-  } else {
-    install.packages(missing, repos = "https://cloud.r-project.org")
-  }
-
-  invisible(NULL)
-}
-
 ensure_pkgs_available <- function(pkgs) {
   missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
   if (length(missing)) {
@@ -51,10 +33,7 @@ ensure_pkgs_available <- function(pkgs) {
   }
 }
 
-# Install external dependencies used in this vignette before library() calls.
-install_missing_pkgs(c("ggplot2", "dplyr", "tibble", "colorspace"), bioc = FALSE)
-
-# VISTA should already be installed when rendering package vignettes.
+# This vignette requires all dependencies to already be installed.
 ensure_pkgs_available(c("VISTA", "ggplot2", "dplyr", "tibble", "colorspace"))
 ```
 

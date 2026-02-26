@@ -127,7 +127,7 @@ If `xCell2` is unavailable, this vignette will skip deconvolution sections.
 ```{r xcell2-missing, eval=!has_xcell2}
 cat("Package 'xCell2' is not installed; deconvolution steps are skipped.\n")
 cat("Install it to run these sections:\n")
-cat("  BiocManager::install('xCell2')\n")
+cat("  Install package 'xCell2' from Bioconductor.\n")
 ```
 
 ```{r run-deconvolution, eval=has_xcell2}
