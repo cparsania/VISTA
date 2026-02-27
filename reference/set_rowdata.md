@@ -115,10 +115,18 @@ if (requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
   )
 
   # View updated rowData
-  head(rowData(vista))
+  head(SummarizedExperiment::rowData(vista))
 }
 #> 'select()' returned 1:many mapping between keys and columns
-#> Error in rowData(vista): could not find function "rowData"
+#> DataFrame with 6 rows and 4 columns
+#>                  baseMean      SYMBOL               GENENAME    ENTREZID
+#>                 <numeric> <character>            <character> <character>
+#> ENSG00000000003  726.8783      TSPAN6          tetraspanin 6        7105
+#> ENSG00000000419  545.3315        DPM1 dolichyl-phosphate m..        8813
+#> ENSG00000000457  240.9891       SCYL3 SCY1 like pseudokina..       57147
+#> ENSG00000000460   54.6336       FIRRM FIGNL1 interacting r..       55732
+#> ENSG00000000971 5574.9091         CFH    complement factor H        3075
+#> ENSG00000001036 1307.8518       FUCA2   alpha-L-fucosidase 2        2519
 
 # Or provide custom annotations
 custom_annot <- data.frame(
