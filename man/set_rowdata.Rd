@@ -88,7 +88,7 @@ if (requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
   )
 
   # View updated rowData
-  head(rowData(vista))
+  head(SummarizedExperiment::rowData(vista))
 }
 
 # Or provide custom annotations

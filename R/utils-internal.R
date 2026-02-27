@@ -1802,7 +1802,7 @@ run_limma_analysis <- function(
 #'   )
 #'
 #'   # View updated rowData
-#'   head(rowData(vista))
+#'   head(SummarizedExperiment::rowData(vista))
 #' }
 #'
 #' # Or provide custom annotations
