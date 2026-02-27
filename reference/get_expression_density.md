@@ -69,3 +69,10 @@ get_expression_density(
 ## Value
 
 A `ggplot2` object.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

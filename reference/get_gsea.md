@@ -55,3 +55,14 @@ get_gsea(
   Additional arguments forwarded to the underlying GSEA function:
   [`clusterProfiler::GSEA()`](https://rdrr.io/pkg/clusterProfiler/man/GSEA.html)
   (msigdb TERM2GENE), `gseGO()`, or `gseKEGG()` depending on `set_type`.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

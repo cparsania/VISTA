@@ -71,3 +71,10 @@ get_expression_scatter(
 ## Value
 
 A `ggplot2` object.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

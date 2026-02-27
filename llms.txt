@@ -528,6 +528,8 @@ Visualize and compare log2 fold-changes across comparisons.
   fold-change barplots across comparisons for selected genes
 - [`get_foldchange_boxplot()`](get_foldchange_boxplot.md) : Plot
   fold-change distributions across comparisons
+- [`get_foldchange_raincloud()`](get_foldchange_raincloud.md) :
+  Raincloud plot of fold-change distributions across comparisons
 - [`get_foldchange_lineplot()`](get_foldchange_lineplot.md) :
   Fold-change line plot across comparisons
 - [`get_foldchange_lollipop()`](get_foldchange_lollipop.md) :
@@ -612,4 +614,5 @@ Built-in datasets for examples and testing.
 - [Color and Palette Design with VISTA](VISTA-colors.md):
 - [Comparing DESeq2 and edgeR with VISTA](VISTA-comparison.md):
 - [Cell-Type Deconvolution with VISTA (airway)](VISTA-deconvolution.md):
+- [Raincloud Plots in VISTA](VISTA-raincloud.md):
 - [VISTA Function Reference](VISTA-reference.md):

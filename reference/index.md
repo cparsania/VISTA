@@ -113,6 +113,8 @@ Visualize and compare log2 fold-changes across comparisons.
   fold-change barplots across comparisons for selected genes
 - [`get_foldchange_boxplot()`](get_foldchange_boxplot.md) : Plot
   fold-change distributions across comparisons
+- [`get_foldchange_raincloud()`](get_foldchange_raincloud.md) :
+  Raincloud plot of fold-change distributions across comparisons
 - [`get_foldchange_lineplot()`](get_foldchange_lineplot.md) :
   Fold-change line plot across comparisons
 - [`get_foldchange_lollipop()`](get_foldchange_lollipop.md) :

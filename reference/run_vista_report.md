@@ -44,3 +44,10 @@ and includes:
 - downloadable artifacts (tables + plots + optional zip bundle),
 
 - interactive HTML tables via DT when installed.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

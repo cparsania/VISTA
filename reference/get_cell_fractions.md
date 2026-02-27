@@ -17,3 +17,10 @@ get_cell_fractions(x)
 ## Value
 
 A data.frame of cell fraction estimates with samples in rows.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

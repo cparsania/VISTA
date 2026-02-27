@@ -4,6 +4,10 @@ The `VISTA` class extends `SummarizedExperiment`. All analysis metadata
 (DE results, summaries, cutoffs, grouping info, etc.) is stored in the
 `metadata()` slot of the object.
 
+## Value
+
+A `VISTA` S4 object.
+
 ## Details
 
 Core elements stored in `metadata(v)`:
@@ -34,3 +38,10 @@ Advanced users can convert an existing `SummarizedExperiment` with
 
 [`create_vista`](create_vista.md), [`as_vista`](as_vista.md),
 [`validate_vista`](validate_vista.md)
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

@@ -174,3 +174,14 @@ get_expression_heatmap(
 
   Additional arguments passed to
   [`ComplexHeatmap::Heatmap()`](https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html).
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

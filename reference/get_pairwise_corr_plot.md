@@ -34,3 +34,14 @@ get_pairwise_corr_plot(
 
   Optional character vector of gene IDs to include; defaults to all
   genes.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

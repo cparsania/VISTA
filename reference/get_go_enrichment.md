@@ -60,3 +60,10 @@ get_go_enrichment(
 ## Value
 
 A list with `enrich` containing an `enrichResult`.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

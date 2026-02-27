@@ -83,3 +83,10 @@ enrichMsigDB(
 ## Value
 
 A list containing a single `enrichResult` object named `"enrich"`.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

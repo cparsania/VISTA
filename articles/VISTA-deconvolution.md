@@ -111,7 +111,7 @@ sections.
 ``` r
 cat("Package 'xCell2' is not installed; deconvolution steps are skipped.\n")
 cat("Install it to run these sections:\n")
-cat("  BiocManager::install('xCell2')\n")
+cat("  Install package 'xCell2' from Bioconductor.\n")
 ```
 
 ``` r

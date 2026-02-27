@@ -80,3 +80,10 @@ get_ma_plot(
 
 A [`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html) MA
 plot.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

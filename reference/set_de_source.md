@@ -22,3 +22,10 @@ set_de_source(object, source = c("deseq2", "edger", "limma", "consensus"))
 ## Value
 
 A modified `VISTA` object with updated active DE source.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

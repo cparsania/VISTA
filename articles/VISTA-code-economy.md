@@ -420,7 +420,7 @@ get_expression_heatmap(
   display_id       = "SYMBOL",
   annotate_columns = TRUE,
   show_row_names   = TRUE,
-  summarise_replicates  = F  
+  summarise_replicates  = FALSE  
 )
 ```
 

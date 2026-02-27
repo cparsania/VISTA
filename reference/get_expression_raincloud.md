@@ -1,7 +1,9 @@
 # Raincloud plot of expression values
 
-Combines a violin, boxplot, and jittered points per sample/group to show
-distribution, summary, and individual values.
+Uses
+[`ggrain::geom_rain()`](https://rdrr.io/pkg/ggrain/man/geom_rain.html)
+to combine a half-violin, boxplot, and jittered points per sample/group
+to show distribution, summary, and individual values.
 
 ## Usage
 
@@ -14,8 +16,20 @@ get_expression_raincloud(
   value_transform = c("log2", "zscore", "none"),
   summarise = FALSE,
   facet = TRUE,
+  rain_side = c("r", "l", "f", "f1x1", "f2x2"),
+  id.long.var = NULL,
   point_alpha = 0.5,
-  point_size = 1.5
+  point_size = 1.5,
+  p.label = "p.signif",
+  stats_group = FALSE,
+  stats_method = "t.test",
+  label_points = FALSE,
+  label_column = "gene",
+  label_size = 3,
+  label_max_overlaps = 50,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL
 )
 ```
 
@@ -49,6 +63,18 @@ get_expression_raincloud(
 
   Logical; facet by group.
 
+- rain_side:
+
+  Side specification passed to
+  [`ggrain::geom_rain()`](https://rdrr.io/pkg/ggrain/man/geom_rain.html);
+  one of `"r"`, `"l"`, `"f"`, `"f1x1"`, or `"f2x2"`.
+
+- id.long.var:
+
+  Optional column name passed to
+  [`ggrain::geom_rain()`](https://rdrr.io/pkg/ggrain/man/geom_rain.html)
+  as `id.long.var` to identify repeated measurements.
+
 - point_alpha:
 
   Alpha for jittered points.
@@ -57,6 +83,88 @@ get_expression_raincloud(
 
   Point size for jittered points.
 
+- p.label:
+
+  Label type passed to
+  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
+
+- stats_group:
+
+  Logical; add pairwise statistical tests when `TRUE`.
+
+- stats_method:
+
+  Statistical method passed to
+  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
+
+- label_points:
+
+  Logical; add text labels to points using `ggrepel`.
+
+- label_column:
+
+  Column name in the plotting data used for labels. Defaults to `"gene"`
+  for expression raincloud plots.
+
+- label_size:
+
+  Text size for point labels.
+
+- label_max_overlaps:
+
+  Maximum overlaps passed to
+  [`ggrepel::geom_text_repel()`](https://ggrepel.slowkow.com/reference/geom_text_repel.html).
+
+- display_id:
+
+  Optional ID/column name to use for labels. If supplied and present in
+  `rowData(x)`, those values are used; otherwise falls back to ID
+  mapping.
+
+- display_from:
+
+  Optional source ID type for mapping (used when `display_id` is not
+  found in `rowData`).
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for ID mapping when `display_id` is set
+  but not found in `rowData`.
+
 ## Value
 
 A `ggplot2` object.
+
+## Details
+
+`id.long.var` controls which repeated unit is connected by lines in
+[`ggrain::geom_rain()`](https://rdrr.io/pkg/ggrain/man/geom_rain.html).
+
+Recommended usage for expression raincloud plots:
+
+- `id.long.var = NULL` (default): best for clean distribution summaries.
+
+- `id.long.var = "gene"`: best when plotting a small number of genes and
+  showing gene-level trajectories across x levels.
+
+- `id.long.var = "<subject_id_column>"`: best for
+  paired/repeated-measure designs when a subject ID exists in
+  `sample_info`.
+
+- `id.long.var = "sample"` or the grouping variable is usually less
+  informative and can over-connect points.
+
+- Point labels (`label_points = TRUE`) work best with `facet = FALSE` or
+  a small number of genes.
+
+For identifier display consistency with other VISTA plotting functions,
+set `display_id` (for example, `"SYMBOL"`). When provided, `genes` can
+be given in that ID space, and default point labels use the mapped
+display IDs.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

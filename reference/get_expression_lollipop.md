@@ -83,3 +83,14 @@ get_expression_lollipop(
 
   Optional `OrgDb` object used for ID mapping when `display_id` is set
   but not found in `rowData`.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

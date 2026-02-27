@@ -53,3 +53,14 @@ get_deg_venn_diagram(
 
   Additional arguments forwarded to
   [`ggvenn::ggvenn()`](https://yanlinlin82.github.io/ggvenn/reference/ggvenn.html).
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

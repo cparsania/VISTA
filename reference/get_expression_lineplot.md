@@ -54,3 +54,14 @@ get_expression_lineplot(
 - color_palette:
 
   Qualitative palette name used for gene colors.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

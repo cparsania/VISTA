@@ -63,3 +63,10 @@ get_expression_joyplot(
 ## Value
 
 A `ggplot2` object.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

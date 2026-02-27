@@ -61,3 +61,14 @@ get_foldchange_barplot(
 
   Facet scales argument passed to `facet_wrap()` when faceting (default
   `"free_y"`).
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

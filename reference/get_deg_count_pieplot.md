@@ -56,3 +56,14 @@ get_deg_count_pieplot(
 - ncol:
 
   Optional number of columns when faceting.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

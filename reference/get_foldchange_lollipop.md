@@ -94,6 +94,10 @@ get_foldchange_lollipop(
   Logical; when two comparisons are provided, facet by comparison
   instead of dodging side-by-side.
 
+## Value
+
+An object returned by this function.
+
 ## Details
 
 Shared arguments: `x` (`VISTA` with DE results),
@@ -106,3 +110,10 @@ Extracts log2 fold changes from stored differential expression results
 and plots them as stems and dots, with labels and a zero reference line.
 You can optionally provide two comparisons; in that case both
 comparisons are drawn side-by-side, coloured by comparison.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

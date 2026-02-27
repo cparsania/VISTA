@@ -94,10 +94,14 @@ get_volcano_plot(
   Additional parameters forwarded to
   [`EnhancedVolcano::EnhancedVolcano()`](https://rdrr.io/pkg/EnhancedVolcano/man/EnhancedVolcano.html).
 
+## Value
+
+A `ggplot2` object.
+
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Create VISTA object
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
@@ -110,10 +114,25 @@ vista <- create_vista(
   group_numerator = "treatment1",
   group_denominator = "control"
 )
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
 
 # Basic volcano plot
 comps <- names(comparisons(vista))
 get_volcano_plot(vista, sample_comparison = comps[1])
+#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+#> ℹ Please use `linewidth` instead.
+#> ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+#>   Please report the issue to the authors.
+#> Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
+#> ℹ Please use the `linewidth` argument instead.
+#> ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+#>   Please report the issue to the authors.
+
 
 # With custom thresholds
 get_volcano_plot(
@@ -123,6 +142,7 @@ get_volcano_plot(
   pval_cutoff = 0.01
 )
 
+
 # Highlight specific genes
 genes_of_interest <- rownames(vista)[1:5]
 get_volcano_plot(
@@ -130,5 +150,6 @@ get_volcano_plot(
   sample_comparison = comps[1],
   genes_to_display = genes_of_interest
 )
-} # }
+
+# }
 ```

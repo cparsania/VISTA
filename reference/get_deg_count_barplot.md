@@ -47,3 +47,14 @@ get_deg_count_barplot(
 - facet_scale:
 
   Scale option passed to `facet_wrap()` when faceting.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

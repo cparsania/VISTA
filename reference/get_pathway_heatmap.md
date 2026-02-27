@@ -102,7 +102,7 @@ Depending on `return_type`:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
@@ -114,6 +114,12 @@ vista <- create_vista(
   group_numerator = "treatment1",
   group_denominator = "control"
 )
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
 
 msig <- get_msigdb_enrichment(
   vista,
@@ -132,5 +138,6 @@ get_pathway_heatmap(
   annotate_columns = TRUE,
   summarise_replicates = FALSE
 )
-} # }
+
+# }
 ```

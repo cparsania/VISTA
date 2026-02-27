@@ -98,3 +98,14 @@ get_corr_heatmap(
 - viridis_begin, viridis_end:
 
   Palette endpoints between 0 and 1.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

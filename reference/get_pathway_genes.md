@@ -66,7 +66,7 @@ Depending on `return_type`:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
@@ -78,6 +78,12 @@ vista <- create_vista(
   group_numerator = "treatment1",
   group_denominator = "control"
 )
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
 
 msig <- get_msigdb_enrichment(
   vista,
@@ -86,8 +92,23 @@ msig <- get_msigdb_enrichment(
   species = "Homo sapiens",
   from_type = "ENSEMBL"
 )
+#> 
 
 pathway_tbl <- get_pathway_genes(msig, top_n = 5, return_type = "long")
 head(pathway_tbl)
-} # }
+#>                         pathway_id                          pathway
+#> 1 HALLMARK_TNFA_SIGNALING_VIA_NFKB HALLMARK_TNFA_SIGNALING_VIA_NFKB
+#> 2 HALLMARK_TNFA_SIGNALING_VIA_NFKB HALLMARK_TNFA_SIGNALING_VIA_NFKB
+#> 3 HALLMARK_TNFA_SIGNALING_VIA_NFKB HALLMARK_TNFA_SIGNALING_VIA_NFKB
+#> 4 HALLMARK_TNFA_SIGNALING_VIA_NFKB HALLMARK_TNFA_SIGNALING_VIA_NFKB
+#> 5 HALLMARK_TNFA_SIGNALING_VIA_NFKB HALLMARK_TNFA_SIGNALING_VIA_NFKB
+#> 6 HALLMARK_TNFA_SIGNALING_VIA_NFKB HALLMARK_TNFA_SIGNALING_VIA_NFKB
+#>              gene
+#> 1 ENSG00000003402
+#> 2 ENSG00000067082
+#> 3 ENSG00000099860
+#> 4 ENSG00000102804
+#> 5 ENSG00000105835
+#> 6 ENSG00000107968
+# }
 ```

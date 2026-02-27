@@ -19,3 +19,14 @@ print(x, ...)
 - ...:
 
   Ignored.
+
+## Value
+
+The input object `x`, returned invisibly.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

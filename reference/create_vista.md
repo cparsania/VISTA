@@ -256,7 +256,7 @@ cutoffs(vista)
 #> 
 
 # Multiple comparisons example
-if (FALSE) { # \dontrun{
+# \donttest{
 vista_multi <- create_vista(
   counts = count_data,
   sample_info = sample_metadata,
@@ -268,5 +268,5 @@ vista_multi <- create_vista(
   log2fc_cutoff = 1.0,
   pval_cutoff = 0.01
 )
-} # }
+# }
 ```

@@ -88,42 +88,50 @@ A list with `enrich` containing an `enrichResult`.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Create VISTA object
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
 vista <- create_vista(
-  counts = count_data,
-  sample_info = sample_metadata,
+  counts = count_data[1:200, ],
+  sample_info = sample_metadata[1:6, ],
   column_geneid = "gene_id",
   group_column = "cond_long",
   group_numerator = "treatment1",
   group_denominator = "control"
 )
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+comp <- names(comparisons(vista))[1]
 
 # Run MSigDB enrichment on upregulated genes
 msig_up <- get_msigdb_enrichment(
   vista,
-  sample_comparison = "treatment1_VS_control",
+  sample_comparison = comp,
   regulation = "Up",
   msigdb_category = "H",  # Hallmark gene sets
   from_type = "ENSEMBL"
 )
 
-# View results
-head(msig_up$enrich)
+if (!is.null(msig_up$enrich)) {
+  # View results
+  head(msig_up$enrich)
+  # Visualize enrichment
+  get_enrichment_plot(msig_up$enrich)
+}
 
-# Visualize enrichment
-get_enrichment_plot(msig_up$enrich)
 
 # Enrichment for downregulated genes
 msig_down <- get_msigdb_enrichment(
   vista,
-  sample_comparison = "treatment1_VS_control",
+  sample_comparison = comp,
   regulation = "Down",
-  msigdb_category = "C2",  # Curated gene sets
-  msigdb_subcategory = "CP:KEGG"  # KEGG pathways
+  msigdb_category = "C2"  # Curated gene sets
 )
-} # }
+# }
 ```

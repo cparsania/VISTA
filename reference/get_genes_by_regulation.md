@@ -26,3 +26,10 @@ get_genes_by_regulation(x, sample_comparisons, regulation = "Both")
 ## Value
 
 A named list of character vectors (one per comparison).
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

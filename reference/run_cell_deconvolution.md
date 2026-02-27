@@ -57,3 +57,10 @@ run_cell_deconvolution(
 ## Value
 
 VISTA object with cell_fractions added to metadata.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

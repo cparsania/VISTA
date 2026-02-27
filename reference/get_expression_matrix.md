@@ -55,3 +55,10 @@ get_expression_matrix(
 ## Value
 
 A numeric matrix with genes in rows and samples (or groups) in columns.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

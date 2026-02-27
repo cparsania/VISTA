@@ -50,3 +50,10 @@ get_expression_violinplot(
 ## Value
 
 A `ggplot2` object.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

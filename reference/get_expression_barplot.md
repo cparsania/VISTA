@@ -84,6 +84,10 @@ get_expression_barplot(
   Optional `OrgDb` object used for ID mapping when `display_id` is set
   but not found in `rowData`.
 
+## Value
+
+A `ggplot2` object.
+
 ## Examples
 
 ``` r

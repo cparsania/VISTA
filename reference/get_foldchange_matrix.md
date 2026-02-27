@@ -28,3 +28,10 @@ get_foldchange_matrix(x, sample_comparisons = NULL, genes = NULL)
 ## Value
 
 A numeric matrix with genes in rows and comparisons in columns.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

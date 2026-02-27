@@ -167,23 +167,51 @@ significance) and [`get_pathway_heatmap()`](get_pathway_heatmap.md)
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+vista <- create_vista(
+  counts = count_data[1:200, ],
+  sample_info = sample_metadata[1:6, ],
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control"
+)
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+
 msig <- get_msigdb_enrichment(
-  vista, sample_comparison = "treatment_VS_control",
+  vista,
+  sample_comparison = names(comparisons(vista))[1],
   regulation = "Up", from_type = "ENSEMBL"
 )
+#> Using human MSigDB with ortholog mapping to mouse. Use `db_species = "MM"` for mouse-native gene sets.
+#> This message is displayed once per session.
 
 # Simple: pathway-coloured chords
 get_enrichment_chord(msig)
+#> Warning: `vista_obj` and `comparison` are required for "foldchange" colouring. Falling
+#> back to "pathway".
+
 
 # With fold-change colouring
 get_enrichment_chord(
   msig, vista_obj = vista,
-  comparison = "treatment_VS_control",
+  comparison = names(comparisons(vista))[1],
   color_by = "foldchange"
 )
 
+
 # Hub genes only (shared across 2+ pathways)
-get_enrichment_chord(msig, min_pathways = 2)
-} # }
+pw_long <- get_pathway_genes(msig, return_type = "long")
+if (any(table(pw_long$gene) >= 2)) {
+  get_enrichment_chord(msig, min_pathways = 2)
+}
+# }
 ```

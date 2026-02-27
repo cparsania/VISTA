@@ -89,3 +89,10 @@ get_foldchange_chromosome_plot(
 ## Value
 
 A `ggplot2` object.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

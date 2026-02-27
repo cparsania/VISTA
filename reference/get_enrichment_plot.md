@@ -30,3 +30,10 @@ get_enrichment_plot(x, top_n = 10, title = NULL)
 ## Value
 
 A `ggplot2` object.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

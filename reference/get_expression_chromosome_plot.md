@@ -139,3 +139,10 @@ A `ggplot2` object or a list of `ggplot2` objects when multiple
   based on log2 mean expression for that group (assay `norm_counts`),
   using a data-driven colour scale. Ignored when `value_column` is
   supplied.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

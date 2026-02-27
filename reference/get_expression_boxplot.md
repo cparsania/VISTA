@@ -110,3 +110,14 @@ get_expression_boxplot(
   When `pool_genes = TRUE`, either `"x"` (default) or `"group"` to force
   group colors even if x_by = "sample". When `pool_genes = FALSE`,
   either `"gene"` or `"group"`.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

@@ -26,3 +26,10 @@ plot_deg_alluvial(vista_obj, sample_comparisons, show_other = FALSE)
 ## Value
 
 A ggplot object.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

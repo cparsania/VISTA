@@ -65,3 +65,10 @@ Points are coloured by concordance status using fixed colours:
 Regulation is derived from the `log2fc` and `pval` cutoffs stored in
 `cutoffs(x)` (and `p_value_type` from the same list, defaulting to
 `"padj"`).
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

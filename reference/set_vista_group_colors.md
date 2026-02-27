@@ -24,3 +24,10 @@ set_vista_group_colors(object, color_map)
 ## Value
 
 A modified `VISTA` object with updated group colors.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

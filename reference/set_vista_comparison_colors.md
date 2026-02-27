@@ -25,3 +25,10 @@ set_vista_comparison_colors(object, color_map)
 ## Value
 
 A modified `VISTA` object with updated comparison colors.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

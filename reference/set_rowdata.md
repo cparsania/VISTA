@@ -86,7 +86,7 @@ available in that database will be filled.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Load example VISTA object
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
@@ -99,6 +99,12 @@ vista <- create_vista(
   group_numerator = "treatment1",
   group_denominator = "control"
 )
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
 
 # Add annotations from OrgDb (human)
 if (requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
@@ -111,6 +117,8 @@ if (requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
   # View updated rowData
   head(rowData(vista))
 }
+#> 'select()' returned 1:many mapping between keys and columns
+#> Error in rowData(vista): could not find function "rowData"
 
 # Or provide custom annotations
 custom_annot <- data.frame(
@@ -118,5 +126,6 @@ custom_annot <- data.frame(
   custom_info = paste0("Info_", 1:10)
 )
 vista <- set_rowdata(vista, annotations = custom_annot, key_col = "gene_id")
-} # }
+#> Warning: Missing annotations for 75 genes; filling those rows with NA.
+# }
 ```

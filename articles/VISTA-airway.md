@@ -38,22 +38,15 @@ e99625.
 
 ``` r
 # Load required packages
-library(magrittr)
 library(VISTA)
 library(ggplot2)         # For plotting functions
 library(airway)          # Dataset
 library(org.Hs.eg.db)    # Human gene annotations
+library(magrittr)    # %>% 
 ```
 
-If you don’t have the required packages:
-
-``` r
-# Install VISTA from Bioconductor
-BiocManager::install("VISTA")
-
-# Install supporting packages
-BiocManager::install(c("airway", "org.Hs.eg.db"))
-```
+If required packages are missing, install them before rendering this
+vignette.
 
 ## Data Preparation
 
@@ -149,8 +142,10 @@ Prepare sample info with proper rownames:
 
 ``` r
 # Sample info must have rownames matching count column names
-sample_info <- sample_metadata %>% tibble::as_tibble()
-sample_info %<>% dplyr::rename("sample_names"= "Run") %>% dplyr::mutate(sample_names = as.character(sample_names))
+sample_info <- sample_metadata %>%
+  tibble::as_tibble() %>%
+  dplyr::rename("sample_names" = "Run") %>%
+  dplyr::mutate(sample_names = as.character(sample_names))
 
 # Key columns for VISTA
 sample_info[, c("sample_names", "cell", "treatment", "dex")]
@@ -1140,6 +1135,26 @@ get_expression_joyplot(
 
 ![](VISTA-airway_files/figure-html/joyplot-sample-1.png)
 
+#### Raincloud plot (expression)
+
+``` r
+cat("Package 'ggrain' is not installed; expression raincloud plot example is skipped.\n")
+```
+
+``` r
+get_expression_raincloud(
+  vista,
+  genes = top_up$gene_id[1:3],
+  value_transform = "log2",
+  summarise = TRUE,
+  facet = FALSE,
+  id.long.var = "gene",
+  stats_group = TRUE
+)
+```
+
+![](VISTA-airway_files/figure-html/raincloud-expression-1.png)
+
 ## Functional Enrichment Analysis
 
 ### MSigDB Enrichment
@@ -1629,6 +1644,24 @@ head(fc_matrix, n = 10)
 #> ENSG00000001461                -0.04363732
 ```
 
+### Fold-change Raincloud
+
+``` r
+cat("Package 'ggrain' is not installed; fold-change raincloud plot example is skipped.\n")
+```
+
+``` r
+get_foldchange_raincloud(
+  vista,
+  sample_comparisons = comp_names,
+  facet = FALSE,
+  id.long.var = "gene_id",
+  stats_group = TRUE
+)
+```
+
+![](VISTA-airway_files/figure-html/raincloud-foldchange-1.png)
+
 ### Fold-change Heatmap
 
 #### Basic FC heatmap
@@ -1727,7 +1760,7 @@ In this workflow, we:
 4.  ✅ Performed quality control (PCA, MDS, UMAP, correlation)
 5.  ✅ Visualized differential expression (volcano, MA plots)
 6.  ✅ Analyzed expression patterns (heatmaps, barplots, boxplots,
-    violin plots, and more)
+    violin/raincloud plots, and more)
 7.  ✅ Performed functional enrichment (MSigDB, GO, KEGG)
 8.  ✅ Explored fold-change patterns
 9.  ✅ Generated publication-ready visualizations
@@ -1847,70 +1880,71 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] org.Hs.eg.db_3.22.0         AnnotationDbi_1.72.0       
-#>  [3] airway_1.30.0               SummarizedExperiment_1.40.0
-#>  [5] Biobase_2.70.0              GenomicRanges_1.62.1       
-#>  [7] Seqinfo_1.0.0               IRanges_2.44.0             
-#>  [9] S4Vectors_0.48.0            BiocGenerics_0.56.0        
-#> [11] generics_0.1.4              MatrixGenerics_1.22.0      
-#> [13] matrixStats_1.5.0           ggplot2_4.0.2              
-#> [15] VISTA_0.99.0                magrittr_2.0.4             
+#>  [1] magrittr_2.0.4              org.Hs.eg.db_3.22.0        
+#>  [3] AnnotationDbi_1.72.0        airway_1.30.0              
+#>  [5] SummarizedExperiment_1.40.0 Biobase_2.70.0             
+#>  [7] GenomicRanges_1.62.1        Seqinfo_1.0.0              
+#>  [9] IRanges_2.44.0              S4Vectors_0.48.0           
+#> [11] BiocGenerics_0.56.0         generics_0.1.4             
+#> [13] MatrixGenerics_1.22.0       matrixStats_1.5.0          
+#> [15] ggplot2_4.0.2               VISTA_0.99.0               
 #> [17] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] splines_4.5.2           ggplotify_0.1.3         tibble_3.3.1           
-#>   [4] R.oo_1.27.1             polyclip_1.10-7         lifecycle_1.0.5        
-#>   [7] rstatix_0.7.3           edgeR_4.8.2             doParallel_1.0.17      
-#>  [10] lattice_0.22-7          MASS_7.3-65             backports_1.5.0        
-#>  [13] limma_3.66.0            sass_0.4.10             rmarkdown_2.30         
-#>  [16] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             
-#>  [19] ggtangle_0.1.1          EnhancedVolcano_1.28.2  cowplot_1.2.0          
-#>  [22] DBI_1.3.0               RColorBrewer_1.1-3      abind_1.4-8            
-#>  [25] purrr_1.2.1             R.utils_2.13.0          msigdbr_25.1.1         
-#>  [28] yulab.utils_0.2.4       tweenr_2.0.3            rappdirs_0.3.4         
-#>  [31] gdtools_0.5.0           circlize_0.4.17         enrichplot_1.30.4      
-#>  [34] ggrepel_0.9.7           tidytree_0.4.7          RSpectra_0.16-2        
-#>  [37] pkgdown_2.2.0           codetools_0.2-20        DelayedArray_0.36.0    
-#>  [40] DOSE_4.4.0              ggforce_0.5.0           tidyselect_1.2.1       
-#>  [43] shape_1.4.6.1           aplot_0.2.9             farver_2.1.2           
-#>  [46] jsonlite_2.0.0          GetoptLong_1.1.0        Formula_1.2-5          
-#>  [49] ggridges_0.5.7          iterators_1.0.14        systemfonts_1.3.1      
-#>  [52] foreach_1.5.2           tools_4.5.2             ggnewscale_0.5.2       
-#>  [55] treeio_1.34.0           ragg_1.5.0              Rcpp_1.1.1             
-#>  [58] glue_1.8.0              gridExtra_2.3           SparseArray_1.10.8     
-#>  [61] xfun_0.56               DESeq2_1.50.2           qvalue_2.42.0          
-#>  [64] dplyr_1.2.0             withr_3.0.2             BiocManager_1.30.27    
-#>  [67] fastmap_1.2.0           GGally_2.4.0            ggpointdensity_0.2.1   
-#>  [70] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     
-#>  [73] textshaping_1.0.4       colorspace_2.1-2        GO.db_3.22.0           
-#>  [76] RSQLite_2.4.6           R.methodsS3_1.8.2       utf8_1.2.6             
-#>  [79] tidyr_1.3.2             fontLiberation_0.1.0    renv_1.1.4             
-#>  [82] data.table_1.18.2.1     FNN_1.1.4.1             httr_1.4.8             
-#>  [85] htmlwidgets_1.6.4       S4Arrays_1.10.1         scatterpie_0.2.6       
-#>  [88] ggstats_0.12.0          uwot_0.2.4              pkgconfig_2.0.3        
-#>  [91] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
-#>  [94] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
-#>  [97] htmltools_0.5.9         carData_3.0-6           fontBitstreamVera_0.1.1
-#> [100] bookdown_0.46           fgsea_1.36.2            clue_0.3-67            
-#> [103] scales_1.4.0            png_0.1-8               ggfun_0.2.0            
-#> [106] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
-#> [109] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
-#> [112] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.2         
-#> [115] desc_1.4.3              pillar_1.11.1           grid_4.5.2             
-#> [118] vctrs_0.7.1             ggpubr_0.6.3            car_3.1-5              
-#> [121] tidydr_0.0.6            cluster_2.1.8.1         evaluate_1.0.5         
-#> [124] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         
-#> [127] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
-#> [130] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
-#> [133] fs_1.6.6                ggiraph_0.9.6           stringi_1.8.7          
-#> [136] viridisLite_0.4.3       BiocParallel_1.44.0     assertthat_0.2.1       
-#> [139] babelgene_22.9          Biostrings_2.78.0       lazyeval_0.2.2         
-#> [142] GOSemSim_2.36.0         fontquiver_0.2.1        Matrix_1.7-4           
-#> [145] patchwork_1.3.2         bit64_4.6.0-1           KEGGREST_1.50.0        
-#> [148] statmod_1.5.1           igraph_2.2.2            broom_1.0.12           
-#> [151] memoise_2.0.1           bslib_0.10.0            ggtree_4.0.4           
-#> [154] fastmatch_1.1-8         bit_4.6.0               ape_5.8-1              
-#> [157] gson_0.1.0
+#>   [4] R.oo_1.27.1             ggpp_0.6.0              polyclip_1.10-7        
+#>   [7] lifecycle_1.0.5         rstatix_0.7.3           edgeR_4.8.2            
+#>  [10] doParallel_1.0.17       lattice_0.22-7          MASS_7.3-65            
+#>  [13] backports_1.5.0         limma_3.66.0            sass_0.4.10            
+#>  [16] rmarkdown_2.30          jquerylib_0.1.4         yaml_2.3.12            
+#>  [19] otel_0.2.0              ggtangle_0.1.1          EnhancedVolcano_1.28.2 
+#>  [22] cowplot_1.2.0           DBI_1.3.0               RColorBrewer_1.1-3     
+#>  [25] abind_1.4-8             purrr_1.2.1             R.utils_2.13.0         
+#>  [28] msigdbr_25.1.1          yulab.utils_0.2.4       tweenr_2.0.3           
+#>  [31] rappdirs_0.3.4          gdtools_0.5.0           circlize_0.4.17        
+#>  [34] enrichplot_1.30.4       ggrepel_0.9.7           tidytree_0.4.7         
+#>  [37] RSpectra_0.16-2         pkgdown_2.2.0           codetools_0.2-20       
+#>  [40] DelayedArray_0.36.0     DOSE_4.4.0              ggforce_0.5.0          
+#>  [43] tidyselect_1.2.1        shape_1.4.6.1           aplot_0.2.9            
+#>  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.0       
+#>  [49] Formula_1.2-5           ggridges_0.5.7          iterators_1.0.14       
+#>  [52] systemfonts_1.3.1       foreach_1.5.2           tools_4.5.2            
+#>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.0             
+#>  [58] Rcpp_1.1.1              glue_1.8.0              gridExtra_2.3          
+#>  [61] SparseArray_1.10.8      xfun_0.56               DESeq2_1.50.2          
+#>  [64] qvalue_2.42.0           dplyr_1.2.0             withr_3.0.2            
+#>  [67] BiocManager_1.30.27     fastmap_1.2.0           GGally_2.4.0           
+#>  [70] ggpointdensity_0.2.1    digest_0.6.39           R6_2.6.1               
+#>  [73] gridGraphics_0.5-1      textshaping_1.0.4       colorspace_2.1-2       
+#>  [76] GO.db_3.22.0            RSQLite_2.4.6           ggrain_0.1.2           
+#>  [79] R.methodsS3_1.8.2       utf8_1.2.6              tidyr_1.3.2            
+#>  [82] fontLiberation_0.1.0    renv_1.1.4              data.table_1.18.2.1    
+#>  [85] FNN_1.1.4.1             httr_1.4.8              htmlwidgets_1.6.4      
+#>  [88] S4Arrays_1.10.1         scatterpie_0.2.6        ggstats_0.12.0         
+#>  [91] uwot_0.2.4              pkgconfig_2.0.3         gtable_0.3.6           
+#>  [94] blob_1.3.0              ComplexHeatmap_2.26.1   S7_0.2.1               
+#>  [97] XVector_0.50.0          clusterProfiler_4.18.4  htmltools_0.5.9        
+#> [100] carData_3.0-6           fontBitstreamVera_0.1.1 bookdown_0.46          
+#> [103] fgsea_1.36.2            clue_0.3-67             scales_1.4.0           
+#> [106] png_0.1-8               ggfun_0.2.0             knitr_1.51             
+#> [109] reshape2_1.4.5          rjson_0.2.23            nlme_3.1-168           
+#> [112] curl_7.0.0              cachem_1.1.0            GlobalOptions_0.1.3    
+#> [115] stringr_1.6.0           parallel_4.5.2          desc_1.4.3             
+#> [118] pillar_1.11.1           grid_4.5.2              vctrs_0.7.1            
+#> [121] ggpubr_0.6.3            car_3.1-5               tidydr_0.0.6           
+#> [124] cluster_2.1.8.1         evaluate_1.0.5          cli_3.6.5              
+#> [127] locfit_1.5-9.12         compiler_4.5.2          rlang_1.1.7            
+#> [130] crayon_1.5.3            ggsignif_0.6.4          labeling_0.4.3         
+#> [133] forcats_1.0.1           plyr_1.8.9              fs_1.6.6               
+#> [136] ggiraph_0.9.6           stringi_1.8.7           viridisLite_0.4.3      
+#> [139] BiocParallel_1.44.0     assertthat_0.2.1        babelgene_22.9         
+#> [142] Biostrings_2.78.0       lazyeval_0.2.2          GOSemSim_2.36.0        
+#> [145] fontquiver_0.2.1        Matrix_1.7-4            patchwork_1.3.2        
+#> [148] bit64_4.6.0-1           KEGGREST_1.50.0         statmod_1.5.1          
+#> [151] broom_1.0.12            igraph_2.2.2            memoise_2.0.1          
+#> [154] bslib_0.10.0            ggtree_4.0.4            fastmatch_1.1-8        
+#> [157] bit_4.6.0               ape_5.8-1               gson_0.1.0             
+#> [160] polynom_1.4-1
 ```
 
 ## References

@@ -66,3 +66,14 @@ get_foldchange_lineplot(
 
   Character string selecting `"median"` or `"mean"` for the summary
   statistic.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

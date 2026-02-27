@@ -70,3 +70,14 @@ get_mds_plot(
   Optional vector of shapes passed to `scale_shape_manual()` when
   `shape_by` is set. Use a named vector to map shapes to specific
   levels.
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

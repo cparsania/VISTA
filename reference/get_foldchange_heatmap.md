@@ -136,3 +136,14 @@ get_foldchange_heatmap(
 
   Additional arguments forwarded to
   [`ComplexHeatmap::Heatmap()`](https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html).
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```

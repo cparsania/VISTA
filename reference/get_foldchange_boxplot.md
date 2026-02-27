@@ -13,7 +13,8 @@ get_foldchange_boxplot(
   sample_comparison = NULL,
   facet = TRUE,
   p.label = "p.signif",
-  stats_group = FALSE
+  stats_group = FALSE,
+  stats_method = "t.test"
 )
 ```
 
@@ -47,3 +48,19 @@ get_foldchange_boxplot(
 - stats_group:
 
   Logical; add pairwise statistical tests when `TRUE`.
+
+- stats_method:
+
+  Statistical method passed to
+  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
+
+## Value
+
+An object returned by this function.
+
+## Examples
+
+``` r
+NULL
+#> NULL
+```
