@@ -77,7 +77,8 @@ get_expression_boxplot(
 
 - stats_group:
 
-  Logical; add statistical comparisons between groups when `TRUE`.
+  Logical; add statistical comparisons between groups when `TRUE`. Only
+  supported when `by = "group"`.
 
 - p.label:
 

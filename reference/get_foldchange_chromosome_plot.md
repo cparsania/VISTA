@@ -3,7 +3,7 @@
 Convenience wrapper around
 [`get_chromosome_plot()`](get_chromosome_plot.md) for fold-change
 colouring. When multiple comparisons are supplied, panels are facetted
-by comparison with log2FC clipped to ±2.
+by comparison with log2FC clipped to +/-2.
 
 ## Usage
 
@@ -54,7 +54,7 @@ get_foldchange_chromosome_plot(
   Optional comparison name; when supplied, uses `log2fc` from
   `metadata(x)$de_results[[comparison]]` for colouring. If multiple
   comparisons are provided, one panel per comparison is shown (log2FC
-  clipped to ±2).
+  clipped to +/-2).
 
 - value_column:
 

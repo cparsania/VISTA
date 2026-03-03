@@ -74,7 +74,8 @@ get_foldchange_lineplot(): log2FC trajectories across comparisons (optional clus
 <span>  label_digits <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dodge_width <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  facet_comparison <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  facet_comparison <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -140,10 +141,17 @@ two comparisons on the same axis.</p></dd>
 <dd><p>Logical; when two comparisons are provided, facet by
 comparison instead of dodging side-by-side.</p></dd>
 
+
+<dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>
+<dd><p>Optional faceting mode. Use <code>NULL</code> (default) to preserve the
+current <code>facet_comparison</code> behavior. Otherwise choose one of <code>"auto"</code>,
+<code>"gene"</code>, <code>"comparison"</code>, or <code>"none"</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object returned by this function.</p>
+<p>A <code>ggplot2</code> object.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -155,12 +163,39 @@ Plot log2 fold changes as a lollipop chart (one or two comparisons)</p>
 plots them as stems and dots, with labels and a zero reference line. You can
 optionally provide two comparisons; in that case both comparisons are drawn
 side-by-side, coloured by comparison.</p>
+<p><code>facet_by = "gene"</code> provides an explicit per-gene layout, while
+<code>facet_by = "comparison"</code> mirrors the historical <code>facet_comparison = TRUE</code>
+behavior. Leaving <code>facet_by = NULL</code> preserves current defaults for existing code.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="cn">NULL</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"count_data"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sample_metadata"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_vista.html">create_vista</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  counts <span class="op">=</span> <span class="va">count_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span>,</span></span>
+<span class="r-in"><span>  sample_info <span class="op">=</span> <span class="va">sample_metadata</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span>,</span></span>
+<span class="r-in"><span>  column_geneid <span class="op">=</span> <span class="st">"gene_id"</span>,</span></span>
+<span class="r-in"><span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span></span>
+<span class="r-in"><span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span></span>
+<span class="r-in"><span>  group_denominator <span class="op">=</span> <span class="st">"control"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> estimating size factors</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> estimating dispersions</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gene-wise dispersion estimates</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> mean-dispersion relationship</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> final dispersion estimates</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> fitting model and testing</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">comp_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu">get_foldchange_lollipop</span><span class="op">(</span><span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp_name</span>, genes <span class="op">=</span> <span class="va">genes</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="get_foldchange_lollipop-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="fu">get_foldchange_lollipop</span><span class="op">(</span><span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp_name</span>, genes <span class="op">=</span> <span class="va">genes</span>, facet_by <span class="op">=</span> <span class="st">"gene"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="get_foldchange_lollipop-2.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

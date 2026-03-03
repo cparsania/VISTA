@@ -1,6 +1,9 @@
 # Plot fold-change barplots across comparisons for selected genes
 
-Plot fold-change barplots across comparisons for selected genes
+Plots log2 fold changes for selected genes across one or more
+comparisons. `facet_by` provides an explicit, backward-compatible way to
+request per-gene or per-comparison panels without changing the current
+`facet` / `facet_comparison` defaults.
 
 ## Usage
 
@@ -14,7 +17,8 @@ get_foldchange_barplot(
   display_id = NULL,
   sort_by = c("input", "log2fc", "abs_log2fc"),
   facet_comparison = FALSE,
-  facet_scales = "free_y"
+  facet_scales = "free_y",
+  facet_by = NULL
 )
 ```
 
@@ -62,13 +66,44 @@ get_foldchange_barplot(
   Facet scales argument passed to `facet_wrap()` when faceting (default
   `"free_y"`).
 
+- facet_by:
+
+  Optional faceting mode. Use `NULL` (default) to preserve the current
+  `facet` / `facet_comparison` behavior. Otherwise choose one of
+  `"auto"`, `"gene"`, `"comparison"`, or `"none"`.
+
 ## Value
 
 An object returned by this function.
+
+A `ggplot2` object.
 
 ## Examples
 
 ``` r
 NULL
 #> NULL
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+vista <- create_vista(
+  counts = count_data[1:200, ],
+  sample_info = sample_metadata[1:6, ],
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control"
+)
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+
+genes <- rownames(vista)[1:3]
+get_foldchange_barplot(vista, genes = genes)
+
+get_foldchange_barplot(vista, genes = genes, facet_by = "gene")
+
 ```

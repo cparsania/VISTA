@@ -69,7 +69,12 @@ labeling the most variable genes.</p>
 <span>  filter_chrom <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  value_label <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_data_range <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  force_fc_limits <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  force_fc_limits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  scale_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"diverging"</span>, <span class="st">"sequential"</span><span class="op">)</span>,</span>
+<span>  scale_low <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scale_mid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scale_high <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scale_midpoint <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -108,7 +113,7 @@ are labeled. Defaults to <code>NULL</code> (no explicit label set).</p></dd>
 <dd><p>Optional comparison name; when supplied, uses <code>log2fc</code> from
 <code>metadata(x)$de_results[[comparison]]</code> for colouring. If multiple
 comparisons are provided, one panel per comparison is shown (log2FC
-clipped to ±2).</p></dd>
+clipped to +/-2).</p></dd>
 
 
 <dt id="arg-group-value">group_value<a class="anchor" aria-label="anchor" href="#arg-group-value"></a></dt>
@@ -143,6 +148,28 @@ mark each gene position. Default <code>0.02</code>. Increase for longer ticks.</
 <dt id="arg-value-label">value_label<a class="anchor" aria-label="anchor" href="#arg-value-label"></a></dt>
 <dd><p>Optional legend title override for the colour scale.</p></dd>
 
+
+<dt id="arg-scale-mode">scale_mode<a class="anchor" aria-label="anchor" href="#arg-scale-mode"></a></dt>
+<dd><p>Colour scale mode: <code>"diverging"</code> (default) or
+<code>"sequential"</code>.</p></dd>
+
+
+<dt id="arg-scale-low">scale_low<a class="anchor" aria-label="anchor" href="#arg-scale-low"></a></dt>
+<dd><p>Optional low-end colour override.</p></dd>
+
+
+<dt id="arg-scale-mid">scale_mid<a class="anchor" aria-label="anchor" href="#arg-scale-mid"></a></dt>
+<dd><p>Optional midpoint colour override (used with diverging scale).</p></dd>
+
+
+<dt id="arg-scale-high">scale_high<a class="anchor" aria-label="anchor" href="#arg-scale-high"></a></dt>
+<dd><p>Optional high-end colour override.</p></dd>
+
+
+<dt id="arg-scale-midpoint">scale_midpoint<a class="anchor" aria-label="anchor" href="#arg-scale-midpoint"></a></dt>
+<dd><p>Numeric midpoint passed to
+<code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">ggplot2::scale_color_gradient2()</a></code> when <code>scale_mode = "diverging"</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -156,7 +183,7 @@ are still plotted). Values in <code>genes</code> must match either the rownames 
 if <code>id_column = "ENTREZID"</code>, then <code>genes</code> should contain Entrez IDs
 to be labeled.
 When multiple comparisons are supplied, <code>value_column</code> and <code>group_value</code> are
-ignored and the plot is facetted by comparison with a fixed ±2 log2FC scale.</p>
+ignored and the plot is facetted by comparison with a fixed +/-2 log2FC scale.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -29,7 +29,8 @@ get_foldchange_lollipop(
   label_digits = 2,
   display_id = NULL,
   dodge_width = 0.5,
-  facet_comparison = FALSE
+  facet_comparison = FALSE,
+  facet_by = NULL
 )
 ```
 
@@ -94,9 +95,17 @@ get_foldchange_lollipop(
   Logical; when two comparisons are provided, facet by comparison
   instead of dodging side-by-side.
 
+- facet_by:
+
+  Optional faceting mode. Use `NULL` (default) to preserve the current
+  `facet_comparison` behavior. Otherwise choose one of `"auto"`,
+  `"gene"`, `"comparison"`, or `"none"`.
+
 ## Value
 
 An object returned by this function.
+
+A `ggplot2` object.
 
 ## Details
 
@@ -111,9 +120,37 @@ and plots them as stems and dots, with labels and a zero reference line.
 You can optionally provide two comparisons; in that case both
 comparisons are drawn side-by-side, coloured by comparison.
 
+`facet_by = "gene"` provides an explicit per-gene layout, while
+`facet_by = "comparison"` mirrors the historical
+`facet_comparison = TRUE` behavior. Leaving `facet_by = NULL` preserves
+current defaults for existing code.
+
 ## Examples
 
 ``` r
 NULL
 #> NULL
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+vista <- create_vista(
+  counts = count_data[1:200, ],
+  sample_info = sample_metadata[1:6, ],
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control"
+)
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+
+comp_name <- names(comparisons(vista))[1]
+genes <- rownames(vista)[1:3]
+get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes)
+
+get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes, facet_by = "gene")
 ```

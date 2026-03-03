@@ -23,7 +23,12 @@ get_chromosome_plot(
   filter_chrom = NULL,
   value_label = NULL,
   use_data_range = FALSE,
-  force_fc_limits = FALSE
+  force_fc_limits = FALSE,
+  scale_mode = c("diverging", "sequential"),
+  scale_low = NULL,
+  scale_mid = NULL,
+  scale_high = NULL,
+  scale_midpoint = 0
 )
 ```
 
@@ -61,7 +66,7 @@ get_chromosome_plot(
   Optional comparison name; when supplied, uses `log2fc` from
   `metadata(x)$de_results[[comparison]]` for colouring. If multiple
   comparisons are provided, one panel per comparison is shown (log2FC
-  clipped to ±2).
+  clipped to +/-2).
 
 - group_value:
 
@@ -98,6 +103,28 @@ get_chromosome_plot(
 
   Optional legend title override for the colour scale.
 
+- scale_mode:
+
+  Colour scale mode: `"diverging"` (default) or `"sequential"`.
+
+- scale_low:
+
+  Optional low-end colour override.
+
+- scale_mid:
+
+  Optional midpoint colour override (used with diverging scale).
+
+- scale_high:
+
+  Optional high-end colour override.
+
+- scale_midpoint:
+
+  Numeric midpoint passed to
+  [`ggplot2::scale_color_gradient2()`](https://ggplot2.tidyverse.org/reference/scale_gradient.html)
+  when `scale_mode = "diverging"`.
+
 ## Value
 
 A `ggplot2` object.
@@ -110,4 +137,4 @@ are still plotted). Values in `genes` must match either the rownames of
 `id_column = "ENTREZID"`, then `genes` should contain Entrez IDs to be
 labeled. When multiple comparisons are supplied, `value_column` and
 `group_value` are ignored and the plot is facetted by comparison with a
-fixed ±2 log2FC scale.
+fixed +/-2 log2FC scale.

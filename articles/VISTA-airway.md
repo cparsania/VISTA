@@ -903,6 +903,20 @@ get_expression_barplot(
 
 ![](VISTA-airway_files/figure-html/barplot-log-stats-1.png)
 
+#### Per-sample barplot for selected genes
+
+``` r
+get_expression_barplot(
+  vista,
+  genes = top_up$gene_id[1:2],
+  display_id = "SYMBOL",
+  by = "sample",
+  sample_order = "group"
+)
+```
+
+![](VISTA-airway_files/figure-html/barplot-per-sample-1.png)
+
 #### Compare up and down regulated genes
 
 ``` r
@@ -1104,6 +1118,20 @@ get_expression_lollipop(
 ```
 
 ![](VISTA-airway_files/figure-html/lollipop-plot-1.png)
+
+#### Per-sample lollipop plot
+
+``` r
+get_expression_lollipop(
+  vista,
+  genes = top_up$gene_id[1:2],
+  display_id = "SYMBOL",
+  by = "sample",
+  sample_order = "expression"
+)
+```
+
+![](VISTA-airway_files/figure-html/lollipop-per-sample-1.png)
 
 #### Joyplot by treatment group
 
@@ -1643,6 +1671,36 @@ head(fc_matrix, n = 10)
 #> ENSG00000001460                -0.13476909
 #> ENSG00000001461                -0.04363732
 ```
+
+### Fold-change Barplot and Lollipop
+
+#### Per-gene fold-change barplot
+
+``` r
+get_foldchange_barplot(
+  vista,
+  genes = top_up$gene_id[1:3],
+  sample_comparisons = comp_names,
+  display_id = "SYMBOL",
+  facet_by = "gene"
+)
+```
+
+![](VISTA-airway_files/figure-html/fc-barplot-gene-1.png)
+
+#### Per-gene fold-change lollipop
+
+``` r
+get_foldchange_lollipop(
+  vista,
+  sample_comparison = comp_names[1],
+  genes = top_up$gene_id[1:3],
+  display_id = "SYMBOL",
+  facet_by = "gene"
+)
+```
+
+![](VISTA-airway_files/figure-html/fc-lollipop-gene-1.png)
 
 ### Fold-change Raincloud
 

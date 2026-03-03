@@ -56,12 +56,20 @@ colouring (optional group mean, rowData columns, or assay columns).</p>
 <span>  keytype <span class="op">=</span> <span class="st">"GENEID"</span>,</span>
 <span>  id_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sample_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  value_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  value_from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rowdata"</span>, <span class="st">"assay"</span><span class="op">)</span>,</span>
 <span>  value_assay <span class="op">=</span> <span class="st">"norm_counts"</span>,</span>
 <span>  facet_value_columns <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  side_by_side_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  paginate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  panels_per_page <span class="op">=</span> <span class="fl">24</span>,</span>
+<span>  summarise_replicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  summarise_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"median"</span><span class="op">)</span>,</span>
 <span>  group_value <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  label_top_n <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  label_genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"top"</span>, <span class="st">"all"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  line_length <span class="op">=</span> <span class="fl">0.02</span>,</span>
 <span>  line_width <span class="op">=</span> <span class="fl">0.6</span>,</span>
@@ -98,6 +106,16 @@ When <code>NULL</code>, rownames(x) are used as keys.</p></dd>
 are labeled. Defaults to <code>NULL</code> (no explicit label set).</p></dd>
 
 
+<dt id="arg-sample-group">sample_group<a class="anchor" aria-label="anchor" href="#arg-sample-group"></a></dt>
+<dd><p>Optional character vector of groups (from <code>group_column</code>)
+used to subset assay columns when <code>value_from = "assay"</code>.</p></dd>
+
+
+<dt id="arg-group-column">group_column<a class="anchor" aria-label="anchor" href="#arg-group-column"></a></dt>
+<dd><p>Optional column name in <code>sample_info</code> used for
+<code>sample_group</code> selection and replicate summarisation.</p></dd>
+
+
 <dt id="arg-value-column">value_column<a class="anchor" aria-label="anchor" href="#arg-value-column"></a></dt>
 <dd><p>Optional column in <code>rowData(x)</code> used for colouring.</p></dd>
 
@@ -118,6 +136,32 @@ Default <code>"norm_counts"</code>.</p></dd>
 <code>value_column</code>s are always arranged in a chromosome-by-column grid.</p></dd>
 
 
+<dt id="arg-side-by-side-groups">side_by_side_groups<a class="anchor" aria-label="anchor" href="#arg-side-by-side-groups"></a></dt>
+<dd><p>Logical; when plotting multiple <code>value_column</code>s,
+arrange one row per chromosome with one panel per selected sample/group.
+This is useful for direct side-by-side group comparison.</p></dd>
+
+
+<dt id="arg-paginate">paginate<a class="anchor" aria-label="anchor" href="#arg-paginate"></a></dt>
+<dd><p>Logical; when <code>TRUE</code>, split large multi-panel chromosome plots
+into pages to avoid patchwork viewport-size errors.</p></dd>
+
+
+<dt id="arg-panels-per-page">panels_per_page<a class="anchor" aria-label="anchor" href="#arg-panels-per-page"></a></dt>
+<dd><p>Maximum number of panels per page when <code>paginate = TRUE</code>.
+Set to <code>NULL</code> to disable automatic paging.</p></dd>
+
+
+<dt id="arg-summarise-replicates">summarise_replicates<a class="anchor" aria-label="anchor" href="#arg-summarise-replicates"></a></dt>
+<dd><p>Logical; when <code>TRUE</code> and <code>value_from = "assay"</code>,
+aggregate replicates by <code>group_column</code> before plotting.</p></dd>
+
+
+<dt id="arg-summarise-method">summarise_method<a class="anchor" aria-label="anchor" href="#arg-summarise-method"></a></dt>
+<dd><p><code>"mean"</code> or <code>"median"</code> summarisation used when
+<code>summarise_replicates = TRUE</code>.</p></dd>
+
+
 <dt id="arg-group-value">group_value<a class="anchor" aria-label="anchor" href="#arg-group-value"></a></dt>
 <dd><p>Optional group label (from <code>group_column</code>); when supplied,
 uses mean expression for that group for colouring (assay <code>norm_counts</code>).</p></dd>
@@ -126,6 +170,11 @@ uses mean expression for that group for colouring (assay <code>norm_counts</code
 <dt id="arg-label-top-n">label_top_n<a class="anchor" aria-label="anchor" href="#arg-label-top-n"></a></dt>
 <dd><p>Integer; number of genes with largest |value| (or random if
 no value) to label. Ignored when <code>genes</code> is provided. Set to 0 to disable labels.</p></dd>
+
+
+<dt id="arg-label-genes">label_genes<a class="anchor" aria-label="anchor" href="#arg-label-genes"></a></dt>
+<dd><p>One of <code>"top"</code> (default), <code>"all"</code>, or <code>"none"</code> controlling
+chromosome text labels when <code>genes</code> is not supplied.</p></dd>
 
 
 <dt id="arg-display-id">display_id<a class="anchor" aria-label="anchor" href="#arg-display-id"></a></dt>
@@ -149,7 +198,7 @@ mark each gene position. Default <code>0.02</code>. Increase for longer ticks.</
 
 <dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
 <dd><p>Logical; when <code>group_value</code> is used (and <code>value_column</code>
-is <code>NULL</code>), apply log2(x + 1) before coloring.</p></dd>
+is <code>NULL</code>) or when <code>value_from = "assay"</code>, apply log2(x + 1) before coloring.</p></dd>
 
 
 <dt id="arg-value-label">value_label<a class="anchor" aria-label="anchor" href="#arg-value-label"></a></dt>
@@ -167,9 +216,20 @@ is <code>NULL</code>), apply log2(x + 1) before coloring.</p></dd>
 <ul><li><p>If multiple <code>value_column</code>s are supplied, one plot is produced per column
 with its own colour legend titled by that column. Chromosomes are laid out
 top-down in a single column: for each chromosome, plots for all
-<code>value_column</code>s appear sequentially. Legends for each column are shown on
-the first occurrence of that column. Requires <span class="pkg">patchwork</span>; otherwise a
-list of plots is returned.</p></li>
+<code>value_column</code>s appear sequentially. Legends for each column are shown only
+on the first occurrence (at the bottom) to avoid overlap. Requires
+<span class="pkg">patchwork</span>; otherwise a list of plots is returned.</p></li>
+<li><p>Set <code>side_by_side_groups = TRUE</code> to place selected groups/samples in
+separate columns for each chromosome (same-row comparison).</p></li>
+<li><p><code>paginate = TRUE</code> automatically splits large panel collections into a list
+of patchwork pages, which prevents "viewport too small" rendering errors in
+IDE plot panes.</p></li>
+<li><p>For <code>value_from = "assay"</code>, colours follow the VISTA ecosystem: group
+colours are used when <code>summarise_replicates = TRUE</code>, while sample colours
+are derived from group colours when plotting individual replicates.</p></li>
+<li><p>For <code>value_from = "assay"</code> with <code>value_column = NULL</code>, all selected
+assay columns are used (samples after <code>sample_group</code> filtering, or groups
+after replicate summarisation).</p></li>
 <li><p>Labels are kept consistent across <code>value_column</code>s: if <code>genes</code> is provided
 it is used for all panels; otherwise the top <code>label_top_n</code> (by absolute
 value in the first <code>value_column</code>) are used for all panels.</p></li>

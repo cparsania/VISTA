@@ -494,7 +494,7 @@ Visualize gene expression patterns across samples and groups.
 - [`get_expression_heatmap()`](get_expression_heatmap.md) : Expression
   heatmap
 - [`get_expression_barplot()`](get_expression_barplot.md) : Plot gene
-  expression means with optional statistics
+  expression as barplots
 - [`get_expression_boxplot()`](get_expression_boxplot.md) : Plot gene
   expression distributions as boxplots
 - [`get_expression_violinplot()`](get_expression_violinplot.md) : Violin
@@ -505,8 +505,8 @@ Visualize gene expression patterns across samples and groups.
   normalized expression between two samples or groups
 - [`get_expression_lineplot()`](get_expression_lineplot.md) : Gene
   expression line plot
-- [`get_expression_lollipop()`](get_expression_lollipop.md) : Plot mean
-  expression per group as a lollipop chart
+- [`get_expression_lollipop()`](get_expression_lollipop.md) : Plot
+  expression as a lollipop chart
 - [`get_expression_joyplot()`](get_expression_joyplot.md) : Plot
   expression distributions as ridgelines
 - [`get_expression_raincloud()`](get_expression_raincloud.md) :

@@ -1,7 +1,8 @@
-# Plot gene expression means with optional statistics
+# Plot gene expression as barplots
 
-Summarizes expression per group for a handful of genes via barplots with
-optional ggpubr comparisons.
+Displays selected genes as grouped summary bars or individual
+sample-level bars. By default, expression is summarized per group with
+mean ± SD bars. With `by = "sample"`, each sample is drawn separately.
 
 ## Usage
 
@@ -19,7 +20,10 @@ get_expression_barplot(
   comparisons = NULL,
   display_id = NULL,
   display_from = NULL,
-  display_orgdb = NULL
+  display_orgdb = NULL,
+  by = c("group", "sample"),
+  sample_order = c("input", "group", "expression"),
+  facet_by = c("auto", "gene", "none")
 )
 ```
 
@@ -83,6 +87,24 @@ get_expression_barplot(
 
   Optional `OrgDb` object used for ID mapping when `display_id` is set
   but not found in `rowData`.
+
+- by:
+
+  One of `"group"` (default; summarize replicates by group) or
+  `"sample"` (show one bar per sample).
+
+- sample_order:
+
+  Ordering used when `by = "sample"`: `"input"` preserves the current
+  sample order, `"group"` groups samples by `group_column`, and
+  `"expression"` ranks samples by mean expression across the selected
+  genes.
+
+- facet_by:
+
+  Faceting mode: `"auto"` (default; facet by gene when more than one
+  gene is requested), `"gene"`, or `"none"`. For multiple genes,
+  `"none"` falls back to `"gene"` to preserve readability.
 
 ## Value
 
