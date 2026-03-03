@@ -105,6 +105,51 @@ NULL
   meta
 }
 
+# Create per-sample colors that stay consistent with the VISTA group palette.
+.vista_sample_colors <- function(x, samples, group_column = NULL) {
+  samples <- unique(as.character(samples))
+  if (!length(samples)) return(character())
+
+  meta <- .prepare_sample_metadata(x, sample_group = NULL, group_column = group_column)
+  group_col <- attr(meta, "group_column")
+  meta <- meta[match(samples, meta$sample), , drop = FALSE]
+
+  if (anyNA(meta$sample)) {
+    missing_samples <- samples[is.na(meta$sample)]
+    cli::cli_abort(
+      "Unknown sample(s) requested for colouring: {.val {missing_samples}}."
+    )
+  }
+
+  group_vals <- as.character(meta[[group_col]])
+  group_cols <- .vista_group_colors(x, groups_present = group_vals)
+  if (is.null(group_cols) || !length(group_cols)) {
+    pal <- colorspace::qualitative_hcl(length(samples), palette = "Dark 3")
+    return(stats::setNames(pal, samples))
+  }
+
+  out <- stats::setNames(rep(NA_character_, length(samples)), samples)
+  for (grp in unique(group_vals)) {
+    idx <- which(group_vals == grp)
+    grp_samples <- samples[idx]
+    base_col <- group_cols[[grp]] %||% colorspace::qualitative_hcl(1, palette = "Dark 3")
+    if (length(grp_samples) == 1) {
+      out[grp_samples] <- base_col
+    } else {
+      ramp <- grDevices::colorRampPalette(
+        c(
+          colorspace::lighten(base_col, amount = 0.45),
+          colorspace::darken(base_col, amount = 0.10)
+        )
+      )(length(grp_samples))
+      names(ramp) <- grp_samples
+      out[grp_samples] <- ramp
+    }
+  }
+
+  out
+}
+
 # Keep only requested genes or the top-N variable genes; return matrix
 .filter_genes <- function(mat, genes = NULL, top_n_genes = NULL) {
   if (!is.null(genes)) {
@@ -898,7 +943,8 @@ get_corr_heatmap <- function(x,
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #'   `display_id` is set but not found in `rowData`.
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` (default `"free_y"`).
-#' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
+#' @param stats_group Logical; add statistical comparisons between groups when
+#'   `TRUE`. Only supported when `by = "group"`.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
 #' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
 #' @param pool_genes Logical; when `TRUE`, pool selected genes into one
@@ -1110,7 +1156,7 @@ get_expression_boxplot <- function(x,
 #' @param comparison Optional comparison name; when supplied, uses `log2fc` from
 #'   `metadata(x)$de_results[[comparison]]` for colouring. If multiple
 #'   comparisons are provided, one panel per comparison is shown (log2FC
-#'   clipped to ±2).
+#'   clipped to +/-2).
 #' @param group_value Optional group label (from `group_column`); when supplied,
 #'   uses mean expression for that group for colouring (assay `norm_counts`).
 #' @param label_top_n Integer; number of genes with largest |value| (or random if
@@ -1123,6 +1169,13 @@ get_expression_boxplot <- function(x,
 #' @param filter_chrom Optional character vector of chromosomes to keep (e.g.,
 #'   `c("chr1","chr2")`). When `NULL`, all chromosomes returned by the TxDb are shown.
 #' @param value_label Optional legend title override for the colour scale.
+#' @param scale_mode Colour scale mode: `"diverging"` (default) or
+#'   `"sequential"`.
+#' @param scale_low Optional low-end colour override.
+#' @param scale_mid Optional midpoint colour override (used with diverging scale).
+#' @param scale_high Optional high-end colour override.
+#' @param scale_midpoint Numeric midpoint passed to
+#'   `ggplot2::scale_color_gradient2()` when `scale_mode = "diverging"`.
 #'
 #' @details
 #' The \code{genes} argument is only used as an explicit label set (all genes
@@ -1131,7 +1184,7 @@ get_expression_boxplot <- function(x,
 #' if \code{id_column = "ENTREZID"}, then \code{genes} should contain Entrez IDs
 #' to be labeled.
 #' When multiple comparisons are supplied, `value_column` and `group_value` are
-#' ignored and the plot is facetted by comparison with a fixed ±2 log2FC scale.
+#' ignored and the plot is facetted by comparison with a fixed +/-2 log2FC scale.
 #'
 #' @return A `ggplot2` object.
 #' @keywords internal
@@ -1150,8 +1203,14 @@ get_chromosome_plot <- function(x,
                                 filter_chrom = NULL,
                                 value_label = NULL,
                                 use_data_range = FALSE,
-                                force_fc_limits = FALSE) {
+                                force_fc_limits = FALSE,
+                                scale_mode = c("diverging", "sequential"),
+                                scale_low = NULL,
+                                scale_mid = NULL,
+                                scale_high = NULL,
+                                scale_midpoint = 0) {
   stopifnot(inherits(x, "VISTA"))
+  scale_mode <- match.arg(scale_mode)
   if (!requireNamespace("AnnotationDbi", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg AnnotationDbi} is required for TxDb queries.")
   }
@@ -1352,14 +1411,25 @@ get_chromosome_plot <- function(x,
         linewidth = line_width
       ) +
       ggplot2::labs(x = "Genomic position (Mb)", y = "Chromosome", color = value_label_final) +
-      ggplot2::theme_minimal() +
-      ggplot2::scale_color_gradient2(
-        low = "blue",
-        mid = "grey80",
-        high = "red",
+      ggplot2::theme_minimal()
+
+    if (scale_mode == "sequential") {
+      plt <- plt + ggplot2::scale_color_gradient(
+        low = scale_low %||% "grey90",
+        high = scale_high %||% "#2c7fb8",
         na.value = "grey70",
         limits = limits_sym
       )
+    } else {
+      plt <- plt + ggplot2::scale_color_gradient2(
+        low = scale_low %||% "blue",
+        mid = scale_mid %||% "grey80",
+        high = scale_high %||% "red",
+        midpoint = scale_midpoint,
+        na.value = "grey70",
+        limits = limits_sym
+      )
+    }
   }
 
   if (requireNamespace("scales", quietly = TRUE)) {
@@ -1417,6 +1487,10 @@ get_chromosome_plot <- function(x,
 #' colouring (optional group mean, rowData columns, or assay columns).
 #'
 #' @inheritParams get_chromosome_plot
+#' @param sample_group Optional character vector of groups (from `group_column`)
+#'   used to subset assay columns when `value_from = "assay"`.
+#' @param group_column Optional column name in `sample_info` used for
+#'   `sample_group` selection and replicate summarisation.
 #' @param value_from Source for `value_column` data: `"rowdata"` (default) or
 #'   `"assay"`. When `"assay"`, the selected assay column is copied into
 #'   `rowData` temporarily for colouring.
@@ -1424,16 +1498,40 @@ get_chromosome_plot <- function(x,
 #'   Default `"norm_counts"`.
 #' @param facet_value_columns Ignored (kept for compatibility); multiple
 #'   `value_column`s are always arranged in a chromosome-by-column grid.
+#' @param side_by_side_groups Logical; when plotting multiple `value_column`s,
+#'   arrange one row per chromosome with one panel per selected sample/group.
+#'   This is useful for direct side-by-side group comparison.
+#' @param paginate Logical; when `TRUE`, split large multi-panel chromosome plots
+#'   into pages to avoid patchwork viewport-size errors.
+#' @param panels_per_page Maximum number of panels per page when `paginate = TRUE`.
+#'   Set to `NULL` to disable automatic paging.
+#' @param summarise_replicates Logical; when `TRUE` and `value_from = "assay"`,
+#'   aggregate replicates by `group_column` before plotting.
+#' @param summarise_method `"mean"` or `"median"` summarisation used when
+#'   `summarise_replicates = TRUE`.
+#' @param label_genes One of `"top"` (default), `"all"`, or `"none"` controlling
+#'   chromosome text labels when `genes` is not supplied.
 #' @param log_transform Logical; when `group_value` is used (and `value_column`
-#'   is `NULL`), apply log2(x + 1) before coloring.
+#'   is `NULL`) or when `value_from = "assay"`, apply log2(x + 1) before coloring.
 #'
 #' @details
 #' - If multiple `value_column`s are supplied, one plot is produced per column
 #'   with its own colour legend titled by that column. Chromosomes are laid out
 #'   top-down in a single column: for each chromosome, plots for all
-#'   `value_column`s appear sequentially. Legends for each column are shown on
-#'   the first occurrence of that column. Requires \pkg{patchwork}; otherwise a
-#'   list of plots is returned.
+#'   `value_column`s appear sequentially. Legends for each column are shown only
+#'   on the first occurrence (at the bottom) to avoid overlap. Requires
+#'   \pkg{patchwork}; otherwise a list of plots is returned.
+#' - Set `side_by_side_groups = TRUE` to place selected groups/samples in
+#'   separate columns for each chromosome (same-row comparison).
+#' - `paginate = TRUE` automatically splits large panel collections into a list
+#'   of patchwork pages, which prevents "viewport too small" rendering errors in
+#'   IDE plot panes.
+#' - For `value_from = "assay"`, colours follow the VISTA ecosystem: group
+#'   colours are used when `summarise_replicates = TRUE`, while sample colours
+#'   are derived from group colours when plotting individual replicates.
+#' - For `value_from = "assay"` with `value_column = NULL`, all selected
+#'   assay columns are used (samples after `sample_group` filtering, or groups
+#'   after replicate summarisation).
 #' - Labels are kept consistent across `value_column`s: if `genes` is provided
 #'   it is used for all panels; otherwise the top `label_top_n` (by absolute
 #'   value in the first `value_column`) are used for all panels.
@@ -1451,12 +1549,20 @@ get_expression_chromosome_plot <- function(x,
                                            keytype = "GENEID",
                                            id_column = NULL,
                                            genes = NULL,
+                                           sample_group = NULL,
+                                           group_column = NULL,
                                            value_column = NULL,
                                            value_from = c("rowdata", "assay"),
                                            value_assay = "norm_counts",
                                            facet_value_columns = FALSE,
+                                           side_by_side_groups = FALSE,
+                                           paginate = TRUE,
+                                           panels_per_page = 24,
+                                           summarise_replicates = FALSE,
+                                           summarise_method = c("mean", "median"),
                                            group_value = NULL,
                                            label_top_n = 20,
+                                           label_genes = c("top", "all", "none"),
                                            display_id = NULL,
                                            line_length = 0.02,
                                            line_width = 0.6,
@@ -1464,97 +1570,225 @@ get_expression_chromosome_plot <- function(x,
                                            log_transform = TRUE,
                                            value_label = "log2(mean expr)") {
   value_from <- match.arg(value_from)
+  summarise_method <- match.arg(summarise_method)
+  label_genes <- match.arg(label_genes)
 
-  # validate requested value columns in the chosen source
   if (!is.null(value_column)) {
-    if (value_from == "rowdata") {
+    value_column <- as.character(value_column)
+  }
+
+  assay_value_mat <- NULL
+  column_color_map <- NULL
+
+  if (value_from == "rowdata") {
+    if (!is.null(sample_group)) {
+      cli::cli_warn("`sample_group` is ignored when `value_from = \"rowdata\"`.")
+    }
+    if (!is.null(group_column)) {
+      cli::cli_warn("`group_column` is ignored when `value_from = \"rowdata\"`.")
+    }
+    if (isTRUE(summarise_replicates)) {
+      cli::cli_warn("`summarise_replicates` is ignored when `value_from = \"rowdata\"`.")
+    }
+    if (!is.null(value_column)) {
       rd_cols <- colnames(SummarizedExperiment::rowData(x))
       missing_cols <- setdiff(value_column, rd_cols)
       if (length(missing_cols)) {
-        cli::cli_abort("Value column(s) {.val {missing_cols}} not found in rowData. Set `value_from = \"assay\"` if you meant assay columns.")
+        cli::cli_abort(
+          "Value column(s) {.val {missing_cols}} not found in rowData. Set `value_from = \"assay\"` if you meant assay columns."
+        )
       }
-    } else {
-      mat <- SummarizedExperiment::assay(x, value_assay)
-      if (is.null(mat)) cli::cli_abort("Assay {.val {value_assay}} not found in object.")
-      missing_cols <- setdiff(value_column, colnames(mat))
-      if (length(missing_cols)) {
-        cli::cli_abort("Value column(s) {.val {missing_cols}} not found in assay {.val {value_assay}}.")
-      }
+      column_color_map <- stats::setNames(
+        colorspace::qualitative_hcl(length(value_column), palette = "Dark 3"),
+        value_column
+      )
     }
-  }
+  } else {
+    mat <- SummarizedExperiment::assay(x, value_assay)
+    if (is.null(mat)) cli::cli_abort("Assay {.val {value_assay}} not found in object.")
 
-  build_plot_for_value <- function(vc) {
-    value_lbl <- vc
-    x_local <- x
-    if (value_from == "assay") {
-      mat <- SummarizedExperiment::assay(x, value_assay)
-      if (is.null(mat)) cli::cli_abort("Assay {.val {value_assay}} not found in object.")
-      if (!vc %in% colnames(mat)) cli::cli_abort("Column {.val {vc}} not found in assay {.val {value_assay}}.")
-      vals <- mat[, vc]
-      rd_local <- as.data.frame(SummarizedExperiment::rowData(x_local))
-      rd_local[[vc]] <- vals
-      SummarizedExperiment::rowData(x_local) <- rd_local
+    meta <- .prepare_sample_metadata(x, sample_group = sample_group, group_column = group_column)
+    group_col <- attr(meta, "group_column")
+    if (!nrow(meta)) cli::cli_abort("No samples available after filtering.")
+
+    mat <- mat[, meta$sample, drop = FALSE]
+
+    if (summarise_replicates) {
+      grp_levels <- unique(as.character(meta[[group_col]]))
+      summarised_list <- lapply(grp_levels, function(grp) {
+        samples_grp <- meta$sample[as.character(meta[[group_col]]) == grp]
+        vals <- mat[, samples_grp, drop = FALSE]
+        if (summarise_method == "mean") {
+          rowMeans(vals, na.rm = TRUE)
+        } else {
+          matrixStats::rowMedians(as.matrix(vals), na.rm = TRUE)
+        }
+      })
+      assay_value_mat <- do.call(cbind, summarised_list)
+      rownames(assay_value_mat) <- rownames(mat)
+      colnames(assay_value_mat) <- grp_levels
+      column_color_map <- .vista_group_colors(x, groups_present = grp_levels)
+    } else {
+      assay_value_mat <- as.matrix(mat)
+      column_color_map <- .vista_sample_colors(x, samples = colnames(assay_value_mat), group_column = group_col)
     }
-    get_chromosome_plot(
-      x = x_local,
-      txdb = txdb,
-      keytype = keytype,
-      id_column = id_column,
-      genes = genes,
-      value_column = if (!is.null(value_column)) vc else NULL,
-      comparison = NULL,
-      group_value = NULL,
-      label_top_n = label_top_n,
-      display_id = display_id,
-      line_length = line_length,
-      line_width = line_width,
-      filter_chrom = filter_chrom,
-      value_label = value_lbl,
-      use_data_range = TRUE,
-      force_fc_limits = FALSE
-    )
+
+    if (is.null(value_column)) {
+      value_column <- colnames(assay_value_mat)
+    }
+    missing_cols <- setdiff(value_column, colnames(assay_value_mat))
+    if (length(missing_cols)) {
+      cli::cli_abort(
+        c(
+          "Some {.arg value_column} entries were not found in selected assay columns.",
+          "x" = "Missing: {.val {missing_cols}}",
+          "i" = "Available: {.val {colnames(assay_value_mat)}}"
+        )
+      )
+    }
+    assay_value_mat <- assay_value_mat[, value_column, drop = FALSE]
+
+    if (is.null(column_color_map) || !length(column_color_map)) {
+      column_color_map <- stats::setNames(
+        colorspace::qualitative_hcl(length(value_column), palette = "Dark 3"),
+        value_column
+      )
+    }
+    missing_color_names <- setdiff(value_column, names(column_color_map))
+    if (length(missing_color_names)) {
+      extra <- colorspace::qualitative_hcl(length(missing_color_names), palette = "Dark 3")
+      names(extra) <- missing_color_names
+      column_color_map <- c(column_color_map, extra)
+    }
+    column_color_map <- column_color_map[value_column]
+    group_value <- NULL
   }
 
   if (!is.null(value_column)) {
     group_value <- NULL
   }
 
+  resolve_label_setup <- function(reference_values = NULL) {
+    if (!is.null(genes)) {
+      return(list(label_set = as.character(genes), label_top_n = 0))
+    }
+    if (label_genes == "none") {
+      return(list(label_set = NULL, label_top_n = 0))
+    }
+    if (label_genes == "all") {
+      return(list(label_set = rownames(x), label_top_n = 0))
+    }
+    if (!is.null(reference_values) && label_top_n > 0) {
+      ord <- order(abs(reference_values), decreasing = TRUE, na.last = NA)
+      if (length(ord)) {
+        ids <- names(reference_values)[ord[seq_len(min(label_top_n, length(ord)))]]
+        return(list(label_set = ids, label_top_n = 0))
+      }
+    }
+    list(label_set = NULL, label_top_n = label_top_n)
+  }
+
+  build_plot_for_value <- function(vc,
+                                   filter_chr_local = filter_chrom,
+                                   show_legend = TRUE,
+                                   label_set = NULL,
+                                   label_n = label_top_n) {
+    x_local <- x
+    use_value_column <- vc
+    scale_mode_use <- "diverging"
+    scale_low_use <- NULL
+    scale_high_use <- NULL
+
+    if (value_from == "assay") {
+      vals <- assay_value_mat[, vc]
+      if (log_transform) {
+        vals <- log2(vals + 1)
+      }
+      tmp_col <- paste0(".tmp_expr_chr_", make.names(vc))
+      rd_local <- as.data.frame(SummarizedExperiment::rowData(x_local))
+      while (tmp_col %in% colnames(rd_local)) {
+        tmp_col <- paste0(tmp_col, "_x")
+      }
+      rd_local[[tmp_col]] <- vals[rownames(x_local)]
+      SummarizedExperiment::rowData(x_local) <- rd_local
+      use_value_column <- tmp_col
+      scale_mode_use <- "sequential"
+      high_col <- column_color_map[[vc]] %||% "#2c7fb8"
+      scale_high_use <- high_col
+      scale_low_use <- colorspace::lighten(high_col, amount = 0.75)
+    }
+
+    plt <- get_chromosome_plot(
+      x = x_local,
+      txdb = txdb,
+      keytype = keytype,
+      id_column = id_column,
+      genes = label_set,
+      value_column = use_value_column,
+      comparison = NULL,
+      group_value = NULL,
+      label_top_n = label_n,
+      display_id = display_id,
+      line_length = line_length,
+      line_width = line_width,
+      filter_chrom = filter_chr_local,
+      value_label = vc,
+      use_data_range = TRUE,
+      force_fc_limits = FALSE,
+      scale_mode = scale_mode_use,
+      scale_low = scale_low_use,
+      scale_high = scale_high_use
+    )
+
+    if (!isTRUE(show_legend)) {
+      return(plt + ggplot2::theme(legend.position = "none"))
+    }
+
+    plt +
+      ggplot2::theme(
+        legend.position = "bottom",
+        legend.box = "vertical",
+        legend.direction = "horizontal"
+      ) +
+      ggplot2::guides(
+        color = ggplot2::guide_colorbar(
+          title.position = "top",
+          barwidth = grid::unit(3.2, "cm"),
+          barheight = grid::unit(0.30, "cm")
+        )
+      )
+  }
+
   if (!is.null(value_column) && length(value_column) > 1) {
     if (!requireNamespace("patchwork", quietly = TRUE)) {
       cli::cli_warn("Multiple value columns supplied; returning a list of plots (install {pkg patchwork} to combine automatically).")
-      return(lapply(value_column, build_plot_for_value))
+      label_cfg <- resolve_label_setup(
+        if (value_from == "assay") assay_value_mat[, value_column[1]] else NULL
+      )
+      return(lapply(value_column, function(vc) {
+        build_plot_for_value(
+          vc,
+          filter_chr_local = filter_chrom,
+          show_legend = TRUE,
+          label_set = label_cfg$label_set,
+          label_n = label_cfg$label_top_n
+        )
+      }))
     }
 
     if (!is.null(group_value)) {
       cli::cli_warn("`group_value` is ignored when multiple value columns are supplied.")
     }
 
-    # establish a consistent label set across value columns
-    label_set_global <- NULL
-    label_top_n_use <- label_top_n
-    if (!is.null(genes)) {
-      label_set_global <- genes
-      label_top_n_use <- 0
-    } else if (label_top_n > 0) {
-      vals_first <- NULL
-      if (value_from == "rowdata") {
-        vals_first <- SummarizedExperiment::rowData(x)[[value_column[1]]]
-        names(vals_first) <- rownames(x)
-      } else {
-        mat_first <- SummarizedExperiment::assay(x, value_assay)
-        if (!is.null(mat_first) && value_column[1] %in% colnames(mat_first)) {
-          vals_first <- mat_first[, value_column[1]]
-          names(vals_first) <- rownames(x)
-        }
-      }
-      if (!is.null(vals_first)) {
-        ord <- order(abs(vals_first), decreasing = TRUE, na.last = NA)
-        if (length(ord)) {
-          label_set_global <- names(vals_first)[ord[seq_len(min(label_top_n, length(ord)))]]
-          label_top_n_use <- 0
-        }
-      }
+    vals_first <- NULL
+    if (value_from == "rowdata") {
+      vals_first <- SummarizedExperiment::rowData(x)[[value_column[1]]]
+      names(vals_first) <- rownames(x)
+    } else {
+      vals_first <- assay_value_mat[, value_column[1]]
+      names(vals_first) <- rownames(x)
     }
+    label_cfg <- resolve_label_setup(vals_first)
 
     # determine chromosome order once from TxDb
     rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
@@ -1595,64 +1829,77 @@ get_expression_chromosome_plot <- function(x,
     }
     if (!length(chr_levels)) cli::cli_abort("No chromosomes to plot after filtering.")
 
-    make_plot <- function(vc, chr, show_legend) {
-      x_local <- x
-      if (value_from == "assay") {
-        mat <- SummarizedExperiment::assay(x, value_assay)
-        if (is.null(mat)) cli::cli_abort("Assay {.val {value_assay}} not found in object.")
-        if (!vc %in% colnames(mat)) cli::cli_abort("Column {.val {vc}} not found in assay {.val {value_assay}}.")
-        vals <- mat[, vc]
-        rd_local <- as.data.frame(SummarizedExperiment::rowData(x_local))
-        rd_local[[vc]] <- vals
-        SummarizedExperiment::rowData(x_local) <- rd_local
-      }
-      plt <- get_chromosome_plot(
-        x = x_local,
-        txdb = txdb,
-        keytype = keytype,
-        id_column = id_column,
-        genes = label_set_global %||% genes,
-        value_column = vc,
-        comparison = NULL,
-        group_value = NULL,
-        label_top_n = label_top_n_use,
-        display_id = display_id,
-        line_length = line_length,
-        line_width = line_width,
-        filter_chrom = chr,
-        value_label = vc,
-        use_data_range = TRUE,
-        force_fc_limits = FALSE
-      )
-      if (!isTRUE(show_legend)) {
-        plt <- plt + ggplot2::theme(legend.position = "none")
-      }
-      plt
-    }
-
     panels <- list()
-    legend_shown <- setNames(rep(FALSE, length(value_column)), value_column)
+    legend_shown <- stats::setNames(rep(FALSE, length(value_column)), value_column)
     for (chr in chr_levels) {
       for (vc in value_column) {
         show_leg <- !legend_shown[[vc]]
         legend_shown[[vc]] <- TRUE
-        panels[[length(panels) + 1]] <- make_plot(vc, chr, show_leg)
+        panels[[length(panels) + 1]] <- build_plot_for_value(
+          vc,
+          filter_chr_local = chr,
+          show_legend = show_leg,
+          label_set = label_cfg$label_set,
+          label_n = label_cfg$label_top_n
+        )
       }
     }
-    ncol_wrap <- if (isTRUE(facet_value_columns)) 2 else 1
+    ncol_wrap <- if (isTRUE(side_by_side_groups)) {
+      length(value_column)
+    } else if (isTRUE(facet_value_columns)) {
+      min(2, length(value_column))
+    } else {
+      1
+    }
+
+    if (isTRUE(paginate) && !is.null(panels_per_page) && length(panels) > panels_per_page) {
+      panels_per_page <- as.integer(panels_per_page)[1]
+      if (is.na(panels_per_page) || panels_per_page < 1) {
+        cli::cli_abort("{.arg panels_per_page} must be a positive integer or NULL.")
+      }
+
+      # Keep complete chromosome rows together in side-by-side mode.
+      if (isTRUE(side_by_side_groups) && ncol_wrap > 1) {
+        rows_per_page <- max(1L, panels_per_page %/% ncol_wrap)
+        panels_per_page <- rows_per_page * ncol_wrap
+      }
+
+      idx <- split(seq_along(panels), ceiling(seq_along(panels) / panels_per_page))
+      out <- lapply(idx, function(i) {
+        patchwork::wrap_plots(panels[i], ncol = ncol_wrap, guides = "keep")
+      })
+      cli::cli_inform(
+        "Returning {.val {length(out)}} plot pages; print one page at a time (for example, {.code p[[1]]})."
+      )
+      return(out)
+    }
+
     return(patchwork::wrap_plots(panels, ncol = ncol_wrap, guides = "keep"))
   }
 
-  if (!is.null(value_column) && length(value_column) == 1 && value_from == "assay") {
-    return(build_plot_for_value(value_column))
+  if (!is.null(value_column) && length(value_column) == 1) {
+    label_cfg <- resolve_label_setup(
+      if (value_from == "assay") assay_value_mat[, value_column] else NULL
+    )
+    return(
+      build_plot_for_value(
+        value_column[[1]],
+        filter_chr_local = filter_chrom,
+        show_legend = TRUE,
+        label_set = label_cfg$label_set,
+        label_n = label_cfg$label_top_n
+      )
+    )
   }
 
   if (!is.null(value_column) && (is.null(value_label) || value_label == "log2(mean expr)")) {
     value_label <- if (length(value_column) > 1) "value" else value_column
   }
+
+  label_cfg <- resolve_label_setup(NULL)
+
   # When colouring by group expression, apply log2 transform if requested
   if (!is.null(group_value) && log_transform) {
-    # create a temporary rowData column with log2 mean expression
     mat <- SummarizedExperiment::assay(x, "norm_counts")
     meta <- as.data.frame(SummarizedExperiment::colData(x))
     gcol <- .vista_group_col(x)
@@ -1661,46 +1908,58 @@ get_expression_chromosome_plot <- function(x,
       if (length(samples_in_group)) {
         expr_vals <- rowMeans(mat[, samples_in_group, drop = FALSE], na.rm = TRUE)
         SummarizedExperiment::rowData(x)[[".tmp_group_expr"]] <- log2(expr_vals + 1)
+        grp_cols <- .vista_group_colors(x, groups_present = group_value)
+        high_col <- grp_cols[[group_value]] %||% "#2c7fb8"
         return(
           get_chromosome_plot(
             x = x,
             txdb = txdb,
             keytype = keytype,
             id_column = id_column,
-            genes = genes,
+            genes = label_cfg$label_set,
             value_column = ".tmp_group_expr",
             comparison = NULL,
             group_value = NULL,
-            label_top_n = label_top_n,
+            label_top_n = label_cfg$label_top_n,
             display_id = display_id,
             line_length = line_length,
             line_width = line_width,
             filter_chrom = filter_chrom,
             value_label = value_label,
             use_data_range = TRUE,
-            force_fc_limits = FALSE
-          )
+            force_fc_limits = FALSE,
+            scale_mode = "sequential",
+            scale_low = colorspace::lighten(high_col, amount = 0.75),
+            scale_high = high_col
+          ) +
+            ggplot2::theme(
+              legend.position = "bottom",
+              legend.box = "vertical",
+              legend.direction = "horizontal"
+            )
         )
       }
     }
   }
+
   get_chromosome_plot(
     x = x,
     txdb = txdb,
     keytype = keytype,
     id_column = id_column,
-    genes = genes,
+    genes = label_cfg$label_set,
     value_column = value_column,
     comparison = NULL,
     group_value = group_value,
-    label_top_n = label_top_n,
+    label_top_n = label_cfg$label_top_n,
     display_id = display_id,
     line_length = line_length,
     line_width = line_width,
     filter_chrom = filter_chrom,
     value_label = value_label,
     use_data_range = TRUE,
-    force_fc_limits = FALSE
+    force_fc_limits = FALSE,
+    scale_mode = if (!is.null(group_value)) "sequential" else "diverging"
   )
 }
 
@@ -1708,7 +1967,7 @@ get_expression_chromosome_plot <- function(x,
 #'
 #' Convenience wrapper around `get_chromosome_plot()` for fold-change colouring.
 #' When multiple comparisons are supplied, panels are facetted by comparison
-#' with log2FC clipped to ±2.
+#' with log2FC clipped to +/-2.
 #'
 #' @inheritParams get_chromosome_plot
 #' @return A `ggplot2` object.
@@ -2059,17 +2318,25 @@ get_expression_scatter <- function(x,
 # Expression lollipop
 # ──────────────────────────────────────────────────────────────────────────────
 
-#' Plot mean expression per group as a lollipop chart
+#' Plot expression as a lollipop chart
 #'
-#' Summarizes expression per group for a handful of genes using a stem-and-dot
-#' (lollipop) plot. Values are averaged across replicates in each group; this
-#' function does not show individual replicates. For per-sample display or
-#' pairwise tests, use `get_expression_barplot()`.
+#' Displays selected genes as stem-and-dot (lollipop) plots. By default,
+#' expression is summarized per group (mean across replicates). With
+#' `by = "sample"`, the plot shows individual samples.
 #'
 #' @param x A `VISTA` object.
 #' @param genes Character vector (≤15 genes) to plot.
 #' @param sample_group Optional character vector of groups (from `group_column`) to include.
 #' @param group_column Optional column name in `sample_info` to use for grouping samples.
+#' @param by One of `"group"` (default; summarize replicates by group) or
+#'   `"sample"` (show individual samples).
+#' @param sample_order Ordering used when `by = "sample"`:
+#'   `"input"` preserves the current sample order, `"group"` groups samples by
+#'   `group_column`, and `"expression"` ranks samples by mean expression across
+#'   the selected genes.
+#' @param facet_by Faceting mode: `"auto"` (default; facet by gene when more
+#'   than one gene is requested), `"gene"`, or `"none"`. For multiple genes,
+#'   `"none"` falls back to `"gene"` to avoid unreadable combined panels.
 #' @param log_transform Logical; log2-transform expression before plotting.
 #' @param facet_scale Scaling option passed to `facet_wrap()` when plotting multiple genes.
 #' @param point_size Numeric size of the dots.
@@ -2083,12 +2350,33 @@ get_expression_scatter <- function(x,
 #'   is not found in `rowData`).
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #'   `display_id` is set but not found in `rowData`.
+#' @return A `ggplot2` object.
+#'
+#' @examples
+#' data("count_data", package = "VISTA")
+#' data("sample_metadata", package = "VISTA")
+#'
+#' vista <- create_vista(
+#'   counts = count_data[1:200, ],
+#'   sample_info = sample_metadata[1:6, ],
+#'   column_geneid = "gene_id",
+#'   group_column = "cond_long",
+#'   group_numerator = "treatment1",
+#'   group_denominator = "control"
+#' )
+#'
+#' genes <- rownames(vista)[1:3]
+#' get_expression_lollipop(vista, genes = genes)
+#' get_expression_lollipop(vista, genes = genes[1:2], by = "sample")
 #'
 #' @export
 get_expression_lollipop <- function(x,
                                     genes,
                                     sample_group = NULL,
                                     group_column = NULL,
+                                    by = c("group", "sample"),
+                                    sample_order = c("input", "group", "expression"),
+                                    facet_by = c("auto", "gene", "none"),
                                     log_transform = TRUE,
                                     facet_scale = "free_y",
                                     point_size = 6,
@@ -2100,6 +2388,8 @@ get_expression_lollipop <- function(x,
                                     display_orgdb = NULL) {
   stopifnot(inherits(x, "VISTA"))
   if (length(genes) > 15) cli::cli_abort("Maximum 15 genes can be plotted at once.")
+  by <- match.arg(by)
+  sample_order <- match.arg(sample_order)
 
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
@@ -2149,25 +2439,36 @@ get_expression_lollipop <- function(x,
     ylab <- "Normalized Counts"
   }
 
-  df_sum <- df |>
-    dplyr::group_by(.data[[group_col]], .data$gene) |>
-    dplyr::summarise(expression = mean(.data$expression, na.rm = TRUE), .groups = "drop")
-  if (nrow(df_sum) == 0) cli::cli_abort("No data available to plot after filtering genes and samples.")
+  if (by == "group") {
+    plot_df <- df |>
+      dplyr::group_by(.data[[group_col]], .data$gene) |>
+      dplyr::summarise(expression = mean(.data$expression, na.rm = TRUE), .groups = "drop")
+    if (nrow(plot_df) == 0) cli::cli_abort("No data available to plot after filtering genes and samples.")
+    x_var <- group_col
+    x_lab <- group_col
+  } else {
+    plot_df <- .order_expression_plot_samples(df, meta, group_col, sample_order = sample_order)
+    if (nrow(plot_df) == 0) cli::cli_abort("No data available to plot after filtering genes and samples.")
+    x_var <- "sample"
+    x_lab <- "Sample"
+  }
 
-  cols <- .vista_group_colors(x, df_sum[[group_col]])
+  facet_mode <- .resolve_expression_plot_facet(facet_by, n_genes = length(unique(plot_df$gene)))
+  cols <- .vista_group_colors(x, plot_df[[group_col]])
 
   plt <- ggplot2::ggplot(
-    df_sum,
-    ggplot2::aes(x = .data[[group_col]], y = expression, color = .data[[group_col]])
+    plot_df,
+    ggplot2::aes(x = .data[[x_var]], y = expression, color = .data[[group_col]])
   ) +
     ggplot2::geom_segment(
-      ggplot2::aes(xend = .data[[group_col]], y = 0, yend = expression),
+      ggplot2::aes(xend = .data[[x_var]], y = 0, yend = expression),
       linewidth = line_size,
       lineend = "round"
     ) +
     ggplot2::geom_point(size = point_size) +
-    ggplot2::labs(x = group_col, y = ylab, color = group_col) +
-    ggplot2::theme_minimal(base_size = 14)
+    ggplot2::labs(x = x_lab, y = ylab, color = group_col) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
   if (label) {
     plt <- plt + ggplot2::geom_text(
@@ -2181,7 +2482,7 @@ get_expression_lollipop <- function(x,
     plt <- plt + ggplot2::scale_color_manual(values = cols)
   }
 
-  if (length(genes) > 1) {
+  if (facet_mode == "gene") {
     plt <- plt + ggplot2::facet_wrap(~gene, scales = facet_scale)
   }
 
@@ -2318,6 +2619,68 @@ get_expression_lineplot <- function(x,
   }
   df$sample <- factor(df$sample, levels = unique(df$sample))
   list(df = df, group_col = group_col, ylab = ylab)
+}
+
+#' @keywords internal
+.resolve_expression_plot_facet <- function(facet_by = c("auto", "gene", "none"),
+                                           n_genes) {
+  facet_by <- match.arg(facet_by)
+  if (facet_by == "auto") {
+    return(if (n_genes > 1L) "gene" else "none")
+  }
+  if (facet_by == "none" && n_genes > 1L) {
+    cli::cli_warn(
+      "{.arg facet_by = 'none'} is crowded for multiple genes; using {.val gene} faceting instead."
+    )
+    return("gene")
+  }
+  facet_by
+}
+
+#' @keywords internal
+.order_expression_plot_samples <- function(df,
+                                           meta,
+                                           group_col,
+                                           sample_order = c("input", "group", "expression")) {
+  sample_order <- match.arg(sample_order)
+  meta_ord <- meta
+  meta_ord$sample <- as.character(meta_ord$sample)
+
+  if (sample_order == "expression") {
+    expr_ord <- df |>
+      dplyr::group_by(.data$sample) |>
+      dplyr::summarise(.expr_order = mean(.data$expression, na.rm = TRUE), .groups = "drop")
+    meta_ord <- dplyr::left_join(meta_ord, expr_ord, by = "sample")
+    meta_ord <- dplyr::arrange(meta_ord, dplyr::desc(.data$.expr_order), .data$sample)
+  } else if (sample_order == "group") {
+    meta_ord <- dplyr::arrange(
+      meta_ord,
+      factor(.data[[group_col]], levels = unique(meta[[group_col]])),
+      .data$sample
+    )
+  }
+
+  sample_levels <- unique(meta_ord$sample)
+  df$sample <- factor(df$sample, levels = sample_levels)
+  df
+}
+
+#' @keywords internal
+.resolve_foldchange_facet_mode <- function(facet_by = NULL,
+                                           facet = TRUE,
+                                           facet_comparison = FALSE,
+                                           n_genes = 1L) {
+  if (is.null(facet_by)) {
+    if (!isTRUE(facet)) return("none")
+    if (isTRUE(facet_comparison)) return("comparison")
+    return("gene")
+  }
+
+  facet_by <- match.arg(facet_by, c("auto", "gene", "comparison", "none"))
+  if (facet_by == "auto") {
+    return(if (n_genes > 1L) "gene" else "none")
+  }
+  facet_by
 }
 
 #' Violin plot of expression values
@@ -2994,10 +3357,11 @@ get_foldchange_scatter <- function(x,
 # Expression barplot
 # ──────────────────────────────────────────────────────────────────────────────
 
-#' Plot gene expression means with optional statistics
+#' Plot gene expression as barplots
 #'
-#' Summarizes expression per group for a handful of genes via barplots with
-#' optional ggpubr comparisons.
+#' Displays selected genes as grouped summary bars or individual sample-level
+#' bars. By default, expression is summarized per group with mean ± SD bars.
+#' With `by = "sample"`, each sample is drawn separately.
 #'
 #' @param x A `VISTA` object.
 #' @param genes Character vector (≤10 genes) to plot.
@@ -3016,6 +3380,15 @@ get_foldchange_scatter <- function(x,
 #'   is not found in `rowData`).
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #'   `display_id` is set but not found in `rowData`.
+#' @param by One of `"group"` (default; summarize replicates by group) or
+#'   `"sample"` (show one bar per sample).
+#' @param sample_order Ordering used when `by = "sample"`:
+#'   `"input"` preserves the current sample order, `"group"` groups samples by
+#'   `group_column`, and `"expression"` ranks samples by mean expression across
+#'   the selected genes.
+#' @param facet_by Faceting mode: `"auto"` (default; facet by gene when more
+#'   than one gene is requested), `"gene"`, or `"none"`. For multiple genes,
+#'   `"none"` falls back to `"gene"` to preserve readability.
 #' @return A `ggplot2` object.
 #'
 #' @examples
@@ -3055,15 +3428,23 @@ get_expression_barplot <- function(x,
                                    comparisons = NULL,
                                    display_id = NULL,
                                    display_from = NULL,
-                                   display_orgdb = NULL) {
+                                   display_orgdb = NULL,
+                                   by = c("group", "sample"),
+                                   sample_order = c("input", "group", "expression"),
+                                   facet_by = c("auto", "gene", "none")) {
   stopifnot(inherits(x, "VISTA"))
   if (length(genes) > 10) cli::cli_abort("Maximum 10 genes can be plotted at once.")
+  by <- match.arg(by)
+  sample_order <- match.arg(sample_order)
 
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
 
   if (stats_group && length(unique(meta[[group_col]])) < 2) {
     cli::cli_abort("At least two groups are needed for statistical testing.")
+  }
+  if (stats_group && by == "sample") {
+    cli::cli_abort("{.arg stats_group = TRUE} is only supported when {.arg by = 'group'}.")
   }
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
@@ -3118,25 +3499,38 @@ get_expression_barplot <- function(x,
     ylab <- "Normalized Counts"
   }
 
+  facet_mode <- .resolve_expression_plot_facet(facet_by, n_genes = length(unique(df$gene)))
   cols <- .vista_group_colors(x, df[[group_col]])
 
-  dodge <- ggplot2::position_dodge(width = 0.8)
-  mean_sd_summary <- function(y) {
-    m <- mean(y, na.rm = TRUE)
-    s <- stats::sd(y, na.rm = TRUE)
-    data.frame(y = m, ymin = m - s, ymax = m + s)
-  }
+  if (by == "group") {
+    dodge <- ggplot2::position_dodge(width = 0.8)
+    mean_sd_summary <- function(y) {
+      m <- mean(y, na.rm = TRUE)
+      s <- stats::sd(y, na.rm = TRUE)
+      data.frame(y = m, ymin = m - s, ymax = m + s)
+    }
 
-  plt <- ggplot2::ggplot(
-    df,
-    ggplot2::aes(x = .data[[group_col]], y = expression, fill = .data[[group_col]])
-  ) +
-    ggplot2::stat_summary(fun = mean, geom = "bar", position = dodge, width = 0.6) +
-    ggplot2::stat_summary(fun.data = mean_sd_summary, geom = "errorbar",
-                          position = dodge, width = 0.2) +
-    ggplot2::labs(x = group_col, y = ylab, fill = group_col) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+    plt <- ggplot2::ggplot(
+      df,
+      ggplot2::aes(x = .data[[group_col]], y = expression, fill = .data[[group_col]])
+    ) +
+      ggplot2::stat_summary(fun = mean, geom = "bar", position = dodge, width = 0.6) +
+      ggplot2::stat_summary(fun.data = mean_sd_summary, geom = "errorbar",
+                            position = dodge, width = 0.2) +
+      ggplot2::labs(x = group_col, y = ylab, fill = group_col) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+  } else {
+    df <- .order_expression_plot_samples(df, meta, group_col, sample_order = sample_order)
+    plt <- ggplot2::ggplot(
+      df,
+      ggplot2::aes(x = .data$sample, y = expression, fill = .data[[group_col]])
+    ) +
+      ggplot2::geom_col(alpha = 0.85, width = 0.7) +
+      ggplot2::labs(x = "Sample", y = ylab, fill = group_col) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+  }
 
   if (stats_group) {
     if (!requireNamespace("ggpubr", quietly = TRUE)) {
@@ -3155,7 +3549,7 @@ get_expression_barplot <- function(x,
     plt <- plt + ggplot2::scale_fill_manual(values = cols)
   }
 
-  if (length(genes) > 1) {
+  if (facet_mode == "gene") {
     plt <- plt + ggplot2::facet_wrap(~gene, scales = facet_scales)
   }
 
@@ -3209,6 +3603,34 @@ get_expression_barplot <- function(x,
 #'   two comparisons on the same axis.
 #' @param facet_comparison Logical; when two comparisons are provided, facet by
 #'   comparison instead of dodging side-by-side.
+#' @param facet_by Optional faceting mode. Use `NULL` (default) to preserve the
+#'   current `facet_comparison` behavior. Otherwise choose one of `"auto"`,
+#'   `"gene"`, `"comparison"`, or `"none"`.
+#'
+#' @details
+#' `facet_by = "gene"` provides an explicit per-gene layout, while
+#' `facet_by = "comparison"` mirrors the historical `facet_comparison = TRUE`
+#' behavior. Leaving `facet_by = NULL` preserves current defaults for existing code.
+#'
+#' @return A `ggplot2` object.
+#'
+#' @examples
+#' data("count_data", package = "VISTA")
+#' data("sample_metadata", package = "VISTA")
+#'
+#' vista <- create_vista(
+#'   counts = count_data[1:200, ],
+#'   sample_info = sample_metadata[1:6, ],
+#'   column_geneid = "gene_id",
+#'   group_column = "cond_long",
+#'   group_numerator = "treatment1",
+#'   group_denominator = "control"
+#' )
+#'
+#' comp_name <- names(comparisons(vista))[1]
+#' genes <- rownames(vista)[1:3]
+#' get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes)
+#' get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes, facet_by = "gene")
 #' @export
 get_foldchange_lollipop <- function(x,
                                     sample_comparison,
@@ -3221,7 +3643,8 @@ get_foldchange_lollipop <- function(x,
                                     label_digits = 2,
                                     display_id = NULL,
                                     dodge_width = 0.5,
-                                    facet_comparison = FALSE) {
+                                    facet_comparison = FALSE,
+                                    facet_by = NULL) {
   stopifnot(inherits(x, "VISTA"))
   sort_by <- match.arg(sort_by)
 
@@ -3297,9 +3720,109 @@ get_foldchange_lollipop <- function(x,
   }
   gene_levels <- unique(gene_levels[!is.na(gene_levels)])
   df$gene_id <- factor(df$gene_id, levels = rev(gene_levels))
+  facet_mode <- .resolve_foldchange_facet_mode(
+    facet_by = facet_by,
+    facet = TRUE,
+    facet_comparison = facet_comparison,
+    n_genes = length(gene_levels)
+  )
 
   single_comp <- length(sample_comparison) == 1
   x_labeller <- stats::setNames(df$gene_label, as.character(df$gene_id))
+
+  if (facet_mode == "gene") {
+    df$comparison <- factor(df$comparison, levels = sample_comparison)
+    if (single_comp) {
+      df$fc_dir <- dplyr::case_when(
+        df$log2fc > 0 ~ "pos",
+        df$log2fc < 0 ~ "neg",
+        TRUE ~ "zero"
+      )
+      plt <- ggplot2::ggplot(
+        df,
+        ggplot2::aes(x = comparison, y = log2fc, color = .data$fc_dir)
+      ) +
+        ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
+        ggplot2::geom_segment(
+          ggplot2::aes(xend = comparison, y = 0, yend = log2fc),
+          linewidth = line_size,
+          lineend = "round"
+        ) +
+        ggplot2::geom_point(size = point_size) +
+        ggplot2::labs(
+          x = "comparison",
+          y = "log2 fold change",
+          color = NULL
+        ) +
+        ggplot2::facet_wrap(
+          ~gene_id,
+          scales = "free_y",
+          labeller = ggplot2::as_labeller(x_labeller)
+        ) +
+        ggplot2::theme_minimal(base_size = 14) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+      if (label) {
+        plt <- plt + ggplot2::geom_text(
+          ggplot2::aes(label = round(log2fc, label_digits), color = .data$fc_dir),
+          vjust = -0.6,
+          size = 4
+        )
+      }
+
+      if (!is.null(palette)) {
+        plt <- plt + ggplot2::scale_color_manual(values = palette)
+      } else {
+        plt <- plt + ggplot2::scale_color_manual(values = c(pos = "red4", neg = "blue4", zero = "grey50"))
+      }
+    } else {
+      plt <- ggplot2::ggplot(
+        df,
+        ggplot2::aes(x = comparison, y = log2fc, color = .data$comparison)
+      ) +
+        ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
+        ggplot2::geom_segment(
+          ggplot2::aes(xend = comparison, y = 0, yend = log2fc),
+          linewidth = line_size,
+          lineend = "round"
+        ) +
+        ggplot2::geom_point(size = point_size) +
+        ggplot2::labs(
+          x = "comparison",
+          y = "log2 fold change",
+          color = "comparison"
+        ) +
+        ggplot2::facet_wrap(
+          ~gene_id,
+          scales = "free_y",
+          labeller = ggplot2::as_labeller(x_labeller)
+        ) +
+        ggplot2::theme_minimal(base_size = 14) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+      if (label) {
+        plt <- plt + ggplot2::geom_text(
+          ggplot2::aes(label = round(log2fc, label_digits), color = .data$comparison),
+          vjust = -0.6,
+          size = 4
+        )
+      }
+
+      if (is.null(palette)) {
+        pal_use <- .vista_comparison_colors(x, sample_comparison)
+        if (is.null(pal_use)) {
+          pal_use <- colorspace::qualitative_hcl(length(sample_comparison))
+          names(pal_use) <- sample_comparison
+        }
+      } else {
+        pal_use <- palette
+        if (is.null(names(pal_use))) names(pal_use) <- sample_comparison
+      }
+      plt <- plt + ggplot2::scale_color_manual(values = pal_use)
+    }
+
+    return(plt)
+  }
 
   base_plot <- ggplot2::ggplot(
     df,
@@ -3349,7 +3872,7 @@ get_foldchange_lollipop <- function(x,
       plt <- plt + ggplot2::scale_color_manual(values = palette)
     }
   } else {
-    facet_comparison <- isTRUE(facet_comparison)
+    facet_comparison <- identical(facet_mode, "comparison")
     # compute fixed offsets per comparison so stems remain vertical
     comp_levels <- sample_comparison
     comp_idx <- match(df$comparison, comp_levels)
@@ -4593,6 +5116,11 @@ get_expression_heatmap <- function(vista_obj,
 
 #' Plot fold-change barplots across comparisons for selected genes
 #'
+#' Plots log2 fold changes for selected genes across one or more comparisons.
+#' `facet_by` provides an explicit, backward-compatible way to request
+#' per-gene or per-comparison panels without changing the current
+#' `facet` / `facet_comparison` defaults.
+#'
 #' @param x A `VISTA` object containing differential expression results.
 #' @param genes Character vector of gene IDs to plot.
 #' @param sample_comparisons Optional character vector of comparison names to include; defaults to all available.
@@ -4607,6 +5135,27 @@ get_expression_heatmap <- function(vista_obj,
 #'   faceting by gene (x = comparison).
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` when faceting
 #'   (default `"free_y"`).
+#' @param facet_by Optional faceting mode. Use `NULL` (default) to preserve the
+#'   current `facet` / `facet_comparison` behavior. Otherwise choose one of
+#'   `"auto"`, `"gene"`, `"comparison"`, or `"none"`.
+#' @return A `ggplot2` object.
+#'
+#' @examples
+#' data("count_data", package = "VISTA")
+#' data("sample_metadata", package = "VISTA")
+#'
+#' vista <- create_vista(
+#'   counts = count_data[1:200, ],
+#'   sample_info = sample_metadata[1:6, ],
+#'   column_geneid = "gene_id",
+#'   group_column = "cond_long",
+#'   group_numerator = "treatment1",
+#'   group_denominator = "control"
+#' )
+#'
+#' genes <- rownames(vista)[1:3]
+#' get_foldchange_barplot(vista, genes = genes)
+#' get_foldchange_barplot(vista, genes = genes, facet_by = "gene")
 #'
 #' @export
 get_foldchange_barplot <- function(x,
@@ -4617,7 +5166,8 @@ get_foldchange_barplot <- function(x,
                                    display_id = NULL,
                                    sort_by = c("input", "log2fc", "abs_log2fc"),
                                    facet_comparison = FALSE,
-                                   facet_scales = "free_y") {
+                                   facet_scales = "free_y",
+                                   facet_by = NULL) {
   stopifnot(inherits(x, "VISTA"))
   stopifnot(length(genes) > 0)
   sort_by <- match.arg(sort_by)
@@ -4671,6 +5221,12 @@ get_foldchange_barplot <- function(x,
   gene_levels <- unique(gene_levels[!is.na(gene_levels)])
   df$gene_id <- factor(df$gene_id, levels = gene_levels)
   df$comparison <- factor(df$comparison, levels = sample_comparisons)
+  facet_mode <- .resolve_foldchange_facet_mode(
+    facet_by = facet_by,
+    facet = facet,
+    facet_comparison = facet_comparison,
+    n_genes = length(gene_levels)
+  )
 
   pal <- .vista_comparison_colors(x, sample_comparisons)
   if (is.null(pal)) {
@@ -4678,7 +5234,7 @@ get_foldchange_barplot <- function(x,
   }
   if (is.null(names(pal))) names(pal) <- sample_comparisons
 
-  if (!facet) {
+  if (facet_mode == "none") {
     plt <- ggplot2::ggplot(
       df,
       ggplot2::aes(x = gene_id, y = log2fc, fill = comparison)
@@ -4696,7 +5252,7 @@ get_foldchange_barplot <- function(x,
     if (length(sample_comparisons) == 1) {
       plt <- plt + ggplot2::guides(fill = "none")
     }
-  } else if (isTRUE(facet_comparison)) {
+  } else if (facet_mode == "comparison") {
     plt <- ggplot2::ggplot(df, ggplot2::aes(x = gene_id, y = log2fc, fill = comparison)) +
       ggplot2::geom_col(alpha = 0.85, width = 0.7, position = ggplot2::position_dodge(width = 0.7)) +
       ggplot2::scale_fill_manual(values = pal) +
@@ -4713,7 +5269,7 @@ get_foldchange_barplot <- function(x,
       ggplot2::theme_minimal() +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-    if (facet && length(levels(df$gene_id)) > 1) {
+    if (length(levels(df$gene_id)) > 1) {
       plt <- plt + ggplot2::facet_wrap(~gene_id, scales = facet_scales) +
         ggplot2::scale_x_discrete(labels = stats::setNames(df$gene_label, df$gene_id))
     }

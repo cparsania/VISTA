@@ -20,7 +20,12 @@ get_chromosome_plot(
   filter_chrom = NULL,
   value_label = NULL,
   use_data_range = FALSE,
-  force_fc_limits = FALSE
+  force_fc_limits = FALSE,
+  scale_mode = c("diverging", "sequential"),
+  scale_low = NULL,
+  scale_mid = NULL,
+  scale_high = NULL,
+  scale_midpoint = 0
 )
 }
 \arguments{
@@ -42,7 +47,7 @@ are labeled. Defaults to \code{NULL} (no explicit label set).}
 \item{comparison}{Optional comparison name; when supplied, uses \code{log2fc} from
 \code{metadata(x)$de_results[[comparison]]} for colouring. If multiple
 comparisons are provided, one panel per comparison is shown (log2FC
-clipped to ±2).}
+clipped to +/-2).}
 
 \item{group_value}{Optional group label (from \code{group_column}); when supplied,
 uses mean expression for that group for colouring (assay \code{norm_counts}).}
@@ -62,6 +67,18 @@ mark each gene position. Default \code{0.02}. Increase for longer ticks.}
 \code{c("chr1","chr2")}). When \code{NULL}, all chromosomes returned by the TxDb are shown.}
 
 \item{value_label}{Optional legend title override for the colour scale.}
+
+\item{scale_mode}{Colour scale mode: \code{"diverging"} (default) or
+\code{"sequential"}.}
+
+\item{scale_low}{Optional low-end colour override.}
+
+\item{scale_mid}{Optional midpoint colour override (used with diverging scale).}
+
+\item{scale_high}{Optional high-end colour override.}
+
+\item{scale_midpoint}{Numeric midpoint passed to
+\code{ggplot2::scale_color_gradient2()} when \code{scale_mode = "diverging"}.}
 }
 \value{
 A \code{ggplot2} object.
@@ -78,6 +95,6 @@ are still plotted). Values in \code{genes} must match either the rownames of
 if \code{id_column = "ENTREZID"}, then \code{genes} should contain Entrez IDs
 to be labeled.
 When multiple comparisons are supplied, \code{value_column} and \code{group_value} are
-ignored and the plot is facetted by comparison with a fixed ±2 log2FC scale.
+ignored and the plot is facetted by comparison with a fixed +/-2 log2FC scale.
 }
 \keyword{internal}

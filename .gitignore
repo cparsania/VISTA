@@ -25,3 +25,4 @@ renv/staging/
 renv/python/
 
 /.quarto/
+VISTA.BiocCheck/00BiocCheck.log

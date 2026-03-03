@@ -36,7 +36,7 @@ are labeled. Defaults to \code{NULL} (no explicit label set).}
 \item{comparison}{Optional comparison name; when supplied, uses \code{log2fc} from
 \code{metadata(x)$de_results[[comparison]]} for colouring. If multiple
 comparisons are provided, one panel per comparison is shown (log2FC
-clipped to ±2).}
+clipped to +/-2).}
 
 \item{value_column}{Optional column in \code{rowData(x)} used for colouring.}
 
@@ -60,7 +60,7 @@ A \code{ggplot2} object.
 \description{
 Convenience wrapper around \code{get_chromosome_plot()} for fold-change colouring.
 When multiple comparisons are supplied, panels are facetted by comparison
-with log2FC clipped to ±2.
+with log2FC clipped to +/-2.
 }
 \examples{
 NULL

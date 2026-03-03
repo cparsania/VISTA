@@ -2,7 +2,7 @@
 % Please edit documentation in R/viz_related.R
 \name{get_expression_barplot}
 \alias{get_expression_barplot}
-\title{Plot gene expression means with optional statistics}
+\title{Plot gene expression as barplots}
 \usage{
 get_expression_barplot(
   x,
@@ -17,7 +17,10 @@ get_expression_barplot(
   comparisons = NULL,
   display_id = NULL,
   display_from = NULL,
-  display_orgdb = NULL
+  display_orgdb = NULL,
+  by = c("group", "sample"),
+  sample_order = c("input", "group", "expression"),
+  facet_by = c("auto", "gene", "none")
 )
 }
 \arguments{
@@ -50,13 +53,26 @@ is not found in \code{rowData}).}
 
 \item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when
 \code{display_id} is set but not found in \code{rowData}.}
+
+\item{by}{One of \code{"group"} (default; summarize replicates by group) or
+\code{"sample"} (show one bar per sample).}
+
+\item{sample_order}{Ordering used when \code{by = "sample"}:
+\code{"input"} preserves the current sample order, \code{"group"} groups samples by
+\code{group_column}, and \code{"expression"} ranks samples by mean expression across
+the selected genes.}
+
+\item{facet_by}{Faceting mode: \code{"auto"} (default; facet by gene when more
+than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes,
+\code{"none"} falls back to \code{"gene"} to preserve readability.}
 }
 \value{
 A \code{ggplot2} object.
 }
 \description{
-Summarizes expression per group for a handful of genes via barplots with
-optional ggpubr comparisons.
+Displays selected genes as grouped summary bars or individual sample-level
+bars. By default, expression is summarized per group with mean ± SD bars.
+With \code{by = "sample"}, each sample is drawn separately.
 }
 \examples{
 # Create VISTA object

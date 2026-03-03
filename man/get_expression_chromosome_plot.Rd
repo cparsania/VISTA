@@ -10,12 +10,20 @@ get_expression_chromosome_plot(
   keytype = "GENEID",
   id_column = NULL,
   genes = NULL,
+  sample_group = NULL,
+  group_column = NULL,
   value_column = NULL,
   value_from = c("rowdata", "assay"),
   value_assay = "norm_counts",
   facet_value_columns = FALSE,
+  side_by_side_groups = FALSE,
+  paginate = TRUE,
+  panels_per_page = 24,
+  summarise_replicates = FALSE,
+  summarise_method = c("mean", "median"),
   group_value = NULL,
   label_top_n = 20,
+  label_genes = c("top", "all", "none"),
   display_id = NULL,
   line_length = 0.02,
   line_width = 0.6,
@@ -38,6 +46,12 @@ When \code{NULL}, rownames(x) are used as keys.}
 \code{label_top_n}). When provided, all genes are plotted but only these
 are labeled. Defaults to \code{NULL} (no explicit label set).}
 
+\item{sample_group}{Optional character vector of groups (from \code{group_column})
+used to subset assay columns when \code{value_from = "assay"}.}
+
+\item{group_column}{Optional column name in \code{sample_info} used for
+\code{sample_group} selection and replicate summarisation.}
+
 \item{value_column}{Optional column in \code{rowData(x)} used for colouring.}
 
 \item{value_from}{Source for \code{value_column} data: \code{"rowdata"} (default) or
@@ -50,11 +64,30 @@ Default \code{"norm_counts"}.}
 \item{facet_value_columns}{Ignored (kept for compatibility); multiple
 \code{value_column}s are always arranged in a chromosome-by-column grid.}
 
+\item{side_by_side_groups}{Logical; when plotting multiple \code{value_column}s,
+arrange one row per chromosome with one panel per selected sample/group.
+This is useful for direct side-by-side group comparison.}
+
+\item{paginate}{Logical; when \code{TRUE}, split large multi-panel chromosome plots
+into pages to avoid patchwork viewport-size errors.}
+
+\item{panels_per_page}{Maximum number of panels per page when \code{paginate = TRUE}.
+Set to \code{NULL} to disable automatic paging.}
+
+\item{summarise_replicates}{Logical; when \code{TRUE} and \code{value_from = "assay"},
+aggregate replicates by \code{group_column} before plotting.}
+
+\item{summarise_method}{\code{"mean"} or \code{"median"} summarisation used when
+\code{summarise_replicates = TRUE}.}
+
 \item{group_value}{Optional group label (from \code{group_column}); when supplied,
 uses mean expression for that group for colouring (assay \code{norm_counts}).}
 
 \item{label_top_n}{Integer; number of genes with largest |value| (or random if
 no value) to label. Ignored when \code{genes} is provided. Set to 0 to disable labels.}
+
+\item{label_genes}{One of \code{"top"} (default), \code{"all"}, or \code{"none"} controlling
+chromosome text labels when \code{genes} is not supplied.}
 
 \item{display_id}{Optional column in \code{rowData(x)} to use for point labels
 (fallback to gene_id/rownames).}
@@ -68,7 +101,7 @@ mark each gene position. Default \code{0.02}. Increase for longer ticks.}
 \code{c("chr1","chr2")}). When \code{NULL}, all chromosomes returned by the TxDb are shown.}
 
 \item{log_transform}{Logical; when \code{group_value} is used (and \code{value_column}
-is \code{NULL}), apply log2(x + 1) before coloring.}
+is \code{NULL}) or when \code{value_from = "assay"}, apply log2(x + 1) before coloring.}
 
 \item{value_label}{Optional legend title override for the colour scale.}
 }
@@ -85,9 +118,20 @@ colouring (optional group mean, rowData columns, or assay columns).
 \item If multiple \code{value_column}s are supplied, one plot is produced per column
 with its own colour legend titled by that column. Chromosomes are laid out
 top-down in a single column: for each chromosome, plots for all
-\code{value_column}s appear sequentially. Legends for each column are shown on
-the first occurrence of that column. Requires \pkg{patchwork}; otherwise a
-list of plots is returned.
+\code{value_column}s appear sequentially. Legends for each column are shown only
+on the first occurrence (at the bottom) to avoid overlap. Requires
+\pkg{patchwork}; otherwise a list of plots is returned.
+\item Set \code{side_by_side_groups = TRUE} to place selected groups/samples in
+separate columns for each chromosome (same-row comparison).
+\item \code{paginate = TRUE} automatically splits large panel collections into a list
+of patchwork pages, which prevents "viewport too small" rendering errors in
+IDE plot panes.
+\item For \code{value_from = "assay"}, colours follow the VISTA ecosystem: group
+colours are used when \code{summarise_replicates = TRUE}, while sample colours
+are derived from group colours when plotting individual replicates.
+\item For \code{value_from = "assay"} with \code{value_column = NULL}, all selected
+assay columns are used (samples after \code{sample_group} filtering, or groups
+after replicate summarisation).
 \item Labels are kept consistent across \code{value_column}s: if \code{genes} is provided
 it is used for all panels; otherwise the top \code{label_top_n} (by absolute
 value in the first \code{value_column}) are used for all panels.

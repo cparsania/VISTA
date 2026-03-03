@@ -42,6 +42,34 @@ test_that("get_expression_barplot handles sample subsetting", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("get_expression_barplot supports per-sample mode", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:2]
+
+  p <- get_expression_barplot(
+    vista,
+    genes = genes,
+    by = "sample",
+    sample_order = "group"
+  )
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("get_expression_barplot rejects stats_group in per-sample mode", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1]
+
+  expect_error(
+    get_expression_barplot(
+      vista,
+      genes = genes,
+      by = "sample",
+      stats_group = TRUE
+    ),
+    "only supported when"
+  )
+})
+
 test_that("get_expression_boxplot returns ggplot object", {
   vista <- make_small_vista()
   genes <- rownames(vista)[1:5]
@@ -95,6 +123,19 @@ test_that("get_expression_lollipop returns ggplot object", {
   genes <- rownames(vista)[1:5]
 
   p <- get_expression_lollipop(vista, genes = genes)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("get_expression_lollipop supports per-sample mode", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:3]
+
+  p <- get_expression_lollipop(
+    vista,
+    genes = genes,
+    by = "sample",
+    sample_order = "expression"
+  )
   expect_s3_class(p, "ggplot")
 })
 

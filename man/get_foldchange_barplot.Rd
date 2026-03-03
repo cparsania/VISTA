@@ -13,7 +13,8 @@ get_foldchange_barplot(
   display_id = NULL,
   sort_by = c("input", "log2fc", "abs_log2fc"),
   facet_comparison = FALSE,
-  facet_scales = "free_y"
+  facet_scales = "free_y",
+  facet_by = NULL
 )
 }
 \arguments{
@@ -39,13 +40,38 @@ faceting by gene (x = comparison).}
 
 \item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} when faceting
 (default \code{"free_y"}).}
+
+\item{facet_by}{Optional faceting mode. Use \code{NULL} (default) to preserve the
+current \code{facet} / \code{facet_comparison} behavior. Otherwise choose one of
+\code{"auto"}, \code{"gene"}, \code{"comparison"}, or \code{"none"}.}
 }
 \value{
 An object returned by this function.
+
+A \code{ggplot2} object.
 }
 \description{
-Plot fold-change barplots across comparisons for selected genes
+Plots log2 fold changes for selected genes across one or more comparisons.
+\code{facet_by} provides an explicit, backward-compatible way to request
+per-gene or per-comparison panels without changing the current
+\code{facet} / \code{facet_comparison} defaults.
 }
 \examples{
 NULL
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+vista <- create_vista(
+  counts = count_data[1:200, ],
+  sample_info = sample_metadata[1:6, ],
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control"
+)
+
+genes <- rownames(vista)[1:3]
+get_foldchange_barplot(vista, genes = genes)
+get_foldchange_barplot(vista, genes = genes, facet_by = "gene")
+
 }

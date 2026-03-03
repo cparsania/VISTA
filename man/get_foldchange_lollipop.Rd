@@ -16,7 +16,8 @@ get_foldchange_lollipop(
   label_digits = 2,
   display_id = NULL,
   dodge_width = 0.5,
-  facet_comparison = FALSE
+  facet_comparison = FALSE,
+  facet_by = NULL
 )
 }
 \arguments{
@@ -54,9 +55,15 @@ two comparisons on the same axis.}
 
 \item{facet_comparison}{Logical; when two comparisons are provided, facet by
 comparison instead of dodging side-by-side.}
+
+\item{facet_by}{Optional faceting mode. Use \code{NULL} (default) to preserve the
+current \code{facet_comparison} behavior. Otherwise choose one of \code{"auto"},
+\code{"gene"}, \code{"comparison"}, or \code{"none"}.}
 }
 \value{
 An object returned by this function.
+
+A \code{ggplot2} object.
 }
 \description{
 One-stop doc for fold-change plots:
@@ -77,7 +84,27 @@ Extracts log2 fold changes from stored differential expression results and
 plots them as stems and dots, with labels and a zero reference line. You can
 optionally provide two comparisons; in that case both comparisons are drawn
 side-by-side, coloured by comparison.
+
+\code{facet_by = "gene"} provides an explicit per-gene layout, while
+\code{facet_by = "comparison"} mirrors the historical \code{facet_comparison = TRUE}
+behavior. Leaving \code{facet_by = NULL} preserves current defaults for existing code.
 }
 \examples{
 NULL
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+vista <- create_vista(
+  counts = count_data[1:200, ],
+  sample_info = sample_metadata[1:6, ],
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control"
+)
+
+comp_name <- names(comparisons(vista))[1]
+genes <- rownames(vista)[1:3]
+get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes)
+get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes, facet_by = "gene")
 }

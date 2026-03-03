@@ -2,13 +2,16 @@
 % Please edit documentation in R/bioccheck_roxygen_fixes.R, R/viz_related.R
 \name{get_expression_lollipop}
 \alias{get_expression_lollipop}
-\title{Plot mean expression per group as a lollipop chart}
+\title{Plot expression as a lollipop chart}
 \usage{
 get_expression_lollipop(
   x,
   genes,
   sample_group = NULL,
   group_column = NULL,
+  by = c("group", "sample"),
+  sample_order = c("input", "group", "expression"),
+  facet_by = c("auto", "gene", "none"),
   log_transform = TRUE,
   facet_scale = "free_y",
   point_size = 6,
@@ -28,6 +31,18 @@ get_expression_lollipop(
 \item{sample_group}{Optional character vector of groups (from \code{group_column}) to include.}
 
 \item{group_column}{Optional column name in \code{sample_info} to use for grouping samples.}
+
+\item{by}{One of \code{"group"} (default; summarize replicates by group) or
+\code{"sample"} (show individual samples).}
+
+\item{sample_order}{Ordering used when \code{by = "sample"}:
+\code{"input"} preserves the current sample order, \code{"group"} groups samples by
+\code{group_column}, and \code{"expression"} ranks samples by mean expression across
+the selected genes.}
+
+\item{facet_by}{Faceting mode: \code{"auto"} (default; facet by gene when more
+than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes,
+\code{"none"} falls back to \code{"gene"} to avoid unreadable combined panels.}
 
 \item{log_transform}{Logical; log2-transform expression before plotting.}
 
@@ -53,13 +68,30 @@ is not found in \code{rowData}).}
 }
 \value{
 An object returned by this function.
+
+A \code{ggplot2} object.
 }
 \description{
-Summarizes expression per group for a handful of genes using a stem-and-dot
-(lollipop) plot. Values are averaged across replicates in each group; this
-function does not show individual replicates. For per-sample display or
-pairwise tests, use \code{get_expression_barplot()}.
+Displays selected genes as stem-and-dot (lollipop) plots. By default,
+expression is summarized per group (mean across replicates). With
+\code{by = "sample"}, the plot shows individual samples.
 }
 \examples{
 NULL
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+vista <- create_vista(
+  counts = count_data[1:200, ],
+  sample_info = sample_metadata[1:6, ],
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control"
+)
+
+genes <- rownames(vista)[1:3]
+get_expression_lollipop(vista, genes = genes)
+get_expression_lollipop(vista, genes = genes[1:2], by = "sample")
+
 }

@@ -47,7 +47,8 @@ is not found in \code{rowData}).}
 
 \item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} (default \code{"free_y"}).}
 
-\item{stats_group}{Logical; add statistical comparisons between groups when \code{TRUE}.}
+\item{stats_group}{Logical; add statistical comparisons between groups when
+\code{TRUE}. Only supported when \code{by = "group"}.}
 
 \item{p.label}{Label format for \code{ggpubr::stat_compare_means()}.}
 

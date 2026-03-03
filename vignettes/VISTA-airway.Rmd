@@ -728,6 +728,18 @@ get_expression_barplot(
 )
 ```
 
+### Per-sample barplot for selected genes
+
+```{r barplot-per-sample, fig.width=10, fig.height=6}
+get_expression_barplot(
+  vista,
+  genes = top_up$gene_id[1:2],
+  display_id = "SYMBOL",
+  by = "sample",
+  sample_order = "group"
+)
+```
+
 ### Compare up and down regulated genes
 
 ```{r barplot-comparison, fig.width=10, fig.height=6}
@@ -899,6 +911,18 @@ get_expression_lollipop(
   genes = top_up$gene_id[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE
+)
+```
+
+### Per-sample lollipop plot
+
+```{r lollipop-per-sample, fig.width=10, fig.height=6}
+get_expression_lollipop(
+  vista,
+  genes = top_up$gene_id[1:2],
+  display_id = "SYMBOL",
+  by = "sample",
+  sample_order = "expression"
 )
 ```
 
@@ -1284,6 +1308,32 @@ Useful for comparing multiple comparisons:
 ```{r foldchange-matrix}
 fc_matrix <- get_foldchange_matrix(vista)
 head(fc_matrix, n = 10)
+```
+
+## Fold-change Barplot and Lollipop
+
+### Per-gene fold-change barplot
+
+```{r fc-barplot-gene, fig.width=9, fig.height=6}
+get_foldchange_barplot(
+  vista,
+  genes = top_up$gene_id[1:3],
+  sample_comparisons = comp_names,
+  display_id = "SYMBOL",
+  facet_by = "gene"
+)
+```
+
+### Per-gene fold-change lollipop
+
+```{r fc-lollipop-gene, fig.width=9, fig.height=6}
+get_foldchange_lollipop(
+  vista,
+  sample_comparison = comp_names[1],
+  genes = top_up$gene_id[1:3],
+  display_id = "SYMBOL",
+  facet_by = "gene"
+)
 ```
 
 ## Fold-change Raincloud

@@ -37,14 +37,16 @@ test_that("get_mds_plot handles top_n_genes parameter", {
 test_that("get_umap_plot produces valid plot", {
   skip_if_not_installed("uwot")
   vista <- make_small_vista()
-  p <- get_umap_plot(vista)
+  nn <- max(2, ncol(vista) - 1)
+  p <- get_umap_plot(vista, n_neighbors = nn)
   expect_s3_class(p, "ggplot")
 })
 
 test_that("get_umap_plot supports color_by metadata", {
   skip_if_not_installed("uwot")
   vista <- make_small_vista()
-  p <- get_umap_plot(vista, color_by = "cell", shape_by = "cond_long")
+  nn <- max(2, ncol(vista) - 1)
+  p <- get_umap_plot(vista, color_by = "cell", shape_by = "cond_long", n_neighbors = nn)
   expect_s3_class(p, "ggplot")
 })
 
