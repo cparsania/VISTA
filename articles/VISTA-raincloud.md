@@ -337,7 +337,7 @@ sessionInfo()
 #>  [33] Matrix_1.7-4                R6_2.6.1                   
 #>  [35] fastmap_1.2.0               MatrixGenerics_1.22.0      
 #>  [37] digest_0.6.39               aplot_0.2.9                
-#>  [39] enrichplot_1.30.4           colorspace_2.1-2           
+#>  [39] enrichplot_1.30.5           colorspace_2.1-2           
 #>  [41] ggnewscale_0.5.2            GGally_2.4.0               
 #>  [43] patchwork_1.3.2             AnnotationDbi_1.72.0       
 #>  [45] S4Vectors_0.48.0            DESeq2_1.50.2              

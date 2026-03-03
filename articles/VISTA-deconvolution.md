@@ -312,7 +312,7 @@ sessionInfo()
 #>  [31] msigdbr_25.1.1              pracma_2.4.6               
 #>  [33] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [35] rappdirs_0.3.4              gdtools_0.5.0              
-#>  [37] enrichplot_1.30.4           ggrepel_0.9.7              
+#>  [37] enrichplot_1.30.5           ggrepel_0.9.7              
 #>  [39] tidytree_0.4.7              annotate_1.88.0            
 #>  [41] pkgdown_2.2.0               codetools_0.2-20           
 #>  [43] DelayedArray_0.36.0         DOSE_4.4.0                 

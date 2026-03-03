@@ -733,7 +733,7 @@ sessionInfo()
 #>  [31] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [33] rappdirs_0.3.4              gdtools_0.5.0              
 #>  [35] IRanges_2.44.0              S4Vectors_0.48.0           
-#>  [37] enrichplot_1.30.4           ggrepel_0.9.7              
+#>  [37] enrichplot_1.30.5           ggrepel_0.9.7              
 #>  [39] tidytree_0.4.7              pkgdown_2.2.0              
 #>  [41] codetools_0.2-20            DelayedArray_0.36.0        
 #>  [43] DOSE_4.4.0                  ggforce_0.5.0              
