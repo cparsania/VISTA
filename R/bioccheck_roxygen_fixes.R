@@ -14,6 +14,8 @@ NULL
 NULL
 
 #' @name get_corr_heatmap
+#' @param show_corr_values Deprecated alias for `label`. When supplied, it overrides `label`.
+#' @param col_corr_values Deprecated alias for `label_color`. When supplied, it overrides `label_color`.
 #' @return An object returned by this function.
 #' @examples
 #' NULL
