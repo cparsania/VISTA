@@ -58,7 +58,7 @@ reference:
       - get_deg_count_pieplot
       - get_deg_count_donutplot
       - get_deg_venn_diagram
-      - plot_deg_alluvial
+      - get_deg_alluvial
       - get_genes_by_regulation
 
   - title: "Expression Plots"
@@ -112,7 +112,7 @@ reference:
     contents:
       - run_cell_deconvolution
       - get_cell_fractions
-      - plot_celltype_barplot
+      - get_celltype_barplot
       - get_celltype_group_dotplot
       - get_celltype_heatmap
 
