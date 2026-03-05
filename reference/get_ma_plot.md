@@ -13,10 +13,10 @@ get_ma_plot(
   sample_comparison,
   point_size = 1.2,
   alpha = 0.6,
-  fill_colors = c(Up = "#a40000", Down = "#16317d", Other = "gray70"),
-  topn = 0,
+  colors = c(Up = "#a40000", Down = "#16317d", Other = "gray70"),
+  label_n = 0,
   label_size = 3,
-  repair = FALSE,
+  repair_genes = FALSE,
   display_id = NULL,
   display_from = NULL,
   display_orgdb = NULL
@@ -42,12 +42,12 @@ get_ma_plot(
 
   Numeric transparency (0-1). Default: 0.6.
 
-- fill_colors:
+- colors:
 
   Named character vector of colors for `"Up"`, `"Down"`, and `"Other"`
   genes.
 
-- topn:
+- label_n:
 
   Integer number of genes to label. Default: 0.
 
@@ -55,7 +55,7 @@ get_ma_plot(
 
   Text size for labels. Default: 3.
 
-- repair:
+- repair_genes:
 
   Logical; if `TRUE`, attempt to shorten gene identifiers to symbols by
   stripping prefixes. Default: `FALSE`.

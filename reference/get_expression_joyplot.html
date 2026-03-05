@@ -62,7 +62,10 @@ shapes comparable.</p>
 <span>  alpha <span class="op">=</span> <span class="fl">0.7</span>,</span>
 <span>  scale <span class="op">=</span> <span class="fl">1.2</span>,</span>
 <span>  y_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
-<span>  color_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group"</span>, <span class="st">"sample"</span><span class="op">)</span></span>
+<span>  color_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
+<span>  sample_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"input"</span>, <span class="st">"group"</span>, <span class="st">"expression"</span><span class="op">)</span>,</span>
+<span>  palette <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  colors <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -105,6 +108,20 @@ shapes comparable.</p>
 
 <dt id="arg-color-by">color_by<a class="anchor" aria-label="anchor" href="#arg-color-by"></a></dt>
 <dd><p>Either <code>"group"</code> (default) or <code>"sample"</code> to choose fill colors.</p></dd>
+
+
+<dt id="arg-sample-order">sample_order<a class="anchor" aria-label="anchor" href="#arg-sample-order"></a></dt>
+<dd><p>Ordering for sample-level display: <code>"input"</code>, <code>"group"</code>,
+or <code>"expression"</code>.</p></dd>
+
+
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>Optional qualitative palette name used when generating colours.</p></dd>
+
+
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
+<dd><p>Optional named character vector of manual colours overriding
+<code>palette</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -379,7 +379,7 @@ palette assignment, and metadata persistence – in one call.
 ### Step 3: PCA Plot
 
 ``` r
-get_pca_plot(vista, label_replicates = TRUE)
+get_pca_plot(vista, label = TRUE)
 ```
 
 ![](VISTA-code-economy_files/figure-html/vista-pca-1.png)
@@ -413,8 +413,8 @@ top_genes <- head(de_tbl$gene_id[de_tbl$regulation != "Other"][
 ], 50)
 
 get_expression_heatmap(
-  vista_obj        = vista,
-  samples          = c("Untreated", "Dexamethasone"),
+  x               = vista,
+  sample_group    = c("Untreated", "Dexamethasone"),
   genes            = top_genes,
   value_transform  = "zscore",
   display_id       = "SYMBOL",

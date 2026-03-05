@@ -54,7 +54,10 @@ samples from selected groups/genes.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  sample_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  genes <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sample_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"input"</span>, <span class="st">"group"</span><span class="op">)</span>,</span>
+<span>  value_transform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log2"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  title <span class="op">=</span> <span class="st">"Pairwise Sample Correlations"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -76,6 +79,19 @@ samples from selected groups/genes.</p>
 
 <dt id="arg-genes">genes<a class="anchor" aria-label="anchor" href="#arg-genes"></a></dt>
 <dd><p>Optional character vector of gene IDs to include; defaults to all genes.</p></dd>
+
+
+<dt id="arg-sample-order">sample_order<a class="anchor" aria-label="anchor" href="#arg-sample-order"></a></dt>
+<dd><p>Ordering for selected samples: <code>"input"</code> keeps the
+current order, while <code>"group"</code> sorts by <code>group_column</code>.</p></dd>
+
+
+<dt id="arg-value-transform">value_transform<a class="anchor" aria-label="anchor" href="#arg-value-transform"></a></dt>
+<dd><p>Value transformation: <code>"log2"</code> (default) or <code>"none"</code>.</p></dd>
+
+
+<dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
+<dd><p>Plot title.</p></dd>
 
 </dl></div>
     <div class="section level2">

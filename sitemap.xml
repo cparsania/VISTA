@@ -35,10 +35,12 @@
 <url><loc>/reference/enrichMsigDB.html</loc></url>
 <url><loc>/reference/export_vista_assets.html</loc></url>
 <url><loc>/reference/get_cell_fractions.html</loc></url>
+<url><loc>/reference/get_celltype_barplot.html</loc></url>
 <url><loc>/reference/get_celltype_group_dotplot.html</loc></url>
 <url><loc>/reference/get_celltype_heatmap.html</loc></url>
 <url><loc>/reference/get_chromosome_plot.html</loc></url>
 <url><loc>/reference/get_corr_heatmap.html</loc></url>
+<url><loc>/reference/get_deg_alluvial.html</loc></url>
 <url><loc>/reference/get_deg_count_barplot.html</loc></url>
 <url><loc>/reference/get_deg_count_donutplot.html</loc></url>
 <url><loc>/reference/get_deg_count_pieplot.html</loc></url>
@@ -80,8 +82,6 @@
 <url><loc>/reference/get_umap_plot.html</loc></url>
 <url><loc>/reference/get_volcano_plot.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
-<url><loc>/reference/plot_celltype_barplot.html</loc></url>
-<url><loc>/reference/plot_deg_alluvial.html</loc></url>
 <url><loc>/reference/print.VISTA.html</loc></url>
 <url><loc>/reference/run_cell_deconvolution.html</loc></url>
 <url><loc>/reference/run_deseq_analysis.html</loc></url>

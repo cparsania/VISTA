@@ -10,10 +10,15 @@ cutoffs saved in the `VISTA` object.
 get_foldchange_scatter(
   x,
   sample_comparisons,
-  label_top_n = 0,
-  point_alpha = 0.5,
-  use_hex = FALSE,
-  method = c("pearson", "spearman")
+  label_n = 0,
+  alpha = 0.5,
+  geometry = c("point", "hex"),
+  method = c("pearson", "spearman"),
+  colors = c(`Up/Up` = "#1b9e77", `Down/Down` = "#7570b3", `Up/Down` = "#d95f02",
+    `Down/Up` = "#e7298a", Other = "grey70"),
+  point_size = 1.5,
+  label_size = 3,
+  base_size = 12
 )
 ```
 
@@ -27,22 +32,38 @@ get_foldchange_scatter(
 
   Character vector of length 2 naming the comparisons.
 
-- label_top_n:
+- label_n:
 
   Integer; number of most extreme points to label (by \|log2FC1\| +
   \|log2FC2\|).
 
-- point_alpha:
+- alpha:
 
   Point transparency.
 
-- use_hex:
+- geometry:
 
-  Logical; use hex binning instead of points for dense datasets.
+  Geometry used for the data layer: `"point"` or `"hex"`.
 
 - method:
 
   Correlation method for the subtitle; `"pearson"` or `"spearman"`.
+
+- colors:
+
+  Named vector of concordance colours.
+
+- point_size:
+
+  Point size used when `geometry = "point"`.
+
+- label_size:
+
+  Text size for labeled genes.
+
+- base_size:
+
+  Base theme size.
 
 ## Value
 

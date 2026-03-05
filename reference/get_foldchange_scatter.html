@@ -56,10 +56,15 @@ saved in the <code>VISTA</code> object.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_foldchange_scatter</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">sample_comparisons</span>,</span>
-<span>  label_top_n <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  point_alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  use_hex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pearson"</span>, <span class="st">"spearman"</span><span class="op">)</span></span>
+<span>  label_n <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  geometry <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"hex"</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pearson"</span>, <span class="st">"spearman"</span><span class="op">)</span>,</span>
+<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`Up/Up` <span class="op">=</span> <span class="st">"#1b9e77"</span>, `Down/Down` <span class="op">=</span> <span class="st">"#7570b3"</span>, `Up/Down` <span class="op">=</span> <span class="st">"#d95f02"</span>,</span>
+<span>    `Down/Up` <span class="op">=</span> <span class="st">"#e7298a"</span>, Other <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span>,</span>
+<span>  point_size <span class="op">=</span> <span class="fl">1.5</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">12</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -75,20 +80,36 @@ saved in the <code>VISTA</code> object.</p>
 <dd><p>Character vector of length 2 naming the comparisons.</p></dd>
 
 
-<dt id="arg-label-top-n">label_top_n<a class="anchor" aria-label="anchor" href="#arg-label-top-n"></a></dt>
+<dt id="arg-label-n">label_n<a class="anchor" aria-label="anchor" href="#arg-label-n"></a></dt>
 <dd><p>Integer; number of most extreme points to label (by |log2FC1| + |log2FC2|).</p></dd>
 
 
-<dt id="arg-point-alpha">point_alpha<a class="anchor" aria-label="anchor" href="#arg-point-alpha"></a></dt>
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>Point transparency.</p></dd>
 
 
-<dt id="arg-use-hex">use_hex<a class="anchor" aria-label="anchor" href="#arg-use-hex"></a></dt>
-<dd><p>Logical; use hex binning instead of points for dense datasets.</p></dd>
+<dt id="arg-geometry">geometry<a class="anchor" aria-label="anchor" href="#arg-geometry"></a></dt>
+<dd><p>Geometry used for the data layer: <code>"point"</code> or <code>"hex"</code>.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>Correlation method for the subtitle; <code>"pearson"</code> or <code>"spearman"</code>.</p></dd>
+
+
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
+<dd><p>Named vector of concordance colours.</p></dd>
+
+
+<dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
+<dd><p>Point size used when <code>geometry = "point"</code>.</p></dd>
+
+
+<dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
+<dd><p>Text size for labeled genes.</p></dd>
+
+
+<dt id="arg-base-size">base_size<a class="anchor" aria-label="anchor" href="#arg-base-size"></a></dt>
+<dd><p>Base theme size.</p></dd>
 
 </dl></div>
     <div class="section level2">

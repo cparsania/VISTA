@@ -29,8 +29,7 @@ get_foldchange_lollipop(
   label_digits = 2,
   display_id = NULL,
   dodge_width = 0.5,
-  facet_comparison = FALSE,
-  facet_by = NULL
+  facet_by = c("auto", "gene", "comparison", "none")
 )
 ```
 
@@ -90,16 +89,10 @@ get_foldchange_lollipop(
   Horizontal separation between comparisons when plotting two
   comparisons on the same axis.
 
-- facet_comparison:
-
-  Logical; when two comparisons are provided, facet by comparison
-  instead of dodging side-by-side.
-
 - facet_by:
 
-  Optional faceting mode. Use `NULL` (default) to preserve the current
-  `facet_comparison` behavior. Otherwise choose one of `"auto"`,
-  `"gene"`, `"comparison"`, or `"none"`.
+  Faceting mode: `"auto"` (default), `"gene"`, `"comparison"`, or
+  `"none"`.
 
 ## Value
 
@@ -119,11 +112,6 @@ Extracts log2 fold changes from stored differential expression results
 and plots them as stems and dots, with labels and a zero reference line.
 You can optionally provide two comparisons; in that case both
 comparisons are drawn side-by-side, coloured by comparison.
-
-`facet_by = "gene"` provides an explicit per-gene layout, while
-`facet_by = "comparison"` mirrors the historical
-`facet_comparison = TRUE` behavior. Leaving `facet_by = NULL` preserves
-current defaults for existing code.
 
 ## Examples
 

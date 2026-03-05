@@ -119,11 +119,10 @@ Arguments:
 
 Arguments:
 
-- `x`, `genes`, `sample_group`, `group_column`, `facet`,
-  `log_transform`.
+- `x`, `genes`, `sample_group`, `group_column`, `log_transform`.
 - `display_id`, `display_from`, `display_orgdb`.
 - `facet_scales`, `stats_group`, `p.label`, `comparisons`.
-- `pool_genes`, `x_by`, `facet_by`, `fill_by`.
+- `pool_genes`, `by`, `facet_by`, `fill_by`.
 
 Notes: `genes` capped at 20 when provided. If `facet_by = "gene"` and
 `genes` is NULL, top 20 variable genes are selected automatically.
@@ -150,7 +149,7 @@ Arguments:
 
 - `x`, `genes`, `sample_group`, `group_column`.
 - `value_transform` (`"log2"`, `"zscore"`, `"none"`).
-- `summarise_groups`, `facet_by_group`, `color_palette`.
+- `by`, `facet_by`, `sample_order`, `palette`, `colors`.
 
 ### Distribution helpers
 
@@ -159,7 +158,9 @@ Arguments:
 - `get_expression_raincloud(...)`
 
 Common arguments: `genes`, `sample_group`, `group_column`,
-`value_transform`, `summarise`, `facet` and plotting controls.
+`value_transform`, plot-specific faceting, and plotting controls.
+[`get_expression_violinplot()`](../reference/get_expression_violinplot.md)
+is explicitly group-based (`by = "group"`).
 
 ## Dimensionality reduction
 
@@ -193,8 +194,7 @@ Arguments:
 - `get_deg_count_donutplot(...)`: circular DEG composition summary
   (donut).
 - `get_deg_venn_diagram(...)`: overlap of DEG sets (2–4 comparisons).
-- `plot_deg_alluvial(...)`: transitions of regulation across
-  comparisons.
+- `get_deg_alluvial(...)`: transitions of regulation across comparisons.
 
 ## Volcano/MA
 
@@ -236,7 +236,7 @@ Common label arguments: `display_id`, `display_from`, `display_orgdb`.
 
 - `run_cell_deconvolution(...)`: xCell2 workflow.
 - `get_cell_fractions(x)`: retrieve stored fractions.
-- `plot_celltype_barplot(...)`: stacked composition plot with top-N
+- `get_celltype_barplot(...)`: stacked composition plot with top-N
   selection/collapse options.
 - `get_celltype_group_dotplot(...)`: group-level summary (mean/median)
   with optional sample points.

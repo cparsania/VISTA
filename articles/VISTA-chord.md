@@ -256,8 +256,8 @@ DE results. This requires passing the VISTA object and comparison name.
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
-    vista_obj  = vista,
-    comparison = comp_name,
+    vista  = vista,
+    sample_comparison = comp_name,
     top_n      = 6,
     color_by   = "foldchange",
     display_id = "SYMBOL",
@@ -285,8 +285,8 @@ or Other (grey):
 if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
   get_enrichment_chord(
     msig_down,
-    vista_obj  = vista,
-    comparison = comp_name,
+    vista  = vista,
+    sample_comparison = comp_name,
     top_n      = 6,
     color_by   = "regulation",
     display_id = "SYMBOL",
@@ -306,8 +306,8 @@ strongest drivers appear first.
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
-    vista_obj     = vista,
-    comparison    = comp_name,
+    vista     = vista,
+    sample_comparison    = comp_name,
     top_n         = 6,
     color_by      = "foldchange",
     gene_order_by = "abs_foldchange", # or "foldchange"
@@ -332,8 +332,8 @@ colours chords by fold-change, and orders gene sectors by fold-change.
 if (!is.null(msig_both$enrich) && nrow(msig_both$enrich@result) > 0) {
   get_enrichment_chord(
     msig_both,
-    vista_obj     = vista,
-    comparison    = comp_name,
+    vista     = vista,
+    sample_comparison    = comp_name,
     top_n         = 6,
     color_by      = "foldchange",
     gene_order_by = "foldchange",
@@ -357,8 +357,8 @@ the **hub genes** that bridge multiple enriched terms.
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   hub_result <- get_enrichment_chord(
     msig_hallmark,
-    vista_obj    = vista,
-    comparison   = comp_name,
+    vista    = vista,
+    sample_comparison   = comp_name,
     top_n        = 8,
     min_pathways = 2,
     color_by     = "foldchange",
@@ -393,8 +393,8 @@ threshold further:
 if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
   c2_result <- get_enrichment_chord(
     msig_c2,
-    vista_obj    = vista,
-    comparison   = comp_name,
+    vista    = vista,
+    sample_comparison   = comp_name,
     top_n        = 8,
     min_pathways = 3,
     max_genes    = 30,
@@ -482,8 +482,8 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
     get_enrichment_chord(
       msig_hallmark,
       pathways   = pick,
-      vista_obj  = vista,
-      comparison = comp_name,
+      vista  = vista,
+      sample_comparison = comp_name,
       color_by   = "foldchange",
       display_id = "SYMBOL",
       title      = "Selected pathways of interest"
@@ -518,9 +518,9 @@ shared.
 ``` r
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_pathway_heatmap(
-    vista_obj  = vista,
+    x      = vista,
     enrichment = msig_hallmark$enrich,
-    samples    = c("Untreated", "Dexamethasone"),
+    sample_group = c("Untreated", "Dexamethasone"),
     top_n      = 3,
     gene_mode  = "union",
     max_genes  = 40,
@@ -545,8 +545,8 @@ pathways.
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
-    vista_obj    = vista,
-    comparison   = comp_name,
+    vista    = vista,
+    sample_comparison   = comp_name,
     top_n        = 8,
     min_pathways = 2,
     color_by     = "foldchange",

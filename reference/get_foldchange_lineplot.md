@@ -11,12 +11,12 @@ get_foldchange_lineplot(
   sample_comparisons,
   genes = NULL,
   km = NULL,
-  facet_clusters = FALSE,
-  line_transparency = 0.5,
-  show_average_line = TRUE,
-  average_line_color = NULL,
-  average_line_size = 1,
-  average_line_summary_method = "median"
+  facet_by = c("none", "cluster"),
+  alpha = 0.5,
+  show_summary = TRUE,
+  summary_color = NULL,
+  summary_linewidth = 1,
+  summary_fun = c("median", "mean")
 )
 ```
 
@@ -40,29 +40,29 @@ get_foldchange_lineplot(
   Optional integer specifying the number of k-means clusters to compute;
   `NULL` disables clustering.
 
-- facet_clusters:
+- facet_by:
 
-  Logical; facet the plot by cluster when k-means clustering is
-  requested.
+  Faceting mode: `"none"` (default) or `"cluster"` when k-means
+  clustering is requested.
 
-- line_transparency:
+- alpha:
 
   Numeric alpha applied to individual gene lines.
 
-- show_average_line:
+- show_summary:
 
   Logical; overlay a summary line per cluster when `TRUE`.
 
-- average_line_color:
+- summary_color:
 
   Color used for the summary line. When `NULL`, uses the first
   comparison color (if stored) for consistency across plots.
 
-- average_line_size:
+- summary_linewidth:
 
   Numeric line width for the summary line.
 
-- average_line_summary_method:
+- summary_fun:
 
   Character string selecting `"median"` or `"mean"` for the summary
   statistic.

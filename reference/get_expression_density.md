@@ -17,7 +17,10 @@ get_expression_density(
   alpha = 0.4,
   adjust = 1,
   color_by = c("group", "sample"),
-  facet_by = c("none", "group", "sample")
+  facet_by = c("none", "group", "sample"),
+  sample_order = c("input", "group", "expression"),
+  palette = NULL,
+  colors = NULL
 )
 ```
 
@@ -65,6 +68,20 @@ get_expression_density(
 
   One of `"none"` (default), `"group"`, or `"sample"` to facet
   densities.
+
+- sample_order:
+
+  Ordering for sample-level display: `"input"`, `"group"`, or
+  `"expression"`.
+
+- palette:
+
+  Optional qualitative palette name used when generating colours.
+
+- colors:
+
+  Optional named character vector of manual colours overriding
+  `palette`.
 
 ## Value
 

@@ -15,7 +15,8 @@ get_expression_scatter(
   group_column = NULL,
   genes = NULL,
   log_transform = TRUE,
-  label_top_n = 20,
+  label_n = 20,
+  label_size = 3,
   method = c("pearson", "spearman"),
   display_id = NULL
 )
@@ -53,10 +54,14 @@ get_expression_scatter(
 
   Logical; apply log2(x + 1) transform. Default `TRUE`.
 
-- label_top_n:
+- label_n:
 
   Integer; number of most divergent genes to label (ranked by \|x -
   y\|). Set to 0 to disable labels.
+
+- label_size:
+
+  Numeric size for labeled genes.
 
 - method:
 

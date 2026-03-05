@@ -10,8 +10,7 @@ get_foldchange_boxplot(
   x,
   genes = NULL,
   sample_comparisons = NULL,
-  sample_comparison = NULL,
-  facet = TRUE,
+  facet_by = c("auto", "comparison", "none"),
   p.label = "p.signif",
   stats_group = FALSE,
   stats_method = "t.test"
@@ -32,13 +31,9 @@ get_foldchange_boxplot(
 
   Optional character vector of comparison names to plot.
 
-- sample_comparison:
+- facet_by:
 
-  Deprecated alias for `sample_comparisons`.
-
-- facet:
-
-  Logical; facet each comparison when `TRUE`.
+  Faceting mode: `"auto"` (default), `"comparison"`, or `"none"`.
 
 - p.label:
 

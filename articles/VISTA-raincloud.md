@@ -49,21 +49,17 @@ if (!length(selected_genes)) {
 }
 ```
 
-``` r
-cat("Package 'ggrain' is not installed; raincloud examples are skipped.\n")
-```
-
 ## Expression Raincloud
 
-### Basic expression raincloud
+### Basic expression raincloud (pooled gene-sample values)
 
 ``` r
 get_expression_raincloud(
   vista,
-  genes = selected_genes,
+  genes = selected_genes[1:10],
   value_transform = "log2",
-  summarise = TRUE,
-  facet = FALSE
+  summarise = FALSE,
+  facet_by = "none"
 )
 ```
 
@@ -71,16 +67,23 @@ get_expression_raincloud(
 
 ### `summarise = FALSE` vs `summarise = TRUE`
 
-Use `summarise = FALSE` to show per-sample distributions, and
-`summarise = TRUE` to aggregate replicate-level values by group.
+For expression rainclouds:
+
+- `summarise = FALSE`: each point is a gene-sample value (pooled across
+  selected genes).
+- `summarise = TRUE`: each point is a gene-level group summary (one
+  value per gene per group).
+
+With `summarise = TRUE`, using `id.long.var = "gene"` is useful for
+connecting each gene across groups.
 
 ``` r
 get_expression_raincloud(
   vista,
-  genes = selected_genes,
+  genes = selected_genes[1:10],
   value_transform = "log2",
   summarise = FALSE,
-  facet = FALSE,
+  facet_by = "none",
   id.long.var = "gene"
 )
 ```
@@ -90,10 +93,10 @@ get_expression_raincloud(
 ``` r
 get_expression_raincloud(
   vista,
-  genes = selected_genes,
+  genes = selected_genes[1:10],
   value_transform = "log2",
   summarise = TRUE,
-  facet = FALSE,
+  facet_by = "none",
   id.long.var = "gene"
 )
 ```
@@ -105,10 +108,10 @@ get_expression_raincloud(
 ``` r
 get_expression_raincloud(
   vista,
-  genes = selected_genes,
+  genes = selected_genes[1:10],
   value_transform = "log2",
   summarise = TRUE,
-  facet = FALSE,
+  facet_by = "none",
   id.long.var = "gene",
   stats_group = TRUE,
   stats_method = "wilcox.test",
@@ -118,16 +121,16 @@ get_expression_raincloud(
 
 ![](VISTA-raincloud_files/figure-html/expr-rain-lines-stats-1.png)
 
-### Label dots by gene ID (`facet = FALSE`)
+### Label dots by gene ID (`facet_by = "none"`)
 
 ``` r
 get_expression_raincloud(
   vista,
-  genes = selected_genes,
+  genes = selected_genes[1:10],
   value_transform = "log2",
   summarise = TRUE,
-  facet = FALSE,
-  label_points = TRUE,
+  facet_by = "none",
+  label = TRUE,
   label_column = "gene",
   label_size = 3
 )
@@ -145,24 +148,25 @@ get_expression_raincloud(
   genes = c("NFKBIA", "KLF6", "PER1"),
   value_transform = "log2",
   summarise = TRUE,
-  facet = FALSE,
-  label_points = TRUE,
+  facet_by = "none",
+  label = TRUE,
   display_id = "SYMBOL"
 )
 ```
 
-When `facet = TRUE`, labels can still be added, but readability usually
-drops quickly as the number of genes/points increases. Keep the gene set
-small.
+When `facet_by = "gene"`, prefer `summarise = FALSE` so each facet
+retains replicate-level distribution. With `summarise = TRUE`, each
+facet has only group-level summaries and the raincloud shape is usually
+not informative.
 
 ``` r
 get_expression_raincloud(
   vista,
   genes = selected_genes[1:2],
   value_transform = "log2",
-  summarise = TRUE,
-  facet = TRUE,
-  label_points = TRUE,
+  summarise = FALSE,
+  facet_by = "gene",
+  label = TRUE,
   label_column = "gene",
   label_size = 2.8
 )
@@ -179,10 +183,10 @@ combining a left-side raincloud with
 ``` r
 get_expression_raincloud(
   vista,
-  genes = selected_genes,
+  genes = selected_genes[1:10],
   value_transform = "log2",
   summarise = TRUE,
-  facet = FALSE,
+  facet_by = "none",
   rain_side = "r",
   id.long.var = "gene"
 ) +
@@ -199,7 +203,7 @@ get_expression_raincloud(
 get_foldchange_raincloud(
   vista,
   sample_comparisons = comp_names,
-  facet = TRUE
+  facet_by = "auto"
 )
 ```
 
@@ -211,7 +215,7 @@ get_foldchange_raincloud(
 get_foldchange_raincloud(
   vista,
   sample_comparisons = comp_names,
-  facet = FALSE,
+  facet_by = "none",
   id.long.var = "gene_id",
   stats_group = TRUE,
   stats_method = "t.test"
@@ -226,8 +230,8 @@ get_foldchange_raincloud(
 get_foldchange_raincloud(
   vista,
   sample_comparisons = comp_names,
-  facet = FALSE,
-  label_points = TRUE,
+  facet_by = "none",
+  label = TRUE,
   label_column = "gene_id",
   label_size = 2.8
 )
@@ -240,8 +244,8 @@ get_foldchange_raincloud(
   vista,
   genes = c("NFKBIA", "KLF6", "PER1"),
   sample_comparisons = comp_names,
-  facet = FALSE,
-  label_points = TRUE,
+  facet_by = "none",
+  label = TRUE,
   display_id = "SYMBOL"
 )
 ```
@@ -252,7 +256,7 @@ get_foldchange_raincloud(
 get_foldchange_raincloud(
   vista,
   sample_comparisons = comp_names,
-  facet = FALSE,
+  facet_by = "none",
   rain_side = "r",
   id.long.var = "gene_id"
 ) +

@@ -486,7 +486,7 @@ Visualize sample clustering and variation.
 ``` r
 get_pca_plot(
   vista,
-  label_replicates = TRUE
+  label = TRUE
 ) + theme_minimal(base_size = 16)
 ```
 
@@ -498,7 +498,7 @@ get_pca_plot(
 # Shape points by cell line
 get_pca_plot(
   vista,
-  label_replicates = TRUE,
+  label = TRUE,
   shape_by = "cell"
 )
 ```
@@ -525,8 +525,8 @@ get_pca_plot(
 # Larger points for better visibility
 get_pca_plot(
   vista,
-  label_replicates = TRUE,
-  circle_size = 15
+  label = TRUE,
+  point_size = 15
 )
 ```
 
@@ -538,8 +538,8 @@ get_pca_plot(
 # Clean plot without sample labels
 get_pca_plot(
   vista,
-  label_replicates = FALSE,
-  circle_size = 12
+  label = FALSE,
+  point_size = 12
 )
 ```
 
@@ -554,7 +554,7 @@ Alternative dimensionality reduction method.
 ``` r
 get_mds_plot(
   vista,
-  label_replicates = TRUE
+  label = TRUE
 )
 ```
 
@@ -566,7 +566,7 @@ get_mds_plot(
 get_mds_plot(
   vista,
   top_n_genes = 500,
-  label_replicates = TRUE
+  label = TRUE
 )
 ```
 
@@ -578,7 +578,7 @@ get_mds_plot(
 # Shape points by cell line
 get_mds_plot(
   vista,
-  label_replicates = TRUE,
+  label = TRUE,
   shape_by = "cell"
 )
 ```
@@ -594,7 +594,7 @@ Non-linear sample embedding for exploratory structure.
 ``` r
 get_umap_plot(
   vista,
-  label_replicates = TRUE
+  label = TRUE
 )
 ```
 
@@ -607,7 +607,7 @@ get_umap_plot(
   vista,
   color_by = "cell",
   shape_by = "treatment",
-  label_replicates = TRUE
+  label = TRUE
 )
 ```
 
@@ -659,7 +659,7 @@ get_volcano_plot(
   sample_comparison = comp_names[1],
   log2fc_cutoff = 1.5,
   pval_cutoff = 0.01,
-  lab_size = 3,
+  label_size = 3,
   display_id = "SYMBOL"
 )
 ```
@@ -702,7 +702,7 @@ get_ma_plot(
 get_ma_plot(
   vista,
   sample_comparison = comp_names[1],
-  topn = 10,
+  label_n = 10,
   point_size = 2,
   display_id = "SYMBOL"
 )
@@ -716,7 +716,7 @@ get_ma_plot(
 get_ma_plot(
   vista,
   sample_comparison = comp_names[1],
-  topn = 5,
+  label_n = 5,
   display_id = "SYMBOL",
   point_size = 1.5,
   alpha = 0.8
@@ -782,7 +782,7 @@ print(top_down)
 ``` r
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL"
 )
@@ -795,7 +795,7 @@ get_expression_heatmap(
 ``` r
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL",
   kmeans_k = 3,
@@ -810,7 +810,7 @@ get_expression_heatmap(
 ``` r
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   show_row_names = FALSE,
   display_id = "SYMBOL",
@@ -830,7 +830,7 @@ get_expression_heatmap(
 # By default, columns are split by the first annotation column.
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   show_row_names = FALSE,
   display_id = "SYMBOL",
@@ -847,7 +847,7 @@ get_expression_heatmap(
 ``` r
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL",
   summarise_replicates = TRUE,
@@ -864,11 +864,11 @@ get_expression_heatmap(
 # Smaller gene set to show names
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs[1:25],
   display_id = "SYMBOL",
   show_row_names = TRUE,
-  row_names_font_size = 8
+  label_size = 8
 )
 ```
 
@@ -955,7 +955,7 @@ get_expression_boxplot(
   vista,
   genes = top_up$gene_id[1:3],
   display_id = "SYMBOL",
-  facet = FALSE
+  facet_by = "none"
 )
 ```
 
@@ -1034,7 +1034,7 @@ get_expression_boxplot(
 ``` r
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id[1:4]
+  genes = top_up$gene_id
 )
 ```
 
@@ -1045,7 +1045,7 @@ get_expression_violinplot(
 ``` r
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up$gene_id,
   value_transform = "log2"
 )
 ```
@@ -1057,7 +1057,7 @@ get_expression_violinplot(
 ``` r
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up$gene_id,
   value_transform = "zscore"
 )
 ```
@@ -1088,7 +1088,7 @@ get_expression_scatter(
   sample_x = samples[1],
   sample_y = samples[2],
   log_transform = TRUE,
-  label_top_n = 10
+  label_n = 10
 )
 ```
 
@@ -1166,16 +1166,12 @@ get_expression_joyplot(
 #### Raincloud plot (expression)
 
 ``` r
-cat("Package 'ggrain' is not installed; expression raincloud plot example is skipped.\n")
-```
-
-``` r
 get_expression_raincloud(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up$gene_id,
   value_transform = "log2",
   summarise = TRUE,
-  facet = FALSE,
+  facet_by = "none",
   id.long.var = "gene",
   stats_group = TRUE
 )
@@ -1321,8 +1317,8 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_enrichment_chord(
     msig_up,
-    vista_obj  = vista,
-    comparison = names(comparisons(vista))[1],
+    vista  = vista,
+    sample_comparison = names(comparisons(vista))[1],
     top_n      = 6,
     color_by   = "foldchange",
     display_id = "SYMBOL",
@@ -1338,8 +1334,8 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   chord_result <- get_enrichment_chord(
     msig_up,
-    vista_obj    = vista,
-    comparison   = names(comparisons(vista))[1],
+    vista    = vista,
+    sample_comparison   = names(comparisons(vista))[1],
     top_n        = 8,
     min_pathways = 2,
     color_by     = "regulation",
@@ -1394,9 +1390,9 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ``` r
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_pathway_heatmap(
-    vista_obj = vista,
+    x = vista,
     enrichment = msig_up$enrich,
-    samples = c("Untreated", "Dexamethasone"),
+    sample_group = c("Untreated", "Dexamethasone"),
     top_n = 2,
     gene_mode = "union",
     max_genes = 60,
@@ -1489,26 +1485,26 @@ if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
 }
 #>                                                                           Description
 #> HALLMARK_ADIPOGENESIS                                           HALLMARK_ADIPOGENESIS
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB                     HALLMARK_TNFA_SIGNALING_VIA_NFKB
 #> HALLMARK_ANDROGEN_RESPONSE                                 HALLMARK_ANDROGEN_RESPONSE
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB                     HALLMARK_TNFA_SIGNALING_VIA_NFKB
 #> HALLMARK_XENOBIOTIC_METABOLISM                         HALLMARK_XENOBIOTIC_METABOLISM
 #> HALLMARK_OXIDATIVE_PHOSPHORYLATION                 HALLMARK_OXIDATIVE_PHOSPHORYLATION
 #> HALLMARK_APICAL_JUNCTION                                     HALLMARK_APICAL_JUNCTION
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION
-#> HALLMARK_HYPOXIA                                                     HALLMARK_HYPOXIA
 #> HALLMARK_IL2_STAT5_SIGNALING                             HALLMARK_IL2_STAT5_SIGNALING
 #> HALLMARK_UV_RESPONSE_UP                                       HALLMARK_UV_RESPONSE_UP
+#> HALLMARK_HYPOXIA                                                     HALLMARK_HYPOXIA
+#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION
 #>                                                 NES       pvalue     p.adjust
-#> HALLMARK_ADIPOGENESIS                      1.986707 9.738376e-08 4.869188e-06
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           1.603528 7.821027e-04 1.955257e-02
-#> HALLMARK_ANDROGEN_RESPONSE                 1.655852 2.608251e-03 2.727751e-02
-#> HALLMARK_XENOBIOTIC_METABOLISM             1.526986 2.727751e-03 2.727751e-02
-#> HALLMARK_OXIDATIVE_PHOSPHORYLATION         1.495131 1.754134e-03 2.727751e-02
-#> HALLMARK_APICAL_JUNCTION                   1.479030 4.050758e-03 3.327703e-02
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.421169 4.658784e-03 3.327703e-02
-#> HALLMARK_HYPOXIA                           1.427530 5.665552e-03 3.540970e-02
-#> HALLMARK_IL2_STAT5_SIGNALING               1.473815 1.057779e-02 4.808089e-02
-#> HALLMARK_UV_RESPONSE_UP                    1.453486 9.150772e-03 4.808089e-02
+#> HALLMARK_ADIPOGENESIS                      2.002363 8.537312e-08 4.268656e-06
+#> HALLMARK_ANDROGEN_RESPONSE                 1.661800 1.139063e-03 1.898438e-02
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           1.615600 8.456139e-04 1.898438e-02
+#> HALLMARK_XENOBIOTIC_METABOLISM             1.529090 2.960020e-03 3.018492e-02
+#> HALLMARK_OXIDATIVE_PHOSPHORYLATION         1.509394 3.018492e-03 3.018492e-02
+#> HALLMARK_APICAL_JUNCTION                   1.493441 6.779446e-03 4.662247e-02
+#> HALLMARK_IL2_STAT5_SIGNALING               1.479488 5.833243e-03 4.662247e-02
+#> HALLMARK_UV_RESPONSE_UP                    1.460889 7.734695e-03 4.662247e-02
+#> HALLMARK_HYPOXIA                           1.437550 9.206213e-03 4.662247e-02
+#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.434726 9.324494e-03 4.662247e-02
 ```
 
 #### GSEA with GO Biological Process
@@ -1530,27 +1526,27 @@ if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
   head(gsea_go$enrich@result[, c("Description", "NES", "pvalue", "p.adjust")], n = 10)
 }
 #>                                                  Description       NES
-#> GO:0071294                     cellular response to zinc ion  2.083461
-#> GO:0097501                      stress response to metal ion  2.046176
-#> GO:0032869             cellular response to insulin stimulus  1.888211
-#> GO:0032868                               response to insulin  1.804969
-#> GO:0071375     cellular response to peptide hormone stimulus  1.802610
-#> GO:0051962 positive regulation of nervous system development -1.797462
-#> GO:0031589                           cell-substrate adhesion  1.724863
-#> GO:0050886                                 endocrine process  2.063075
-#> GO:0061687              detoxification of inorganic compound  2.016962
-#> GO:0006006                         glucose metabolic process  1.858099
+#> GO:0071294                     cellular response to zinc ion  2.086734
+#> GO:0032869             cellular response to insulin stimulus  1.857924
+#> GO:0051962 positive regulation of nervous system development -1.847635
+#> GO:0032868                               response to insulin  1.810732
+#> GO:0071375     cellular response to peptide hormone stimulus  1.808067
+#> GO:0031589                           cell-substrate adhesion  1.717682
+#> GO:0097501                      stress response to metal ion  2.025923
+#> GO:0010810             regulation of cell-substrate adhesion  1.794390
+#> GO:0003012                             muscle system process  1.682586
+#> GO:0006006                         glucose metabolic process  1.828210
 #>                  pvalue    p.adjust
-#> GO:0071294 8.367080e-06 0.006525127
-#> GO:0097501 3.652121e-06 0.006525127
-#> GO:0032869 7.633191e-06 0.006525127
-#> GO:0032868 5.418664e-06 0.006525127
-#> GO:0071375 1.584595e-06 0.006525127
-#> GO:0051962 4.452005e-06 0.006525127
-#> GO:0031589 6.975069e-06 0.006525127
-#> GO:0050886 2.249368e-05 0.012085314
-#> GO:0061687 2.821214e-05 0.012085314
-#> GO:0006006 2.877983e-05 0.012085314
+#> GO:0071294 2.496581e-06 0.003490999
+#> GO:0032869 2.666598e-06 0.003490999
+#> GO:0051962 2.048136e-06 0.003490999
+#> GO:0032868 3.836966e-06 0.003490999
+#> GO:0071375 1.466755e-06 0.003490999
+#> GO:0031589 3.765677e-06 0.003490999
+#> GO:0097501 8.810905e-06 0.006544955
+#> GO:0010810 1.079036e-05 0.006544955
+#> GO:0003012 1.078129e-05 0.006544955
+#> GO:0006006 1.309708e-05 0.007149696
 ```
 
 #### GSEA enrichment overview
@@ -1705,14 +1701,10 @@ get_foldchange_lollipop(
 ### Fold-change Raincloud
 
 ``` r
-cat("Package 'ggrain' is not installed; fold-change raincloud plot example is skipped.\n")
-```
-
-``` r
 get_foldchange_raincloud(
   vista,
   sample_comparisons = comp_names,
-  facet = FALSE,
+  facet_by = "none",
   id.long.var = "gene_id",
   stats_group = TRUE
 )
@@ -1800,10 +1792,10 @@ write.csv(
 
 ``` r
 # Save the complete VISTA object for later use
-saveRDS(vista, file = "airway_vista_object.rds")
+saveRDS(vista, file = "airway_vistaect.rds")
 
 # Load it back
-# vista <- readRDS("airway_vista_object.rds")
+# vista <- readRDS("airway_vistaect.rds")
 ```
 
 ## Summary

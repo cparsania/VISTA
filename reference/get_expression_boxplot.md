@@ -1,9 +1,8 @@
 # Plot gene expression distributions as boxplots
 
 Displays per-sample or per-group distributions for selected genes using
-normalized counts. When multiple genes are supplied and `facet = TRUE`,
-facets are per gene (not per group). When `facet = FALSE` with multiple
-genes, genes are shown on the x-axis and facets are per group.
+normalized counts. The x-axis unit is controlled by `by`, and faceting
+is controlled explicitly by `facet_by`.
 
 ## Usage
 
@@ -13,7 +12,6 @@ get_expression_boxplot(
   genes = NULL,
   sample_group = NULL,
   group_column = NULL,
-  facet = TRUE,
   log_transform = TRUE,
   display_id = NULL,
   display_from = NULL,
@@ -23,9 +21,10 @@ get_expression_boxplot(
   p.label = "p.signif",
   comparisons = NULL,
   pool_genes = FALSE,
-  x_by = "group",
-  facet_by = "none",
-  fill_by = NULL
+  by = "group",
+  facet_by = "auto",
+  fill_by = NULL,
+  sample_order = c("input", "group", "expression")
 )
 ```
 
@@ -48,10 +47,6 @@ get_expression_boxplot(
 - group_column:
 
   Optional column name in `sample_info` used as the grouping variable.
-
-- facet:
-
-  Logical; facet the plot when `facet_by` is not `"none"`.
 
 - log_transform:
 
@@ -95,7 +90,7 @@ get_expression_boxplot(
   Logical; when `TRUE`, pool selected genes into one distribution per
   x-axis category (scenario 1).
 
-- x_by:
+- by:
 
   When `pool_genes = TRUE`, either `"group"` or `"sample"` (x-axis and
   optional fill). When `pool_genes = FALSE`, either `"group"` or
@@ -104,13 +99,19 @@ get_expression_boxplot(
 - facet_by:
 
   Faceting control: for pooled genes, `"group"` or `"none"`; for
-  per-gene, `"none"` (default) or `"gene"`.
+  per-gene, `"none"` (default) or `"gene"`. `"auto"` selects the most
+  readable layout.
 
 - fill_by:
 
   When `pool_genes = TRUE`, either `"x"` (default) or `"group"` to force
-  group colors even if x_by = "sample". When `pool_genes = FALSE`,
+  group colors even if `by = "sample"`. When `pool_genes = FALSE`,
   either `"gene"` or `"group"`.
+
+- sample_order:
+
+  Ordering used when sample names are shown on the x-axis: `"input"`,
+  `"group"`, or `"expression"`.
 
 ## Value
 

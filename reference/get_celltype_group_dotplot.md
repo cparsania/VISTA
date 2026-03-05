@@ -14,7 +14,7 @@ get_celltype_group_dotplot(
   error = c("se", "sd", "none"),
   add_points = TRUE,
   point_size = 2.5,
-  font_size = 12
+  base_size = 12
 )
 ```
 
@@ -53,7 +53,7 @@ get_celltype_group_dotplot(
 
   Point size for summary points.
 
-- font_size:
+- base_size:
 
   Base font size.
 

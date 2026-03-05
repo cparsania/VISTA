@@ -56,12 +56,15 @@ restricting to groups or genes.</p>
 <span>  group_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  top_n_genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  label_replicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  circle_size <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  sample_colors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  point_size <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  shape_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  shape_values <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  shape_values <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  color_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  use_vista_colors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  palette <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  colors <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -89,20 +92,16 @@ restricting to groups or genes.</p>
 <dd><p>Optional integer selecting the top variable genes to include.</p></dd>
 
 
-<dt id="arg-label-replicates">label_replicates<a class="anchor" aria-label="anchor" href="#arg-label-replicates"></a></dt>
+<dt id="arg-label">label<a class="anchor" aria-label="anchor" href="#arg-label"></a></dt>
 <dd><p>Logical; draw sample labels when <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
-<dd><p>Numeric size of replicate labels when <code>label_replicates = TRUE</code>.</p></dd>
+<dd><p>Numeric size of sample labels when <code>label = TRUE</code>.</p></dd>
 
 
-<dt id="arg-circle-size">circle_size<a class="anchor" aria-label="anchor" href="#arg-circle-size"></a></dt>
+<dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
 <dd><p>Numeric size for points.</p></dd>
-
-
-<dt id="arg-sample-colors">sample_colors<a class="anchor" aria-label="anchor" href="#arg-sample-colors"></a></dt>
-<dd><p>Logical; apply stored group colors when <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-shape-by">shape_by<a class="anchor" aria-label="anchor" href="#arg-shape-by"></a></dt>
@@ -113,6 +112,26 @@ shapes are not mapped.</p></dd>
 <dt id="arg-shape-values">shape_values<a class="anchor" aria-label="anchor" href="#arg-shape-values"></a></dt>
 <dd><p>Optional vector of shapes passed to <code>scale_shape_manual()</code> when
 <code>shape_by</code> is set. Use a named vector to map shapes to specific levels.</p></dd>
+
+
+<dt id="arg-color-by">color_by<a class="anchor" aria-label="anchor" href="#arg-color-by"></a></dt>
+<dd><p>Optional column name in <code>sample_info</code> used for point colour.
+Defaults to the active grouping column.</p></dd>
+
+
+<dt id="arg-use-vista-colors">use_vista_colors<a class="anchor" aria-label="anchor" href="#arg-use-vista-colors"></a></dt>
+<dd><p>Logical; when <code>TRUE</code>, prefer the stored VISTA group
+colours when colouring by the grouping column.</p></dd>
+
+
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>Optional qualitative palette name used when generating colours
+for non-group metadata levels.</p></dd>
+
+
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
+<dd><p>Optional named character vector of manual colours overriding
+both <code>palette</code> and stored VISTA colours.</p></dd>
 
 </dl></div>
     <div class="section level2">

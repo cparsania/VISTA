@@ -166,9 +166,9 @@ genes_demo
 ``` r
 get_pca_plot(
   vista_dark,
-  label_replicates = TRUE,
+  label = TRUE,
   shape_by = "cell",
-  circle_size = 5
+  point_size = 5
 )
 ```
 
@@ -179,9 +179,9 @@ get_pca_plot(
 ``` r
 get_mds_plot(
   vista_dark,
-  label_replicates = TRUE,
+  label = TRUE,
   shape_by = "cell",
-  circle_size = 5
+  point_size = 5
 )
 ```
 
@@ -207,7 +207,7 @@ get_expression_boxplot(
   genes = genes_demo[1:4],
   log_transform = TRUE,
   pool_genes = FALSE,
-  x_by = "gene",
+  by = "gene",
   facet_by = "none",
   fill_by = "group"
 )
@@ -242,10 +242,10 @@ group_colors(vista_warm)
 ```
 
 ``` r
-p_dark <- get_pca_plot(vista_dark, label_replicates = FALSE, circle_size = 5) +
+p_dark <- get_pca_plot(vista_dark, label = FALSE, point_size = 5) +
   ggtitle("Dark 2")
 
-p_warm <- get_pca_plot(vista_warm, label_replicates = FALSE, circle_size = 5) +
+p_warm <- get_pca_plot(vista_warm, label = FALSE, point_size = 5) +
   ggtitle("Warm")
 
 if (requireNamespace("patchwork", quietly = TRUE)) {
@@ -286,7 +286,7 @@ S4Vectors::metadata(vista_multi)$comparison$colors
 get_foldchange_barplot(
   vista_multi,
   genes = head(rownames(vista_multi), 6),
-  facet = FALSE
+  facet_by = "none"
 )
 ```
 
@@ -327,14 +327,14 @@ S4Vectors::metadata(vista_multi_custom)$comparison$colors
 ``` r
 p_custom_group <- get_pca_plot(
   vista_custom,
-  label_replicates = FALSE,
-  circle_size = 5
+  label = FALSE,
+  point_size = 5
 ) + ggtitle("Custom group colors")
 
 p_custom_comp <- get_foldchange_barplot(
   vista_multi_custom,
   genes = head(rownames(vista_multi_custom), 6),
-  facet = FALSE
+  facet_by = "none"
 ) + ggtitle("Custom comparison colors")
 
 if (requireNamespace("patchwork", quietly = TRUE)) {

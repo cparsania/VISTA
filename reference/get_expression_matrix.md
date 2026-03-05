@@ -11,7 +11,7 @@ get_expression_matrix(
   x,
   assay_name = "norm_counts",
   genes = NULL,
-  samples = NULL,
+  sample_names = NULL,
   group_column = NULL,
   summarise = FALSE,
   transform = c("none", "log2", "zscore")
@@ -32,7 +32,7 @@ get_expression_matrix(
 
   Optional character vector of gene IDs to keep.
 
-- samples:
+- sample_names:
 
   Optional character vector of sample IDs (or group labels when
   `summarise = TRUE`) to keep.

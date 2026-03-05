@@ -67,7 +67,7 @@ Visualize differential expression results across comparisons.
 - [`get_deg_count_donutplot()`](get_deg_count_donutplot.md) : Donut
   chart of DEG counts (Up/Down) across comparisons
 - [`get_deg_venn_diagram()`](get_deg_venn_diagram.md) : DEG Venn diagram
-- [`plot_deg_alluvial()`](plot_deg_alluvial.md) : Plot alluvial diagram
+- [`get_deg_alluvial()`](get_deg_alluvial.md) : Plot alluvial diagram
   showing gene regulation transitions across comparisons
 - [`get_genes_by_regulation()`](get_genes_by_regulation.md) : Get Genes
   by Regulation
@@ -155,7 +155,7 @@ Estimate and visualize cell-type composition from bulk RNA-seq.
   Deconvolution on Bulk RNA-seq from VISTA Object
 - [`get_cell_fractions()`](get_cell_fractions.md) : Retrieve stored cell
   fraction estimates
-- [`plot_celltype_barplot()`](plot_celltype_barplot.md) : Plot cell-type
+- [`get_celltype_barplot()`](get_celltype_barplot.md) : Plot cell-type
   composition as stacked bars
 - [`get_celltype_group_dotplot()`](get_celltype_group_dotplot.md) : Plot
   group-level deconvolution scores as dot plot

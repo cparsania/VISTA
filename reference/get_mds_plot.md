@@ -12,12 +12,15 @@ get_mds_plot(
   group_column = NULL,
   genes = NULL,
   top_n_genes = NULL,
-  label_replicates = FALSE,
+  label = FALSE,
   label_size = 3,
-  circle_size = 10,
-  sample_colors = TRUE,
+  point_size = 10,
   shape_by = NULL,
-  shape_values = NULL
+  shape_values = NULL,
+  color_by = NULL,
+  use_vista_colors = TRUE,
+  palette = NULL,
+  colors = NULL
 )
 ```
 
@@ -44,21 +47,17 @@ get_mds_plot(
 
   Optional integer selecting the top variable genes to include.
 
-- label_replicates:
+- label:
 
   Logical; draw sample labels when `TRUE`.
 
 - label_size:
 
-  Numeric size of replicate labels when `label_replicates = TRUE`.
+  Numeric size of sample labels when `label = TRUE`.
 
-- circle_size:
+- point_size:
 
   Numeric size for points.
-
-- sample_colors:
-
-  Logical; apply stored group colors when `TRUE`.
 
 - shape_by:
 
@@ -70,6 +69,26 @@ get_mds_plot(
   Optional vector of shapes passed to `scale_shape_manual()` when
   `shape_by` is set. Use a named vector to map shapes to specific
   levels.
+
+- color_by:
+
+  Optional column name in `sample_info` used for point colour. Defaults
+  to the active grouping column.
+
+- use_vista_colors:
+
+  Logical; when `TRUE`, prefer the stored VISTA group colours when
+  colouring by the grouping column.
+
+- palette:
+
+  Optional qualitative palette name used when generating colours for
+  non-group metadata levels.
+
+- colors:
+
+  Optional named character vector of manual colours overriding both
+  `palette` and stored VISTA colours.
 
 ## Value
 

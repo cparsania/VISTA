@@ -9,8 +9,8 @@ source pathway.
 ``` r
 get_enrichment_chord(
   x,
-  vista_obj = NULL,
-  comparison = NULL,
+  vista = NULL,
+  sample_comparison = NULL,
   pathways = NULL,
   top_n = 8,
   pathway_column = c("Description", "ID"),
@@ -41,15 +41,15 @@ get_enrichment_chord(
   clusterProfiler, or a list containing an `enrich` element (e.g. output
   of [`get_msigdb_enrichment()`](get_msigdb_enrichment.md)).
 
-- vista_obj:
+- vista:
 
   Optional `VISTA` object. Required when `color_by` is `"foldchange"` or
   `"regulation"`.
 
-- comparison:
+- sample_comparison:
 
-  Character scalar naming the DE comparison in `vista_obj` to pull
-  log2FC values from. Required when `vista_obj` is supplied.
+  Character scalar naming the DE comparison in `vista` to pull log2FC
+  values from. Required when `vista` is supplied.
 
 - pathways:
 
@@ -90,23 +90,23 @@ get_enrichment_chord(
 
   Order of gene sectors in the chord plot: `"none"` (default),
   `"foldchange"` (descending log2FC), or `"abs_foldchange"` (descending
-  absolute log2FC). Fold-change based ordering requires `vista_obj` +
-  `comparison`.
+  absolute log2FC). Fold-change based ordering requires `vista` +
+  `sample_comparison`.
 
 - gene_id_column:
 
-  Column in `rowData(vista_obj)` used to map enrichment gene IDs to
-  `vista_obj` rownames (for FC lookup).
+  Column in `rowData(vista)` used to map enrichment gene IDs to `vista`
+  rownames (for FC lookup).
 
 - display_id:
 
-  Column in `rowData(vista_obj)` providing display-friendly gene names.
+  Column in `rowData(vista)` providing display-friendly gene names.
 
 - color_by:
 
   How to colour chords: `"foldchange"` (continuous gradient),
   `"regulation"` (Up / Down / Other), or `"pathway"` (source pathway).
-  Falls back to `"pathway"` when `vista_obj` is `NULL`.
+  Falls back to `"pathway"` when `vista` is `NULL`.
 
 - up_color:
 
@@ -196,14 +196,14 @@ msig <- get_msigdb_enrichment(
 
 # Simple: pathway-coloured chords
 get_enrichment_chord(msig)
-#> Warning: `vista_obj` and `comparison` are required for "foldchange" colouring. Falling
-#> back to "pathway".
+#> Warning: `vista` and `sample_comparison` are required for "foldchange" colouring.
+#> Falling back to "pathway".
 
 
 # With fold-change colouring
 get_enrichment_chord(
-  msig, vista_obj = vista,
-  comparison = names(comparisons(vista))[1],
+  msig, vista = vista,
+  sample_comparison = names(comparisons(vista))[1],
   color_by = "foldchange"
 )
 

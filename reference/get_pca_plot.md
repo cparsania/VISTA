@@ -12,14 +12,17 @@ get_pca_plot(
   group_column = NULL,
   genes = NULL,
   top_n_genes = NULL,
-  label_replicates = FALSE,
+  label = FALSE,
   label_size = 3,
-  circle_size = 10,
-  sample_colors = TRUE,
+  point_size = 10,
   shape_by = NULL,
   shape_values = NULL,
   sample.seed = 123,
-  show_clusters = FALSE
+  show_clusters = FALSE,
+  color_by = NULL,
+  use_vista_colors = TRUE,
+  palette = NULL,
+  colors = NULL
 )
 ```
 
@@ -51,21 +54,17 @@ get_pca_plot(
   Optional integer selecting the top most variable genes to include.
   Ignored when `genes` is supplied.
 
-- label_replicates:
+- label:
 
   Logical; if `TRUE`, sample names are drawn next to the points.
 
 - label_size:
 
-  Numeric size of replicate labels when `label_replicates = TRUE`.
+  Numeric size of sample labels when `label = TRUE`.
 
-- circle_size:
+- point_size:
 
   Numeric size of the plotted points.
-
-- sample_colors:
-
-  Logical; if `TRUE`, apply the stored group colors to the points.
 
 - shape_by:
 
@@ -85,6 +84,26 @@ get_pca_plot(
 - show_clusters:
 
   Logical; add normal ellipses per group when `TRUE`.
+
+- color_by:
+
+  Optional column name in `sample_info` used to map point colour.
+  Defaults to the active grouping column.
+
+- use_vista_colors:
+
+  Logical; when `TRUE`, prefer the stored VISTA group colours when
+  colouring by the grouping column.
+
+- palette:
+
+  Optional qualitative palette name used when generating colours for
+  non-group metadata levels.
+
+- colors:
+
+  Optional named character vector of manual colours overriding both
+  `palette` and stored VISTA colours.
 
 ## Value
 
@@ -117,7 +136,7 @@ get_pca_plot(vista)
 
 
 # With sample labels
-get_pca_plot(vista, label_replicates = TRUE)
+get_pca_plot(vista, label = TRUE)
 
 
 # Using top variable genes

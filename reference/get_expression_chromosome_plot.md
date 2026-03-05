@@ -25,7 +25,7 @@ get_expression_chromosome_plot(
   summarise_replicates = FALSE,
   summarise_method = c("mean", "median"),
   group_value = NULL,
-  label_top_n = 20,
+  label_n = 20,
   label_genes = c("top", "all", "none"),
   display_id = NULL,
   line_length = 0.02,
@@ -122,11 +122,10 @@ get_expression_chromosome_plot(
   Optional group label (from `group_column`); when supplied, uses mean
   expression for that group for colouring (assay `norm_counts`).
 
-- label_top_n:
+- label_n:
 
-  Integer; number of genes with largest \|value\| (or random if no
-  value) to label. Ignored when `genes` is provided. Set to 0 to disable
-  labels.
+  Integer; number of genes with the largest absolute values to label
+  when `genes` is not supplied. Set to 0 to disable automatic labels.
 
 - label_genes:
 
@@ -193,9 +192,8 @@ A `ggplot2` object or a list of `ggplot2` objects when multiple
   groups after replicate summarisation).
 
 - Labels are kept consistent across `value_column`s: if `genes` is
-  provided it is used for all panels; otherwise the top `label_top_n`
-  (by absolute value in the first `value_column`) are used for all
-  panels.
+  provided it is used for all panels; otherwise the top `label_n` (by
+  absolute value in the first `value_column`) are used for all panels.
 
 - When `value_from = "assay"`, the specified assay column is copied into
   `rowData` on the fly so it can be used for colouring.

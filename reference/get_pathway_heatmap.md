@@ -10,9 +10,9 @@ feature IDs, and forwards to
 
 ``` r
 get_pathway_heatmap(
-  vista_obj,
+  x,
   enrichment,
-  samples,
+  sample_group = NULL,
   pathways = NULL,
   top_n = 5,
   pathway_column = c("Description", "ID"),
@@ -28,7 +28,7 @@ get_pathway_heatmap(
 
 ## Arguments
 
-- vista_obj:
+- x:
 
   A `VISTA` object.
 
@@ -37,7 +37,7 @@ get_pathway_heatmap(
   An `enrichResult`/`gseaResult`, or a list with element `enrich` as
   returned by `get_*_enrichment()` helpers.
 
-- samples:
+- sample_group:
 
   Character vector of group labels to include (same semantics as
   [`get_expression_heatmap()`](get_expression_heatmap.md)).
@@ -71,9 +71,9 @@ get_pathway_heatmap(
 
 - gene_id_column:
 
-  Optional column in `rowData(vista_obj)` used to map enrichment genes
-  back to VISTA rownames (e.g., `"SYMBOL"` or `"ENTREZID"`). Leave
-  `NULL` when enrichment genes already match VISTA rownames.
+  Optional column in `rowData(x)` used to map enrichment genes back to
+  VISTA rownames (e.g., `"SYMBOL"` or `"ENTREZID"`). Leave `NULL` when
+  enrichment genes already match VISTA rownames.
 
 - max_genes:
 
@@ -132,7 +132,7 @@ msig <- get_msigdb_enrichment(
 get_pathway_heatmap(
   vista,
   enrichment = msig,
-  samples = c("control", "treatment1"),
+  sample_group = c("control", "treatment1"),
   top_n = 3,
   value_transform = "zscore",
   annotate_columns = TRUE,

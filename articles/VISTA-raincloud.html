@@ -125,22 +125,20 @@ fold-change data in VISTA, including line-connection control with
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">selected_genes</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">selected_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n_select_genes</span><span class="op">]</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Package 'ggrain' is not installed; raincloud examples are skipped.\n"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="expression-raincloud">Expression Raincloud<a class="anchor" aria-label="anchor" href="#expression-raincloud"></a>
 </h2>
 <div class="section level3">
-<h3 id="basic-expression-raincloud">Basic expression raincloud<a class="anchor" aria-label="anchor" href="#basic-expression-raincloud"></a>
+<h3 id="basic-expression-raincloud-pooled-gene-sample-values">Basic expression raincloud (pooled gene-sample values)<a class="anchor" aria-label="anchor" href="#basic-expression-raincloud-pooled-gene-sample-values"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_raincloud.html">get_expression_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
-<span>  genes <span class="op">=</span> <span class="va">selected_genes</span>,</span>
+<span>  genes <span class="op">=</span> <span class="va">selected_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="st">"log2"</span>,</span>
-<span>  summarise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  summarise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-raincloud_files/figure-html/expr-rain-basic-1.png" class="r-plt" alt="" width="864" style="display: block; margin: auto;"></p>
 </div>
@@ -148,26 +146,35 @@ fold-change data in VISTA, including line-connection control with
 <h3 id="summarise-false-vs-summarise-true">
 <code>summarise = FALSE</code> vs <code>summarise = TRUE</code><a class="anchor" aria-label="anchor" href="#summarise-false-vs-summarise-true"></a>
 </h3>
-<p>Use <code>summarise = FALSE</code> to show per-sample distributions,
-and <code>summarise = TRUE</code> to aggregate replicate-level values by
-group.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<p>For expression rainclouds:</p>
+<ul>
+<li>
+<code>summarise = FALSE</code>: each point is a gene-sample value
+(pooled across selected genes).</li>
+<li>
+<code>summarise = TRUE</code>: each point is a gene-level group
+summary (one value per gene per group).</li>
+</ul>
+<p>With <code>summarise = TRUE</code>, using
+<code>id.long.var = "gene"</code> is useful for connecting each gene
+across groups.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_raincloud.html">get_expression_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
-<span>  genes <span class="op">=</span> <span class="va">selected_genes</span>,</span>
+<span>  genes <span class="op">=</span> <span class="va">selected_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="st">"log2"</span>,</span>
 <span>  summarise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  id.long.var <span class="op">=</span> <span class="st">"gene"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-raincloud_files/figure-html/expr-rain-nosummarise-1.png" class="r-plt" alt="" width="960" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_raincloud.html">get_expression_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
-<span>  genes <span class="op">=</span> <span class="va">selected_genes</span>,</span>
+<span>  genes <span class="op">=</span> <span class="va">selected_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="st">"log2"</span>,</span>
 <span>  summarise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  id.long.var <span class="op">=</span> <span class="st">"gene"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-raincloud_files/figure-html/expr-rain-summarise-1.png" class="r-plt" alt="" width="960" style="display: block; margin: auto;"></p>
@@ -175,13 +182,13 @@ group.</p>
 <div class="section level3">
 <h3 id="expression-raincloud-with-lines-and-p-values">Expression raincloud with lines and p-values<a class="anchor" aria-label="anchor" href="#expression-raincloud-with-lines-and-p-values"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_raincloud.html">get_expression_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
-<span>  genes <span class="op">=</span> <span class="va">selected_genes</span>,</span>
+<span>  genes <span class="op">=</span> <span class="va">selected_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="st">"log2"</span>,</span>
 <span>  summarise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  id.long.var <span class="op">=</span> <span class="st">"gene"</span>,</span>
 <span>  stats_group <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  stats_method <span class="op">=</span> <span class="st">"wilcox.test"</span>,</span>
@@ -190,16 +197,16 @@ group.</p>
 <p><img src="VISTA-raincloud_files/figure-html/expr-rain-lines-stats-1.png" class="r-plt" alt="" width="864" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
-<h3 id="label-dots-by-gene-id-facet-false">Label dots by gene ID (<code>facet = FALSE</code>)<a class="anchor" aria-label="anchor" href="#label-dots-by-gene-id-facet-false"></a>
+<h3 id="label-dots-by-gene-id-facet_by-none">Label dots by gene ID (<code>facet_by = "none"</code>)<a class="anchor" aria-label="anchor" href="#label-dots-by-gene-id-facet_by-none"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_raincloud.html">get_expression_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
-<span>  genes <span class="op">=</span> <span class="va">selected_genes</span>,</span>
+<span>  genes <span class="op">=</span> <span class="va">selected_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="st">"log2"</span>,</span>
 <span>  summarise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  label_points <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  label_column <span class="op">=</span> <span class="st">"gene"</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -207,27 +214,29 @@ group.</p>
 <p>If your object has symbol annotations in <code>rowData(vista)</code>
 (or you provide <code>display_from</code>/<code>display_orgdb</code>),
 you can label directly in symbol space:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_raincloud.html">get_expression_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NFKBIA"</span>, <span class="st">"KLF6"</span>, <span class="st">"PER1"</span><span class="op">)</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="st">"log2"</span>,</span>
 <span>  summarise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  label_points <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="st">"SYMBOL"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>When <code>facet = TRUE</code>, labels can still be added, but
-readability usually drops quickly as the number of genes/points
-increases. Keep the gene set small.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>When <code>facet_by = "gene"</code>, prefer
+<code>summarise = FALSE</code> so each facet retains replicate-level
+distribution. With <code>summarise = TRUE</code>, each facet has only
+group-level summaries and the raincloud shape is usually not
+informative.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_raincloud.html">get_expression_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="va">selected_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="st">"log2"</span>,</span>
-<span>  summarise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  label_points <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  summarise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"gene"</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  label_column <span class="op">=</span> <span class="st">"gene"</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="fl">2.8</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -238,13 +247,13 @@ increases. Keep the gene set small.</p>
 </h3>
 <p>Raincloud plots can be visually emphasized in a horizontal layout by
 combining a left-side raincloud with <code><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip()</a></code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_expression_raincloud.html">get_expression_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
-<span>  genes <span class="op">=</span> <span class="va">selected_genes</span>,</span>
+<span>  genes <span class="op">=</span> <span class="va">selected_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="st">"log2"</span>,</span>
 <span>  summarise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  rain_side <span class="op">=</span> <span class="st">"r"</span>,</span>
 <span>  id.long.var <span class="op">=</span> <span class="st">"gene"</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
@@ -258,22 +267,22 @@ combining a left-side raincloud with <code><a href="https://ggplot2.tidyverse.or
 <div class="section level3">
 <h3 id="basic-fold-change-raincloud">Basic fold-change raincloud<a class="anchor" aria-label="anchor" href="#basic-fold-change-raincloud"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_foldchange_raincloud.html">get_foldchange_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp_names</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  facet_by <span class="op">=</span> <span class="st">"auto"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-raincloud_files/figure-html/fc-rain-basic-1.png" class="r-plt" alt="" width="864" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="fold-change-raincloud-with-gene-trajectories-and-p-values">Fold-change raincloud with gene trajectories and p-values<a class="anchor" aria-label="anchor" href="#fold-change-raincloud-with-gene-trajectories-and-p-values"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_foldchange_raincloud.html">get_foldchange_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp_names</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  id.long.var <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
 <span>  stats_group <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  stats_method <span class="op">=</span> <span class="st">"t.test"</span></span>
@@ -283,34 +292,34 @@ combining a left-side raincloud with <code><a href="https://ggplot2.tidyverse.or
 <div class="section level3">
 <h3 id="label-dots-by-gene-id-for-fold-change-raincloud">Label dots by gene ID for fold-change raincloud<a class="anchor" aria-label="anchor" href="#label-dots-by-gene-id-for-fold-change-raincloud"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_foldchange_raincloud.html">get_foldchange_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp_names</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  label_points <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  label_column <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="fl">2.8</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-raincloud_files/figure-html/fc-rain-labels-1.png" class="r-plt" alt="" width="960" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_foldchange_raincloud.html">get_foldchange_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NFKBIA"</span>, <span class="st">"KLF6"</span>, <span class="st">"PER1"</span><span class="op">)</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp_names</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  label_points <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="st">"SYMBOL"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="flipped-fold-change-raincloud">Flipped fold-change raincloud<a class="anchor" aria-label="anchor" href="#flipped-fold-change-raincloud"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_foldchange_raincloud.html">get_foldchange_raincloud</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp_names</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  rain_side <span class="op">=</span> <span class="st">"r"</span>,</span>
 <span>  id.long.var <span class="op">=</span> <span class="st">"gene_id"</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
@@ -332,7 +341,7 @@ because you must manually:</p>
 </ol>
 <p>A minimal non-VISTA workflow typically requires custom wrangling and
 multiple plot-specific settings:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1) Build long expression/fold-change tables manually</span></span>
 <span><span class="co"># 2) Join sample metadata and comparison metadata</span></span>
 <span><span class="co"># 3) Validate IDs for repeated measures (id.long.var)</span></span>
@@ -346,7 +355,7 @@ the rest of the plotting API.</p>
 <div class="section level3">
 <h3 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h3>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.5.2 (2025-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>

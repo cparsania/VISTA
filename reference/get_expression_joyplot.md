@@ -16,7 +16,10 @@ get_expression_joyplot(
   alpha = 0.7,
   scale = 1.2,
   y_by = c("group", "sample"),
-  color_by = c("group", "sample")
+  color_by = c("group", "sample"),
+  sample_order = c("input", "group", "expression"),
+  palette = NULL,
+  colors = NULL
 )
 ```
 
@@ -59,6 +62,20 @@ get_expression_joyplot(
 - color_by:
 
   Either `"group"` (default) or `"sample"` to choose fill colors.
+
+- sample_order:
+
+  Ordering for sample-level display: `"input"`, `"group"`, or
+  `"expression"`.
+
+- palette:
+
+  Optional qualitative palette name used when generating colours.
+
+- colors:
+
+  Optional named character vector of manual colours overriding
+  `palette`.
 
 ## Value
 

@@ -11,9 +11,11 @@ get_expression_violinplot(
   genes = NULL,
   sample_group = NULL,
   group_column = NULL,
+  by = "group",
   value_transform = c("log2", "zscore", "none"),
   summarise = FALSE,
-  facet = TRUE
+  facet_by = c("auto", "gene", "none"),
+  sample_order = c("input", "group", "expression")
 )
 ```
 
@@ -35,17 +37,30 @@ get_expression_violinplot(
 
   Grouping column in `sample_info`; defaults to the stored grouping.
 
+- by:
+
+  Plot unit. Violin plots currently support only `"group"`, because a
+  violin needs replicate-level distributions within groups rather than
+  single values per sample.
+
 - value_transform:
 
   One of `"log2"`, `"zscore"`, or `"none"`.
 
 - summarise:
 
-  Logical; if `TRUE`, averages replicates per group before plotting.
+  Logical retained for compatibility. Violin plots always use
+  replicate-level values, so `summarise = TRUE` is ignored with a
+  warning.
 
-- facet:
+- facet_by:
 
-  Logical; facet by group.
+  Faceting mode: `"auto"` (default), `"gene"`, or `"none"`.
+
+- sample_order:
+
+  Ordering for sample-level x-axis display: `"input"`, `"group"`, or
+  `"expression"` before values are grouped into violins.
 
 ## Value
 

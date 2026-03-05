@@ -7,9 +7,9 @@ optional transformations and annotations.
 
 ``` r
 get_expression_heatmap(
-  vista_obj,
-  samples,
+  x,
   genes,
+  sample_group = NULL,
   value_transform = c("zscore", "log2", "raw"),
   repair_genes = FALSE,
   color_default = TRUE,
@@ -20,7 +20,7 @@ get_expression_heatmap(
   show_row_names = FALSE,
   cluster_rows = TRUE,
   show_row_dend = TRUE,
-  row_names_font_size = 10,
+  label_size = 10,
   label_specific_rows = NULL,
   label_specific_rows_gp = grid::gpar(fontsize = 5),
   show_column_names = TRUE,
@@ -42,18 +42,18 @@ get_expression_heatmap(
 
 ## Arguments
 
-- vista_obj:
+- x:
 
   A `VISTA` object.
-
-- samples:
-
-  Character vector of group labels specifying which samples to include
-  (based on the selected grouping column).
 
 - genes:
 
   Character vector of gene identifiers to display.
+
+- sample_group:
+
+  Character vector of group labels specifying which samples to include
+  (based on the selected grouping column).
 
 - value_transform:
 
@@ -101,7 +101,7 @@ get_expression_heatmap(
 
   Logical; display the row dendrogram.
 
-- row_names_font_size:
+- label_size:
 
   Numeric font size for row names.
 
@@ -168,7 +168,8 @@ get_expression_heatmap(
 
 - group_column:
 
-  Optional column name in `sample_info` used to interpret `samples`.
+  Optional column name in `sample_info` used to interpret
+  `sample_group`.
 
 - ...:
 

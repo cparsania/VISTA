@@ -8,11 +8,11 @@ Barplot of DEG counts (Up/Down) across comparisons
 get_deg_count_barplot(
   x,
   sample_comparisons = NULL,
-  show_counts = TRUE,
-  font_size = 12,
-  fill_colors = c(Up = "red4", Down = "blue4"),
-  facet_by = c("none", "regulation", "sample_comparisons", "sample_comparison"),
-  facet_scale = "fixed"
+  label = TRUE,
+  base_size = 12,
+  colors = c(Up = "red4", Down = "blue4"),
+  facet_by = c("none", "regulation", "comparison"),
+  facet_scales = "fixed"
 )
 ```
 
@@ -26,25 +26,24 @@ get_deg_count_barplot(
 
   Optional character vector of comparison names to display.
 
-- show_counts:
+- label:
 
   Logical; overlay numeric counts above bars when `TRUE`.
 
-- font_size:
+- base_size:
 
   Numeric base font size for the plot.
 
-- fill_colors:
+- colors:
 
   Named vector giving fill colors for `"Up"` and `"Down"` bars.
 
 - facet_by:
 
-  Either `"none"`, `"regulation"`, or `"sample_comparisons"` (alias
-  `"sample_comparison"`) describing the facet variable. Use `"none"` for
-  a single panel.
+  Either `"none"`, `"regulation"`, or `"comparison"` describing the
+  facet variable. Use `"none"` for a single panel.
 
-- facet_scale:
+- facet_scales:
 
   Scale option passed to `facet_wrap()` when faceting.
 

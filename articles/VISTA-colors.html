@@ -235,9 +235,9 @@ are preserved across multiple visualization types.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista_dark</span>,</span>
-<span>  label_replicates <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  shape_by <span class="op">=</span> <span class="st">"cell"</span>,</span>
-<span>  circle_size <span class="op">=</span> <span class="fl">5</span></span>
+<span>  point_size <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-colors_files/figure-html/pca-consistent-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 </div>
@@ -247,9 +247,9 @@ are preserved across multiple visualization types.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_mds_plot.html">get_mds_plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista_dark</span>,</span>
-<span>  label_replicates <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  shape_by <span class="op">=</span> <span class="st">"cell"</span>,</span>
-<span>  circle_size <span class="op">=</span> <span class="fl">5</span></span>
+<span>  point_size <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-colors_files/figure-html/mds-consistent-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 </div>
@@ -273,7 +273,7 @@ are preserved across multiple visualization types.</p>
 <span>  genes <span class="op">=</span> <span class="va">genes_demo</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
 <span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  pool_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  x_by <span class="op">=</span> <span class="st">"gene"</span>,</span>
+<span>  by <span class="op">=</span> <span class="st">"gene"</span>,</span>
 <span>  facet_by <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  fill_by <span class="op">=</span> <span class="st">"group"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -305,10 +305,10 @@ are needed.</p>
 <span><span class="co">#&gt;    control treatment1 </span></span>
 <span><span class="co">#&gt;  "#ABB065"  "#E093C3"</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p_dark</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span><span class="va">vista_dark</span>, label_replicates <span class="op">=</span> <span class="cn">FALSE</span>, circle_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span></span>
+<code class="sourceCode R"><span><span class="va">p_dark</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span><span class="va">vista_dark</span>, label <span class="op">=</span> <span class="cn">FALSE</span>, point_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Dark 2"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">p_warm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span><span class="va">vista_warm</span>, label_replicates <span class="op">=</span> <span class="cn">FALSE</span>, circle_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="va">p_warm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span><span class="va">vista_warm</span>, label <span class="op">=</span> <span class="cn">FALSE</span>, point_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Warm"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"patchwork"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -346,7 +346,7 @@ colors.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_foldchange_barplot.html">get_foldchange_barplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista_multi</span>,</span>
 <span>  genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">vista_multi</span><span class="op">)</span>, <span class="fl">6</span><span class="op">)</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-colors_files/figure-html/fc-bar-comparison-colors-1.png" class="r-plt" alt="" width="960" style="display: block; margin: auto;"></p>
 </div>
@@ -383,14 +383,14 @@ named vectors using built-in VISTA setters.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_custom_group</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista_custom</span>,</span>
-<span>  label_replicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  circle_size <span class="op">=</span> <span class="fl">5</span></span>
+<span>  label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  point_size <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Custom group colors"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">p_custom_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_foldchange_barplot.html">get_foldchange_barplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista_multi_custom</span>,</span>
 <span>  genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">vista_multi_custom</span><span class="op">)</span>, <span class="fl">6</span><span class="op">)</span>,</span>
-<span>  facet <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  facet_by <span class="op">=</span> <span class="st">"none"</span></span>
 <span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Custom comparison colors"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"patchwork"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>

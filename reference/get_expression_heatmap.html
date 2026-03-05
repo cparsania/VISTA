@@ -51,9 +51,9 @@ with optional transformations and annotations.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_expression_heatmap</span><span class="op">(</span></span>
-<span>  <span class="va">vista_obj</span>,</span>
-<span>  <span class="va">samples</span>,</span>
+<span>  <span class="va">x</span>,</span>
 <span>  <span class="va">genes</span>,</span>
+<span>  sample_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"zscore"</span>, <span class="st">"log2"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
 <span>  repair_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  color_default <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -64,7 +64,7 @@ with optional transformations and annotations.</p>
 <span>  show_row_names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cluster_rows <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_row_dend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  row_names_font_size <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  label_specific_rows <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  label_specific_rows_gp <span class="op">=</span> <span class="fu">grid</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/gpar.html" class="external-link">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  show_column_names <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -88,16 +88,17 @@ with optional transformations and annotations.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-vista-obj">vista_obj<a class="anchor" aria-label="anchor" href="#arg-vista-obj"></a></dt>
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A <code>VISTA</code> object.</p></dd>
-
-
-<dt id="arg-samples">samples<a class="anchor" aria-label="anchor" href="#arg-samples"></a></dt>
-<dd><p>Character vector of group labels specifying which samples to include (based on the selected grouping column).</p></dd>
 
 
 <dt id="arg-genes">genes<a class="anchor" aria-label="anchor" href="#arg-genes"></a></dt>
 <dd><p>Character vector of gene identifiers to display.</p></dd>
+
+
+<dt id="arg-sample-group">sample_group<a class="anchor" aria-label="anchor" href="#arg-sample-group"></a></dt>
+<dd><p>Character vector of group labels specifying which samples
+to include (based on the selected grouping column).</p></dd>
 
 
 <dt id="arg-value-transform">value_transform<a class="anchor" aria-label="anchor" href="#arg-value-transform"></a></dt>
@@ -140,7 +141,7 @@ with optional transformations and annotations.</p>
 <dd><p>Logical; display the row dendrogram.</p></dd>
 
 
-<dt id="arg-row-names-font-size">row_names_font_size<a class="anchor" aria-label="anchor" href="#arg-row-names-font-size"></a></dt>
+<dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
 <dd><p>Numeric font size for row names.</p></dd>
 
 
@@ -204,7 +205,7 @@ Defaults to the first annotation column when <code>annotate_columns</code> is en
 
 
 <dt id="arg-group-column">group_column<a class="anchor" aria-label="anchor" href="#arg-group-column"></a></dt>
-<dd><p>Optional column name in <code>sample_info</code> used to interpret <code>samples</code>.</p></dd>
+<dd><p>Optional column name in <code>sample_info</code> used to interpret <code>sample_group</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

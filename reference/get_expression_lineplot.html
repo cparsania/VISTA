@@ -55,10 +55,15 @@ summarized groups with optional transformations and group faceting.</p>
 <span>  <span class="va">genes</span>,</span>
 <span>  sample_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="st">"group"</span><span class="op">)</span>,</span>
 <span>  value_transform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log2"</span>, <span class="st">"zscore"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
-<span>  summarise_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  facet_by_group <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  color_palette <span class="op">=</span> <span class="st">"Dark 3"</span></span>
+<span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"group"</span>, <span class="st">"gene"</span><span class="op">)</span>,</span>
+<span>  sample_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"input"</span>, <span class="st">"group"</span>, <span class="st">"expression"</span><span class="op">)</span>,</span>
+<span>  palette <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  colors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  line_width <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  point_size <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">12</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -82,20 +87,42 @@ summarized groups with optional transformations and group faceting.</p>
 <dd><p>Optional column name in <code>sample_info</code> defining the grouping/faceting variable.</p></dd>
 
 
+<dt id="arg-by">by<a class="anchor" aria-label="anchor" href="#arg-by"></a></dt>
+<dd><p>Plot unit: <code>"sample"</code> (default) or <code>"group"</code> to average
+replicates before plotting.</p></dd>
+
+
 <dt id="arg-value-transform">value_transform<a class="anchor" aria-label="anchor" href="#arg-value-transform"></a></dt>
 <dd><p>Transformation applied to expression values; one of <code>"log2"</code>, <code>"zscore"</code>, or <code>"none"</code>.</p></dd>
 
 
-<dt id="arg-summarise-groups">summarise_groups<a class="anchor" aria-label="anchor" href="#arg-summarise-groups"></a></dt>
-<dd><p>Logical; if <code>TRUE</code>, averages replicates per group before plotting.</p></dd>
+<dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>
+<dd><p>Faceting mode: <code>"none"</code> (default), <code>"group"</code>, or <code>"gene"</code>.</p></dd>
 
 
-<dt id="arg-facet-by-group">facet_by_group<a class="anchor" aria-label="anchor" href="#arg-facet-by-group"></a></dt>
-<dd><p>Logical; facet the plot by the grouping column when <code>TRUE</code>.</p></dd>
+<dt id="arg-sample-order">sample_order<a class="anchor" aria-label="anchor" href="#arg-sample-order"></a></dt>
+<dd><p>Ordering used for sample-level plots: <code>"input"</code>,
+<code>"group"</code>, or <code>"expression"</code>.</p></dd>
 
 
-<dt id="arg-color-palette">color_palette<a class="anchor" aria-label="anchor" href="#arg-color-palette"></a></dt>
-<dd><p>Qualitative palette name used for gene colors.</p></dd>
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>Optional qualitative palette name used for gene colours.</p></dd>
+
+
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
+<dd><p>Optional named character vector of manual gene colours.</p></dd>
+
+
+<dt id="arg-line-width">line_width<a class="anchor" aria-label="anchor" href="#arg-line-width"></a></dt>
+<dd><p>Line width.</p></dd>
+
+
+<dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
+<dd><p>Point size.</p></dd>
+
+
+<dt id="arg-base-size">base_size<a class="anchor" aria-label="anchor" href="#arg-base-size"></a></dt>
+<dd><p>Base theme size.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -14,7 +14,7 @@ Workflow covered:
 3.  Extract cell-fraction estimates with
     [`get_cell_fractions()`](../reference/get_cell_fractions.md).
 4.  Visualize sample-level composition with
-    [`plot_celltype_barplot()`](../reference/plot_celltype_barplot.md).
+    [`get_celltype_barplot()`](../reference/get_celltype_barplot.md).
 5.  Compare treatment groups with
     [`get_celltype_group_dotplot()`](../reference/get_celltype_group_dotplot.md).
 6.  Inspect cell-type/sample structure with
@@ -194,14 +194,14 @@ cell_fractions[1:min(4, nrow(cell_fractions)), 1:min(6, ncol(cell_fractions))]
 ## Plot Cell-Type Composition
 
 ``` r
-plot_celltype_barplot(
+get_celltype_barplot(
   x = vista_deconv,
   group_column = "cond_long",
   top_n = 12,
   collapse_other = TRUE,
   normalize = "sample",
-  facet_by_group = TRUE,
-  font_size = 11
+  facet_by = "group",
+  base_size = 11
 )
 ```
 
@@ -221,7 +221,7 @@ get_celltype_group_dotplot(
   error = "se",
   add_points = TRUE,
   point_size = 2.5,
-  font_size = 11
+  base_size = 11
 )
 ```
 
@@ -240,8 +240,8 @@ get_celltype_heatmap(
   transform = "zscore",
   cluster_rows = TRUE,
   cluster_columns = FALSE,
-  show_values = FALSE,
-  font_size = 10
+  label = FALSE,
+  base_size = 10
 )
 ```
 

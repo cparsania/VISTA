@@ -14,9 +14,9 @@ get_foldchange_chromosome_plot(
   keytype = "GENEID",
   id_column = NULL,
   genes = NULL,
-  comparison = NULL,
+  sample_comparison = NULL,
   value_column = NULL,
-  label_top_n = 20,
+  label_n = 20,
   display_id = NULL,
   line_length = 0.02,
   line_width = 0.6,
@@ -49,22 +49,19 @@ get_foldchange_chromosome_plot(
   `label_top_n`). When provided, all genes are plotted but only these
   are labeled. Defaults to `NULL` (no explicit label set).
 
-- comparison:
+- sample_comparison:
 
-  Optional comparison name; when supplied, uses `log2fc` from
-  `metadata(x)$de_results[[comparison]]` for colouring. If multiple
-  comparisons are provided, one panel per comparison is shown (log2FC
-  clipped to +/-2).
+  Optional comparison name (or vector of names) used for fold-change
+  colouring.
 
 - value_column:
 
   Optional column in `rowData(x)` used for colouring.
 
-- label_top_n:
+- label_n:
 
-  Integer; number of genes with largest \|value\| (or random if no
-  value) to label. Ignored when `genes` is provided. Set to 0 to disable
-  labels.
+  Integer; number of genes with the largest absolute fold-change to
+  label when `genes` is not supplied. Set to 0 to disable labels.
 
 - display_id:
 

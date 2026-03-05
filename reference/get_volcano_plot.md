@@ -11,12 +11,10 @@ get_volcano_plot(
   sample_comparison,
   log2fc_cutoff = 1,
   pval_cutoff = 0.05,
-  genes_to_display = NULL,
-  lab_size = 3,
+  label_genes = NULL,
+  label_size = 3,
   point_size = 1,
-  col_up = "#a40000",
-  col_down = "#007e2f",
-  col_other = "grey",
+  colors = c(Up = "#a40000", Down = "#007e2f", Other = "grey"),
   repair_genes = TRUE,
   display_id = NULL,
   display_from = NULL,
@@ -44,11 +42,11 @@ get_volcano_plot(
 
   Numeric p-value threshold used to color significant points.
 
-- genes_to_display:
+- label_genes:
 
   Optional character vector of gene identifiers to force-label.
 
-- lab_size:
+- label_size:
 
   Numeric label text size.
 
@@ -56,17 +54,9 @@ get_volcano_plot(
 
   Numeric point size.
 
-- col_up:
+- colors:
 
-  Color assigned to up-regulated genes.
-
-- col_down:
-
-  Color assigned to down-regulated genes.
-
-- col_other:
-
-  Color assigned to non-significant genes.
+  Named colour vector with entries for `"Up"`, `"Down"`, and `"Other"`.
 
 - repair_genes:
 
@@ -148,7 +138,7 @@ genes_of_interest <- rownames(vista)[1:5]
 get_volcano_plot(
   vista,
   sample_comparison = comps[1],
-  genes_to_display = genes_of_interest
+  label_genes = genes_of_interest
 )
 
 # }

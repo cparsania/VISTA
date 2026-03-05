@@ -13,17 +13,19 @@ get_expression_raincloud(
   genes = NULL,
   sample_group = NULL,
   group_column = NULL,
+  by = "group",
   value_transform = c("log2", "zscore", "none"),
   summarise = FALSE,
-  facet = TRUE,
+  facet_by = c("auto", "gene", "none"),
+  sample_order = c("input", "group", "expression"),
   rain_side = c("r", "l", "f", "f1x1", "f2x2"),
   id.long.var = NULL,
-  point_alpha = 0.5,
+  alpha = 0.5,
   point_size = 1.5,
   p.label = "p.signif",
   stats_group = FALSE,
   stats_method = "t.test",
-  label_points = FALSE,
+  label = FALSE,
   label_column = "gene",
   label_size = 3,
   label_max_overlaps = 50,
@@ -51,17 +53,31 @@ get_expression_raincloud(
 
   Grouping column in `sample_info`; defaults to the stored grouping.
 
+- by:
+
+  Plot unit. Violin plots currently support only `"group"`, because a
+  violin needs replicate-level distributions within groups rather than
+  single values per sample.
+
 - value_transform:
 
   One of `"log2"`, `"zscore"`, or `"none"`.
 
 - summarise:
 
-  Logical; if `TRUE`, averages replicates per group before plotting.
+  Logical; when `TRUE`, collapse replicates within each group for each
+  gene (one value per gene per group). This is useful for pooled
+  multi-gene raincloud plots where each dot represents one gene-level
+  summary in a group.
 
-- facet:
+- facet_by:
 
-  Logical; facet by group.
+  Faceting mode: `"auto"` (default), `"gene"`, or `"none"`.
+
+- sample_order:
+
+  Ordering for sample-level x-axis display: `"input"`, `"group"`, or
+  `"expression"` before values are grouped into violins.
 
 - rain_side:
 
@@ -75,7 +91,7 @@ get_expression_raincloud(
   [`ggrain::geom_rain()`](https://rdrr.io/pkg/ggrain/man/geom_rain.html)
   as `id.long.var` to identify repeated measurements.
 
-- point_alpha:
+- alpha:
 
   Alpha for jittered points.
 
@@ -97,7 +113,7 @@ get_expression_raincloud(
   Statistical method passed to
   [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
 
-- label_points:
+- label:
 
   Logical; add text labels to points using `ggrepel`.
 
@@ -154,8 +170,8 @@ Recommended usage for expression raincloud plots:
 - `id.long.var = "sample"` or the grouping variable is usually less
   informative and can over-connect points.
 
-- Point labels (`label_points = TRUE`) work best with `facet = FALSE` or
-  a small number of genes.
+- Point labels (`label = TRUE`) work best with `facet_by = "none"` or a
+  small number of genes.
 
 For identifier display consistency with other VISTA plotting functions,
 set `display_id` (for example, `"SYMBOL"`). When provided, `genes` can

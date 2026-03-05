@@ -57,16 +57,18 @@ genes. UMAP is intended for exploratory sample-level structure.</p>
 <span>  color_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  top_n_genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  label_replicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  circle_size <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  sample_colors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  point_size <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  shape_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  shape_values <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_neighbors <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>  min_dist <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  metric <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
+<span>  use_vista_colors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  palette <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  colors <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -101,21 +103,16 @@ Defaults to <code>group_column</code>.</p></dd>
 <dd><p>Optional integer selecting top variable genes to include.</p></dd>
 
 
-<dt id="arg-label-replicates">label_replicates<a class="anchor" aria-label="anchor" href="#arg-label-replicates"></a></dt>
+<dt id="arg-label">label<a class="anchor" aria-label="anchor" href="#arg-label"></a></dt>
 <dd><p>Logical; draw sample labels when <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
-<dd><p>Numeric label size when <code>label_replicates = TRUE</code>.</p></dd>
+<dd><p>Numeric label size when <code>label = TRUE</code>.</p></dd>
 
 
-<dt id="arg-circle-size">circle_size<a class="anchor" aria-label="anchor" href="#arg-circle-size"></a></dt>
+<dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
 <dd><p>Numeric point size.</p></dd>
-
-
-<dt id="arg-sample-colors">sample_colors<a class="anchor" aria-label="anchor" href="#arg-sample-colors"></a></dt>
-<dd><p>Logical; when <code>TRUE</code>, apply VISTA group colors if
-coloring by the grouping column. Otherwise generate a qualitative palette.</p></dd>
 
 
 <dt id="arg-shape-by">shape_by<a class="anchor" aria-label="anchor" href="#arg-shape-by"></a></dt>
@@ -141,6 +138,21 @@ coloring by the grouping column. Otherwise generate a qualitative palette.</p></
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Integer random seed passed to UMAP.</p></dd>
+
+
+<dt id="arg-use-vista-colors">use_vista_colors<a class="anchor" aria-label="anchor" href="#arg-use-vista-colors"></a></dt>
+<dd><p>Logical; when <code>TRUE</code>, prefer the stored VISTA group
+colours when colouring by the grouping column.</p></dd>
+
+
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>Optional qualitative palette name used when generating colours
+for non-group metadata levels.</p></dd>
+
+
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
+<dd><p>Optional named character vector of manual colours overriding
+both <code>palette</code> and stored VISTA colours.</p></dd>
 
 </dl></div>
     <div class="section level2">

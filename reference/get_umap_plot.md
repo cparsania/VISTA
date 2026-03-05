@@ -14,16 +14,18 @@ get_umap_plot(
   color_by = NULL,
   genes = NULL,
   top_n_genes = NULL,
-  label_replicates = FALSE,
+  label = FALSE,
   label_size = 3,
-  circle_size = 10,
-  sample_colors = TRUE,
+  point_size = 10,
   shape_by = NULL,
   shape_values = NULL,
   n_neighbors = 15,
   min_dist = 0.1,
   metric = "euclidean",
-  seed = 123
+  seed = 123,
+  use_vista_colors = TRUE,
+  palette = NULL,
+  colors = NULL
 )
 ```
 
@@ -56,22 +58,17 @@ get_umap_plot(
 
   Optional integer selecting top variable genes to include.
 
-- label_replicates:
+- label:
 
   Logical; draw sample labels when `TRUE`.
 
 - label_size:
 
-  Numeric label size when `label_replicates = TRUE`.
+  Numeric label size when `label = TRUE`.
 
-- circle_size:
+- point_size:
 
   Numeric point size.
-
-- sample_colors:
-
-  Logical; when `TRUE`, apply VISTA group colors if coloring by the
-  grouping column. Otherwise generate a qualitative palette.
 
 - shape_by:
 
@@ -97,6 +94,21 @@ get_umap_plot(
 - seed:
 
   Integer random seed passed to UMAP.
+
+- use_vista_colors:
+
+  Logical; when `TRUE`, prefer the stored VISTA group colours when
+  colouring by the grouping column.
+
+- palette:
+
+  Optional qualitative palette name used when generating colours for
+  non-group metadata levels.
+
+- colors:
+
+  Optional named character vector of manual colours overriding both
+  `palette` and stored VISTA colours.
 
 ## Value
 

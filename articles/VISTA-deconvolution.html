@@ -90,7 +90,7 @@ metadata.</li>
 <li>Extract cell-fraction estimates with
 <code><a href="../reference/get_cell_fractions.html">get_cell_fractions()</a></code>.</li>
 <li>Visualize sample-level composition with
-<code><a href="../reference/plot_celltype_barplot.html">plot_celltype_barplot()</a></code>.</li>
+<code><a href="../reference/get_celltype_barplot.html">get_celltype_barplot()</a></code>.</li>
 <li>Compare treatment groups with
 <code><a href="../reference/get_celltype_group_dotplot.html">get_celltype_group_dotplot()</a></code>.</li>
 <li>Inspect cell-type/sample structure with
@@ -266,14 +266,14 @@ deconvolution sections.</p>
 <h2 id="plot-cell-type-composition">Plot Cell-Type Composition<a class="anchor" aria-label="anchor" href="#plot-cell-type-composition"></a>
 </h2>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_celltype_barplot.html">plot_celltype_barplot</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_celltype_barplot.html">get_celltype_barplot</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">vista_deconv</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
 <span>  top_n <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>  collapse_other <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="st">"sample"</span>,</span>
-<span>  facet_by_group <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  font_size <span class="op">=</span> <span class="fl">11</span></span>
+<span>  facet_by <span class="op">=</span> <span class="st">"group"</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">11</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-deconvolution_files/figure-html/celltype-barplot-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
@@ -291,7 +291,7 @@ keeping sample-level points visible.</p>
 <span>  error <span class="op">=</span> <span class="st">"se"</span>,</span>
 <span>  add_points <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  point_size <span class="op">=</span> <span class="fl">2.5</span>,</span>
-<span>  font_size <span class="op">=</span> <span class="fl">11</span></span>
+<span>  base_size <span class="op">=</span> <span class="fl">11</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-deconvolution_files/figure-html/group-summary-plot-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
@@ -308,8 +308,8 @@ and concordance within groups.</p>
 <span>  transform <span class="op">=</span> <span class="st">"zscore"</span>,</span>
 <span>  cluster_rows <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cluster_columns <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  show_values <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  font_size <span class="op">=</span> <span class="fl">10</span></span>
+<span>  label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-deconvolution_files/figure-html/celltype-heatmap-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>

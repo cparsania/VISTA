@@ -339,8 +339,8 @@ name.</p>
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_chord.html">get_enrichment_chord</a></span><span class="op">(</span></span>
 <span>    <span class="va">msig_hallmark</span>,</span>
-<span>    vista_obj  <span class="op">=</span> <span class="va">vista</span>,</span>
-<span>    comparison <span class="op">=</span> <span class="va">comp_name</span>,</span>
+<span>    vista  <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>    sample_comparison <span class="op">=</span> <span class="va">comp_name</span>,</span>
 <span>    top_n      <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    color_by   <span class="op">=</span> <span class="st">"foldchange"</span>,</span>
 <span>    display_id <span class="op">=</span> <span class="st">"SYMBOL"</span>,</span>
@@ -368,8 +368,8 @@ but meaningful when using <code>regulation = "Both"</code>)</li>
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_down</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_down</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_chord.html">get_enrichment_chord</a></span><span class="op">(</span></span>
 <span>    <span class="va">msig_down</span>,</span>
-<span>    vista_obj  <span class="op">=</span> <span class="va">vista</span>,</span>
-<span>    comparison <span class="op">=</span> <span class="va">comp_name</span>,</span>
+<span>    vista  <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>    sample_comparison <span class="op">=</span> <span class="va">comp_name</span>,</span>
 <span>    top_n      <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    color_by   <span class="op">=</span> <span class="st">"regulation"</span>,</span>
 <span>    display_id <span class="op">=</span> <span class="st">"SYMBOL"</span>,</span>
@@ -387,8 +387,8 @@ strongest drivers appear first.</p>
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_chord.html">get_enrichment_chord</a></span><span class="op">(</span></span>
 <span>    <span class="va">msig_hallmark</span>,</span>
-<span>    vista_obj     <span class="op">=</span> <span class="va">vista</span>,</span>
-<span>    comparison    <span class="op">=</span> <span class="va">comp_name</span>,</span>
+<span>    vista     <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>    sample_comparison    <span class="op">=</span> <span class="va">comp_name</span>,</span>
 <span>    top_n         <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    color_by      <span class="op">=</span> <span class="st">"foldchange"</span>,</span>
 <span>    gene_order_by <span class="op">=</span> <span class="st">"abs_foldchange"</span>, <span class="co"># or "foldchange"</span></span>
@@ -411,8 +411,8 @@ fold-change.</p>
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_both</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_both</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_chord.html">get_enrichment_chord</a></span><span class="op">(</span></span>
 <span>    <span class="va">msig_both</span>,</span>
-<span>    vista_obj     <span class="op">=</span> <span class="va">vista</span>,</span>
-<span>    comparison    <span class="op">=</span> <span class="va">comp_name</span>,</span>
+<span>    vista     <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>    sample_comparison    <span class="op">=</span> <span class="va">comp_name</span>,</span>
 <span>    top_n         <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    color_by      <span class="op">=</span> <span class="st">"foldchange"</span>,</span>
 <span>    gene_order_by <span class="op">=</span> <span class="st">"foldchange"</span>,</span>
@@ -437,8 +437,8 @@ bridge multiple enriched terms.</p>
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">hub_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_enrichment_chord.html">get_enrichment_chord</a></span><span class="op">(</span></span>
 <span>    <span class="va">msig_hallmark</span>,</span>
-<span>    vista_obj    <span class="op">=</span> <span class="va">vista</span>,</span>
-<span>    comparison   <span class="op">=</span> <span class="va">comp_name</span>,</span>
+<span>    vista    <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>    sample_comparison   <span class="op">=</span> <span class="va">comp_name</span>,</span>
 <span>    top_n        <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>    min_pathways <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>    color_by     <span class="op">=</span> <span class="st">"foldchange"</span>,</span>
@@ -470,8 +470,8 @@ threshold further:</p>
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_c2</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_c2</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">c2_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_enrichment_chord.html">get_enrichment_chord</a></span><span class="op">(</span></span>
 <span>    <span class="va">msig_c2</span>,</span>
-<span>    vista_obj    <span class="op">=</span> <span class="va">vista</span>,</span>
-<span>    comparison   <span class="op">=</span> <span class="va">comp_name</span>,</span>
+<span>    vista    <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>    sample_comparison   <span class="op">=</span> <span class="va">comp_name</span>,</span>
 <span>    top_n        <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>    min_pathways <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>    max_genes    <span class="op">=</span> <span class="fl">30</span>,</span>
@@ -554,8 +554,8 @@ threshold further:</p>
 <span>    <span class="fu"><a href="../reference/get_enrichment_chord.html">get_enrichment_chord</a></span><span class="op">(</span></span>
 <span>      <span class="va">msig_hallmark</span>,</span>
 <span>      pathways   <span class="op">=</span> <span class="va">pick</span>,</span>
-<span>      vista_obj  <span class="op">=</span> <span class="va">vista</span>,</span>
-<span>      comparison <span class="op">=</span> <span class="va">comp_name</span>,</span>
+<span>      vista  <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>      sample_comparison <span class="op">=</span> <span class="va">comp_name</span>,</span>
 <span>      color_by   <span class="op">=</span> <span class="st">"foldchange"</span>,</span>
 <span>      display_id <span class="op">=</span> <span class="st">"SYMBOL"</span>,</span>
 <span>      title      <span class="op">=</span> <span class="st">"Selected pathways of interest"</span></span>
@@ -588,9 +588,9 @@ are shared.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_pathway_heatmap.html">get_pathway_heatmap</a></span><span class="op">(</span></span>
-<span>    vista_obj  <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>    x      <span class="op">=</span> <span class="va">vista</span>,</span>
 <span>    enrichment <span class="op">=</span> <span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span>,</span>
-<span>    samples    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Untreated"</span>, <span class="st">"Dexamethasone"</span><span class="op">)</span>,</span>
+<span>    sample_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Untreated"</span>, <span class="st">"Dexamethasone"</span><span class="op">)</span>,</span>
 <span>    top_n      <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>    gene_mode  <span class="op">=</span> <span class="st">"union"</span>,</span>
 <span>    max_genes  <span class="op">=</span> <span class="fl">40</span>,</span>
@@ -613,8 +613,8 @@ sharing across pathways.</p>
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">msig_hallmark</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/get_enrichment_chord.html">get_enrichment_chord</a></span><span class="op">(</span></span>
 <span>    <span class="va">msig_hallmark</span>,</span>
-<span>    vista_obj    <span class="op">=</span> <span class="va">vista</span>,</span>
-<span>    comparison   <span class="op">=</span> <span class="va">comp_name</span>,</span>
+<span>    vista    <span class="op">=</span> <span class="va">vista</span>,</span>
+<span>    sample_comparison   <span class="op">=</span> <span class="va">comp_name</span>,</span>
 <span>    top_n        <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>    min_pathways <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>    color_by     <span class="op">=</span> <span class="st">"foldchange"</span>,</span>

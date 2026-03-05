@@ -58,10 +58,10 @@ regulation class and the top results can be optionally labeled with gene IDs.</p
 <span>  <span class="va">sample_comparison</span>,</span>
 <span>  point_size <span class="op">=</span> <span class="fl">1.2</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.6</span>,</span>
-<span>  fill_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Up <span class="op">=</span> <span class="st">"#a40000"</span>, Down <span class="op">=</span> <span class="st">"#16317d"</span>, Other <span class="op">=</span> <span class="st">"gray70"</span><span class="op">)</span>,</span>
-<span>  topn <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Up <span class="op">=</span> <span class="st">"#a40000"</span>, Down <span class="op">=</span> <span class="st">"#16317d"</span>, Other <span class="op">=</span> <span class="st">"gray70"</span><span class="op">)</span>,</span>
+<span>  label_n <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  label_size <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  repair <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  repair_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  display_from <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  display_orgdb <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -89,12 +89,12 @@ one of <code>names(comparisons(x))</code>.</p></dd>
 <dd><p>Numeric transparency (0-1). Default: 0.6.</p></dd>
 
 
-<dt id="arg-fill-colors">fill_colors<a class="anchor" aria-label="anchor" href="#arg-fill-colors"></a></dt>
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
 <dd><p>Named character vector of colors for <code>"Up"</code>,
 <code>"Down"</code>, and <code>"Other"</code> genes.</p></dd>
 
 
-<dt id="arg-topn">topn<a class="anchor" aria-label="anchor" href="#arg-topn"></a></dt>
+<dt id="arg-label-n">label_n<a class="anchor" aria-label="anchor" href="#arg-label-n"></a></dt>
 <dd><p>Integer number of genes to label. Default: 0.</p></dd>
 
 
@@ -102,7 +102,7 @@ one of <code>names(comparisons(x))</code>.</p></dd>
 <dd><p>Text size for labels. Default: 3.</p></dd>
 
 
-<dt id="arg-repair">repair<a class="anchor" aria-label="anchor" href="#arg-repair"></a></dt>
+<dt id="arg-repair-genes">repair_genes<a class="anchor" aria-label="anchor" href="#arg-repair-genes"></a></dt>
 <dd><p>Logical; if <code>TRUE</code>, attempt to shorten gene identifiers to
 symbols by stripping prefixes. Default: <code>FALSE</code>.</p></dd>
 

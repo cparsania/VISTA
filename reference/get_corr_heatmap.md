@@ -12,14 +12,16 @@ get_corr_heatmap(
   group_column = NULL,
   genes = NULL,
   corr_method = "pearson",
-  vis_method = "square",
-  plot_type = "full",
-  cluster_samples = TRUE,
+  triangle = c("full", "lower", "upper"),
+  cluster_by = c("correlation", "group", "input", "none"),
   show_diagonal = TRUE,
-  show_corr_values = TRUE,
-  col_corr_values = "black",
-  size_corr_values = 4,
-  scale_range = NULL,
+  label = TRUE,
+  show_corr_values = NULL,
+  label_color = "black",
+  col_corr_values = NULL,
+  label_size = 4,
+  limits = NULL,
+  base_size = 12,
   viridis_option = "viridis",
   viridis_direction = 1,
   viridis_begin = 0,
@@ -53,39 +55,49 @@ get_corr_heatmap(
   [`stats::cor()`](https://rdrr.io/r/stats/cor.html) (e.g.,
   `"pearson"`).
 
-- vis_method:
-
-  Currently unused; retained for backward compatibility.
-
-- plot_type:
+- triangle:
 
   Either `"full"`, `"lower"`, or `"upper"` to control which triangle is
   drawn.
 
-- cluster_samples:
+- cluster_by:
 
-  Logical; hierarchically cluster samples before plotting when `TRUE`.
+  Ordering strategy for samples: `"correlation"` (default), `"group"`,
+  `"input"`, or `"none"`.
 
 - show_diagonal:
 
   Logical; include the correlation diagonal when `TRUE`.
 
-- show_corr_values:
+- label:
 
   Logical; overlay correlation coefficients as text.
 
-- col_corr_values:
+- show_corr_values:
+
+  Deprecated alias for `label`. When supplied, it overrides `label`.
+
+- label_color:
 
   Color for the text labels.
 
-- size_corr_values:
+- col_corr_values:
+
+  Deprecated alias for `label_color`. When supplied, it overrides
+  `label_color`.
+
+- label_size:
 
   Numeric text size multiplier.
 
-- scale_range:
+- limits:
 
   Optional numeric vector of length two giving limits for the color
   scale.
+
+- base_size:
+
+  Base theme size.
 
 - viridis_option:
 

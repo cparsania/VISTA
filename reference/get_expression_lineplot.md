@@ -11,10 +11,15 @@ get_expression_lineplot(
   genes,
   sample_group = NULL,
   group_column = NULL,
+  by = c("sample", "group"),
   value_transform = c("log2", "zscore", "none"),
-  summarise_groups = FALSE,
-  facet_by_group = FALSE,
-  color_palette = "Dark 3"
+  facet_by = c("none", "group", "gene"),
+  sample_order = c("input", "group", "expression"),
+  palette = NULL,
+  colors = NULL,
+  line_width = 1,
+  point_size = 2,
+  base_size = 12
 )
 ```
 
@@ -38,22 +43,44 @@ get_expression_lineplot(
   Optional column name in `sample_info` defining the grouping/faceting
   variable.
 
+- by:
+
+  Plot unit: `"sample"` (default) or `"group"` to average replicates
+  before plotting.
+
 - value_transform:
 
   Transformation applied to expression values; one of `"log2"`,
   `"zscore"`, or `"none"`.
 
-- summarise_groups:
+- facet_by:
 
-  Logical; if `TRUE`, averages replicates per group before plotting.
+  Faceting mode: `"none"` (default), `"group"`, or `"gene"`.
 
-- facet_by_group:
+- sample_order:
 
-  Logical; facet the plot by the grouping column when `TRUE`.
+  Ordering used for sample-level plots: `"input"`, `"group"`, or
+  `"expression"`.
 
-- color_palette:
+- palette:
 
-  Qualitative palette name used for gene colors.
+  Optional qualitative palette name used for gene colours.
+
+- colors:
+
+  Optional named character vector of manual gene colours.
+
+- line_width:
+
+  Line width.
+
+- point_size:
+
+  Point size.
+
+- base_size:
+
+  Base theme size.
 
 ## Value
 

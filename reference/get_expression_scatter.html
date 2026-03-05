@@ -61,7 +61,8 @@ and reports Pearson/Spearman correlation.</p>
 <span>  group_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  label_top_n <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  label_n <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pearson"</span>, <span class="st">"spearman"</span><span class="op">)</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -101,9 +102,13 @@ to stored grouping column).</p></dd>
 <dd><p>Logical; apply log2(x + 1) transform. Default <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-label-top-n">label_top_n<a class="anchor" aria-label="anchor" href="#arg-label-top-n"></a></dt>
+<dt id="arg-label-n">label_n<a class="anchor" aria-label="anchor" href="#arg-label-n"></a></dt>
 <dd><p>Integer; number of most divergent genes to label
 (ranked by |x - y|). Set to 0 to disable labels.</p></dd>
+
+
+<dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
+<dd><p>Numeric size for labeled genes.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>

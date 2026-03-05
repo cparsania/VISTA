@@ -7,7 +7,7 @@ ComplexHeatmap, supporting clustering and annotations.
 
 ``` r
 get_foldchange_heatmap(
-  vista_obj,
+  x,
   sample_comparisons,
   genes,
   repair_genes = FALSE,
@@ -16,7 +16,7 @@ get_foldchange_heatmap(
   show_row_names = FALSE,
   cluster_rows = TRUE,
   show_row_dend = TRUE,
-  row_names_font_size = 10,
+  label_size = 10,
   label_specific_rows = NULL,
   label_specific_rows_gp = grid::gpar(fontsize = 5),
   show_column_names = TRUE,
@@ -36,7 +36,7 @@ get_foldchange_heatmap(
 
 ## Arguments
 
-- vista_obj:
+- x:
 
   A `VISTA` object with stored differential expression results.
 
@@ -75,7 +75,7 @@ get_foldchange_heatmap(
 
   Logical; display the row dendrogram.
 
-- row_names_font_size:
+- label_size:
 
   Numeric font size for row names.
 

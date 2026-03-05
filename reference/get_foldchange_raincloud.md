@@ -12,16 +12,15 @@ get_foldchange_raincloud(
   x,
   genes = NULL,
   sample_comparisons = NULL,
-  sample_comparison = NULL,
-  facet = TRUE,
+  facet_by = c("auto", "comparison", "none"),
   rain_side = c("r", "l", "f", "f1x1", "f2x2"),
   id.long.var = NULL,
-  point_alpha = 0.5,
+  alpha = 0.5,
   point_size = 1.5,
   p.label = "p.signif",
   stats_group = FALSE,
   stats_method = "t.test",
-  label_points = FALSE,
+  label = FALSE,
   label_column = "gene_id",
   label_size = 3,
   label_max_overlaps = 50,
@@ -45,13 +44,9 @@ get_foldchange_raincloud(
 
   Optional character vector of comparison names to plot.
 
-- sample_comparison:
+- facet_by:
 
-  Deprecated alias for `sample_comparisons`.
-
-- facet:
-
-  Logical; facet each comparison when `TRUE`.
+  Faceting mode: `"auto"` (default), `"comparison"`, or `"none"`.
 
 - rain_side:
 
@@ -65,7 +60,7 @@ get_foldchange_raincloud(
   [`ggrain::geom_rain()`](https://rdrr.io/pkg/ggrain/man/geom_rain.html)
   as `id.long.var` to identify repeated measurements.
 
-- point_alpha:
+- alpha:
 
   Alpha for jittered points.
 
@@ -87,7 +82,7 @@ get_foldchange_raincloud(
   Statistical method passed to
   [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
 
-- label_points:
+- label:
 
   Logical; add text labels to points using `ggrepel`.
 
@@ -143,7 +138,7 @@ Recommended usage for fold-change raincloud plots:
 - Continuous value columns (e.g. `log2FoldChange`) are not suitable
   identifiers for line connections.
 
-- Point labels (`label_points = TRUE`) work best with `facet = FALSE`
+- Point labels (`label = TRUE`) work best with `facet_by = "none"`
   unless only a small set of genes is shown.
 
 For identifier display consistency with other VISTA plotting functions,

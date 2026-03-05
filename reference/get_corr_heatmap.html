@@ -56,14 +56,16 @@ optional clustering and annotations.</p>
 <span>  group_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  corr_method <span class="op">=</span> <span class="st">"pearson"</span>,</span>
-<span>  vis_method <span class="op">=</span> <span class="st">"square"</span>,</span>
-<span>  plot_type <span class="op">=</span> <span class="st">"full"</span>,</span>
-<span>  cluster_samples <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  triangle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"full"</span>, <span class="st">"lower"</span>, <span class="st">"upper"</span><span class="op">)</span>,</span>
+<span>  cluster_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"correlation"</span>, <span class="st">"group"</span>, <span class="st">"input"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  show_diagonal <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  show_corr_values <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  col_corr_values <span class="op">=</span> <span class="st">"black"</span>,</span>
-<span>  size_corr_values <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  scale_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  show_corr_values <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  label_color <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  col_corr_values <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  limits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>  viridis_option <span class="op">=</span> <span class="st">"viridis"</span>,</span>
 <span>  viridis_direction <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  viridis_begin <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -95,36 +97,48 @@ optional clustering and annotations.</p>
 <dd><p>Correlation method passed to <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">stats::cor()</a></code> (e.g., <code>"pearson"</code>).</p></dd>
 
 
-<dt id="arg-vis-method">vis_method<a class="anchor" aria-label="anchor" href="#arg-vis-method"></a></dt>
-<dd><p>Currently unused; retained for backward compatibility.</p></dd>
-
-
-<dt id="arg-plot-type">plot_type<a class="anchor" aria-label="anchor" href="#arg-plot-type"></a></dt>
+<dt id="arg-triangle">triangle<a class="anchor" aria-label="anchor" href="#arg-triangle"></a></dt>
 <dd><p>Either <code>"full"</code>, <code>"lower"</code>, or <code>"upper"</code> to control which triangle is drawn.</p></dd>
 
 
-<dt id="arg-cluster-samples">cluster_samples<a class="anchor" aria-label="anchor" href="#arg-cluster-samples"></a></dt>
-<dd><p>Logical; hierarchically cluster samples before plotting when <code>TRUE</code>.</p></dd>
+<dt id="arg-cluster-by">cluster_by<a class="anchor" aria-label="anchor" href="#arg-cluster-by"></a></dt>
+<dd><p>Ordering strategy for samples: <code>"correlation"</code> (default),
+<code>"group"</code>, <code>"input"</code>, or <code>"none"</code>.</p></dd>
 
 
 <dt id="arg-show-diagonal">show_diagonal<a class="anchor" aria-label="anchor" href="#arg-show-diagonal"></a></dt>
 <dd><p>Logical; include the correlation diagonal when <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-show-corr-values">show_corr_values<a class="anchor" aria-label="anchor" href="#arg-show-corr-values"></a></dt>
+<dt id="arg-label">label<a class="anchor" aria-label="anchor" href="#arg-label"></a></dt>
 <dd><p>Logical; overlay correlation coefficients as text.</p></dd>
 
 
-<dt id="arg-col-corr-values">col_corr_values<a class="anchor" aria-label="anchor" href="#arg-col-corr-values"></a></dt>
+<dt id="arg-show-corr-values">show_corr_values<a class="anchor" aria-label="anchor" href="#arg-show-corr-values"></a></dt>
+<dd><p>Deprecated alias for <code>label</code>. When supplied, it
+overrides <code>label</code>.</p></dd>
+
+
+<dt id="arg-label-color">label_color<a class="anchor" aria-label="anchor" href="#arg-label-color"></a></dt>
 <dd><p>Color for the text labels.</p></dd>
 
 
-<dt id="arg-size-corr-values">size_corr_values<a class="anchor" aria-label="anchor" href="#arg-size-corr-values"></a></dt>
+<dt id="arg-col-corr-values">col_corr_values<a class="anchor" aria-label="anchor" href="#arg-col-corr-values"></a></dt>
+<dd><p>Deprecated alias for <code>label_color</code>. When supplied, it
+overrides <code>label_color</code>.</p></dd>
+
+
+<dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
 <dd><p>Numeric text size multiplier.</p></dd>
 
 
-<dt id="arg-scale-range">scale_range<a class="anchor" aria-label="anchor" href="#arg-scale-range"></a></dt>
-<dd><p>Optional numeric vector of length two giving limits for the color scale.</p></dd>
+<dt id="arg-limits">limits<a class="anchor" aria-label="anchor" href="#arg-limits"></a></dt>
+<dd><p>Optional numeric vector of length two giving limits for the
+color scale.</p></dd>
+
+
+<dt id="arg-base-size">base_size<a class="anchor" aria-label="anchor" href="#arg-base-size"></a></dt>
+<dd><p>Base theme size.</p></dd>
 
 
 <dt id="arg-viridis-option">viridis_option<a class="anchor" aria-label="anchor" href="#arg-viridis-option"></a></dt>

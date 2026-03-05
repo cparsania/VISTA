@@ -51,7 +51,7 @@ ComplexHeatmap, supporting clustering and annotations.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_foldchange_heatmap</span><span class="op">(</span></span>
-<span>  <span class="va">vista_obj</span>,</span>
+<span>  <span class="va">x</span>,</span>
 <span>  <span class="va">sample_comparisons</span>,</span>
 <span>  <span class="va">genes</span>,</span>
 <span>  repair_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -60,7 +60,7 @@ ComplexHeatmap, supporting clustering and annotations.</p>
 <span>  show_row_names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cluster_rows <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  show_row_dend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  row_names_font_size <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  label_specific_rows <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  label_specific_rows_gp <span class="op">=</span> <span class="fu">grid</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/gpar.html" class="external-link">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  show_column_names <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -82,7 +82,7 @@ ComplexHeatmap, supporting clustering and annotations.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-vista-obj">vista_obj<a class="anchor" aria-label="anchor" href="#arg-vista-obj"></a></dt>
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A <code>VISTA</code> object with stored differential expression results.</p></dd>
 
 
@@ -118,7 +118,7 @@ ComplexHeatmap, supporting clustering and annotations.</p>
 <dd><p>Logical; display the row dendrogram.</p></dd>
 
 
-<dt id="arg-row-names-font-size">row_names_font_size<a class="anchor" aria-label="anchor" href="#arg-row-names-font-size"></a></dt>
+<dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
 <dd><p>Numeric font size for row names.</p></dd>
 
 

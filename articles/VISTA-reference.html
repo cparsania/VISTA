@@ -291,8 +291,7 @@ mirror <code><a href="../reference/create_vista.html">create_vista()</a></code>.
 <ul>
 <li>
 <code>x</code>, <code>genes</code>, <code>sample_group</code>,
-<code>group_column</code>, <code>facet</code>,
-<code>log_transform</code>.</li>
+<code>group_column</code>, <code>log_transform</code>.</li>
 <li>
 <code>display_id</code>, <code>display_from</code>,
 <code>display_orgdb</code>.</li>
@@ -300,7 +299,7 @@ mirror <code><a href="../reference/create_vista.html">create_vista()</a></code>.
 <code>facet_scales</code>, <code>stats_group</code>,
 <code>p.label</code>, <code>comparisons</code>.</li>
 <li>
-<code>pool_genes</code>, <code>x_by</code>, <code>facet_by</code>,
+<code>pool_genes</code>, <code>by</code>, <code>facet_by</code>,
 <code>fill_by</code>.</li>
 </ul>
 <p>Notes: <code>genes</code> capped at 20 when provided. If
@@ -355,8 +354,8 @@ variable genes are selected automatically.</p>
 <code>value_transform</code> (<code>"log2"</code>,
 <code>"zscore"</code>, <code>"none"</code>).</li>
 <li>
-<code>summarise_groups</code>, <code>facet_by_group</code>,
-<code>color_palette</code>.</li>
+<code>by</code>, <code>facet_by</code>, <code>sample_order</code>,
+<code>palette</code>, <code>colors</code>.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -368,8 +367,10 @@ variable genes are selected automatically.</p>
 <li><code>get_expression_raincloud(...)</code></li>
 </ul>
 <p>Common arguments: <code>genes</code>, <code>sample_group</code>,
-<code>group_column</code>, <code>value_transform</code>,
-<code>summarise</code>, <code>facet</code> and plotting controls.</p>
+<code>group_column</code>, <code>value_transform</code>, plot-specific
+faceting, and plotting controls.
+<code><a href="../reference/get_expression_violinplot.html">get_expression_violinplot()</a></code> is explicitly group-based
+(<code>by = "group"</code>).</p>
 </div>
 </div>
 <div class="section level2">
@@ -439,8 +440,8 @@ summary (donut).</li>
 <code>get_deg_venn_diagram(...)</code>: overlap of DEG sets (2–4
 comparisons).</li>
 <li>
-<code>plot_deg_alluvial(...)</code>: transitions of regulation
-across comparisons.</li>
+<code>get_deg_alluvial(...)</code>: transitions of regulation across
+comparisons.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -524,7 +525,7 @@ gene–pathway relationships (requires circlize); supports
 <li>
 <code>get_cell_fractions(x)</code>: retrieve stored fractions.</li>
 <li>
-<code>plot_celltype_barplot(...)</code>: stacked composition plot
+<code>get_celltype_barplot(...)</code>: stacked composition plot
 with top-N selection/collapse options.</li>
 <li>
 <code>get_celltype_group_dotplot(...)</code>: group-level summary

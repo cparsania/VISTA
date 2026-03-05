@@ -74,8 +74,7 @@ get_foldchange_lineplot(): log2FC trajectories across comparisons (optional clus
 <span>  label_digits <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dodge_width <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  facet_comparison <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  facet_by <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"gene"</span>, <span class="st">"comparison"</span>, <span class="st">"none"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -137,15 +136,9 @@ Input gene matching still uses <code>gene_id</code>.</p></dd>
 two comparisons on the same axis.</p></dd>
 
 
-<dt id="arg-facet-comparison">facet_comparison<a class="anchor" aria-label="anchor" href="#arg-facet-comparison"></a></dt>
-<dd><p>Logical; when two comparisons are provided, facet by
-comparison instead of dodging side-by-side.</p></dd>
-
-
 <dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>
-<dd><p>Optional faceting mode. Use <code>NULL</code> (default) to preserve the
-current <code>facet_comparison</code> behavior. Otherwise choose one of <code>"auto"</code>,
-<code>"gene"</code>, <code>"comparison"</code>, or <code>"none"</code>.</p></dd>
+<dd><p>Faceting mode: <code>"auto"</code> (default), <code>"gene"</code>,
+<code>"comparison"</code>, or <code>"none"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -163,9 +156,6 @@ Plot log2 fold changes as a lollipop chart (one or two comparisons)</p>
 plots them as stems and dots, with labels and a zero reference line. You can
 optionally provide two comparisons; in that case both comparisons are drawn
 side-by-side, coloured by comparison.</p>
-<p><code>facet_by = "gene"</code> provides an explicit per-gene layout, while
-<code>facet_by = "comparison"</code> mirrors the historical <code>facet_comparison = TRUE</code>
-behavior. Leaving <code>facet_by = NULL</code> preserves current defaults for existing code.</p>
     </div>
 
     <div class="section level2">

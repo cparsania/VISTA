@@ -59,9 +59,9 @@ with log2FC clipped to +/-2.</p>
 <span>  keytype <span class="op">=</span> <span class="st">"GENEID"</span>,</span>
 <span>  id_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  comparison <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sample_comparison <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  value_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  label_top_n <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  label_n <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  line_length <span class="op">=</span> <span class="fl">0.02</span>,</span>
 <span>  line_width <span class="op">=</span> <span class="fl">0.6</span>,</span>
@@ -96,20 +96,18 @@ When <code>NULL</code>, rownames(x) are used as keys.</p></dd>
 are labeled. Defaults to <code>NULL</code> (no explicit label set).</p></dd>
 
 
-<dt id="arg-comparison">comparison<a class="anchor" aria-label="anchor" href="#arg-comparison"></a></dt>
-<dd><p>Optional comparison name; when supplied, uses <code>log2fc</code> from
-<code>metadata(x)$de_results[[comparison]]</code> for colouring. If multiple
-comparisons are provided, one panel per comparison is shown (log2FC
-clipped to +/-2).</p></dd>
+<dt id="arg-sample-comparison">sample_comparison<a class="anchor" aria-label="anchor" href="#arg-sample-comparison"></a></dt>
+<dd><p>Optional comparison name (or vector of names) used
+for fold-change colouring.</p></dd>
 
 
 <dt id="arg-value-column">value_column<a class="anchor" aria-label="anchor" href="#arg-value-column"></a></dt>
 <dd><p>Optional column in <code>rowData(x)</code> used for colouring.</p></dd>
 
 
-<dt id="arg-label-top-n">label_top_n<a class="anchor" aria-label="anchor" href="#arg-label-top-n"></a></dt>
-<dd><p>Integer; number of genes with largest |value| (or random if
-no value) to label. Ignored when <code>genes</code> is provided. Set to 0 to disable labels.</p></dd>
+<dt id="arg-label-n">label_n<a class="anchor" aria-label="anchor" href="#arg-label-n"></a></dt>
+<dd><p>Integer; number of genes with the largest absolute fold-change
+to label when <code>genes</code> is not supplied. Set to 0 to disable labels.</p></dd>
 
 
 <dt id="arg-display-id">display_id<a class="anchor" aria-label="anchor" href="#arg-display-id"></a></dt>

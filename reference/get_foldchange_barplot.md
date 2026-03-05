@@ -1,9 +1,8 @@
 # Plot fold-change barplots across comparisons for selected genes
 
 Plots log2 fold changes for selected genes across one or more
-comparisons. `facet_by` provides an explicit, backward-compatible way to
-request per-gene or per-comparison panels without changing the current
-`facet` / `facet_comparison` defaults.
+comparisons. `facet_by` controls per-gene or per-comparison layout
+explicitly.
 
 ## Usage
 
@@ -12,13 +11,11 @@ get_foldchange_barplot(
   x,
   genes,
   sample_comparisons = NULL,
-  facet = TRUE,
   coord_flip = FALSE,
   display_id = NULL,
   sort_by = c("input", "log2fc", "abs_log2fc"),
-  facet_comparison = FALSE,
   facet_scales = "free_y",
-  facet_by = NULL
+  facet_by = c("auto", "gene", "comparison", "none")
 )
 ```
 
@@ -37,10 +34,6 @@ get_foldchange_barplot(
   Optional character vector of comparison names to include; defaults to
   all available.
 
-- facet:
-
-  Logical; facet by gene when `TRUE`.
-
 - coord_flip:
 
   Logical; flip axes when `TRUE`.
@@ -56,11 +49,6 @@ get_foldchange_barplot(
   `"log2fc"` (descending log2FC of the first comparison), or
   `"abs_log2fc"` (descending max absolute log2FC across comparisons).
 
-- facet_comparison:
-
-  Logical; facet by comparison (x = gene) instead of faceting by gene (x
-  = comparison).
-
 - facet_scales:
 
   Facet scales argument passed to `facet_wrap()` when faceting (default
@@ -68,9 +56,8 @@ get_foldchange_barplot(
 
 - facet_by:
 
-  Optional faceting mode. Use `NULL` (default) to preserve the current
-  `facet` / `facet_comparison` behavior. Otherwise choose one of
-  `"auto"`, `"gene"`, `"comparison"`, or `"none"`.
+  Faceting mode: `"auto"` (default), `"gene"`, `"comparison"`, or
+  `"none"`.
 
 ## Value
 

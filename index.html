@@ -161,7 +161,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[[</span><span class="va">comp</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"log2fc"</span>, <span class="st">"padj"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># QC</span></span>
-<span><span class="fu"><a href="reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span><span class="va">vista</span>, label_replicates <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span><span class="va">vista</span>, label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_mds_plot.html">get_mds_plot</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_corr_heatmap.html">get_corr_heatmap</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="co"># Optional nonlinear view (requires uwot)</span></span>
@@ -180,7 +180,7 @@
 <span>  regulation <span class="op">=</span> <span class="st">"Up"</span></span>
 <span><span class="op">)</span><span class="op">[[</span><span class="va">comp</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span><span class="va">vista</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">]</span>, kmeans_k <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span><span class="va">vista</span>, sample_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="reference/VISTA-accessors.html">sample_info</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">$</span><span class="va">cond_long</span><span class="op">)</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">]</span>, kmeans_k <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_expression_barplot.html">get_expression_barplot</a></span><span class="op">(</span><span class="va">vista</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, by <span class="op">=</span> <span class="st">"sample"</span>, facet_by <span class="op">=</span> <span class="st">"gene"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_expression_lollipop.html">get_expression_lollipop</a></span><span class="op">(</span><span class="va">vista</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, by <span class="op">=</span> <span class="st">"sample"</span>, facet_by <span class="op">=</span> <span class="st">"gene"</span><span class="op">)</span></span>
 <span></span>
@@ -300,7 +300,7 @@
 <li><code><a href="reference/get_deg_count_pieplot.html">get_deg_count_pieplot()</a></code></li>
 <li><code><a href="reference/get_deg_count_donutplot.html">get_deg_count_donutplot()</a></code></li>
 <li><code><a href="reference/get_deg_venn_diagram.html">get_deg_venn_diagram()</a></code></li>
-<li><code><a href="reference/plot_deg_alluvial.html">plot_deg_alluvial()</a></code></li>
+<li><code><a href="reference/get_deg_alluvial.html">get_deg_alluvial()</a></code></li>
 </ul>
 </div>
 <div class="section level3">
@@ -353,11 +353,33 @@
 </h3>
 <ul>
 <li><code><a href="reference/run_cell_deconvolution.html">run_cell_deconvolution()</a></code></li>
-<li><code><a href="reference/plot_celltype_barplot.html">plot_celltype_barplot()</a></code></li>
+<li><code><a href="reference/get_celltype_barplot.html">get_celltype_barplot()</a></code></li>
 <li><code><a href="reference/get_celltype_group_dotplot.html">get_celltype_group_dotplot()</a></code></li>
 <li><code><a href="reference/get_celltype_heatmap.html">get_celltype_heatmap()</a></code></li>
 </ul>
 </div>
+</div>
+<div class="section level2">
+<h2 id="harmonized-plot-api">Harmonized Plot API<a class="anchor" aria-label="anchor" href="#harmonized-plot-api"></a>
+</h2>
+<p>VISTA plotting functions are converging on a shared argument grammar so that the same concepts use the same names across plot families.</p>
+<ul>
+<li>
+<code>sample_group</code> and <code>group_column</code> control sample filtering and grouping.</li>
+<li>
+<code>sample_comparison</code> is used for one contrast; <code>sample_comparisons</code> is used for multiple contrasts.</li>
+<li>
+<code>by</code> controls the plotting unit when a plot can switch between group-level and sample-level views.</li>
+<li>
+<code>facet_by</code> controls layout when a plot can switch between gene, group, comparison, or no faceting.</li>
+<li>
+<code>sample_order</code> controls sample sequencing for per-sample plots.</li>
+<li>
+<code>display_id</code> controls user-facing gene labels when feature annotations are available.</li>
+<li>
+<code>color_by</code>, <code>palette</code>, and <code>colors</code> are available on sample-embedding and selected distribution plots for more explicit color control.</li>
+</ul>
+<p>This keeps older code working while making new plots easier to predict.</p>
 </div>
 <div class="section level2">
 <h2 id="example-analyses">Example Analyses<a class="anchor" aria-label="anchor" href="#example-analyses"></a>

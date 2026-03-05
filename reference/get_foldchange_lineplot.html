@@ -55,12 +55,12 @@ optionally clustering genes.</p>
 <span>  <span class="va">sample_comparisons</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  km <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  facet_clusters <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  line_transparency <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  show_average_line <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  average_line_color <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  average_line_size <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  average_line_summary_method <span class="op">=</span> <span class="st">"median"</span></span>
+<span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"cluster"</span><span class="op">)</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  show_summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  summary_color <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  summary_linewidth <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  summary_fun <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"mean"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -84,28 +84,29 @@ optionally clustering genes.</p>
 <dd><p>Optional integer specifying the number of k-means clusters to compute; <code>NULL</code> disables clustering.</p></dd>
 
 
-<dt id="arg-facet-clusters">facet_clusters<a class="anchor" aria-label="anchor" href="#arg-facet-clusters"></a></dt>
-<dd><p>Logical; facet the plot by cluster when k-means clustering is requested.</p></dd>
+<dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>
+<dd><p>Faceting mode: <code>"none"</code> (default) or <code>"cluster"</code> when
+k-means clustering is requested.</p></dd>
 
 
-<dt id="arg-line-transparency">line_transparency<a class="anchor" aria-label="anchor" href="#arg-line-transparency"></a></dt>
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>Numeric alpha applied to individual gene lines.</p></dd>
 
 
-<dt id="arg-show-average-line">show_average_line<a class="anchor" aria-label="anchor" href="#arg-show-average-line"></a></dt>
+<dt id="arg-show-summary">show_summary<a class="anchor" aria-label="anchor" href="#arg-show-summary"></a></dt>
 <dd><p>Logical; overlay a summary line per cluster when <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-average-line-color">average_line_color<a class="anchor" aria-label="anchor" href="#arg-average-line-color"></a></dt>
+<dt id="arg-summary-color">summary_color<a class="anchor" aria-label="anchor" href="#arg-summary-color"></a></dt>
 <dd><p>Color used for the summary line. When <code>NULL</code>, uses
 the first comparison color (if stored) for consistency across plots.</p></dd>
 
 
-<dt id="arg-average-line-size">average_line_size<a class="anchor" aria-label="anchor" href="#arg-average-line-size"></a></dt>
+<dt id="arg-summary-linewidth">summary_linewidth<a class="anchor" aria-label="anchor" href="#arg-summary-linewidth"></a></dt>
 <dd><p>Numeric line width for the summary line.</p></dd>
 
 
-<dt id="arg-average-line-summary-method">average_line_summary_method<a class="anchor" aria-label="anchor" href="#arg-average-line-summary-method"></a></dt>
+<dt id="arg-summary-fun">summary_fun<a class="anchor" aria-label="anchor" href="#arg-summary-fun"></a></dt>
 <dd><p>Character string selecting <code>"median"</code> or <code>"mean"</code> for the summary statistic.</p></dd>
 
 </dl></div>

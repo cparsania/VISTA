@@ -50,11 +50,11 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_deg_count_barplot</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  show_counts <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  font_size <span class="op">=</span> <span class="fl">12</span>,</span>
-<span>  fill_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Up <span class="op">=</span> <span class="st">"red4"</span>, Down <span class="op">=</span> <span class="st">"blue4"</span><span class="op">)</span>,</span>
-<span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"regulation"</span>, <span class="st">"sample_comparisons"</span>, <span class="st">"sample_comparison"</span><span class="op">)</span>,</span>
-<span>  facet_scale <span class="op">=</span> <span class="st">"fixed"</span></span>
+<span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">12</span>,</span>
+<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Up <span class="op">=</span> <span class="st">"red4"</span>, Down <span class="op">=</span> <span class="st">"blue4"</span><span class="op">)</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"regulation"</span>, <span class="st">"comparison"</span><span class="op">)</span>,</span>
+<span>  facet_scales <span class="op">=</span> <span class="st">"fixed"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -70,24 +70,24 @@
 <dd><p>Optional character vector of comparison names to display.</p></dd>
 
 
-<dt id="arg-show-counts">show_counts<a class="anchor" aria-label="anchor" href="#arg-show-counts"></a></dt>
+<dt id="arg-label">label<a class="anchor" aria-label="anchor" href="#arg-label"></a></dt>
 <dd><p>Logical; overlay numeric counts above bars when <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-font-size">font_size<a class="anchor" aria-label="anchor" href="#arg-font-size"></a></dt>
+<dt id="arg-base-size">base_size<a class="anchor" aria-label="anchor" href="#arg-base-size"></a></dt>
 <dd><p>Numeric base font size for the plot.</p></dd>
 
 
-<dt id="arg-fill-colors">fill_colors<a class="anchor" aria-label="anchor" href="#arg-fill-colors"></a></dt>
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
 <dd><p>Named vector giving fill colors for <code>"Up"</code> and <code>"Down"</code> bars.</p></dd>
 
 
 <dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>
-<dd><p>Either <code>"none"</code>, <code>"regulation"</code>, or <code>"sample_comparisons"</code> (alias <code>"sample_comparison"</code>) describing the facet variable.
+<dd><p>Either <code>"none"</code>, <code>"regulation"</code>, or <code>"comparison"</code> describing the facet variable.
 Use <code>"none"</code> for a single panel.</p></dd>
 
 
-<dt id="arg-facet-scale">facet_scale<a class="anchor" aria-label="anchor" href="#arg-facet-scale"></a></dt>
+<dt id="arg-facet-scales">facet_scales<a class="anchor" aria-label="anchor" href="#arg-facet-scales"></a></dt>
 <dd><p>Scale option passed to <code>facet_wrap()</code> when faceting.</p></dd>
 
 </dl></div>

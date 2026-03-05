@@ -10,7 +10,10 @@ get_pairwise_corr_plot(
   x,
   sample_group = NULL,
   group_column = NULL,
-  genes = NULL
+  genes = NULL,
+  sample_order = c("input", "group"),
+  value_transform = c("log2", "none"),
+  title = "Pairwise Sample Correlations"
 )
 ```
 
@@ -34,6 +37,19 @@ get_pairwise_corr_plot(
 
   Optional character vector of gene IDs to include; defaults to all
   genes.
+
+- sample_order:
+
+  Ordering for selected samples: `"input"` keeps the current order,
+  while `"group"` sorts by `group_column`.
+
+- value_transform:
+
+  Value transformation: `"log2"` (default) or `"none"`.
+
+- title:
+
+  Plot title.
 
 ## Value
 

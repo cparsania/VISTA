@@ -8,12 +8,11 @@ Pie chart of DEG counts (Up/Down) across comparisons
 get_deg_count_pieplot(
   x,
   sample_comparisons = NULL,
-  show_counts = TRUE,
-  show_percent = TRUE,
-  percent_digits = 1,
-  font_size = 12,
-  fill_colors = c(Up = "red4", Down = "blue4"),
-  facet_by = c("sample_comparisons", "none"),
+  label = c("both", "count", "percent", "none"),
+  label_digits = 1,
+  base_size = 12,
+  colors = c(Up = "red4", Down = "blue4"),
+  facet_by = c("comparison", "none"),
   ncol = NULL
 )
 ```
@@ -28,30 +27,26 @@ get_deg_count_pieplot(
 
   Optional character vector of comparison names to display.
 
-- show_counts:
+- label:
 
-  Logical; include raw count labels in slices.
+  Label mode: `"both"` (default), `"count"`, `"percent"`, or `"none"`.
 
-- show_percent:
-
-  Logical; include percent labels in slices.
-
-- percent_digits:
+- label_digits:
 
   Integer number of decimals used for percentage labels.
 
-- font_size:
+- base_size:
 
   Numeric base font size for the plot.
 
-- fill_colors:
+- colors:
 
   Named vector giving fill colors for `"Up"` and `"Down"` slices.
 
 - facet_by:
 
-  Either `"sample_comparisons"` (default) to draw one pie per
-  comparison, or `"none"` for a single pie.
+  Either `"comparison"` (default) to draw one pie per comparison, or
+  `"none"` for a single pie.
 
 - ncol:
 

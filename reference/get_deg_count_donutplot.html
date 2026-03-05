@@ -50,12 +50,11 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_deg_count_donutplot</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  show_counts <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  show_percent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  percent_digits <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  font_size <span class="op">=</span> <span class="fl">12</span>,</span>
-<span>  fill_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Up <span class="op">=</span> <span class="st">"red4"</span>, Down <span class="op">=</span> <span class="st">"blue4"</span><span class="op">)</span>,</span>
-<span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample_comparisons"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"count"</span>, <span class="st">"percent"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  label_digits <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">12</span>,</span>
+<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Up <span class="op">=</span> <span class="st">"red4"</span>, Down <span class="op">=</span> <span class="st">"blue4"</span><span class="op">)</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"comparison"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  ncol <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -72,28 +71,24 @@
 <dd><p>Optional character vector of comparison names to display.</p></dd>
 
 
-<dt id="arg-show-counts">show_counts<a class="anchor" aria-label="anchor" href="#arg-show-counts"></a></dt>
-<dd><p>Logical; include raw count labels in slices.</p></dd>
+<dt id="arg-label">label<a class="anchor" aria-label="anchor" href="#arg-label"></a></dt>
+<dd><p>Label mode: <code>"both"</code> (default), <code>"count"</code>, <code>"percent"</code>, or <code>"none"</code>.</p></dd>
 
 
-<dt id="arg-show-percent">show_percent<a class="anchor" aria-label="anchor" href="#arg-show-percent"></a></dt>
-<dd><p>Logical; include percent labels in slices.</p></dd>
-
-
-<dt id="arg-percent-digits">percent_digits<a class="anchor" aria-label="anchor" href="#arg-percent-digits"></a></dt>
+<dt id="arg-label-digits">label_digits<a class="anchor" aria-label="anchor" href="#arg-label-digits"></a></dt>
 <dd><p>Integer number of decimals used for percentage labels.</p></dd>
 
 
-<dt id="arg-font-size">font_size<a class="anchor" aria-label="anchor" href="#arg-font-size"></a></dt>
+<dt id="arg-base-size">base_size<a class="anchor" aria-label="anchor" href="#arg-base-size"></a></dt>
 <dd><p>Numeric base font size for the plot.</p></dd>
 
 
-<dt id="arg-fill-colors">fill_colors<a class="anchor" aria-label="anchor" href="#arg-fill-colors"></a></dt>
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
 <dd><p>Named vector giving fill colors for <code>"Up"</code> and <code>"Down"</code> slices.</p></dd>
 
 
 <dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>
-<dd><p>Either <code>"sample_comparisons"</code> (default) to draw one donut per comparison,
+<dd><p>Either <code>"comparison"</code> (default) to draw one donut per comparison,
 or <code>"none"</code> for a single donut.</p></dd>
 
 

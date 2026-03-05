@@ -8,14 +8,14 @@ Plot cell-type deconvolution heatmap
 get_celltype_heatmap(
   x,
   group_column = NULL,
-  samples = NULL,
+  sample_names = NULL,
   cell_types = NULL,
   top_n = 20,
   transform = c("none", "zscore", "log1p"),
   cluster_rows = TRUE,
   cluster_columns = TRUE,
-  show_values = FALSE,
-  font_size = 11,
+  label = FALSE,
+  base_size = 11,
   return_type = c("plot", "matrix", "both")
 )
 ```
@@ -31,9 +31,9 @@ get_celltype_heatmap(
   Optional grouping column from `sample_info(x)`. If provided and
   `cluster_columns = FALSE`, samples are ordered by this group.
 
-- samples:
+- sample_names:
 
-  Optional character vector of samples to include.
+  Optional character vector of sample names to include.
 
 - cell_types:
 
@@ -55,11 +55,11 @@ get_celltype_heatmap(
 
   Logical; hierarchical cluster samples.
 
-- show_values:
+- label:
 
   Logical; overlay numeric values on tiles.
 
-- font_size:
+- base_size:
 
   Base font size.
 
