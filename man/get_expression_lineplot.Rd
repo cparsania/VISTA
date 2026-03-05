@@ -9,10 +9,15 @@ get_expression_lineplot(
   genes,
   sample_group = NULL,
   group_column = NULL,
+  by = c("sample", "group"),
   value_transform = c("log2", "zscore", "none"),
-  summarise_groups = FALSE,
-  facet_by_group = FALSE,
-  color_palette = "Dark 3"
+  facet_by = c("none", "group", "gene"),
+  sample_order = c("input", "group", "expression"),
+  palette = NULL,
+  colors = NULL,
+  line_width = 1,
+  point_size = 2,
+  base_size = 12
 )
 }
 \arguments{
@@ -24,13 +29,25 @@ get_expression_lineplot(
 
 \item{group_column}{Optional column name in \code{sample_info} defining the grouping/faceting variable.}
 
+\item{by}{Plot unit: \code{"sample"} (default) or \code{"group"} to average
+replicates before plotting.}
+
 \item{value_transform}{Transformation applied to expression values; one of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
 
-\item{summarise_groups}{Logical; if \code{TRUE}, averages replicates per group before plotting.}
+\item{facet_by}{Faceting mode: \code{"none"} (default), \code{"group"}, or \code{"gene"}.}
 
-\item{facet_by_group}{Logical; facet the plot by the grouping column when \code{TRUE}.}
+\item{sample_order}{Ordering used for sample-level plots: \code{"input"},
+\code{"group"}, or \code{"expression"}.}
 
-\item{color_palette}{Qualitative palette name used for gene colors.}
+\item{palette}{Optional qualitative palette name used for gene colours.}
+
+\item{colors}{Optional named character vector of manual gene colours.}
+
+\item{line_width}{Line width.}
+
+\item{point_size}{Point size.}
+
+\item{base_size}{Base theme size.}
 }
 \value{
 An object returned by this function.

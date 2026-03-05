@@ -9,9 +9,11 @@ get_expression_violinplot(
   genes = NULL,
   sample_group = NULL,
   group_column = NULL,
+  by = "group",
   value_transform = c("log2", "zscore", "none"),
   summarise = FALSE,
-  facet = TRUE
+  facet_by = c("auto", "gene", "none"),
+  sample_order = c("input", "group", "expression")
 )
 }
 \arguments{
@@ -23,11 +25,19 @@ get_expression_violinplot(
 
 \item{group_column}{Grouping column in \code{sample_info}; defaults to the stored grouping.}
 
+\item{by}{Plot unit. Violin plots currently support only \code{"group"}, because
+a violin needs replicate-level distributions within groups rather than
+single values per sample.}
+
 \item{value_transform}{One of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
 
-\item{summarise}{Logical; if \code{TRUE}, averages replicates per group before plotting.}
+\item{summarise}{Logical retained for compatibility. Violin plots always use
+replicate-level values, so \code{summarise = TRUE} is ignored with a warning.}
 
-\item{facet}{Logical; facet by group.}
+\item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"gene"}, or \code{"none"}.}
+
+\item{sample_order}{Ordering for sample-level x-axis display: \code{"input"},
+\code{"group"}, or \code{"expression"} before values are grouped into violins.}
 }
 \value{
 A \code{ggplot2} object.

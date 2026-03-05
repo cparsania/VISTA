@@ -207,9 +207,9 @@ test_that("get_pathway_heatmap returns mapped genes and supports SYMBOL mapping"
   enr <- clusterProfiler::enricher(gene = symbols[1:12], TERM2GENE = term2gene)
 
   mapped_genes <- get_pathway_heatmap(
-    vista_obj = vista,
+    x = vista,
     enrichment = enr,
-    samples = unique(SummarizedExperiment::colData(vista)$cond_long),
+    sample_group = unique(SummarizedExperiment::colData(vista)$cond_long),
     top_n = 1,
     gene_id_column = "SYMBOL",
     return_type = "genes"
@@ -234,9 +234,9 @@ test_that("get_pathway_heatmap returns heatmap object when optional deps install
   enr <- clusterProfiler::enricher(gene = genes[1:12], TERM2GENE = term2gene)
 
   out <- get_pathway_heatmap(
-    vista_obj = vista,
+    x = vista,
     enrichment = enr,
-    samples = unique(SummarizedExperiment::colData(vista)$cond_long),
+    sample_group = unique(SummarizedExperiment::colData(vista)$cond_long),
     pathways = "Pathway_A",
     return_type = "both",
     value_transform = "zscore",
@@ -261,13 +261,85 @@ test_that("get_pathway_heatmap blocks genes and samples override via ...", {
 
   expect_error(
     get_pathway_heatmap(
-      vista_obj = vista,
+      x = vista,
       enrichment = enr,
-      samples = unique(SummarizedExperiment::colData(vista)$cond_long),
+      sample_group = unique(SummarizedExperiment::colData(vista)$cond_long),
       pathways = "Pathway_A",
       genes = genes[1:5],
       return_type = "genes"
     ),
     "managed by"
+  )
+})
+
+test_that("get_pathway_genes validates pathway filters and top_n", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:20]
+
+  term2gene <- data.frame(
+    term = c(rep("Pathway_A", 10), rep("Pathway_B", 10)),
+    gene = genes,
+    stringsAsFactors = FALSE
+  )
+  enr <- clusterProfiler::enricher(gene = genes[1:12], TERM2GENE = term2gene)
+
+  expect_error(
+    get_pathway_genes(enr, pathways = "Not_A_Pathway"),
+    "were not found"
+  )
+
+  expect_error(
+    get_pathway_genes(enr, top_n = 0),
+    "top_n"
+  )
+
+  id_tbl <- get_pathway_genes(enr, top_n = 1, pathway_column = "ID", return_type = "long")
+  expect_true(all(id_tbl$pathway_id %in% as.data.frame(enr@result)$ID))
+})
+
+test_that("get_pathway_heatmap supports intersection and max_genes cap", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:30]
+
+  term2gene <- data.frame(
+    term = c(rep("Pathway_A", 15), rep("Pathway_B", 15)),
+    gene = c(genes[1:15], genes[8:22]),
+    stringsAsFactors = FALSE
+  )
+  enr <- clusterProfiler::enricher(gene = genes[1:20], TERM2GENE = term2gene)
+
+  expected <- intersect(genes[1:15], genes[8:22])
+  got <- get_pathway_heatmap(
+    x = vista,
+    enrichment = enr,
+    sample_group = unique(SummarizedExperiment::colData(vista)$cond_long),
+    top_n = 2,
+    gene_mode = "intersection",
+    max_genes = 5,
+    return_type = "genes"
+  )
+
+  expect_lte(length(got), 5)
+  expect_true(all(got %in% expected))
+})
+
+test_that("get_gsea errors when no fold-change column is available", {
+  vista <- make_small_vista()
+  comp <- names(comparisons(vista))[1]
+
+  md <- S4Vectors::metadata(vista)
+  tbl <- as.data.frame(md$de_results[[comp]], stringsAsFactors = FALSE)
+  tbl$log2fc <- NULL
+  tbl$log2FoldChange <- NULL
+  tbl$logFC <- NULL
+  md$de_results_by_method <- NULL
+  md$de_summary_by_method <- NULL
+  md$de_active_source <- NULL
+  md$de_results[[comp]] <- tbl
+  S4Vectors::metadata(vista) <- md
+
+  expect_error(
+    get_gsea(vista, sample_comparison = comp, set_type = "msigdb"),
+    "No log2FC"
   )
 })

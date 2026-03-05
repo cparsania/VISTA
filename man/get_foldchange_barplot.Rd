@@ -8,13 +8,11 @@ get_foldchange_barplot(
   x,
   genes,
   sample_comparisons = NULL,
-  facet = TRUE,
   coord_flip = FALSE,
   display_id = NULL,
   sort_by = c("input", "log2fc", "abs_log2fc"),
-  facet_comparison = FALSE,
   facet_scales = "free_y",
-  facet_by = NULL
+  facet_by = c("auto", "gene", "comparison", "none")
 )
 }
 \arguments{
@@ -23,8 +21,6 @@ get_foldchange_barplot(
 \item{genes}{Character vector of gene IDs to plot.}
 
 \item{sample_comparisons}{Optional character vector of comparison names to include; defaults to all available.}
-
-\item{facet}{Logical; facet by gene when \code{TRUE}.}
 
 \item{coord_flip}{Logical; flip axes when \code{TRUE}.}
 
@@ -35,15 +31,11 @@ gene matching still uses \code{gene_id}.}
 \code{"log2fc"} (descending log2FC of the first comparison), or \code{"abs_log2fc"}
 (descending max absolute log2FC across comparisons).}
 
-\item{facet_comparison}{Logical; facet by comparison (x = gene) instead of
-faceting by gene (x = comparison).}
-
 \item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} when faceting
 (default \code{"free_y"}).}
 
-\item{facet_by}{Optional faceting mode. Use \code{NULL} (default) to preserve the
-current \code{facet} / \code{facet_comparison} behavior. Otherwise choose one of
-\code{"auto"}, \code{"gene"}, \code{"comparison"}, or \code{"none"}.}
+\item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"gene"},
+\code{"comparison"}, or \code{"none"}.}
 }
 \value{
 An object returned by this function.
@@ -52,9 +44,7 @@ A \code{ggplot2} object.
 }
 \description{
 Plots log2 fold changes for selected genes across one or more comparisons.
-\code{facet_by} provides an explicit, backward-compatible way to request
-per-gene or per-comparison panels without changing the current
-\code{facet} / \code{facet_comparison} defaults.
+\code{facet_by} controls per-gene or per-comparison layout explicitly.
 }
 \examples{
 NULL

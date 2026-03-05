@@ -1028,6 +1028,17 @@ run_limma_analysis <- function(
     cli::cli_abort("Package {.pkg EnhancedVolcano} must be installed to draw volcano plots.")
   }
   toptable <- as.data.frame(toptable, stringsAsFactors = FALSE)
+  dots <- list(...)
+
+  # Backward-compatible argument aliases commonly used in older VISTA vignettes.
+  if ("lab_size" %in% names(dots) && !"labSize" %in% names(dots)) {
+    dots$labSize <- dots$lab_size
+    dots$lab_size <- NULL
+  }
+  if ("point_size" %in% names(dots) && !"pointSize" %in% names(dots)) {
+    dots$pointSize <- dots$point_size
+    dots$point_size <- NULL
+  }
 
   # --- auto-detect columns if not supplied
   if (is.null(x)) {
@@ -1099,16 +1110,19 @@ run_limma_analysis <- function(
   }
 
   # --- call EnhancedVolcano (it expects symmetric FCcutoff)
-  plt <- EnhancedVolcano::EnhancedVolcano(
-    toptable = toptable,
-    lab = lab,
-    x = x,
-    y = y,
-    pCutoff = pCutoff,
-    FCcutoff = max(abs(fc_up), abs(fc_down)),
-    colCustom = if (col_by_regul) keyvals else NULL,
-    ...
+  ev_args <- c(
+    list(
+      toptable = toptable,
+      lab = lab,
+      x = x,
+      y = y,
+      pCutoff = pCutoff,
+      FCcutoff = max(abs(fc_up), abs(fc_down)),
+      colCustom = if (col_by_regul) keyvals else NULL
+    ),
+    dots
   )
+  plt <- do.call(EnhancedVolcano::EnhancedVolcano, ev_args)
 
   if (isTRUE(return_keyvals)) {
     return(structure(plt, keyvals = keyvals))

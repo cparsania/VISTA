@@ -88,7 +88,7 @@ names(comparisons(vista))
 deg_summary(vista)
 
 # QC and DE interpretation
-get_pca_plot(vista, label_replicates = TRUE)
+get_pca_plot(vista, label = TRUE)
 get_volcano_plot(vista, sample_comparison = names(comparisons(vista))[1])
 
 # Enrichment

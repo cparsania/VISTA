@@ -337,25 +337,25 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
 
   plot_paths <- list()
   plot_paths$pca <- safe_plot("pca", "qc_pca.png", function() {
-    get_pca_plot(vista_obj, label_replicates = TRUE)
+    get_pca_plot(vista_obj, label = TRUE)
   }, width = 9, height = 6)
   plot_paths$mds <- safe_plot("mds", "qc_mds.png", function() {
-    get_mds_plot(vista_obj, label_replicates = TRUE)
+    get_mds_plot(vista_obj, label = TRUE)
   }, width = 9, height = 6)
   plot_paths$corr_heatmap <- safe_plot("corr_heatmap", "qc_corr_heatmap.png", function() {
     get_corr_heatmap(vista_obj)
   }, width = 8, height = 7)
   plot_paths$deg_bar <- safe_plot("deg_bar", "de_deg_count_barplot.png", function() {
-    get_deg_count_barplot(vista_obj, facet_by = "sample_comparisons")
+    get_deg_count_barplot(vista_obj, facet_by = "comparison")
   }, width = 10, height = 6)
   if (cfg$include_deg_pie) {
     plot_paths$deg_pie <- safe_plot("deg_pie", "de_deg_count_pieplot.png", function() {
-      get_deg_count_pieplot(vista_obj, facet_by = "sample_comparisons")
+      get_deg_count_pieplot(vista_obj, facet_by = "comparison")
     }, width = 10, height = 5)
   }
   if (cfg$include_deg_donut) {
     plot_paths$deg_donut <- safe_plot("deg_donut", "de_deg_count_donutplot.png", function() {
-      get_deg_count_donutplot(vista_obj, facet_by = "sample_comparisons")
+      get_deg_count_donutplot(vista_obj, facet_by = "comparison")
     }, width = 10, height = 5)
   }
   plot_paths$volcano <- safe_plot("volcano", paste0("de_volcano_", comp_tag, ".png"), function() {
@@ -382,8 +382,8 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
   if (length(heatmap_genes) >= 2) {
     hm_out <- tryCatch(
       get_expression_heatmap(
-        vista_obj = vista_obj,
-        samples = group_values,
+        x = vista_obj,
+        sample_group = group_values,
         genes = heatmap_genes,
         value_transform = "zscore",
         annotate_columns = hm_annotate,
@@ -520,9 +520,9 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
       "get_pathway_heatmap" %in% getNamespaceExports("VISTA")) {
     pathway_hm <- tryCatch(
       get_pathway_heatmap(
-        vista_obj = vista_obj,
+        x = vista_obj,
         enrichment = msig_enr,
-        samples = group_values,
+        sample_group = group_values,
         top_n = cfg$pathway_top_n,
         gene_mode = cfg$pathway_gene_mode,
         max_genes = cfg$pathway_max_genes,

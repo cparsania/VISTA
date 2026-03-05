@@ -9,12 +9,10 @@ get_volcano_plot(
   sample_comparison,
   log2fc_cutoff = 1,
   pval_cutoff = 0.05,
-  genes_to_display = NULL,
-  lab_size = 3,
+  label_genes = NULL,
+  label_size = 3,
   point_size = 1,
-  col_up = "#a40000",
-  col_down = "#007e2f",
-  col_other = "grey",
+  colors = c(Up = "#a40000", Down = "#007e2f", Other = "grey"),
   repair_genes = TRUE,
   display_id = NULL,
   display_from = NULL,
@@ -31,17 +29,14 @@ get_volcano_plot(
 
 \item{pval_cutoff}{Numeric p-value threshold used to color significant points.}
 
-\item{genes_to_display}{Optional character vector of gene identifiers to force-label.}
+\item{label_genes}{Optional character vector of gene identifiers to force-label.}
 
-\item{lab_size}{Numeric label text size.}
+\item{label_size}{Numeric label text size.}
 
 \item{point_size}{Numeric point size.}
 
-\item{col_up}{Color assigned to up-regulated genes.}
-
-\item{col_down}{Color assigned to down-regulated genes.}
-
-\item{col_other}{Color assigned to non-significant genes.}
+\item{colors}{Named colour vector with entries for \code{"Up"}, \code{"Down"}, and
+\code{"Other"}.}
 
 \item{repair_genes}{Logical; when \code{TRUE}, split \code{gene_id} values like \code{ID:SYMBOL} to display the symbol.}
 
@@ -96,7 +91,7 @@ genes_of_interest <- rownames(vista)[1:5]
 get_volcano_plot(
   vista,
   sample_comparison = comps[1],
-  genes_to_display = genes_of_interest
+  label_genes = genes_of_interest
 )
 }
 

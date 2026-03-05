@@ -22,7 +22,7 @@ get_expression_chromosome_plot(
   summarise_replicates = FALSE,
   summarise_method = c("mean", "median"),
   group_value = NULL,
-  label_top_n = 20,
+  label_n = 20,
   label_genes = c("top", "all", "none"),
   display_id = NULL,
   line_length = 0.02,
@@ -83,8 +83,8 @@ aggregate replicates by \code{group_column} before plotting.}
 \item{group_value}{Optional group label (from \code{group_column}); when supplied,
 uses mean expression for that group for colouring (assay \code{norm_counts}).}
 
-\item{label_top_n}{Integer; number of genes with largest |value| (or random if
-no value) to label. Ignored when \code{genes} is provided. Set to 0 to disable labels.}
+\item{label_n}{Integer; number of genes with the largest absolute values to
+label when \code{genes} is not supplied. Set to 0 to disable automatic labels.}
 
 \item{label_genes}{One of \code{"top"} (default), \code{"all"}, or \code{"none"} controlling
 chromosome text labels when \code{genes} is not supplied.}
@@ -133,7 +133,7 @@ are derived from group colours when plotting individual replicates.
 assay columns are used (samples after \code{sample_group} filtering, or groups
 after replicate summarisation).
 \item Labels are kept consistent across \code{value_column}s: if \code{genes} is provided
-it is used for all panels; otherwise the top \code{label_top_n} (by absolute
+it is used for all panels; otherwise the top \code{label_n} (by absolute
 value in the first \code{value_column}) are used for all panels.
 \item When \code{value_from = "assay"}, the specified assay column is copied into
 \code{rowData} on the fly so it can be used for colouring.

@@ -10,14 +10,16 @@ get_corr_heatmap(
   group_column = NULL,
   genes = NULL,
   corr_method = "pearson",
-  vis_method = "square",
-  plot_type = "full",
-  cluster_samples = TRUE,
+  triangle = c("full", "lower", "upper"),
+  cluster_by = c("correlation", "group", "input", "none"),
   show_diagonal = TRUE,
-  show_corr_values = TRUE,
-  col_corr_values = "black",
-  size_corr_values = 4,
-  scale_range = NULL,
+  label = TRUE,
+  show_corr_values = NULL,
+  label_color = "black",
+  col_corr_values = NULL,
+  label_size = 4,
+  limits = NULL,
+  base_size = 12,
   viridis_option = "viridis",
   viridis_direction = 1,
   viridis_begin = 0,
@@ -35,21 +37,29 @@ get_corr_heatmap(
 
 \item{corr_method}{Correlation method passed to \code{stats::cor()} (e.g., \code{"pearson"}).}
 
-\item{vis_method}{Currently unused; retained for backward compatibility.}
+\item{triangle}{Either \code{"full"}, \code{"lower"}, or \code{"upper"} to control which triangle is drawn.}
 
-\item{plot_type}{Either \code{"full"}, \code{"lower"}, or \code{"upper"} to control which triangle is drawn.}
-
-\item{cluster_samples}{Logical; hierarchically cluster samples before plotting when \code{TRUE}.}
+\item{cluster_by}{Ordering strategy for samples: \code{"correlation"} (default),
+\code{"group"}, \code{"input"}, or \code{"none"}.}
 
 \item{show_diagonal}{Logical; include the correlation diagonal when \code{TRUE}.}
 
-\item{show_corr_values}{Logical; overlay correlation coefficients as text.}
+\item{label}{Logical; overlay correlation coefficients as text.}
 
-\item{col_corr_values}{Color for the text labels.}
+\item{show_corr_values}{Deprecated alias for \code{label}. When supplied, it
+overrides \code{label}.}
 
-\item{size_corr_values}{Numeric text size multiplier.}
+\item{label_color}{Color for the text labels.}
 
-\item{scale_range}{Optional numeric vector of length two giving limits for the color scale.}
+\item{col_corr_values}{Deprecated alias for \code{label_color}. When supplied, it
+overrides \code{label_color}.}
+
+\item{label_size}{Numeric text size multiplier.}
+
+\item{limits}{Optional numeric vector of length two giving limits for the
+color scale.}
+
+\item{base_size}{Base theme size.}
 
 \item{viridis_option}{Character viridis palette name.}
 

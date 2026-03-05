@@ -9,17 +9,19 @@ get_expression_raincloud(
   genes = NULL,
   sample_group = NULL,
   group_column = NULL,
+  by = "group",
   value_transform = c("log2", "zscore", "none"),
   summarise = FALSE,
-  facet = TRUE,
+  facet_by = c("auto", "gene", "none"),
+  sample_order = c("input", "group", "expression"),
   rain_side = c("r", "l", "f", "f1x1", "f2x2"),
   id.long.var = NULL,
-  point_alpha = 0.5,
+  alpha = 0.5,
   point_size = 1.5,
   p.label = "p.signif",
   stats_group = FALSE,
   stats_method = "t.test",
-  label_points = FALSE,
+  label = FALSE,
   label_column = "gene",
   label_size = 3,
   label_max_overlaps = 50,
@@ -37,11 +39,21 @@ get_expression_raincloud(
 
 \item{group_column}{Grouping column in \code{sample_info}; defaults to the stored grouping.}
 
+\item{by}{Plot unit. Violin plots currently support only \code{"group"}, because
+a violin needs replicate-level distributions within groups rather than
+single values per sample.}
+
 \item{value_transform}{One of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
 
-\item{summarise}{Logical; if \code{TRUE}, averages replicates per group before plotting.}
+\item{summarise}{Logical; when \code{TRUE}, collapse replicates within each
+group for each gene (one value per gene per group). This is useful for
+pooled multi-gene raincloud plots where each dot represents one gene-level
+summary in a group.}
 
-\item{facet}{Logical; facet by group.}
+\item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"gene"}, or \code{"none"}.}
+
+\item{sample_order}{Ordering for sample-level x-axis display: \code{"input"},
+\code{"group"}, or \code{"expression"} before values are grouped into violins.}
 
 \item{rain_side}{Side specification passed to \code{ggrain::geom_rain()}; one of
 \code{"r"}, \code{"l"}, \code{"f"}, \code{"f1x1"}, or \code{"f2x2"}.}
@@ -49,7 +61,7 @@ get_expression_raincloud(
 \item{id.long.var}{Optional column name passed to \code{ggrain::geom_rain()} as
 \code{id.long.var} to identify repeated measurements.}
 
-\item{point_alpha}{Alpha for jittered points.}
+\item{alpha}{Alpha for jittered points.}
 
 \item{point_size}{Point size for jittered points.}
 
@@ -59,7 +71,7 @@ get_expression_raincloud(
 
 \item{stats_method}{Statistical method passed to \code{ggpubr::stat_compare_means()}.}
 
-\item{label_points}{Logical; add text labels to points using \code{ggrepel}.}
+\item{label}{Logical; add text labels to points using \code{ggrepel}.}
 
 \item{label_column}{Column name in the plotting data used for labels.
 Defaults to \code{"gene"} for expression raincloud plots.}
@@ -97,7 +109,7 @@ showing gene-level trajectories across x levels.
 designs when a subject ID exists in \code{sample_info}.
 \item \code{id.long.var = "sample"} or the grouping variable is usually less
 informative and can over-connect points.
-\item Point labels (\code{label_points = TRUE}) work best with \code{facet = FALSE} or
+\item Point labels (\code{label = TRUE}) work best with \code{facet_by = "none"} or
 a small number of genes.
 }
 

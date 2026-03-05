@@ -7,10 +7,10 @@ test_that("get_pca_plot produces valid plot", {
 test_that("get_pca_plot handles label_replicates parameter", {
   vista <- make_small_vista()
 
-  p_no_labels <- get_pca_plot(vista, label_replicates = FALSE)
+  p_no_labels <- get_pca_plot(vista, label = FALSE)
   expect_s3_class(p_no_labels, "ggplot")
 
-  p_with_labels <- get_pca_plot(vista, label_replicates = TRUE)
+  p_with_labels <- get_pca_plot(vista, label = TRUE)
   expect_s3_class(p_with_labels, "ggplot")
 })
 
@@ -19,6 +19,28 @@ test_that("get_pca_plot handles top_n_genes parameter", {
 
   p <- get_pca_plot(vista, top_n_genes = 50)
   expect_s3_class(p, "ggplot")
+})
+
+test_that("embedding plots support harmonized color and label arguments", {
+  vista <- make_small_vista()
+
+  p_pca <- get_pca_plot(
+    vista,
+    color_by = "cell",
+    label = TRUE,
+    use_vista_colors = FALSE,
+    palette = "Set 2"
+  )
+  expect_s3_class(p_pca, "ggplot")
+
+  p_mds <- get_mds_plot(
+    vista,
+    color_by = "cell",
+    label = FALSE,
+    use_vista_colors = FALSE,
+    colors = c("#1b9e77", "#d95f02", "#7570b3", "#e7298a")
+  )
+  expect_s3_class(p_mds, "ggplot")
 })
 
 test_that("get_mds_plot produces valid plot", {
@@ -84,7 +106,7 @@ test_that("get_ma_plot handles topn parameter", {
   vista <- make_small_vista()
   comps <- comparisons(vista)
 
-  p <- get_ma_plot(vista, sample_comparison = names(comps)[1], topn = 5)
+  p <- get_ma_plot(vista, sample_comparison = names(comps)[1], label_n = 5)
   expect_s3_class(p, "ggplot")
 })
 
@@ -141,7 +163,7 @@ test_that("get_deg_count_donutplot summarizes correctly", {
 
 test_that("get_deg_count_donutplot handles label toggles", {
   vista <- make_small_vista()
-  p <- get_deg_count_donutplot(vista, show_counts = FALSE, show_percent = TRUE)
+  p <- get_deg_count_donutplot(vista, label = "percent")
   expect_s3_class(p, "ggplot")
 })
 
@@ -151,7 +173,7 @@ test_that("get_expression_heatmap returns ComplexHeatmap object", {
   genes <- rownames(vista)[1:20]
   groups <- unique(SummarizedExperiment::colData(vista)$cond_long)
 
-  hm <- get_expression_heatmap(vista, genes = genes, samples = groups)
+  hm <- get_expression_heatmap(vista, sample_group = groups, genes = genes)
   expect_true(!is.null(hm))
 })
 
@@ -161,6 +183,6 @@ test_that("get_expression_heatmap handles kmeans clustering", {
   genes <- rownames(vista)[1:30]
   groups <- unique(SummarizedExperiment::colData(vista)$cond_long)
 
-  hm <- get_expression_heatmap(vista, genes = genes, samples = groups, kmeans_k = 3)
+  hm <- get_expression_heatmap(vista, genes = genes, sample_group = groups, kmeans_k = 3)
   expect_true(!is.null(hm))
 })

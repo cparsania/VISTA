@@ -72,15 +72,15 @@ make_mock_deconv_vista <- function(include_sample_names = FALSE, include_text_co
   v
 }
 
-test_that("plot_celltype_barplot supports top_n and normalization", {
+test_that("get_celltype_barplot supports top_n and normalization", {
   v <- make_mock_deconv_vista()
 
-  p <- plot_celltype_barplot(
+  p <- get_celltype_barplot(
     v,
     top_n = 2,
     collapse_other = TRUE,
     normalize = "sample",
-    facet_by_group = FALSE
+    facet_by = "none"
   )
 
   expect_s3_class(p, "ggplot")
@@ -90,9 +90,9 @@ test_that("plot_celltype_barplot supports top_n and normalization", {
   expect_equal(as.numeric(sample_sums), rep(1, length(sample_sums)))
 })
 
-test_that("plot_celltype_barplot validates group_column", {
+test_that("get_celltype_barplot validates group_column", {
   v <- make_mock_deconv_vista()
-  expect_error(plot_celltype_barplot(v, group_column = "missing_group"), "not found")
+  expect_error(get_celltype_barplot(v, group_column = "missing_group"), "not found")
 })
 
 test_that("get_celltype_group_dotplot returns ggplot", {

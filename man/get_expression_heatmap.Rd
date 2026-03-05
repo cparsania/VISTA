@@ -5,9 +5,9 @@
 \title{Expression heatmap}
 \usage{
 get_expression_heatmap(
-  vista_obj,
-  samples,
+  x,
   genes,
+  sample_group = NULL,
   value_transform = c("zscore", "log2", "raw"),
   repair_genes = FALSE,
   color_default = TRUE,
@@ -18,7 +18,7 @@ get_expression_heatmap(
   show_row_names = FALSE,
   cluster_rows = TRUE,
   show_row_dend = TRUE,
-  row_names_font_size = 10,
+  label_size = 10,
   label_specific_rows = NULL,
   label_specific_rows_gp = grid::gpar(fontsize = 5),
   show_column_names = TRUE,
@@ -38,11 +38,12 @@ get_expression_heatmap(
 )
 }
 \arguments{
-\item{vista_obj}{A \code{VISTA} object.}
-
-\item{samples}{Character vector of group labels specifying which samples to include (based on the selected grouping column).}
+\item{x}{A \code{VISTA} object.}
 
 \item{genes}{Character vector of gene identifiers to display.}
+
+\item{sample_group}{Character vector of group labels specifying which samples
+to include (based on the selected grouping column).}
 
 \item{value_transform}{One of \code{"zscore"}, \code{"log2"}, or \code{"raw"} controlling how expression values are transformed.}
 
@@ -64,7 +65,7 @@ get_expression_heatmap(
 
 \item{show_row_dend}{Logical; display the row dendrogram.}
 
-\item{row_names_font_size}{Numeric font size for row names.}
+\item{label_size}{Numeric font size for row names.}
 
 \item{label_specific_rows}{Optional character vector of row names to highlight via \code{anno_mark()}.}
 
@@ -97,7 +98,7 @@ Defaults to the first annotation column when \code{annotate_columns} is enabled.
 
 \item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when}
 
-\item{group_column}{Optional column name in \code{sample_info} used to interpret \code{samples}.}
+\item{group_column}{Optional column name in \code{sample_info} used to interpret \code{sample_group}.}
 
 \item{...}{Additional arguments passed to \code{ComplexHeatmap::Heatmap()}.}
 }

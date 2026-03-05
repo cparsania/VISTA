@@ -12,7 +12,8 @@ get_expression_scatter(
   group_column = NULL,
   genes = NULL,
   log_transform = TRUE,
-  label_top_n = 20,
+  label_n = 20,
+  label_size = 3,
   method = c("pearson", "spearman"),
   display_id = NULL
 )
@@ -34,8 +35,10 @@ to stored grouping column).}
 
 \item{log_transform}{Logical; apply log2(x + 1) transform. Default \code{TRUE}.}
 
-\item{label_top_n}{Integer; number of most divergent genes to label
+\item{label_n}{Integer; number of most divergent genes to label
 (ranked by |x - y|). Set to 0 to disable labels.}
+
+\item{label_size}{Numeric size for labeled genes.}
 
 \item{method}{Correlation method for the subtitle; \code{"pearson"} (default) or
 \code{"spearman"}.}

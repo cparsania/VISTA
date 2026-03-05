@@ -9,12 +9,12 @@ get_foldchange_lineplot(
   sample_comparisons,
   genes = NULL,
   km = NULL,
-  facet_clusters = FALSE,
-  line_transparency = 0.5,
-  show_average_line = TRUE,
-  average_line_color = NULL,
-  average_line_size = 1,
-  average_line_summary_method = "median"
+  facet_by = c("none", "cluster"),
+  alpha = 0.5,
+  show_summary = TRUE,
+  summary_color = NULL,
+  summary_linewidth = 1,
+  summary_fun = c("median", "mean")
 )
 }
 \arguments{
@@ -26,18 +26,19 @@ get_foldchange_lineplot(
 
 \item{km}{Optional integer specifying the number of k-means clusters to compute; \code{NULL} disables clustering.}
 
-\item{facet_clusters}{Logical; facet the plot by cluster when k-means clustering is requested.}
+\item{facet_by}{Faceting mode: \code{"none"} (default) or \code{"cluster"} when
+k-means clustering is requested.}
 
-\item{line_transparency}{Numeric alpha applied to individual gene lines.}
+\item{alpha}{Numeric alpha applied to individual gene lines.}
 
-\item{show_average_line}{Logical; overlay a summary line per cluster when \code{TRUE}.}
+\item{show_summary}{Logical; overlay a summary line per cluster when \code{TRUE}.}
 
-\item{average_line_color}{Color used for the summary line. When \code{NULL}, uses
+\item{summary_color}{Color used for the summary line. When \code{NULL}, uses
 the first comparison color (if stored) for consistency across plots.}
 
-\item{average_line_size}{Numeric line width for the summary line.}
+\item{summary_linewidth}{Numeric line width for the summary line.}
 
-\item{average_line_summary_method}{Character string selecting \code{"median"} or \code{"mean"} for the summary statistic.}
+\item{summary_fun}{Character string selecting \code{"median"} or \code{"mean"} for the summary statistic.}
 }
 \value{
 An object returned by this function.

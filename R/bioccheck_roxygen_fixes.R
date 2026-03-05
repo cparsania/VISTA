@@ -196,7 +196,7 @@ NULL
 #' NULL
 NULL
 
-#' @name plot_deg_alluvial
+#' @name get_deg_alluvial
 #' @examples
 #' NULL
 NULL

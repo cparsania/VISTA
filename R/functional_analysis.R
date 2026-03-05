@@ -467,10 +467,10 @@ get_pathway_genes <- function(x,
 #' genes from selected pathways (via [get_pathway_genes()]), maps them to the
 #' `VISTA` feature IDs, and forwards to [get_expression_heatmap()].
 #'
-#' @param vista_obj A `VISTA` object.
+#' @param x A `VISTA` object.
 #' @param enrichment An `enrichResult`/`gseaResult`, or a list with element
 #'   `enrich` as returned by `get_*_enrichment()` helpers.
-#' @param samples Character vector of group labels to include (same semantics as
+#' @param sample_group Character vector of group labels to include (same semantics as
 #'   [get_expression_heatmap()]).
 #' @param pathways Optional pathway names to include. When `NULL`, top pathways
 #'   are selected using `top_n`.
@@ -481,7 +481,7 @@ get_pathway_genes <- function(x,
 #' @param gene_sep Delimiter used to parse pathway gene strings (default `"/"`).
 #' @param gene_mode How to combine pathway genes for plotting: `"union"` (default)
 #'   or `"intersection"`.
-#' @param gene_id_column Optional column in `rowData(vista_obj)` used to map
+#' @param gene_id_column Optional column in `rowData(x)` used to map
 #'   enrichment genes back to VISTA rownames (e.g., `"SYMBOL"` or `"ENTREZID"`).
 #'   Leave `NULL` when enrichment genes already match VISTA rownames.
 #' @param max_genes Optional cap on the number of genes passed to the heatmap.
@@ -521,7 +521,7 @@ get_pathway_genes <- function(x,
 #' get_pathway_heatmap(
 #'   vista,
 #'   enrichment = msig,
-#'   samples = c("control", "treatment1"),
+#'   sample_group = c("control", "treatment1"),
 #'   top_n = 3,
 #'   value_transform = "zscore",
 #'   annotate_columns = TRUE,
@@ -530,9 +530,9 @@ get_pathway_genes <- function(x,
 #' }
 #'
 #' @export
-get_pathway_heatmap <- function(vista_obj,
+get_pathway_heatmap <- function(x,
                                 enrichment,
-                                samples,
+                                sample_group = NULL,
                                 pathways = NULL,
                                 top_n = 5,
                                 pathway_column = c("Description", "ID"),
@@ -543,15 +543,15 @@ get_pathway_heatmap <- function(vista_obj,
                                 max_genes = NULL,
                                 return_type = c("heatmap", "both", "genes"),
                                 ...) {
-  stopifnot(inherits(vista_obj, "VISTA"))
+  stopifnot(inherits(x, "VISTA"))
   gene_mode <- match.arg(gene_mode)
   return_type <- match.arg(return_type)
 
   dots <- list(...)
-  blocked <- intersect(c("genes", "samples"), names(dots))
+  blocked <- intersect(c("genes", "sample_group"), names(dots))
   if (length(blocked) > 0) {
     cli::cli_abort(
-      "Argument(s) {.val {blocked}} are managed by {.fun get_pathway_heatmap}. Use {.arg pathways}/{.arg top_n} and {.arg samples}."
+      "Argument(s) {.val {blocked}} are managed by {.fun get_pathway_heatmap}. Use {.arg pathways}/{.arg top_n} and {.arg sample_group}."
     )
   }
 
@@ -581,22 +581,22 @@ get_pathway_heatmap <- function(vista_obj,
 
   mapped_genes <- selected_genes
   if (!is.null(gene_id_column)) {
-    rd <- as.data.frame(SummarizedExperiment::rowData(vista_obj), stringsAsFactors = FALSE)
+    rd <- as.data.frame(SummarizedExperiment::rowData(x), stringsAsFactors = FALSE)
     if (!gene_id_column %in% colnames(rd)) {
       cli::cli_abort(
-        "{.arg gene_id_column} '{gene_id_column}' not found in rowData(vista_obj)."
+        "{.arg gene_id_column} '{gene_id_column}' not found in rowData(x)."
       )
     }
     lookup <- as.character(rd[[gene_id_column]])
-    names(lookup) <- rownames(vista_obj)
+    names(lookup) <- rownames(x)
     mapped_genes <- names(lookup)[match(selected_genes, lookup)]
     mapped_genes <- unique(mapped_genes[!is.na(mapped_genes)])
   }
 
-  genes_in_object <- intersect(mapped_genes, rownames(vista_obj))
+  genes_in_object <- intersect(mapped_genes, rownames(x))
   if (!length(genes_in_object)) {
     cli::cli_abort(
-      "No selected pathway genes matched rownames(vista_obj). If IDs differ, supply {.arg gene_id_column}."
+      "No selected pathway genes matched rownames(x). If IDs differ, supply {.arg gene_id_column}."
     )
   }
 
@@ -617,8 +617,8 @@ get_pathway_heatmap <- function(vista_obj,
     get_expression_heatmap,
     c(
       list(
-        vista_obj = vista_obj,
-        samples = samples,
+        x = x,
+        sample_group = sample_group,
         genes = genes_in_object
       ),
       dots
@@ -947,11 +947,11 @@ get_gsea <- function(x,
 #' @param x An `enrichResult`, `gseaResult`, or `compareClusterResult` from
 #'   clusterProfiler, or a list containing an `enrich` element (e.g. output of
 #'   [get_msigdb_enrichment()]).
-#' @param vista_obj Optional `VISTA` object.
+#' @param vista Optional `VISTA` object.
 #'   Required when `color_by` is `"foldchange"` or `"regulation"`.
-#' @param comparison Character scalar naming the DE comparison in `vista_obj`
+#' @param sample_comparison Character scalar naming the DE comparison in `vista`
 #'   to pull log2FC values from.
-#'   Required when `vista_obj` is supplied.
+#'   Required when `vista` is supplied.
 #' @param pathways Optional character vector of pathway names to include.
 #'   Matches against `pathway_column`.
 #' @param top_n Number of top pathways to display when `pathways` is `NULL`
@@ -969,14 +969,14 @@ get_gsea <- function(x,
 #' @param gene_order_by Order of gene sectors in the chord plot:
 #'   `"none"` (default), `"foldchange"` (descending log2FC),
 #'   or `"abs_foldchange"` (descending absolute log2FC).
-#'   Fold-change based ordering requires `vista_obj` + `comparison`.
-#' @param gene_id_column Column in `rowData(vista_obj)` used to map enrichment
-#'   gene IDs to `vista_obj` rownames (for FC lookup).
-#' @param display_id Column in `rowData(vista_obj)` providing display-friendly
+#'   Fold-change based ordering requires `vista` + `sample_comparison`.
+#' @param gene_id_column Column in `rowData(vista)` used to map enrichment
+#'   gene IDs to `vista` rownames (for FC lookup).
+#' @param display_id Column in `rowData(vista)` providing display-friendly
 #'   gene names.
 #' @param color_by How to colour chords: `"foldchange"` (continuous gradient),
 #'   `"regulation"` (Up / Down / Other), or `"pathway"` (source pathway).
-#'   Falls back to `"pathway"` when `vista_obj` is `NULL`.
+#'   Falls back to `"pathway"` when `vista` is `NULL`.
 #' @param up_color Colour for up-regulated genes (default `"#D73027"`).
 #' @param down_color Colour for down-regulated genes (default `"#1A9850"`).
 #' @param other_color Colour for non-significant genes (default `"grey70"`).
@@ -1021,8 +1021,8 @@ get_gsea <- function(x,
 #'
 #' # With fold-change colouring
 #' get_enrichment_chord(
-#'   msig, vista_obj = vista,
-#'   comparison = names(comparisons(vista))[1],
+#'   msig, vista = vista,
+#'   sample_comparison = names(comparisons(vista))[1],
 #'   color_by = "foldchange"
 #' )
 #'
@@ -1035,8 +1035,8 @@ get_gsea <- function(x,
 #'
 #' @export
 get_enrichment_chord <- function(x,
-                                 vista_obj       = NULL,
-                                 comparison      = NULL,
+                                 vista           = NULL,
+                                 sample_comparison = NULL,
                                  pathways        = NULL,
                                  top_n           = 8,
                                  pathway_column  = c("Description", "ID"),
@@ -1120,18 +1120,18 @@ get_enrichment_chord <- function(x,
   # --- resolve fold-change if requested --------------------------------------
   fc_lookup <- NULL
   if (color_by %in% c("foldchange", "regulation")) {
-    if (is.null(vista_obj) || is.null(comparison)) {
+    if (is.null(vista) || is.null(sample_comparison)) {
       cli::cli_warn(
-        "{.arg vista_obj} and {.arg comparison} are required for {.val {color_by}} colouring. Falling back to {.val pathway}."
+        "{.arg vista} and {.arg sample_comparison} are required for {.val {color_by}} colouring. Falling back to {.val pathway}."
       )
       color_by <- "pathway"
     } else {
-      stopifnot(inherits(vista_obj, "VISTA"))
-      comps <- comparisons(vista_obj)
-      if (!comparison %in% names(comps)) {
-        cli::cli_abort("Comparison {.val {comparison}} not found in {.arg vista_obj}.")
+      stopifnot(inherits(vista, "VISTA"))
+      comps <- comparisons(vista)
+      if (!sample_comparison %in% names(comps)) {
+        cli::cli_abort("Comparison {.val {sample_comparison}} not found in {.arg vista}.")
       }
-      de_tbl <- comps[[comparison]]
+      de_tbl <- comps[[sample_comparison]]
 
       fc_col <- intersect(c("log2fc", "log2FoldChange", "logFC"), names(de_tbl))[1]
       if (is.na(fc_col)) {
@@ -1144,7 +1144,7 @@ get_enrichment_chord <- function(x,
 
         # map enrichment gene IDs -> vista rownames when gene_id_column supplied
         if (!is.null(gene_id_column)) {
-          rd <- as.data.frame(SummarizedExperiment::rowData(vista_obj), stringsAsFactors = FALSE)
+          rd <- as.data.frame(SummarizedExperiment::rowData(vista), stringsAsFactors = FALSE)
           if (gene_id_column %in% colnames(rd)) {
             id_map <- stats::setNames(rownames(rd), rd[[gene_id_column]])
             enrichment_genes <- unique(long_tbl$gene)
@@ -1161,8 +1161,8 @@ get_enrichment_chord <- function(x,
 
   # --- resolve display IDs --------------------------------------------------
   gene_labels <- stats::setNames(unique(long_tbl$gene), unique(long_tbl$gene))
-  if (!is.null(display_id) && !is.null(vista_obj)) {
-    rd <- as.data.frame(SummarizedExperiment::rowData(vista_obj), stringsAsFactors = FALSE)
+  if (!is.null(display_id) && !is.null(vista)) {
+    rd <- as.data.frame(SummarizedExperiment::rowData(vista), stringsAsFactors = FALSE)
     if (display_id %in% colnames(rd)) {
       lab_map <- stats::setNames(rd[[display_id]], rownames(rd))
       if (!is.null(gene_id_column) && gene_id_column %in% colnames(rd)) {
@@ -1188,7 +1188,7 @@ get_enrichment_chord <- function(x,
   if (gene_order_by != "none") {
     if (is.null(fc_lookup)) {
       cli::cli_warn(
-        "{.arg gene_order_by} = {.val {gene_order_by}} requires fold-change lookup ({.arg vista_obj} + {.arg comparison}). Using default gene order."
+        "{.arg gene_order_by} = {.val {gene_order_by}} requires fold-change lookup ({.arg vista} + {.arg sample_comparison}). Using default gene order."
       )
     } else {
       gene_fc <- fc_lookup[gene_order]

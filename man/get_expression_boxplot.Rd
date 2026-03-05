@@ -9,7 +9,6 @@ get_expression_boxplot(
   genes = NULL,
   sample_group = NULL,
   group_column = NULL,
-  facet = TRUE,
   log_transform = TRUE,
   display_id = NULL,
   display_from = NULL,
@@ -19,9 +18,10 @@ get_expression_boxplot(
   p.label = "p.signif",
   comparisons = NULL,
   pool_genes = FALSE,
-  x_by = "group",
-  facet_by = "none",
-  fill_by = NULL
+  by = "group",
+  facet_by = "auto",
+  fill_by = NULL,
+  sample_order = c("input", "group", "expression")
 )
 }
 \arguments{
@@ -32,8 +32,6 @@ get_expression_boxplot(
 \item{sample_group}{Optional character vector specifying which groups (as defined by \code{group_column}) to include.}
 
 \item{group_column}{Optional column name in \code{sample_info} used as the grouping variable.}
-
-\item{facet}{Logical; facet the plot when \code{facet_by} is not \code{"none"}.}
 
 \item{log_transform}{Logical; apply log2(x + 1) transform before plotting.}
 
@@ -57,23 +55,26 @@ is not found in \code{rowData}).}
 \item{pool_genes}{Logical; when \code{TRUE}, pool selected genes into one
 distribution per x-axis category (scenario 1).}
 
-\item{x_by}{When \code{pool_genes = TRUE}, either \code{"group"} or \code{"sample"} (x-axis and optional fill).
-When \code{pool_genes = FALSE}, either \code{"group"} or \code{"gene"} (x-axis for per-gene distributions).}
+\item{by}{When \code{pool_genes = TRUE}, either \code{"group"} or \code{"sample"} (x-axis
+and optional fill). When \code{pool_genes = FALSE}, either \code{"group"} or
+\code{"gene"} (x-axis for per-gene distributions).}
 
 \item{facet_by}{Faceting control: for pooled genes, \code{"group"} or \code{"none"}; for per-gene,
-\code{"none"} (default) or \code{"gene"}.}
+\code{"none"} (default) or \code{"gene"}. \code{"auto"} selects the most readable layout.}
 
 \item{fill_by}{When \code{pool_genes = TRUE}, either \code{"x"} (default) or \code{"group"} to force group colors
-even if x_by = "sample". When \code{pool_genes = FALSE}, either \code{"gene"} or \code{"group"}.}
+even if \code{by = "sample"}. When \code{pool_genes = FALSE}, either \code{"gene"} or \code{"group"}.}
+
+\item{sample_order}{Ordering used when sample names are shown on the x-axis:
+\code{"input"}, \code{"group"}, or \code{"expression"}.}
 }
 \value{
 An object returned by this function.
 }
 \description{
 Displays per-sample or per-group distributions for selected genes using
-normalized counts. When multiple genes are supplied and \code{facet = TRUE},
-facets are per gene (not per group). When \code{facet = FALSE} with multiple
-genes, genes are shown on the x-axis and facets are per group.
+normalized counts. The x-axis unit is controlled by \code{by}, and faceting is
+controlled explicitly by \code{facet_by}.
 }
 \examples{
 NULL

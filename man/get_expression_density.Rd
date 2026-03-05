@@ -14,7 +14,10 @@ get_expression_density(
   alpha = 0.4,
   adjust = 1,
   color_by = c("group", "sample"),
-  facet_by = c("none", "group", "sample")
+  facet_by = c("none", "group", "sample"),
+  sample_order = c("input", "group", "expression"),
+  palette = NULL,
+  colors = NULL
 )
 }
 \arguments{
@@ -37,6 +40,14 @@ get_expression_density(
 \item{color_by}{Either \code{"group"} (default) or \code{"sample"} to choose fill/color variable.}
 
 \item{facet_by}{One of \code{"none"} (default), \code{"group"}, or \code{"sample"} to facet densities.}
+
+\item{sample_order}{Ordering for sample-level display: \code{"input"}, \code{"group"},
+or \code{"expression"}.}
+
+\item{palette}{Optional qualitative palette name used when generating colours.}
+
+\item{colors}{Optional named character vector of manual colours overriding
+\code{palette}.}
 }
 \value{
 A \code{ggplot2} object.

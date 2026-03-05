@@ -7,11 +7,11 @@
 get_deg_count_barplot(
   x,
   sample_comparisons = NULL,
-  show_counts = TRUE,
-  font_size = 12,
-  fill_colors = c(Up = "red4", Down = "blue4"),
-  facet_by = c("none", "regulation", "sample_comparisons", "sample_comparison"),
-  facet_scale = "fixed"
+  label = TRUE,
+  base_size = 12,
+  colors = c(Up = "red4", Down = "blue4"),
+  facet_by = c("none", "regulation", "comparison"),
+  facet_scales = "fixed"
 )
 }
 \arguments{
@@ -19,16 +19,16 @@ get_deg_count_barplot(
 
 \item{sample_comparisons}{Optional character vector of comparison names to display.}
 
-\item{show_counts}{Logical; overlay numeric counts above bars when \code{TRUE}.}
+\item{label}{Logical; overlay numeric counts above bars when \code{TRUE}.}
 
-\item{font_size}{Numeric base font size for the plot.}
+\item{base_size}{Numeric base font size for the plot.}
 
-\item{fill_colors}{Named vector giving fill colors for \code{"Up"} and \code{"Down"} bars.}
+\item{colors}{Named vector giving fill colors for \code{"Up"} and \code{"Down"} bars.}
 
-\item{facet_by}{Either \code{"none"}, \code{"regulation"}, or \code{"sample_comparisons"} (alias \code{"sample_comparison"}) describing the facet variable.
+\item{facet_by}{Either \code{"none"}, \code{"regulation"}, or \code{"comparison"} describing the facet variable.
 Use \code{"none"} for a single panel.}
 
-\item{facet_scale}{Scale option passed to \code{facet_wrap()} when faceting.}
+\item{facet_scales}{Scale option passed to \code{facet_wrap()} when faceting.}
 }
 \value{
 An object returned by this function.

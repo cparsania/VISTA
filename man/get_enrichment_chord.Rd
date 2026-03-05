@@ -6,8 +6,8 @@
 \usage{
 get_enrichment_chord(
   x,
-  vista_obj = NULL,
-  comparison = NULL,
+  vista = NULL,
+  sample_comparison = NULL,
   pathways = NULL,
   top_n = 8,
   pathway_column = c("Description", "ID"),
@@ -34,12 +34,12 @@ get_enrichment_chord(
 clusterProfiler, or a list containing an \code{enrich} element (e.g. output of
 \code{\link[=get_msigdb_enrichment]{get_msigdb_enrichment()}}).}
 
-\item{vista_obj}{Optional \code{VISTA} object.
+\item{vista}{Optional \code{VISTA} object.
 Required when \code{color_by} is \code{"foldchange"} or \code{"regulation"}.}
 
-\item{comparison}{Character scalar naming the DE comparison in \code{vista_obj}
+\item{sample_comparison}{Character scalar naming the DE comparison in \code{vista}
 to pull log2FC values from.
-Required when \code{vista_obj} is supplied.}
+Required when \code{vista} is supplied.}
 
 \item{pathways}{Optional character vector of pathway names to include.
 Matches against \code{pathway_column}.}
@@ -65,17 +65,17 @@ cap for readability.}
 \item{gene_order_by}{Order of gene sectors in the chord plot:
 \code{"none"} (default), \code{"foldchange"} (descending log2FC),
 or \code{"abs_foldchange"} (descending absolute log2FC).
-Fold-change based ordering requires \code{vista_obj} + \code{comparison}.}
+Fold-change based ordering requires \code{vista} + \code{sample_comparison}.}
 
-\item{gene_id_column}{Column in \code{rowData(vista_obj)} used to map enrichment
-gene IDs to \code{vista_obj} rownames (for FC lookup).}
+\item{gene_id_column}{Column in \code{rowData(vista)} used to map enrichment
+gene IDs to \code{vista} rownames (for FC lookup).}
 
-\item{display_id}{Column in \code{rowData(vista_obj)} providing display-friendly
+\item{display_id}{Column in \code{rowData(vista)} providing display-friendly
 gene names.}
 
 \item{color_by}{How to colour chords: \code{"foldchange"} (continuous gradient),
 \code{"regulation"} (Up / Down / Other), or \code{"pathway"} (source pathway).
-Falls back to \code{"pathway"} when \code{vista_obj} is \code{NULL}.}
+Falls back to \code{"pathway"} when \code{vista} is \code{NULL}.}
 
 \item{up_color}{Colour for up-regulated genes (default \code{"#D73027"}).}
 
@@ -140,8 +140,8 @@ get_enrichment_chord(msig)
 
 # With fold-change colouring
 get_enrichment_chord(
-  msig, vista_obj = vista,
-  comparison = names(comparisons(vista))[1],
+  msig, vista = vista,
+  sample_comparison = names(comparisons(vista))[1],
   color_by = "foldchange"
 )
 

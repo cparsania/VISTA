@@ -422,7 +422,7 @@ create_vista <- function(counts,
 #' @param x A `VISTA` object.
 #' @param assay_name Assay to extract (default: `"norm_counts"`).
 #' @param genes Optional character vector of gene IDs to keep.
-#' @param samples Optional character vector of sample IDs (or group labels when
+#' @param sample_names Optional character vector of sample IDs (or group labels when
 #'   `summarise = TRUE`) to keep.
 #' @param group_column Optional column in `sample_info` used when summarising
 #'   replicates. Defaults to the stored `group_column`.
@@ -436,7 +436,7 @@ create_vista <- function(counts,
 get_expression_matrix <- function(x,
                                   assay_name = "norm_counts",
                                   genes = NULL,
-                                  samples = NULL,
+                                  sample_names = NULL,
                                   group_column = NULL,
                                   summarise = FALSE,
                                   transform = c("none", "log2", "zscore")) {
@@ -458,9 +458,9 @@ get_expression_matrix <- function(x,
 
   if (summarise) {
     stopifnot(group_col %in% names(meta))
-    if (!is.null(samples)) {
-      # treat samples as group labels when summarising
-      meta <- meta[meta[[group_col]] %in% samples, , drop = FALSE]
+    if (!is.null(sample_names)) {
+      # treat sample_names as group labels when summarising
+      meta <- meta[meta[[group_col]] %in% sample_names, , drop = FALSE]
     }
     group_map <- split(meta$sample, meta[[group_col]])
     mat <- vapply(group_map, function(samps) rowMeans(mat[, samps, drop = FALSE]),
@@ -468,8 +468,8 @@ get_expression_matrix <- function(x,
     mat <- as.matrix(mat)
     rownames(mat) <- if (!is.null(genes)) genes[genes %in% rownames(mat)] else rownames(mat)
   } else {
-    if (!is.null(samples)) {
-      keep <- intersect(colnames(mat), samples)
+    if (!is.null(sample_names)) {
+      keep <- intersect(colnames(mat), sample_names)
       mat <- mat[, keep, drop = FALSE]
     }
   }

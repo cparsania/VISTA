@@ -13,7 +13,10 @@ get_expression_joyplot(
   alpha = 0.7,
   scale = 1.2,
   y_by = c("group", "sample"),
-  color_by = c("group", "sample")
+  color_by = c("group", "sample"),
+  sample_order = c("input", "group", "expression"),
+  palette = NULL,
+  colors = NULL
 )
 }
 \arguments{
@@ -35,6 +38,14 @@ get_expression_joyplot(
 (ridge) grouping.}
 
 \item{color_by}{Either \code{"group"} (default) or \code{"sample"} to choose fill colors.}
+
+\item{sample_order}{Ordering for sample-level display: \code{"input"}, \code{"group"},
+or \code{"expression"}.}
+
+\item{palette}{Optional qualitative palette name used when generating colours.}
+
+\item{colors}{Optional named character vector of manual colours overriding
+\code{palette}.}
 }
 \value{
 A \code{ggplot2} object.

@@ -5,7 +5,7 @@
 \title{Fold-change heatmap}
 \usage{
 get_foldchange_heatmap(
-  vista_obj,
+  x,
   sample_comparisons,
   genes,
   repair_genes = FALSE,
@@ -14,7 +14,7 @@ get_foldchange_heatmap(
   show_row_names = FALSE,
   cluster_rows = TRUE,
   show_row_dend = TRUE,
-  row_names_font_size = 10,
+  label_size = 10,
   label_specific_rows = NULL,
   label_specific_rows_gp = grid::gpar(fontsize = 5),
   show_column_names = TRUE,
@@ -32,7 +32,7 @@ get_foldchange_heatmap(
 )
 }
 \arguments{
-\item{vista_obj}{A \code{VISTA} object with stored differential expression results.}
+\item{x}{A \code{VISTA} object with stored differential expression results.}
 
 \item{sample_comparisons}{Character vector of comparison names to include.}
 
@@ -50,7 +50,7 @@ get_foldchange_heatmap(
 
 \item{show_row_dend}{Logical; display the row dendrogram.}
 
-\item{row_names_font_size}{Numeric font size for row names.}
+\item{label_size}{Numeric font size for row names.}
 
 \item{label_specific_rows}{Optional character vector of genes to highlight with \code{anno_mark()}.}
 

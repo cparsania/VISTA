@@ -8,16 +8,15 @@ get_foldchange_raincloud(
   x,
   genes = NULL,
   sample_comparisons = NULL,
-  sample_comparison = NULL,
-  facet = TRUE,
+  facet_by = c("auto", "comparison", "none"),
   rain_side = c("r", "l", "f", "f1x1", "f2x2"),
   id.long.var = NULL,
-  point_alpha = 0.5,
+  alpha = 0.5,
   point_size = 1.5,
   p.label = "p.signif",
   stats_group = FALSE,
   stats_method = "t.test",
-  label_points = FALSE,
+  label = FALSE,
   label_column = "gene_id",
   label_size = 3,
   label_max_overlaps = 50,
@@ -33,9 +32,7 @@ get_foldchange_raincloud(
 
 \item{sample_comparisons}{Optional character vector of comparison names to plot.}
 
-\item{sample_comparison}{Deprecated alias for \code{sample_comparisons}.}
-
-\item{facet}{Logical; facet each comparison when \code{TRUE}.}
+\item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"comparison"}, or \code{"none"}.}
 
 \item{rain_side}{Side specification passed to \code{ggrain::geom_rain()}; one of
 \code{"r"}, \code{"l"}, \code{"f"}, \code{"f1x1"}, or \code{"f2x2"}.}
@@ -43,7 +40,7 @@ get_foldchange_raincloud(
 \item{id.long.var}{Optional column name passed to \code{ggrain::geom_rain()} as
 \code{id.long.var} to identify repeated measurements.}
 
-\item{point_alpha}{Alpha for jittered points.}
+\item{alpha}{Alpha for jittered points.}
 
 \item{point_size}{Point size for jittered points.}
 
@@ -53,7 +50,7 @@ get_foldchange_raincloud(
 
 \item{stats_method}{Statistical method passed to \code{ggpubr::stat_compare_means()}.}
 
-\item{label_points}{Logical; add text labels to points using \code{ggrepel}.}
+\item{label}{Logical; add text labels to points using \code{ggrepel}.}
 
 \item{label_column}{Column name in the plotting data used for labels.
 Defaults to \code{"gene_id"} for fold-change raincloud plots.}
@@ -91,7 +88,7 @@ across comparisons.
 comparison is already on the x-axis.
 \item Continuous value columns (e.g. \code{log2FoldChange}) are not suitable
 identifiers for line connections.
-\item Point labels (\code{label_points = TRUE}) work best with \code{facet = FALSE}
+\item Point labels (\code{label = TRUE}) work best with \code{facet_by = "none"}
 unless only a small set of genes is shown.
 }
 

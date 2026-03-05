@@ -80,6 +80,96 @@ NULL
   deg_summary(x)
 }
 
+.resolve_plot_label_flag <- function(label = NULL,
+                                     legacy = FALSE,
+                                     legacy_arg = "label_replicates") {
+  if (is.null(label)) {
+    return(isTRUE(legacy))
+  }
+  if (!is.logical(label) || length(label) != 1L || is.na(label)) {
+    cli::cli_abort("{.arg label} must be TRUE or FALSE.")
+  }
+  if (!identical(isTRUE(label), isTRUE(legacy))) {
+    cli::cli_warn(
+      "{.arg label} overrides the legacy {.arg {legacy_arg}} argument."
+    )
+  }
+  isTRUE(label)
+}
+
+.resolve_plot_color_column <- function(meta,
+                                       group_col,
+                                       color_by = NULL,
+                                       arg = "color_by") {
+  color_col <- color_by %||% group_col
+  if (!color_col %in% colnames(meta)) {
+    cli::cli_abort(
+      "Column {.val {color_col}} not found in {.arg sample_info}; cannot map {.arg {arg}}."
+    )
+  }
+  color_col
+}
+
+.resolve_palette_values <- function(levels,
+                                    colors = NULL,
+                                    palette = NULL,
+                                    default = "Dark 3") {
+  levels <- unique(as.character(levels))
+  if (!length(levels)) return(NULL)
+
+  if (!is.null(colors)) {
+    if (!is.character(colors) || !length(colors)) {
+      cli::cli_abort("{.arg colors} must be a non-empty character vector when supplied.")
+    }
+    if (is.null(names(colors))) {
+      if (length(colors) < length(levels)) {
+        cli::cli_abort(
+          "Not enough {.arg colors} supplied for levels: {.val {levels}}."
+        )
+      }
+      colors <- colors[seq_along(levels)]
+      names(colors) <- levels
+    } else {
+      missing_levels <- setdiff(levels, names(colors))
+      if (length(missing_levels)) {
+        cli::cli_abort(
+          "{.arg colors} is missing values for levels: {.val {missing_levels}}."
+        )
+      }
+      colors <- colors[levels]
+    }
+    return(colors)
+  }
+
+  pal <- colorspace::qualitative_hcl(length(levels), palette = palette %||% default)
+  stats::setNames(pal, levels)
+}
+
+.resolve_embedding_colors <- function(x,
+                                      values,
+                                      color_col,
+                                      group_col,
+                                      use_vista_colors = TRUE,
+                                      palette = NULL,
+                                      colors = NULL) {
+  vals <- as.character(values)
+  if (!length(vals)) return(NULL)
+
+  if (isTRUE(use_vista_colors) && identical(color_col, group_col)) {
+    vista_cols <- .vista_group_colors(x, groups_present = vals)
+    if (!is.null(vista_cols) && length(vista_cols)) {
+      return(vista_cols)
+    }
+  }
+
+  .resolve_palette_values(
+    levels = vals,
+    colors = colors,
+    palette = palette,
+    default = "Dark 3"
+  )
+}
+
 # Filter sample metadata to selected groups and keep a tidy tibble
 .prepare_sample_metadata <- function(x, sample_group = NULL, group_column = NULL) {
   group_col <- group_column %||% .vista_group_col(x)
@@ -184,16 +274,23 @@ NULL
 #'   When `NULL`, all genes are used.
 #' @param top_n_genes Optional integer selecting the top most variable genes to include. Ignored
 #'   when `genes` is supplied.
-#' @param label_replicates Logical; if `TRUE`, sample names are drawn next to the points.
-#' @param label_size Numeric size of replicate labels when `label_replicates = TRUE`.
-#' @param circle_size Numeric size of the plotted points.
-#' @param sample_colors Logical; if `TRUE`, apply the stored group colors to the points.
+#' @param label Logical; if `TRUE`, sample names are drawn next to the points.
+#' @param label_size Numeric size of sample labels when `label = TRUE`.
+#' @param point_size Numeric size of the plotted points.
 #' @param shape_by Optional column name in `sample_info` used to map point shape. When `NULL`,
 #'   shapes are not mapped.
 #' @param shape_values Optional vector of shapes passed to `scale_shape_manual()` when
 #'   `shape_by` is set. Use a named vector to map shapes to specific levels.
 #' @param sample.seed Deprecated/unused; retained for backward compatibility.
 #' @param show_clusters Logical; add normal ellipses per group when `TRUE`.
+#' @param color_by Optional column name in `sample_info` used to map point colour.
+#'   Defaults to the active grouping column.
+#' @param use_vista_colors Logical; when `TRUE`, prefer the stored VISTA group
+#'   colours when colouring by the grouping column.
+#' @param palette Optional qualitative palette name used when generating colours
+#'   for non-group metadata levels.
+#' @param colors Optional named character vector of manual colours overriding
+#'   both `palette` and stored VISTA colours.
 #' @param group_column Optional column name in `sample_info` to use for grouping. Defaults to
 #'   the stored grouping column.
 #' @return A ggplot object showing the first two PCs.
@@ -216,7 +313,7 @@ NULL
 #' get_pca_plot(vista)
 #'
 #' # With sample labels
-#' get_pca_plot(vista, label_replicates = TRUE)
+#' get_pca_plot(vista, label = TRUE)
 #'
 #' # Using top variable genes
 #' get_pca_plot(vista, top_n_genes = 100)
@@ -230,20 +327,27 @@ get_pca_plot <- function(x,
                          group_column = NULL,
                          genes = NULL,
                          top_n_genes = NULL,
-                         label_replicates = FALSE,
+                         label = FALSE,
                          label_size = 3,
-                         circle_size = 10,
-                         sample_colors = TRUE,
+                         point_size = 10,
                          shape_by = NULL,
                          shape_values = NULL,
                          sample.seed = 123,
-                         show_clusters = FALSE) {
+                         show_clusters = FALSE,
+                         color_by = NULL,
+                         use_vista_colors = TRUE,
+                         palette = NULL,
+                         colors = NULL) {
 
   stopifnot(inherits(x, "VISTA"))
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
+  color_col <- .resolve_plot_color_column(meta, group_col, color_by)
+  if (!is.logical(label) || length(label) != 1L || is.na(label)) {
+    cli::cli_abort("{.arg label} must be TRUE or FALSE.")
+  }
   mat <- mat[, meta$sample, drop = FALSE]
   if (!is.null(shape_by) && !shape_by %in% colnames(meta)) {
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
@@ -264,26 +368,35 @@ get_pca_plot <- function(x,
   if (!is.null(shape_by)) {
     pca_df[[shape_by]] <- factor(pca_df[[shape_by]])
   }
+  pca_df[[color_col]] <- factor(pca_df[[color_col]])
 
-  cols <- .vista_group_colors(x, groups_present = pca_df[[group_col]])
+  cols <- .resolve_embedding_colors(
+    x = x,
+    values = pca_df[[color_col]],
+    color_col = color_col,
+    group_col = group_col,
+    use_vista_colors = use_vista_colors,
+    palette = palette,
+    colors = colors
+  )
 
   if (is.null(shape_by)) {
     gp <- ggplot2::ggplot(
       pca_df,
-      ggplot2::aes(x = PC1, y = PC2, color = .data[[group_col]], label = sample)
+      ggplot2::aes(x = PC1, y = PC2, color = .data[[color_col]], label = sample)
     )
   } else {
     gp <- ggplot2::ggplot(
       pca_df,
-      ggplot2::aes(x = PC1, y = PC2, color = .data[[group_col]], shape = .data[[shape_by]], label = sample)
+      ggplot2::aes(x = PC1, y = PC2, color = .data[[color_col]], shape = .data[[shape_by]], label = sample)
     )
   }
 
   gp <- gp +
-    ggplot2::geom_point(size = circle_size, alpha = 0.85) +
+    ggplot2::geom_point(size = point_size, alpha = 0.85) +
     ggplot2::theme_minimal(base_size = 14) +
     ggplot2::labs(
-      color = group_col,
+      color = color_col,
       title = "PCA",
       x = sprintf("PC1 (%.1f%%)", var_expl[1]),
       y = sprintf("PC2 (%.1f%%)", var_expl[2])
@@ -309,11 +422,11 @@ get_pca_plot <- function(x,
     }
   }
 
-  if (sample_colors && !is.null(cols)) {
+  if (!is.null(cols)) {
     gp <- gp + ggplot2::scale_color_manual(values = cols)
   }
 
-  if (label_replicates) {
+  if (label) {
     gp <- gp + ggrepel::geom_text_repel(ggplot2::aes(label = sample), size = label_size)
   }
 
@@ -351,14 +464,21 @@ get_pca_plot <- function(x,
 #' @param sample_group Optional character vector of groups to include (based on the column specified by `group_column`).
 #' @param genes Optional character vector of gene identifiers to restrict the matrix.
 #' @param top_n_genes Optional integer selecting the top variable genes to include.
-#' @param label_replicates Logical; draw sample labels when `TRUE`.
-#' @param label_size Numeric size of replicate labels when `label_replicates = TRUE`.
-#' @param circle_size Numeric size for points.
-#' @param sample_colors Logical; apply stored group colors when `TRUE`.
+#' @param label Logical; draw sample labels when `TRUE`.
+#' @param label_size Numeric size of sample labels when `label = TRUE`.
+#' @param point_size Numeric size for points.
 #' @param shape_by Optional column name in `sample_info` used to map point shape. When `NULL`,
 #'   shapes are not mapped.
 #' @param shape_values Optional vector of shapes passed to `scale_shape_manual()` when
 #'   `shape_by` is set. Use a named vector to map shapes to specific levels.
+#' @param color_by Optional column name in `sample_info` used for point colour.
+#'   Defaults to the active grouping column.
+#' @param use_vista_colors Logical; when `TRUE`, prefer the stored VISTA group
+#'   colours when colouring by the grouping column.
+#' @param palette Optional qualitative palette name used when generating colours
+#'   for non-group metadata levels.
+#' @param colors Optional named character vector of manual colours overriding
+#'   both `palette` and stored VISTA colours.
 #' @param group_column Optional column name in `sample_info` to use for grouping/filtering.
 #'
 #' @export
@@ -367,18 +487,25 @@ get_mds_plot <- function(x,
                          group_column = NULL,
                          genes = NULL,
                          top_n_genes = NULL,
-                         label_replicates = FALSE,
+                         label = FALSE,
                          label_size = 3,
-                         circle_size = 10,
-                         sample_colors = TRUE,
+                         point_size = 10,
                          shape_by = NULL,
-                         shape_values = NULL) {
+                         shape_values = NULL,
+                         color_by = NULL,
+                         use_vista_colors = TRUE,
+                         palette = NULL,
+                         colors = NULL) {
 
   stopifnot(inherits(x, "VISTA"))
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
+  color_col <- .resolve_plot_color_column(meta, group_col, color_by)
+  if (!is.logical(label) || length(label) != 1L || is.na(label)) {
+    cli::cli_abort("{.arg label} must be TRUE or FALSE.")
+  }
   mat <- mat[, meta$sample, drop = FALSE]
   if (!is.null(shape_by) && !shape_by %in% colnames(meta)) {
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
@@ -406,26 +533,35 @@ get_mds_plot <- function(x,
   if (!is.null(shape_by)) {
     mds_df[[shape_by]] <- factor(mds_df[[shape_by]])
   }
+  mds_df[[color_col]] <- factor(mds_df[[color_col]])
 
-  cols <- .vista_group_colors(x, groups_present = mds_df[[group_col]])
+  cols <- .resolve_embedding_colors(
+    x = x,
+    values = mds_df[[color_col]],
+    color_col = color_col,
+    group_col = group_col,
+    use_vista_colors = use_vista_colors,
+    palette = palette,
+    colors = colors
+  )
 
   if (is.null(shape_by)) {
     gp <- ggplot2::ggplot(
       mds_df,
-      ggplot2::aes(x = Dim1, y = Dim2, color = .data[[group_col]], label = sample)
+      ggplot2::aes(x = Dim1, y = Dim2, color = .data[[color_col]], label = sample)
     )
   } else {
     gp <- ggplot2::ggplot(
       mds_df,
-      ggplot2::aes(x = Dim1, y = Dim2, color = .data[[group_col]], shape = .data[[shape_by]], label = sample)
+      ggplot2::aes(x = Dim1, y = Dim2, color = .data[[color_col]], shape = .data[[shape_by]], label = sample)
     )
   }
 
   gp <- gp +
-    ggplot2::geom_point(size = circle_size, alpha = 0.85) +
+    ggplot2::geom_point(size = point_size, alpha = 0.85) +
     ggplot2::theme_minimal(base_size = 14) +
     ggplot2::labs(
-      color = group_col,
+      color = color_col,
       title = "MDS",
       x = if (!is.na(var_expl[1])) sprintf("Dim1 (%.1f%%)", var_expl[1]) else "Dim1",
       y = if (!is.na(var_expl[2])) sprintf("Dim2 (%.1f%%)", var_expl[2]) else "Dim2"
@@ -451,10 +587,10 @@ get_mds_plot <- function(x,
     }
   }
 
-  if (sample_colors && !is.null(cols)) {
+  if (!is.null(cols)) {
     gp <- gp + ggplot2::scale_color_manual(values = cols)
   }
-  if (label_replicates) {
+  if (label) {
     gp <- gp + ggrepel::geom_text_repel(ggplot2::aes(label = sample), size = label_size)
   }
   gp
@@ -478,11 +614,9 @@ get_mds_plot <- function(x,
 #'   Defaults to `group_column`.
 #' @param genes Optional character vector of gene identifiers to restrict the matrix.
 #' @param top_n_genes Optional integer selecting top variable genes to include.
-#' @param label_replicates Logical; draw sample labels when `TRUE`.
-#' @param label_size Numeric label size when `label_replicates = TRUE`.
-#' @param circle_size Numeric point size.
-#' @param sample_colors Logical; when `TRUE`, apply VISTA group colors if
-#'   coloring by the grouping column. Otherwise generate a qualitative palette.
+#' @param label Logical; draw sample labels when `TRUE`.
+#' @param label_size Numeric label size when `label = TRUE`.
+#' @param point_size Numeric point size.
 #' @param shape_by Optional column name in `sample_info` used to map point shape.
 #' @param shape_values Optional vector passed to `scale_shape_manual()` when
 #'   `shape_by` is set.
@@ -490,6 +624,12 @@ get_mds_plot <- function(x,
 #' @param min_dist UMAP `min_dist` parameter.
 #' @param metric UMAP distance metric.
 #' @param seed Integer random seed passed to UMAP.
+#' @param use_vista_colors Logical; when `TRUE`, prefer the stored VISTA group
+#'   colours when colouring by the grouping column.
+#' @param palette Optional qualitative palette name used when generating colours
+#'   for non-group metadata levels.
+#' @param colors Optional named character vector of manual colours overriding
+#'   both `palette` and stored VISTA colours.
 #'
 #' @return A ggplot object with UMAP1/UMAP2 coordinates.
 #'
@@ -517,16 +657,18 @@ get_umap_plot <- function(x,
                           color_by = NULL,
                           genes = NULL,
                           top_n_genes = NULL,
-                          label_replicates = FALSE,
+                          label = FALSE,
                           label_size = 3,
-                          circle_size = 10,
-                          sample_colors = TRUE,
+                          point_size = 10,
                           shape_by = NULL,
                           shape_values = NULL,
                           n_neighbors = 15,
                           min_dist = 0.1,
                           metric = "euclidean",
-                          seed = 123) {
+                          seed = 123,
+                          use_vista_colors = TRUE,
+                          palette = NULL,
+                          colors = NULL) {
 
   stopifnot(inherits(x, "VISTA"))
   if (!requireNamespace("uwot", quietly = TRUE)) {
@@ -536,12 +678,11 @@ get_umap_plot <- function(x,
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
-  color_col <- color_by %||% group_col
-  mat <- mat[, meta$sample, drop = FALSE]
-
-  if (!color_col %in% colnames(meta)) {
-    cli::cli_abort("Column {.val {color_col}} not found in sample_info; cannot map colors.")
+  color_col <- .resolve_plot_color_column(meta, group_col, color_by)
+  if (!is.logical(label) || length(label) != 1L || is.na(label)) {
+    cli::cli_abort("{.arg label} must be TRUE or FALSE.")
   }
+  mat <- mat[, meta$sample, drop = FALSE]
   if (!is.null(shape_by) && !shape_by %in% colnames(meta)) {
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
   }
@@ -597,7 +738,7 @@ get_umap_plot <- function(x,
   }
 
   gp <- gp +
-    ggplot2::geom_point(size = circle_size, alpha = 0.85) +
+    ggplot2::geom_point(size = point_size, alpha = 0.85) +
     ggplot2::theme_minimal(base_size = 14) +
     ggplot2::labs(
       color = color_col,
@@ -626,20 +767,20 @@ get_umap_plot <- function(x,
     }
   }
 
-  if (sample_colors) {
-    cols <- if (identical(color_col, group_col)) {
-      .vista_group_colors(x, groups_present = umap_df[[color_col]])
-    } else {
-      lvls <- levels(umap_df[[color_col]])
-      pal <- colorspace::qualitative_hcl(length(lvls), palette = "Dark 3")
-      stats::setNames(pal, lvls)
-    }
-    if (!is.null(cols) && length(cols) > 0) {
-      gp <- gp + ggplot2::scale_color_manual(values = cols)
-    }
+  cols <- .resolve_embedding_colors(
+    x = x,
+    values = umap_df[[color_col]],
+    color_col = color_col,
+    group_col = group_col,
+    use_vista_colors = use_vista_colors,
+    palette = palette,
+    colors = colors
+  )
+  if (!is.null(cols) && length(cols) > 0) {
+    gp <- gp + ggplot2::scale_color_manual(values = cols)
   }
 
-  if (label_replicates) {
+  if (label) {
     gp <- gp + ggrepel::geom_text_repel(ggplot2::aes(label = sample), size = label_size)
   }
 
@@ -659,12 +800,11 @@ get_umap_plot <- function(x,
 #' @param sample_comparison Character scalar naming the comparison to display.
 #' @param log2fc_cutoff Numeric absolute log2 fold-change threshold used to color significant points.
 #' @param pval_cutoff Numeric p-value threshold used to color significant points.
-#' @param genes_to_display Optional character vector of gene identifiers to force-label.
-#' @param lab_size Numeric label text size.
+#' @param label_genes Optional character vector of gene identifiers to force-label.
+#' @param label_size Numeric label text size.
 #' @param point_size Numeric point size.
-#' @param col_up Color assigned to up-regulated genes.
-#' @param col_down Color assigned to down-regulated genes.
-#' @param col_other Color assigned to non-significant genes.
+#' @param colors Named colour vector with entries for `"Up"`, `"Down"`, and
+#'   `"Other"`.
 #' @param repair_genes Logical; when `TRUE`, split `gene_id` values like `ID:SYMBOL` to display the symbol.
 #' @param display_id Optional ID/column name to use for plot labels. If supplied
 #'   and present in `rowData(x)`, those values are used; otherwise falls back to
@@ -708,7 +848,7 @@ get_umap_plot <- function(x,
 #' get_volcano_plot(
 #'   vista,
 #'   sample_comparison = comps[1],
-#'   genes_to_display = genes_of_interest
+#'   label_genes = genes_of_interest
 #' )
 #' }
 #'
@@ -717,18 +857,16 @@ get_volcano_plot <- function(x,
                              sample_comparison,
                              log2fc_cutoff = 1,
                              pval_cutoff = 0.05,
-                             genes_to_display = NULL,
-                             lab_size = 3,
+                             label_genes = NULL,
+                             label_size = 3,
                              point_size = 1,
-                             col_up = "#a40000",
-                             col_down = "#007e2f",
-                             col_other = "grey",
+                             colors = c(Up = "#a40000", Down = "#007e2f", Other = "grey"),
                              repair_genes = TRUE,
                              display_id = NULL,
                              display_from = NULL,
                              display_orgdb = NULL,
                              ...) {
-
+  dots <- list(...)
 
   stopifnot(inherits(x, "VISTA"))
   comps <- .vista_comparisons(x)
@@ -738,7 +876,34 @@ get_volcano_plot <- function(x,
       "i" = "Available: {.val {names(comps)}}"
     ))
   }
-  stopifnot(is.null(genes_to_display) || is.character(genes_to_display))
+  stopifnot(is.null(label_genes) || is.character(label_genes))
+  color_names <- names(colors)
+  colors <- as.character(colors)
+  if (is.null(color_names) && length(colors) == 3L) {
+    color_names <- c("Up", "Down", "Other")
+  }
+  names(colors) <- color_names
+  if (is.null(names(colors)) || any(!c("Up", "Down", "Other") %in% names(colors))) {
+    cli::cli_abort("{.arg colors} must be a named vector with entries for {.val Up}, {.val Down}, and {.val Other}.")
+  }
+
+  # Backward-compatible color aliases passed through `...`
+  if ("col_up" %in% names(dots)) {
+    colors[["Up"]] <- as.character(dots$col_up)[1]
+    dots$col_up <- NULL
+  }
+  if ("col_down" %in% names(dots)) {
+    colors[["Down"]] <- as.character(dots$col_down)[1]
+    dots$col_down <- NULL
+  }
+  if ("col_other" %in% names(dots)) {
+    colors[["Other"]] <- as.character(dots$col_other)[1]
+    dots$col_other <- NULL
+  }
+  if ("col_others" %in% names(dots)) {
+    colors[["Other"]] <- as.character(dots$col_others)[1]
+    dots$col_others <- NULL
+  }
 
   volcano_data <- comps[[sample_comparison]]
   gid_col <- if ("gene_id" %in% colnames(volcano_data)) "gene_id" else colnames(volcano_data)[1]
@@ -761,23 +926,26 @@ get_volcano_plot <- function(x,
     lab <- display
   }
 
-  .EnhancedVolcano2(
-    toptable = volcano_data,
-    lab = lab,
-    x = "log2fc",
-    y = "pvalue",
-    pCutoff = pval_cutoff,
-    FCcutoff = log2fc_cutoff,
-    col_by_regul = TRUE,
-    col_up = col_up,
-    col_down = col_down,
-    col_others = col_other,
-    selectLab = genes_to_display,
-    labSize = lab_size,
-    pointSize = point_size,
-    title = sample_comparison,
-    ...
+  vol_args <- c(
+    list(
+      toptable = volcano_data,
+      lab = lab,
+      x = "log2fc",
+      y = "pvalue",
+      pCutoff = pval_cutoff,
+      FCcutoff = log2fc_cutoff,
+      col_by_regul = TRUE,
+      col_up = colors[["Up"]],
+      col_down = colors[["Down"]],
+      col_others = colors[["Other"]],
+      selectLab = label_genes,
+      labSize = label_size,
+      pointSize = point_size,
+      title = sample_comparison
+    ),
+    dots
   )
+  do.call(.EnhancedVolcano2, vol_args)
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -793,13 +961,30 @@ get_volcano_plot <- function(x,
 #' @param sample_group Optional character vector of groups (from the column specified by `group_column`) used to subset samples.
 #' @param genes Optional character vector of gene IDs to include; defaults to all genes.
 #' @param group_column Optional column name in `sample_info` defining the grouping used for filtering.
+#' @param sample_order Ordering for selected samples: `"input"` keeps the
+#'   current order, while `"group"` sorts by `group_column`.
+#' @param value_transform Value transformation: `"log2"` (default) or `"none"`.
+#' @param title Plot title.
 #'
 #' @export
-get_pairwise_corr_plot <- function(x, sample_group = NULL, group_column = NULL, genes = NULL) {
+get_pairwise_corr_plot <- function(x,
+                                   sample_group = NULL,
+                                   group_column = NULL,
+                                   genes = NULL,
+                                   sample_order = c("input", "group"),
+                                   value_transform = c("log2", "none"),
+                                   title = "Pairwise Sample Correlations") {
   stopifnot(inherits(x, "VISTA"))
+  sample_order <- match.arg(sample_order)
+  value_transform <- match.arg(value_transform)
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
+  group_col <- attr(meta, "group_column")
+  if (sample_order == "group" && group_col %in% colnames(meta)) {
+    meta <- meta |>
+      dplyr::arrange(.data[[group_col]], .data$sample)
+  }
   mat <- mat[, meta$sample, drop = FALSE]
 
   if (!is.null(genes)) {
@@ -810,8 +995,10 @@ get_pairwise_corr_plot <- function(x, sample_group = NULL, group_column = NULL, 
     mat <- mat[genes, , drop = FALSE]
   }
 
-  mat <- log2(mat + 1)
-  GGally::ggpairs(as.data.frame(mat), title = "Pairwise Sample Correlations") +
+  if (value_transform == "log2") {
+    mat <- log2(mat + 1)
+  }
+  GGally::ggpairs(as.data.frame(mat), title = title) +
     ggplot2::theme_minimal(base_size = 15)
 }
 
@@ -828,14 +1015,20 @@ get_pairwise_corr_plot <- function(x, sample_group = NULL, group_column = NULL, 
 #' @param sample_group Optional character vector of groups (referencing `group_column`) to include.
 #' @param genes Optional character vector of gene IDs to limit the matrix.
 #' @param corr_method Correlation method passed to `stats::cor()` (e.g., `"pearson"`).
-#' @param vis_method Currently unused; retained for backward compatibility.
-#' @param plot_type Either `"full"`, `"lower"`, or `"upper"` to control which triangle is drawn.
-#' @param cluster_samples Logical; hierarchically cluster samples before plotting when `TRUE`.
+#' @param triangle Either `"full"`, `"lower"`, or `"upper"` to control which triangle is drawn.
+#' @param cluster_by Ordering strategy for samples: `"correlation"` (default),
+#'   `"group"`, `"input"`, or `"none"`.
 #' @param show_diagonal Logical; include the correlation diagonal when `TRUE`.
-#' @param show_corr_values Logical; overlay correlation coefficients as text.
-#' @param col_corr_values Color for the text labels.
-#' @param size_corr_values Numeric text size multiplier.
-#' @param scale_range Optional numeric vector of length two giving limits for the color scale.
+#' @param label Logical; overlay correlation coefficients as text.
+#' @param show_corr_values Deprecated alias for `label`. When supplied, it
+#'   overrides `label`.
+#' @param label_color Color for the text labels.
+#' @param col_corr_values Deprecated alias for `label_color`. When supplied, it
+#'   overrides `label_color`.
+#' @param label_size Numeric text size multiplier.
+#' @param limits Optional numeric vector of length two giving limits for the
+#'   color scale.
+#' @param base_size Base theme size.
 #' @param viridis_option Character viridis palette name.
 #' @param viridis_direction Integer (1 or -1) controlling palette direction.
 #' @param viridis_begin,viridis_end Palette endpoints between 0 and 1.
@@ -848,14 +1041,16 @@ get_corr_heatmap <- function(x,
                              group_column = NULL,
                              genes = NULL,
                              corr_method = "pearson",
-                             vis_method = "square",
-                             plot_type = "full",
-                             cluster_samples = TRUE,
+                             triangle = c("full", "lower", "upper"),
+                             cluster_by = c("correlation", "group", "input", "none"),
                              show_diagonal = TRUE,
-                             show_corr_values = TRUE,
-                             col_corr_values = "black",
-                             size_corr_values = 4,
-                             scale_range = NULL,
+                             label = TRUE,
+                             show_corr_values = NULL,
+                             label_color = "black",
+                             col_corr_values = NULL,
+                             label_size = 4,
+                             limits = NULL,
+                             base_size = 12,
                              # NEW viridis options
                              viridis_option = "viridis",  # "magma","plasma","inferno","cividis","turbo"
                              viridis_direction = 1,       # 1 or -1
@@ -863,9 +1058,18 @@ get_corr_heatmap <- function(x,
                              viridis_end = 1) {
 
   stopifnot(inherits(x, "VISTA"))
+  triangle <- match.arg(triangle)
+  cluster_by <- match.arg(cluster_by)
+  if (!is.null(show_corr_values)) {
+    label <- isTRUE(show_corr_values)
+  }
+  if (!is.null(col_corr_values)) {
+    label_color <- col_corr_values
+  }
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
+  group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
 
   if (!is.null(genes)) {
@@ -883,18 +1087,30 @@ get_corr_heatmap <- function(x,
   colnames(df) <- c("Var1", "Var2", "value")
 
   if (!show_diagonal) df <- dplyr::filter(df, Var1 != Var2)
-
-  # cluster-based ordering (before plotting)
-  if (cluster_samples) {
-    ord <- hclust(as.dist(1 - cor_mat))$order
-    df$Var1 <- factor(df$Var1, levels = rownames(cor_mat)[ord])
-    df$Var2 <- factor(df$Var2, levels = rownames(cor_mat)[ord])
+  if (triangle == "lower") {
+    df <- dplyr::filter(df, as.integer(Var1) >= as.integer(Var2))
+  } else if (triangle == "upper") {
+    df <- dplyr::filter(df, as.integer(Var1) <= as.integer(Var2))
   }
+
+  if (cluster_by == "correlation") {
+    ord <- hclust(as.dist(1 - cor_mat))$order
+    sample_levels <- rownames(cor_mat)[ord]
+  } else if (cluster_by == "group" && group_col %in% colnames(meta)) {
+    sample_levels <- meta |>
+      dplyr::arrange(.data[[group_col]], .data$sample) |>
+      dplyr::pull(.data$sample) |>
+      unique()
+  } else {
+    sample_levels <- colnames(mat)
+  }
+  df$Var1 <- factor(df$Var1, levels = sample_levels)
+  df$Var2 <- factor(df$Var2, levels = sample_levels)
 
   p <- ggplot2::ggplot(df, ggplot2::aes(Var1, Var2, fill = value)) +
     ggplot2::geom_tile() +
     ggplot2::coord_fixed() +
-    ggplot2::theme_minimal(base_size = 12) +
+    ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
                    axis.title = ggplot2::element_blank())
 
@@ -904,16 +1120,16 @@ get_corr_heatmap <- function(x,
     direction = viridis_direction,
     begin = viridis_begin,
     end = viridis_end,
-    limits = scale_range,    # e.g., c(0.8, 1)
+    limits = limits,         # e.g., c(0.8, 1)
     oob = scales::squish,
     name = NULL
   )
 
-  if (show_corr_values) {
+  if (label) {
     p <- p + ggplot2::geom_text(
       ggplot2::aes(label = sprintf("%.2f", value)),
-      color = col_corr_values,
-      size = size_corr_values / 3
+      color = label_color,
+      size = label_size / 3
     )
   }
 
@@ -927,14 +1143,12 @@ get_corr_heatmap <- function(x,
 #' Plot gene expression distributions as boxplots
 #'
 #' Displays per-sample or per-group distributions for selected genes using
-#' normalized counts. When multiple genes are supplied and `facet = TRUE`,
-#' facets are per gene (not per group). When `facet = FALSE` with multiple
-#' genes, genes are shown on the x-axis and facets are per group.
+#' normalized counts. The x-axis unit is controlled by `by`, and faceting is
+#' controlled explicitly by `facet_by`.
 #'
 #' @param x A `VISTA` object.
 #' @param genes Optional character vector of genes to display (≤20). Defaults to all genes.
 #' @param sample_group Optional character vector specifying which groups (as defined by `group_column`) to include.
-#' @param facet Logical; facet the plot when `facet_by` is not `"none"`.
 #' @param group_column Optional column name in `sample_info` used as the grouping variable.
 #' @param log_transform Logical; apply log2(x + 1) transform before plotting.
 #' @param display_id Optional column in `rowData(x)` to use for gene labels (facets).
@@ -949,19 +1163,21 @@ get_corr_heatmap <- function(x,
 #' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
 #' @param pool_genes Logical; when `TRUE`, pool selected genes into one
 #'   distribution per x-axis category (scenario 1).
-#' @param x_by When `pool_genes = TRUE`, either `"group"` or `"sample"` (x-axis and optional fill).
-#'   When `pool_genes = FALSE`, either `"group"` or `"gene"` (x-axis for per-gene distributions).
+#' @param by When `pool_genes = TRUE`, either `"group"` or `"sample"` (x-axis
+#'   and optional fill). When `pool_genes = FALSE`, either `"group"` or
+#'   `"gene"` (x-axis for per-gene distributions).
 #' @param facet_by Faceting control: for pooled genes, `"group"` or `"none"`; for per-gene,
-#'   `"none"` (default) or `"gene"`.
+#'   `"none"` (default) or `"gene"`. `"auto"` selects the most readable layout.
 #' @param fill_by When `pool_genes = TRUE`, either `"x"` (default) or `"group"` to force group colors
-#'   even if x_by = "sample". When `pool_genes = FALSE`, either `"gene"` or `"group"`.
+#'   even if `by = "sample"`. When `pool_genes = FALSE`, either `"gene"` or `"group"`.
+#' @param sample_order Ordering used when sample names are shown on the x-axis:
+#'   `"input"`, `"group"`, or `"expression"`.
 #'
 #' @export
 get_expression_boxplot <- function(x,
                                    genes = NULL,
                                    sample_group = NULL,
                                    group_column = NULL,
-                                   facet = TRUE,
                                    log_transform = TRUE,
                                    display_id = NULL,
                                    display_from = NULL,
@@ -971,24 +1187,33 @@ get_expression_boxplot <- function(x,
                                    p.label = "p.signif",
                                    comparisons = NULL,
                                    pool_genes = FALSE,
-                                   x_by = "group",
-                                   facet_by = "none",
-  fill_by = NULL) {
+                                   by = "group",
+                                   facet_by = "auto",
+                                   fill_by = NULL,
+                                   sample_order = c("input", "group", "expression")) {
   stopifnot(inherits(x, "VISTA"))
-  allowed_x_by <- if (pool_genes) c("group", "sample") else c("group", "gene")
-  if (!is.null(x_by) && !x_by %in% allowed_x_by) {
+  sample_order <- match.arg(sample_order)
+  allowed_by <- if (pool_genes) c("group", "sample") else c("group", "gene")
+  if (!is.null(by) && !by %in% allowed_by) {
     cli::cli_abort(
-      "Invalid {.arg x_by} for {.arg pool_genes} = {pool_genes}. Use one of: {allowed_x_by}."
+      "Invalid {.arg by} for {.arg pool_genes} = {pool_genes}. Use one of: {allowed_by}."
     )
   }
-  allowed_facet_by <- if (pool_genes) c("group", "none") else c("gene", "none")
+  allowed_facet_by <- if (pool_genes) c("auto", "group", "none") else c("auto", "gene", "none")
   if (!is.null(facet_by) && !facet_by %in% allowed_facet_by) {
     cli::cli_abort(
       "Invalid {.arg facet_by} for {.arg pool_genes} = {pool_genes}. Use one of: {allowed_facet_by}."
     )
   }
-  x_by <- if (pool_genes) match.arg(x_by, c("group", "sample")) else match.arg(x_by, c("group", "gene"))
-  facet_by <- if (pool_genes) match.arg(facet_by %||% "group", c("group", "none")) else match.arg(facet_by %||% "none", c("gene", "none"))
+  by <- if (pool_genes) match.arg(by, c("group", "sample")) else match.arg(by, c("group", "gene"))
+  facet_by <- if (pool_genes) {
+    match.arg(facet_by %||% "auto", c("auto", "group", "none"))
+  } else {
+    match.arg(facet_by %||% "auto", c("auto", "gene", "none"))
+  }
+  if (identical(facet_by, "auto")) {
+    facet_by <- if (pool_genes) "group" else if (!is.null(genes) && length(genes) > 1) "gene" else "none"
+  }
   fill_by <- if (pool_genes) match.arg(fill_by %||% "x", c("x", "group")) else match.arg(fill_by %||% "group", c("gene", "group"))
 
   mat <- SummarizedExperiment::assay(x)
@@ -1049,15 +1274,19 @@ get_expression_boxplot <- function(x,
     df$gene <- "All genes"
   }
 
-  x_var <- if (x_by == "group") {
+  x_var <- if (by == "group") {
     group_col
   } else if (pool_genes) {
     "sample"
   } else {
     "gene"
   }
-  x_label <- if (x_by == "group") group_col else if (pool_genes) "sample" else "gene"
+  x_label <- if (by == "group") group_col else if (pool_genes) "sample" else "gene"
   cols_group <- .vista_group_colors(x, df[[group_col]])
+
+  if (pool_genes && identical(x_var, "sample")) {
+    df <- .order_expression_plot_samples(df, meta, group_col, sample_order = sample_order)
+  }
 
   if (pool_genes) {
     if (fill_by == "group") {
@@ -1069,7 +1298,7 @@ get_expression_boxplot <- function(x,
       fill_var <- df[[x_var]]
       fill_lab <- x_label
       fill_levels <- unique(df[[x_var]])
-      palette_manual <- if (x_by == "group") cols_group else NULL
+      palette_manual <- if (by == "group") cols_group else NULL
     }
   } else {
     if (fill_by == "group") {
@@ -1095,7 +1324,11 @@ get_expression_boxplot <- function(x,
     )
   ) +
     ggplot2::geom_boxplot(outlier.shape = NA, alpha = 0.8) +
-    ggplot2::labs(x = x_label, y = "log2(Normalized Counts + 1)", fill = fill_lab) +
+    ggplot2::labs(
+      x = x_label,
+      y = if (log_transform) "log2(Normalized Counts + 1)" else "Normalized Counts",
+      fill = fill_lab
+    ) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
@@ -1107,7 +1340,7 @@ get_expression_boxplot <- function(x,
     if (!requireNamespace("ggpubr", quietly = TRUE)) {
       cli::cli_abort("Package {.pkg ggpubr} must be installed for `stats_group = TRUE`.")
     }
-    if (x_by == "group" && length(unique(df[[group_col]])) < 2) {
+    if (by == "group" && length(unique(df[[group_col]])) < 2) {
       cli::cli_warn("At least two groups are needed for statistical testing.")
     } else {
       plt <- plt + ggpubr::stat_compare_means(
@@ -1120,7 +1353,7 @@ get_expression_boxplot <- function(x,
     }
   }
 
-  if (facet && facet_by != "none") {
+  if (facet_by != "none") {
     facet_var <- switch(facet_by,
                         gene = "gene",
                         group = group_col,
@@ -1509,6 +1742,8 @@ get_chromosome_plot <- function(x,
 #'   aggregate replicates by `group_column` before plotting.
 #' @param summarise_method `"mean"` or `"median"` summarisation used when
 #'   `summarise_replicates = TRUE`.
+#' @param label_n Integer; number of genes with the largest absolute values to
+#'   label when `genes` is not supplied. Set to 0 to disable automatic labels.
 #' @param label_genes One of `"top"` (default), `"all"`, or `"none"` controlling
 #'   chromosome text labels when `genes` is not supplied.
 #' @param log_transform Logical; when `group_value` is used (and `value_column`
@@ -1533,7 +1768,7 @@ get_chromosome_plot <- function(x,
 #'   assay columns are used (samples after `sample_group` filtering, or groups
 #'   after replicate summarisation).
 #' - Labels are kept consistent across `value_column`s: if `genes` is provided
-#'   it is used for all panels; otherwise the top `label_top_n` (by absolute
+#'   it is used for all panels; otherwise the top `label_n` (by absolute
 #'   value in the first `value_column`) are used for all panels.
 #' - When `value_from = "assay"`, the specified assay column is copied into
 #'   `rowData` on the fly so it can be used for colouring.
@@ -1561,7 +1796,7 @@ get_expression_chromosome_plot <- function(x,
                                            summarise_replicates = FALSE,
                                            summarise_method = c("mean", "median"),
                                            group_value = NULL,
-                                           label_top_n = 20,
+                                           label_n = 20,
                                            label_genes = c("top", "all", "none"),
                                            display_id = NULL,
                                            line_length = 0.02,
@@ -1678,21 +1913,21 @@ get_expression_chromosome_plot <- function(x,
     if (label_genes == "all") {
       return(list(label_set = rownames(x), label_top_n = 0))
     }
-    if (!is.null(reference_values) && label_top_n > 0) {
+    if (!is.null(reference_values) && label_n > 0) {
       ord <- order(abs(reference_values), decreasing = TRUE, na.last = NA)
       if (length(ord)) {
-        ids <- names(reference_values)[ord[seq_len(min(label_top_n, length(ord)))]]
+        ids <- names(reference_values)[ord[seq_len(min(label_n, length(ord)))]]
         return(list(label_set = ids, label_top_n = 0))
       }
     }
-    list(label_set = NULL, label_top_n = label_top_n)
+    list(label_set = NULL, label_top_n = label_n)
   }
 
   build_plot_for_value <- function(vc,
                                    filter_chr_local = filter_chrom,
                                    show_legend = TRUE,
                                    label_set = NULL,
-                                   label_n = label_top_n) {
+                                   label_n_local = label_n) {
     x_local <- x
     use_value_column <- vc
     scale_mode_use <- "diverging"
@@ -1727,7 +1962,7 @@ get_expression_chromosome_plot <- function(x,
       value_column = use_value_column,
       comparison = NULL,
       group_value = NULL,
-      label_top_n = label_n,
+      label_top_n = label_n_local,
       display_id = display_id,
       line_length = line_length,
       line_width = line_width,
@@ -1970,6 +2205,10 @@ get_expression_chromosome_plot <- function(x,
 #' with log2FC clipped to +/-2.
 #'
 #' @inheritParams get_chromosome_plot
+#' @param sample_comparison Optional comparison name (or vector of names) used
+#'   for fold-change colouring.
+#' @param label_n Integer; number of genes with the largest absolute fold-change
+#'   to label when `genes` is not supplied. Set to 0 to disable labels.
 #' @return A `ggplot2` object.
 #' @export
 get_foldchange_chromosome_plot <- function(x,
@@ -1977,9 +2216,9 @@ get_foldchange_chromosome_plot <- function(x,
                                            keytype = "GENEID",
                                            id_column = NULL,
                                            genes = NULL,
-                                           comparison = NULL,
+                                           sample_comparison = NULL,
                                            value_column = NULL,
-                                           label_top_n = 20,
+                                           label_n = 20,
                                            display_id = NULL,
                                            line_length = 0.02,
                                            line_width = 0.6,
@@ -1991,9 +2230,9 @@ get_foldchange_chromosome_plot <- function(x,
     id_column = id_column,
     genes = genes,
     value_column = value_column,
-    comparison = comparison,
+    comparison = sample_comparison,
     group_value = NULL,
-    label_top_n = label_top_n,
+    label_top_n = label_n,
     display_id = display_id,
     line_length = line_length,
     line_width = line_width,
@@ -2022,6 +2261,11 @@ get_foldchange_chromosome_plot <- function(x,
 #' @param adjust Bandwidth adjustment factor passed to `geom_density()`.
 #' @param color_by Either `"group"` (default) or `"sample"` to choose fill/color variable.
 #' @param facet_by One of `"none"` (default), `"group"`, or `"sample"` to facet densities.
+#' @param sample_order Ordering for sample-level display: `"input"`, `"group"`,
+#'   or `"expression"`.
+#' @param palette Optional qualitative palette name used when generating colours.
+#' @param colors Optional named character vector of manual colours overriding
+#'   `palette`.
 #'
 #' @return A `ggplot2` object.
 #' @export
@@ -2034,10 +2278,14 @@ get_expression_density <- function(x,
                                    alpha = 0.4,
                                    adjust = 1,
                                    color_by = c("group", "sample"),
-                                   facet_by = c("none", "group", "sample")) {
+                                   facet_by = c("none", "group", "sample"),
+                                   sample_order = c("input", "group", "expression"),
+                                   palette = NULL,
+                                   colors = NULL) {
   stopifnot(inherits(x, "VISTA"))
   color_by <- match.arg(color_by)
   facet_by <- match.arg(facet_by)
+  sample_order <- match.arg(sample_order)
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
@@ -2062,10 +2310,23 @@ get_expression_density <- function(x,
   } else {
     xlab <- "Normalized Counts"
   }
+  df <- .order_expression_plot_samples(df, meta, group_col, sample_order = sample_order)
 
   fill_var <- if (color_by == "group") df[[group_col]] else df$sample
   fill_lab <- if (color_by == "group") group_col else "Sample"
-  cols <- if (color_by == "group") .vista_group_colors(x, fill_var) else NULL
+  cols <- if (color_by == "group") {
+    .resolve_embedding_colors(
+      x = x,
+      values = fill_var,
+      color_col = group_col,
+      group_col = group_col,
+      use_vista_colors = TRUE,
+      palette = palette,
+      colors = colors
+    )
+  } else {
+    .resolve_palette_values(fill_var, colors = colors, palette = palette)
+  }
 
   plt <- ggplot2::ggplot(df, ggplot2::aes(x = expression, fill = fill_var, color = fill_var)) +
     ggplot2::geom_density(alpha = alpha, adjust = adjust) +
@@ -2104,6 +2365,11 @@ get_expression_density <- function(x,
 #' @param y_by Either `"group"` (default) or `"sample"` to choose the y-axis
 #'   (ridge) grouping.
 #' @param color_by Either `"group"` (default) or `"sample"` to choose fill colors.
+#' @param sample_order Ordering for sample-level display: `"input"`, `"group"`,
+#'   or `"expression"`.
+#' @param palette Optional qualitative palette name used when generating colours.
+#' @param colors Optional named character vector of manual colours overriding
+#'   `palette`.
 #'
 #' @return A `ggplot2` object.
 #' @export
@@ -2115,13 +2381,17 @@ get_expression_joyplot <- function(x,
                                    alpha = 0.7,
                                    scale = 1.2,
                                    y_by = c("group", "sample"),
-                                   color_by = c("group", "sample")) {
+                                   color_by = c("group", "sample"),
+                                   sample_order = c("input", "group", "expression"),
+                                   palette = NULL,
+                                   colors = NULL) {
   stopifnot(inherits(x, "VISTA"))
   if (!requireNamespace("ggridges", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg ggridges} must be installed to use `get_expression_joyplot()`.")
   }
   y_by <- match.arg(y_by)
   color_by <- match.arg(color_by)
+  sample_order <- match.arg(sample_order)
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
@@ -2146,11 +2416,24 @@ get_expression_joyplot <- function(x,
   } else {
     xlab <- "Normalized Counts"
   }
+  df <- .order_expression_plot_samples(df, meta, group_col, sample_order = sample_order)
 
   y_var <- if (y_by == "group") group_col else "sample"
   fill_var <- if (color_by == "group") df[[group_col]] else df$sample
   fill_lab <- if (color_by == "group") group_col else "Sample"
-  cols <- if (color_by == "group") .vista_group_colors(x, df[[group_col]]) else NULL
+  cols <- if (color_by == "group") {
+    .resolve_embedding_colors(
+      x = x,
+      values = df[[group_col]],
+      color_col = group_col,
+      group_col = group_col,
+      use_vista_colors = TRUE,
+      palette = palette,
+      colors = colors
+    )
+  } else {
+    .resolve_palette_values(df$sample, colors = colors, palette = palette)
+  }
 
   plt <- ggplot2::ggplot(
     df,
@@ -2187,8 +2470,9 @@ get_expression_joyplot <- function(x,
 #'   to stored grouping column).
 #' @param genes Optional character vector of genes to include; defaults to all.
 #' @param log_transform Logical; apply log2(x + 1) transform. Default `TRUE`.
-#' @param label_top_n Integer; number of most divergent genes to label
+#' @param label_n Integer; number of most divergent genes to label
 #'   (ranked by |x - y|). Set to 0 to disable labels.
+#' @param label_size Numeric size for labeled genes.
 #' @param method Correlation method for the subtitle; `"pearson"` (default) or
 #'   `"spearman"`.
 #' @param display_id Optional column in `rowData(x)` to use for point labels
@@ -2203,7 +2487,8 @@ get_expression_scatter <- function(x,
                                    group_column = NULL,
                                    genes = NULL,
                                    log_transform = TRUE,
-                                   label_top_n = 20,
+                                   label_n = 20,
+                                   label_size = 3,
                                    method = c("pearson", "spearman"),
                                    display_id = NULL) {
   stopifnot(inherits(x, "VISTA"))
@@ -2300,13 +2585,13 @@ get_expression_scatter <- function(x,
                       hjust = 0, vjust = 1, size = 3.2,
                       color = "red", parse = TRUE)
 
-  if (label_top_n > 0 && requireNamespace("ggrepel", quietly = TRUE)) {
+  if (label_n > 0 && requireNamespace("ggrepel", quietly = TRUE)) {
     top_idx <- order(df$abs_diff, decreasing = TRUE)
-    top_genes <- df[top_idx[seq_len(min(label_top_n, nrow(df)))], ]
+    top_genes <- df[top_idx[seq_len(min(label_n, nrow(df)))], ]
     plt <- plt + ggrepel::geom_text_repel(
       data = top_genes,
       ggplot2::aes(label = gene),
-      size = 3,
+      size = label_size,
       max.overlaps = Inf
     )
   }
@@ -2496,10 +2781,17 @@ get_expression_lollipop <- function(x,
 #' @param x A `VISTA` object.
 #' @param genes Character vector of gene identifiers to plot.
 #' @param sample_group Optional character vector specifying which groups (values taken from `group_column`) to include.
+#' @param by Plot unit: `"sample"` (default) or `"group"` to average
+#'   replicates before plotting.
 #' @param value_transform Transformation applied to expression values; one of `"log2"`, `"zscore"`, or `"none"`.
-#' @param summarise_groups Logical; if `TRUE`, averages replicates per group before plotting.
-#' @param facet_by_group Logical; facet the plot by the grouping column when `TRUE`.
-#' @param color_palette Qualitative palette name used for gene colors.
+#' @param facet_by Faceting mode: `"none"` (default), `"group"`, or `"gene"`.
+#' @param sample_order Ordering used for sample-level plots: `"input"`,
+#'   `"group"`, or `"expression"`.
+#' @param palette Optional qualitative palette name used for gene colours.
+#' @param colors Optional named character vector of manual gene colours.
+#' @param line_width Line width.
+#' @param point_size Point size.
+#' @param base_size Base theme size.
 #' @param group_column Optional column name in `sample_info` defining the grouping/faceting variable.
 #' @aliases get_expression_lineplot
 #' @export
@@ -2507,66 +2799,69 @@ get_expression_lineplot <- function(x,
                                     genes,
                                     sample_group = NULL,
                                     group_column = NULL,
+                                    by = c("sample", "group"),
                                     value_transform = c("log2", "zscore", "none"),
-                                    summarise_groups = FALSE,
-                                    facet_by_group = FALSE,
-                                    color_palette = "Dark 3") {
+                                    facet_by = c("none", "group", "gene"),
+                                    sample_order = c("input", "group", "expression"),
+                                    palette = NULL,
+                                    colors = NULL,
+                                    line_width = 1,
+                                    point_size = 2,
+                                    base_size = 12) {
   stopifnot(inherits(x, "VISTA"))
+  by <- match.arg(by)
   value_transform <- match.arg(value_transform)
+  facet_by <- match.arg(facet_by)
+  sample_order <- match.arg(sample_order)
+  summarise <- identical(by, "group")
 
-  meta <- .prepare_sample_metadata(x, sample_group, group_column)
-  group_col <- attr(meta, "group_column")
-
-  mat <- SummarizedExperiment::assay(x)[, meta$sample, drop = FALSE]
-  missing_genes <- setdiff(genes, rownames(mat))
-  if (length(missing_genes) == length(genes)) {
-    cli::cli_abort("None of the specified {.arg genes} were found in the data.")
-  }
-  keep_genes <- intersect(genes, rownames(mat))
-  mat <- mat[keep_genes, , drop = FALSE]
-
-  df <- mat |>
-    as.data.frame() |>
-    tibble::rownames_to_column("gene") |>
-    tidyr::pivot_longer(-gene, names_to = "sample", values_to = "expression") |>
-    dplyr::left_join(meta, by = "sample")
+  prep <- .vista_expression_long(
+    x = x,
+    genes = genes,
+    sample_group = sample_group,
+    group_column = group_column,
+    value_transform = value_transform,
+    summarise = summarise,
+    sample_order = sample_order
+  )
+  df <- prep$df
+  group_col <- prep$group_col
 
   if (value_transform == "log2") {
-    df$expression <- log2(df$expression + 1)
     ylab <- "log2(Normalized Counts + 1)"
   } else if (value_transform == "zscore") {
-    df <- df |>
-      dplyr::group_by(gene) |>
-      dplyr::mutate(expression = as.numeric(scale(expression))) |>
-      dplyr::ungroup()
     ylab <- "Z-score"
   } else {
     ylab <- "Normalized Counts"
   }
 
-  if (summarise_groups) {
-    df <- df |>
-      dplyr::group_by(gene, .data[[group_col]]) |>
-      dplyr::summarise(expression = mean(expression, na.rm = TRUE), .groups = "drop") |>
-      dplyr::mutate(sample = .data[[group_col]])
+  if (facet_by == "group" && summarise) {
+    cli::cli_warn("{.arg facet_by = 'group'} is ignored when {.arg by = 'group'}.")
+    facet_by <- "none"
   }
 
-  df$sample <- factor(df$sample, levels = unique(df$sample))
-  palette_cols <- colorspace::qualitative_hcl(length(unique(df$gene)), palette = color_palette)
+  gene_cols <- .resolve_palette_values(
+    levels = unique(df$gene),
+    colors = colors,
+    palette = palette,
+    default = "Dark 3"
+  )
 
   plt <- ggplot2::ggplot(
     df,
     ggplot2::aes(x = sample, y = expression, group = gene, color = gene)
   ) +
-    ggplot2::geom_line(linewidth = 1) +
-    ggplot2::geom_point(size = 2) +
-    ggplot2::scale_color_manual(values = palette_cols) +
-    ggplot2::labs(x = if (summarise_groups) group_col else "Sample", y = ylab, color = "Gene") +
-    ggplot2::theme_minimal() +
+    ggplot2::geom_line(linewidth = line_width) +
+    ggplot2::geom_point(size = point_size) +
+    ggplot2::scale_color_manual(values = gene_cols, drop = FALSE) +
+    ggplot2::labs(x = if (summarise) group_col else "Sample", y = ylab, color = "Gene") +
+    ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-  if (facet_by_group && group_col %in% colnames(df)) {
+  if (facet_by == "group" && !summarise && group_col %in% colnames(df)) {
     plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste("~", group_col)))
+  } else if (facet_by == "gene") {
+    plt <- plt + ggplot2::facet_wrap(~gene, scales = "free_y")
   }
 
   plt
@@ -2579,7 +2874,8 @@ get_expression_lineplot <- function(x,
 .vista_expression_long <- function(x, genes = NULL, sample_group = NULL,
                                    group_column = NULL,
                                    value_transform = c("log2", "zscore", "none"),
-                                   summarise = FALSE) {
+                                   summarise = FALSE,
+                                   sample_order = c("input", "group", "expression")) {
   value_transform <- match.arg(value_transform)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
@@ -2616,23 +2912,28 @@ get_expression_lineplot <- function(x,
       dplyr::group_by(gene, .data[[group_col]]) |>
       dplyr::summarise(expression = mean(expression, na.rm = TRUE), .groups = "drop") |>
       dplyr::mutate(sample = .data[[group_col]])
+    df$sample <- factor(df$sample, levels = unique(df$sample))
+    return(list(df = df, group_col = group_col, ylab = ylab))
   }
-  df$sample <- factor(df$sample, levels = unique(df$sample))
+
+  df <- .order_expression_plot_samples(
+    df = df,
+    meta = meta,
+    group_col = group_col,
+    sample_order = sample_order
+  )
   list(df = df, group_col = group_col, ylab = ylab)
 }
 
 #' @keywords internal
-.resolve_expression_plot_facet <- function(facet_by = c("auto", "gene", "none"),
+.resolve_expression_plot_facet <- function(facet_by = c("auto", "gene", "group", "none"),
                                            n_genes) {
+  if (length(facet_by) != 1L) {
+    facet_by <- "auto"
+  }
   facet_by <- match.arg(facet_by)
   if (facet_by == "auto") {
     return(if (n_genes > 1L) "gene" else "none")
-  }
-  if (facet_by == "none" && n_genes > 1L) {
-    cli::cli_warn(
-      "{.arg facet_by = 'none'} is crowded for multiple genes; using {.val gene} faceting instead."
-    )
-    return("gene")
   }
   facet_by
 }
@@ -2666,17 +2967,9 @@ get_expression_lineplot <- function(x,
 }
 
 #' @keywords internal
-.resolve_foldchange_facet_mode <- function(facet_by = NULL,
-                                           facet = TRUE,
-                                           facet_comparison = FALSE,
+.resolve_foldchange_facet_mode <- function(facet_by = c("auto", "gene", "comparison", "none"),
                                            n_genes = 1L) {
-  if (is.null(facet_by)) {
-    if (!isTRUE(facet)) return("none")
-    if (isTRUE(facet_comparison)) return("comparison")
-    return("gene")
-  }
-
-  facet_by <- match.arg(facet_by, c("auto", "gene", "comparison", "none"))
+  facet_by <- match.arg(facet_by)
   if (facet_by == "auto") {
     return(if (n_genes > 1L) "gene" else "none")
   }
@@ -2692,9 +2985,15 @@ get_expression_lineplot <- function(x,
 #' @param genes Optional character vector of gene IDs to include; defaults to all.
 #' @param sample_group Optional subset of groups (values of `group_column`) to keep.
 #' @param group_column Grouping column in `sample_info`; defaults to the stored grouping.
+#' @param by Plot unit. Violin plots currently support only `"group"`, because
+#'   a violin needs replicate-level distributions within groups rather than
+#'   single values per sample.
 #' @param value_transform One of `"log2"`, `"zscore"`, or `"none"`.
-#' @param summarise Logical; if `TRUE`, averages replicates per group before plotting.
-#' @param facet Logical; facet by group.
+#' @param summarise Logical retained for compatibility. Violin plots always use
+#'   replicate-level values, so `summarise = TRUE` is ignored with a warning.
+#' @param facet_by Faceting mode: `"auto"` (default), `"gene"`, or `"none"`.
+#' @param sample_order Ordering for sample-level x-axis display: `"input"`,
+#'   `"group"`, or `"expression"` before values are grouped into violins.
 #'
 #' @return A `ggplot2` object.
 #' @export
@@ -2702,26 +3001,60 @@ get_expression_violinplot <- function(x,
                                       genes = NULL,
                                       sample_group = NULL,
                                       group_column = NULL,
+                                      by = "group",
                                       value_transform = c("log2", "zscore", "none"),
                                       summarise = FALSE,
-                                      facet = TRUE) {
+                                      facet_by = c("auto", "gene", "none"),
+                                      sample_order = c("input", "group", "expression")) {
   stopifnot(inherits(x, "VISTA"))
-  prep <- .vista_expression_long(x, genes, sample_group, group_column, value_transform, summarise)
+  if (!identical(by, "group")) {
+    cli::cli_abort(
+      "{.fun get_expression_violinplot} currently supports only {.code by = 'group'} because violins require replicate distributions within groups."
+    )
+  }
+  sample_order <- match.arg(sample_order)
+  if (isTRUE(summarise)) {
+    cli::cli_warn(
+      "{.arg summarise = TRUE} is not meaningful for violin plots because each group becomes a single value. Using replicate-level values instead."
+    )
+    summarise <- FALSE
+  }
+  prep <- .vista_expression_long(
+    x, genes, sample_group, group_column, value_transform, summarise,
+    sample_order = sample_order
+  )
   df <- prep$df; group_col <- prep$group_col; ylab <- prep$ylab
   cols <- .vista_group_colors(x, df[[group_col]])
+  facet_mode <- .resolve_expression_plot_facet(facet_by, n_genes = length(unique(df$gene)))
+
+  group_levels <- unique(as.character(df[[group_col]]))
+  df[[group_col]] <- factor(as.character(df[[group_col]]), levels = group_levels)
 
   plt <- ggplot2::ggplot(
     df,
-    ggplot2::aes(x = sample, y = expression,
-                 fill = factor(.data[[group_col]], levels = unique(df[[group_col]])))
+    ggplot2::aes(
+      x = .data[[group_col]],
+      y = expression,
+      fill = .data[[group_col]]
+    )
   ) +
-    ggplot2::geom_violin(trim = FALSE, alpha = 0.8, color = NA) +
+    ggplot2::geom_violin(trim = FALSE, alpha = 0.8, color = NA, scale = "width") +
     ggplot2::geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.6, color = "gray30") +
-    ggplot2::labs(x = NULL, y = ylab, fill = group_col) +
+    ggplot2::geom_point(
+      position = ggplot2::position_jitter(width = 0.08, height = 0),
+      size = 1.3,
+      alpha = 0.65,
+      shape = 21,
+      stroke = 0.2,
+      color = "gray20"
+    ) +
+    ggplot2::labs(x = group_col, y = ylab, fill = group_col) +
     ggplot2::theme_minimal() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 0, hjust = 0.5))
   if (!is.null(cols)) plt <- plt + ggplot2::scale_fill_manual(values = cols)
-  if (facet) plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste0("~", group_col)), scales = "free_x")
+  if (facet_mode != "none") {
+    plt <- plt + ggplot2::facet_wrap(~gene, scales = "free_y")
+  }
   plt
 }
 
@@ -2731,16 +3064,20 @@ get_expression_violinplot <- function(x,
 #' points per sample/group to show distribution, summary, and individual values.
 #'
 #' @inheritParams get_expression_violinplot
+#' @param summarise Logical; when `TRUE`, collapse replicates within each
+#'   group for each gene (one value per gene per group). This is useful for
+#'   pooled multi-gene raincloud plots where each dot represents one gene-level
+#'   summary in a group.
 #' @param rain_side Side specification passed to `ggrain::geom_rain()`; one of
 #'   `"r"`, `"l"`, `"f"`, `"f1x1"`, or `"f2x2"`.
 #' @param id.long.var Optional column name passed to `ggrain::geom_rain()` as
 #'   `id.long.var` to identify repeated measurements.
-#' @param point_alpha Alpha for jittered points.
+#' @param alpha Alpha for jittered points.
 #' @param point_size Point size for jittered points.
 #' @param p.label Label type passed to `ggpubr::stat_compare_means()`.
 #' @param stats_group Logical; add pairwise statistical tests when `TRUE`.
 #' @param stats_method Statistical method passed to `ggpubr::stat_compare_means()`.
-#' @param label_points Logical; add text labels to points using `ggrepel`.
+#' @param label Logical; add text labels to points using `ggrepel`.
 #' @param label_column Column name in the plotting data used for labels.
 #'   Defaults to `"gene"` for expression raincloud plots.
 #' @param label_size Text size for point labels.
@@ -2765,7 +3102,7 @@ get_expression_violinplot <- function(x,
 #'   designs when a subject ID exists in `sample_info`.
 #'   \item `id.long.var = "sample"` or the grouping variable is usually less
 #'   informative and can over-connect points.
-#'   \item Point labels (`label_points = TRUE`) work best with `facet = FALSE` or
+#'   \item Point labels (`label = TRUE`) work best with `facet_by = "none"` or
 #'   a small number of genes.
 #' }
 #'
@@ -2779,17 +3116,19 @@ get_expression_raincloud <- function(x,
                                      genes = NULL,
                                      sample_group = NULL,
                                      group_column = NULL,
+                                     by = "group",
                                      value_transform = c("log2", "zscore", "none"),
                                      summarise = FALSE,
-                                     facet = TRUE,
+                                     facet_by = c("auto", "gene", "none"),
+                                     sample_order = c("input", "group", "expression"),
                                      rain_side = c("r", "l", "f", "f1x1", "f2x2"),
                                      id.long.var = NULL,
-                                     point_alpha = 0.5,
+                                     alpha = 0.5,
                                      point_size = 1.5,
                                      p.label = "p.signif",
                                      stats_group = FALSE,
                                      stats_method = "t.test",
-                                     label_points = FALSE,
+                                     label = FALSE,
                                      label_column = "gene",
                                      label_size = 3,
                                      label_max_overlaps = 50,
@@ -2800,8 +3139,14 @@ get_expression_raincloud <- function(x,
   if (!requireNamespace("ggrain", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg ggrain} must be installed to use `get_expression_raincloud()`.")
   }
+  if (!identical(by, "group")) {
+    cli::cli_abort(
+      "{.fun get_expression_raincloud} currently supports only {.code by = 'group'} because raincloud plots require replicate distributions within groups."
+    )
+  }
   rain_side <- match.arg(rain_side)
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
+  sample_order <- match.arg(sample_order)
 
   genes_use <- genes
   if (!is.null(genes) && !is.null(display_id)) {
@@ -2821,8 +3166,25 @@ get_expression_raincloud <- function(x,
     }
   }
 
-  prep <- .vista_expression_long(x, genes_use, sample_group, group_column, value_transform, summarise)
+  prep <- .vista_expression_long(
+    x, genes_use, sample_group, group_column, value_transform, summarise,
+    sample_order = sample_order
+  )
   df <- prep$df; group_col <- prep$group_col; ylab <- prep$ylab
+  facet_mode <- .resolve_expression_plot_facet(facet_by, n_genes = length(unique(df$gene)))
+  group_levels <- unique(as.character(df[[group_col]]))
+  df[[group_col]] <- factor(as.character(df[[group_col]]), levels = group_levels)
+
+  if (isTRUE(summarise) && length(unique(df$gene)) < 2L) {
+    cli::cli_warn(
+      "{.arg summarise = TRUE} with a single gene yields one value per group (no within-group distribution)."
+    )
+  }
+  if (isTRUE(summarise) && identical(facet_mode, "gene")) {
+    cli::cli_warn(
+      "{.arg summarise = TRUE} with {.arg facet_by = 'gene'} gives one summarized value per group in each facet, so raincloud distributions are not informative. Consider {.code facet_by = 'none'} with {.code id.long.var = 'gene'}."
+    )
+  }
 
   if (!is.null(display_id)) {
     if (!is.null(rd) && display_id %in% colnames(rd)) {
@@ -2857,7 +3219,7 @@ get_expression_raincloud <- function(x,
 
   rain_args <- list(
     rain.side = rain_side,
-    point.args = list(alpha = point_alpha, size = point_size),
+    point.args = list(alpha = alpha, size = point_size),
     boxplot.args = list(outlier.shape = NA, alpha = 0.7, color = "gray30"),
     violin.args = list(alpha = 0.6, color = NA)
   )
@@ -2867,41 +3229,45 @@ get_expression_raincloud <- function(x,
 
   plt <- ggplot2::ggplot(
     df,
-    ggplot2::aes(x = sample, y = expression,
-                 fill = factor(.data[[group_col]], levels = unique(df[[group_col]])))
+    ggplot2::aes(
+      x = .data[[group_col]],
+      y = expression,
+      fill = .data[[group_col]]
+    )
   ) +
     do.call(ggrain::geom_rain, rain_args) +
-    ggplot2::labs(x = NULL, y = ylab, fill = group_col) +
+    ggplot2::labs(x = group_col, y = ylab, fill = group_col) +
     ggplot2::theme_minimal() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 0, hjust = 0.5))
   if (!is.null(cols)) plt <- plt + ggplot2::scale_fill_manual(values = cols)
-  if (facet) plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste0("~", group_col)), scales = "free_x")
+  if (facet_mode != "none") {
+    plt <- plt + ggplot2::facet_wrap(~gene, scales = "free_y")
+  }
 
-  if (label_points) {
-    if (!requireNamespace("ggrepel", quietly = TRUE)) {
-      cli::cli_abort("Package {.pkg ggrepel} must be installed when {.arg label_points = TRUE}.")
+  if (label) {
+    if (facet_mode != "none" && nrow(df) > 120) {
+      cli::cli_warn("{.arg label = TRUE} with faceting can create crowded labels. Consider fewer genes or {.arg facet_by = 'none'}.")
     }
-    if (facet && nrow(df) > 120) {
-      cli::cli_warn("`label_points = TRUE` with `facet = TRUE` can create crowded labels. Consider fewer genes or `facet = FALSE`.")
-    }
-    label_df <- unique(df[, c("sample", "expression", label_column_effective, group_col), drop = FALSE])
-    plt <- plt + ggrepel::geom_text_repel(
+    label_cols <- unique(c(group_col, "expression", label_column_effective, "gene"))
+    label_df <- unique(df[, label_cols, drop = FALSE])
+    plt <- plt + ggplot2::geom_text(
       data = label_df,
       ggplot2::aes(label = .data[[label_column_effective]]),
       size = label_size,
-      max.overlaps = label_max_overlaps,
+      vjust = -0.3,
+      check_overlap = TRUE,
       show.legend = FALSE
     )
   }
 
   if (stats_group) {
-    if (facet) {
-      cli::cli_warn("Statistical comparison is only supported when `facet = FALSE`. Skipping stats.")
-    } else if (length(unique(df$sample)) < 2) {
-      cli::cli_warn("At least two sample groups are required for statistical testing.")
+    if (facet_mode != "none") {
+      cli::cli_warn("Statistical comparison is only supported when {.arg facet_by = 'none'}. Skipping stats.")
+    } else if (length(unique(df[[group_col]])) < 2) {
+      cli::cli_warn("At least two groups are required for statistical testing.")
     } else {
       plt <- plt + ggpubr::stat_compare_means(
-        ggplot2::aes(group = sample),
+        ggplot2::aes(group = .data[[group_col]]),
         method = stats_method,
         label = p.label
       )
@@ -2923,8 +3289,7 @@ get_expression_raincloud <- function(x,
 #' @param x A `VISTA` object containing differential expression results.
 #' @param genes Optional character vector of gene IDs to include.
 #' @param sample_comparisons Optional character vector of comparison names to plot.
-#' @param sample_comparison Deprecated alias for `sample_comparisons`.
-#' @param facet Logical; facet each comparison when `TRUE`.
+#' @param facet_by Faceting mode: `"auto"` (default), `"comparison"`, or `"none"`.
 #' @param p.label Label type passed to `ggpubr::stat_compare_means()`.
 #' @param stats_group Logical; add pairwise statistical tests when `TRUE`.
 #' @param stats_method Statistical method passed to `ggpubr::stat_compare_means()`.
@@ -2934,8 +3299,7 @@ get_expression_raincloud <- function(x,
 get_foldchange_boxplot <- function(x,
                                    genes = NULL,
                                    sample_comparisons = NULL,
-                                   sample_comparison = NULL,
-                                   facet = TRUE,
+                                   facet_by = c("auto", "comparison", "none"),
                                    p.label = "p.signif",
                                    stats_group = FALSE,
                                    stats_method = "t.test") {
@@ -2943,13 +3307,18 @@ get_foldchange_boxplot <- function(x,
 
   # Build fold-change matrix from stored DE results
   comps <- .vista_comparisons(x)
-  if (!is.null(sample_comparison)) {
-    cli::cli_warn("`sample_comparison` is deprecated; use `sample_comparisons`.")
-    if (is.null(sample_comparisons)) {
-      sample_comparisons <- sample_comparison
+  if (is.null(sample_comparisons)) {
+    sample_comparisons <- names(comps)
+  }
+  stopifnot(all(sample_comparisons %in% names(comps)))
+  facet_mode <- {
+    facet_by <- match.arg(facet_by)
+    if (identical(facet_by, "auto")) {
+      if (length(sample_comparisons) > 1L) "comparison" else "none"
+    } else {
+      facet_by
     }
   }
-  if (is.null(sample_comparisons)) sample_comparisons <- names(comps)
 
   # wide matrix gene_id x comparisons
   all_genes <- unique(unlist(lapply(comps[sample_comparisons], \(d) d$gene_id)))
@@ -2982,11 +3351,13 @@ get_foldchange_boxplot <- function(x,
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-  if (facet) plt <- plt + ggplot2::facet_wrap(~comparison, scales = "free_x")
+  if (facet_mode == "comparison") {
+    plt <- plt + ggplot2::facet_wrap(~comparison, scales = "free_x")
+  }
 
   if (stats_group) {
-    if (facet) {
-      cli::cli_warn("Statistical comparison is only supported when `facet = FALSE`. Skipping stats.")
+    if (facet_mode != "none") {
+      cli::cli_warn("Statistical comparison is only supported when {.arg facet_by = 'none'}. Skipping stats.")
     } else if (length(unique(df$comparison)) < 2) {
       cli::cli_warn("At least two comparisons are required for statistical testing.")
     } else {
@@ -3009,18 +3380,17 @@ get_foldchange_boxplot <- function(x,
 #' @param x A `VISTA` object containing differential expression results.
 #' @param genes Optional character vector of gene IDs to include.
 #' @param sample_comparisons Optional character vector of comparison names to plot.
-#' @param sample_comparison Deprecated alias for `sample_comparisons`.
-#' @param facet Logical; facet each comparison when `TRUE`.
+#' @param facet_by Faceting mode: `"auto"` (default), `"comparison"`, or `"none"`.
 #' @param rain_side Side specification passed to `ggrain::geom_rain()`; one of
 #'   `"r"`, `"l"`, `"f"`, `"f1x1"`, or `"f2x2"`.
 #' @param id.long.var Optional column name passed to `ggrain::geom_rain()` as
 #'   `id.long.var` to identify repeated measurements.
-#' @param point_alpha Alpha for jittered points.
+#' @param alpha Alpha for jittered points.
 #' @param point_size Point size for jittered points.
 #' @param p.label Label type passed to `ggpubr::stat_compare_means()`.
 #' @param stats_group Logical; add pairwise statistical tests when `TRUE`.
 #' @param stats_method Statistical method passed to `ggpubr::stat_compare_means()`.
-#' @param label_points Logical; add text labels to points using `ggrepel`.
+#' @param label Logical; add text labels to points using `ggrepel`.
 #' @param label_column Column name in the plotting data used for labels.
 #'   Defaults to `"gene_id"` for fold-change raincloud plots.
 #' @param label_size Text size for point labels.
@@ -3045,7 +3415,7 @@ get_foldchange_boxplot <- function(x,
 #'   comparison is already on the x-axis.
 #'   \item Continuous value columns (e.g. `log2FoldChange`) are not suitable
 #'   identifiers for line connections.
-#'   \item Point labels (`label_points = TRUE`) work best with `facet = FALSE`
+#'   \item Point labels (`label = TRUE`) work best with `facet_by = "none"`
 #'   unless only a small set of genes is shown.
 #' }
 #'
@@ -3058,16 +3428,15 @@ get_foldchange_boxplot <- function(x,
 get_foldchange_raincloud <- function(x,
                                      genes = NULL,
                                      sample_comparisons = NULL,
-                                     sample_comparison = NULL,
-                                     facet = TRUE,
+                                     facet_by = c("auto", "comparison", "none"),
                                      rain_side = c("r", "l", "f", "f1x1", "f2x2"),
                                      id.long.var = NULL,
-                                     point_alpha = 0.5,
+                                     alpha = 0.5,
                                      point_size = 1.5,
                                      p.label = "p.signif",
                                      stats_group = FALSE,
                                      stats_method = "t.test",
-                                     label_points = FALSE,
+                                     label = FALSE,
                                      label_column = "gene_id",
                                      label_size = 3,
                                      label_max_overlaps = 50,
@@ -3082,13 +3451,18 @@ get_foldchange_raincloud <- function(x,
 
   comps <- .vista_comparisons(x)
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
-  if (!is.null(sample_comparison)) {
-    cli::cli_warn("`sample_comparison` is deprecated; use `sample_comparisons`.")
-    if (is.null(sample_comparisons)) {
-      sample_comparisons <- sample_comparison
+  if (is.null(sample_comparisons)) {
+    sample_comparisons <- names(comps)
+  }
+  stopifnot(all(sample_comparisons %in% names(comps)))
+  facet_mode <- {
+    facet_by <- match.arg(facet_by)
+    if (identical(facet_by, "auto")) {
+      if (length(sample_comparisons) > 1L) "comparison" else "none"
+    } else {
+      facet_by
     }
   }
-  if (is.null(sample_comparisons)) sample_comparisons <- names(comps)
 
   all_genes <- unique(unlist(lapply(comps[sample_comparisons], \(d) d$gene_id)))
   genes_use <- genes
@@ -3161,7 +3535,7 @@ get_foldchange_raincloud <- function(x,
 
   rain_args <- list(
     rain.side = rain_side,
-    point.args = list(alpha = point_alpha, size = point_size),
+    point.args = list(alpha = alpha, size = point_size),
     boxplot.args = list(outlier.shape = NA, alpha = 0.8),
     violin.args = list(alpha = 0.6, color = NA)
   )
@@ -3176,16 +3550,19 @@ get_foldchange_raincloud <- function(x,
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-  if (facet) plt <- plt + ggplot2::facet_wrap(~comparison, scales = "free_x")
+  if (facet_mode == "comparison") {
+    plt <- plt + ggplot2::facet_wrap(~comparison, scales = "free_x")
+  }
 
-  if (label_points) {
+  if (label) {
     if (!requireNamespace("ggrepel", quietly = TRUE)) {
-      cli::cli_abort("Package {.pkg ggrepel} must be installed when {.arg label_points = TRUE}.")
+      cli::cli_abort("Package {.pkg ggrepel} must be installed when {.arg label = TRUE}.")
     }
-    if (facet && nrow(df) > 120) {
-      cli::cli_warn("`label_points = TRUE` with `facet = TRUE` can create crowded labels. Consider fewer genes or `facet = FALSE`.")
+    if (facet_mode != "none" && nrow(df) > 120) {
+      cli::cli_warn("{.arg label = TRUE} with faceting can create crowded labels. Consider fewer genes or {.arg facet_by = 'none'}.")
     }
-    label_df <- unique(df[, c("comparison", "log2FoldChange", label_column_effective), drop = FALSE])
+    label_cols <- unique(c("comparison", "log2FoldChange", label_column_effective))
+    label_df <- unique(df[, label_cols, drop = FALSE])
     plt <- plt + ggrepel::geom_text_repel(
       data = label_df,
       ggplot2::aes(label = .data[[label_column_effective]]),
@@ -3196,8 +3573,8 @@ get_foldchange_raincloud <- function(x,
   }
 
   if (stats_group) {
-    if (facet) {
-      cli::cli_warn("Statistical comparison is only supported when `facet = FALSE`. Skipping stats.")
+    if (facet_mode != "none") {
+      cli::cli_warn("Statistical comparison is only supported when {.arg facet_by = 'none'}. Skipping stats.")
     } else if (length(unique(df$comparison)) < 2) {
       cli::cli_warn("At least two comparisons are required for statistical testing.")
     } else {
@@ -3224,10 +3601,14 @@ get_foldchange_raincloud <- function(x,
 #'
 #' @param x A `VISTA` object containing DE results.
 #' @param sample_comparisons Character vector of length 2 naming the comparisons.
-#' @param label_top_n Integer; number of most extreme points to label (by |log2FC1| + |log2FC2|).
-#' @param point_alpha Point transparency.
-#' @param use_hex Logical; use hex binning instead of points for dense datasets.
+#' @param label_n Integer; number of most extreme points to label (by |log2FC1| + |log2FC2|).
+#' @param alpha Point transparency.
+#' @param geometry Geometry used for the data layer: `"point"` or `"hex"`.
 #' @param method Correlation method for the subtitle; `"pearson"` or `"spearman"`.
+#' @param colors Named vector of concordance colours.
+#' @param point_size Point size used when `geometry = "point"`.
+#' @param label_size Text size for labeled genes.
+#' @param base_size Base theme size.
 #' 
 #' @details Points are coloured by concordance status using fixed colours:
 #' \itemize{
@@ -3244,11 +3625,22 @@ get_foldchange_raincloud <- function(x,
 #' @export
 get_foldchange_scatter <- function(x,
                                    sample_comparisons,
-                                   label_top_n = 0,
-                                   point_alpha = 0.5,
-                                   use_hex = FALSE,
-                                   method = c("pearson", "spearman")) {
+                                   label_n = 0,
+                                   alpha = 0.5,
+                                   geometry = c("point", "hex"),
+                                   method = c("pearson", "spearman"),
+                                   colors = c(
+                                     "Up/Up" = "#1b9e77",
+                                     "Down/Down" = "#7570b3",
+                                     "Up/Down" = "#d95f02",
+                                     "Down/Up" = "#e7298a",
+                                     "Other" = "grey70"
+                                   ),
+                                   point_size = 1.5,
+                                   label_size = 3,
+                                   base_size = 12) {
   stopifnot(inherits(x, "VISTA"))
+  geometry <- match.arg(geometry)
   method <- match.arg(method)
   if (length(sample_comparisons) != 2) {
     cli::cli_abort("{.arg sample_comparisons} must contain exactly two comparisons.")
@@ -3316,36 +3708,39 @@ get_foldchange_scatter <- function(x,
 
   status_levels <- c("Up/Up", "Down/Down", "Up/Down", "Down/Up", "Other")
   merged$status <- factor(merged$status, levels = status_levels)
-  cols <- c("Up/Up" = "#1b9e77", "Down/Down" = "#7570b3",
-            "Up/Down" = "#d95f02", "Down/Up" = "#e7298a", "Other" = "grey70")
+  colors <- stats::setNames(as.character(colors), names(colors))
+  if (is.null(names(colors)) || any(!status_levels %in% names(colors))) {
+    cli::cli_abort("{.arg colors} must include named colours for {.val {status_levels}}.")
+  }
+  colors <- colors[status_levels]
 
   plt <- ggplot2::ggplot(merged, ggplot2::aes(x = log2fc1, y = log2fc2, color = status))
-  if (use_hex) {
+  if (geometry == "hex") {
     plt <- plt + ggplot2::geom_hex(show.legend = FALSE)
   } else {
-    plt <- plt + ggplot2::geom_point(alpha = point_alpha, size = 1.5)
+    plt <- plt + ggplot2::geom_point(alpha = alpha, size = point_size)
   }
   plt <- plt +
     ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "grey60") +
     ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "grey60") +
     ggplot2::geom_vline(xintercept = c(-lfc_cut, lfc_cut), linetype = "dotted", color = "grey70") +
     ggplot2::geom_hline(yintercept = c(-lfc_cut, lfc_cut), linetype = "dotted", color = "grey70") +
-    ggplot2::scale_color_manual(values = cols, drop = FALSE) +
+    ggplot2::scale_color_manual(values = colors, drop = FALSE) +
     ggplot2::labs(
       x = paste0(sample_comparisons[1], " log2FC"),
       y = paste0(sample_comparisons[2], " log2FC"),
       color = "Regulation",
       subtitle = subtitle
     ) +
-    ggplot2::theme_minimal()
+    ggplot2::theme_minimal(base_size = base_size)
 
-  if (label_top_n > 0 && requireNamespace("ggrepel", quietly = TRUE)) {
+  if (label_n > 0 && requireNamespace("ggrepel", quietly = TRUE)) {
     idx <- order(abs(merged$log2fc1) + abs(merged$log2fc2), decreasing = TRUE)
-    to_lab <- merged[idx[seq_len(min(label_top_n, length(idx)))], ]
+    to_lab <- merged[idx[seq_len(min(label_n, length(idx)))], ]
     plt <- plt + ggrepel::geom_text_repel(
       data = to_lab,
       ggplot2::aes(label = gene_id),
-      size = 3,
+      size = label_size,
       max.overlaps = Inf
     )
   }
@@ -3601,16 +3996,8 @@ get_expression_barplot <- function(x,
 #'   Input gene matching still uses `gene_id`.
 #' @param dodge_width Horizontal separation between comparisons when plotting
 #'   two comparisons on the same axis.
-#' @param facet_comparison Logical; when two comparisons are provided, facet by
-#'   comparison instead of dodging side-by-side.
-#' @param facet_by Optional faceting mode. Use `NULL` (default) to preserve the
-#'   current `facet_comparison` behavior. Otherwise choose one of `"auto"`,
-#'   `"gene"`, `"comparison"`, or `"none"`.
-#'
-#' @details
-#' `facet_by = "gene"` provides an explicit per-gene layout, while
-#' `facet_by = "comparison"` mirrors the historical `facet_comparison = TRUE`
-#' behavior. Leaving `facet_by = NULL` preserves current defaults for existing code.
+#' @param facet_by Faceting mode: `"auto"` (default), `"gene"`,
+#'   `"comparison"`, or `"none"`.
 #'
 #' @return A `ggplot2` object.
 #'
@@ -3643,8 +4030,7 @@ get_foldchange_lollipop <- function(x,
                                     label_digits = 2,
                                     display_id = NULL,
                                     dodge_width = 0.5,
-                                    facet_comparison = FALSE,
-                                    facet_by = NULL) {
+                                    facet_by = c("auto", "gene", "comparison", "none")) {
   stopifnot(inherits(x, "VISTA"))
   sort_by <- match.arg(sort_by)
 
@@ -3722,8 +4108,6 @@ get_foldchange_lollipop <- function(x,
   df$gene_id <- factor(df$gene_id, levels = rev(gene_levels))
   facet_mode <- .resolve_foldchange_facet_mode(
     facet_by = facet_by,
-    facet = TRUE,
-    facet_comparison = facet_comparison,
     n_genes = length(gene_levels)
   )
 
@@ -4016,21 +4400,21 @@ get_deg_venn_diagram <- function(x,
 # DEG count barplot
 # ──────────────────────────────────────────────────────────────────────────────
 
-.normalize_deg_fill_colors <- function(fill_colors) {
-  if (!is.character(fill_colors) || !length(fill_colors)) {
-    cli::cli_abort("{.arg fill_colors} must be a character vector.")
+.normalize_deg_colors <- function(colors) {
+  if (!is.character(colors) || !length(colors)) {
+    cli::cli_abort("{.arg colors} must be a character vector.")
   }
-  if (is.null(names(fill_colors)) || any(!nzchar(names(fill_colors)))) {
-    if (length(fill_colors) < 2) {
-      cli::cli_abort("{.arg fill_colors} must provide at least two colors for {.val Up} and {.val Down}.")
+  if (is.null(names(colors)) || any(!nzchar(names(colors)))) {
+    if (length(colors) < 2) {
+      cli::cli_abort("{.arg colors} must provide at least two colors for {.val Up} and {.val Down}.")
     }
-    fill_colors <- stats::setNames(fill_colors[seq_len(2)], c("Up", "Down"))
+    colors <- stats::setNames(colors[seq_len(2)], c("Up", "Down"))
   }
-  missing_keys <- setdiff(c("Up", "Down"), names(fill_colors))
+  missing_keys <- setdiff(c("Up", "Down"), names(colors))
   if (length(missing_keys)) {
-    cli::cli_abort("{.arg fill_colors} must include named colors for {.val Up} and {.val Down}. Missing: {.val {missing_keys}}")
+    cli::cli_abort("{.arg colors} must include named colors for {.val Up} and {.val Down}. Missing: {.val {missing_keys}}")
   }
-  fill_colors[c("Up", "Down")]
+  colors[c("Up", "Down")]
 }
 
 .collect_deg_count_data <- function(x, sample_comparisons = NULL) {
@@ -4126,33 +4510,34 @@ get_deg_venn_diagram <- function(x,
   df
 }
 
-.format_deg_slice_label <- function(n, pct, show_counts = TRUE, show_percent = TRUE, percent_digits = 1) {
-  if (!show_counts && !show_percent) return(rep("", length(n)))
+.format_deg_slice_label <- function(n, pct, label = c("both", "count", "percent", "none"), label_digits = 1) {
+  label <- match.arg(label)
+  if (label == "none") return(rep("", length(n)))
   count_lab <- formatC(n, format = "f", digits = 0, big.mark = ",")
-  pct_lab <- formatC(100 * pct, format = "f", digits = percent_digits)
-  pct_lab[!is.finite(pct)] <- formatC(0, format = "f", digits = percent_digits)
-  if (show_counts && show_percent) {
+  pct_lab <- formatC(100 * pct, format = "f", digits = label_digits)
+  pct_lab[!is.finite(pct)] <- formatC(0, format = "f", digits = label_digits)
+  if (label == "both") {
     return(paste0(count_lab, " (", pct_lab, "%)"))
   }
-  if (show_counts) return(count_lab)
+  if (label == "count") return(count_lab)
   paste0(pct_lab, "%")
 }
 
 .plot_deg_count_circular <- function(df,
-                                     show_counts = TRUE,
-                                     show_percent = TRUE,
-                                     percent_digits = 1,
-                                     font_size = 12,
-                                     fill_colors = c(Up = "red4", Down = "blue4"),
+                                     label = c("both", "count", "percent", "none"),
+                                     label_digits = 1,
+                                     base_size = 12,
+                                     colors = c(Up = "red4", Down = "blue4"),
                                      donut = FALSE,
-                                     facet_by = c("sample_comparisons", "none"),
+                                     facet_by = c("comparison", "none"),
                                      ncol = NULL) {
   facet_by <- match.arg(facet_by)
-  fill_colors <- .normalize_deg_fill_colors(fill_colors)
+  label <- match.arg(label)
+  colors <- .normalize_deg_colors(colors)
 
   n_comp <- dplyr::n_distinct(df$sample_comparisons)
   if (facet_by == "none" && n_comp > 1) {
-    cli::cli_abort("`facet_by = 'none'` requires exactly one comparison. Provide one {.arg sample_comparisons} value or use {.val facet_by = 'sample_comparisons'}.")
+    cli::cli_abort("`facet_by = 'none'` requires exactly one comparison. Provide one {.arg sample_comparisons} value or use {.val facet_by = 'comparison'}.")
   }
 
   df <- df |>
@@ -4163,9 +4548,8 @@ get_deg_venn_diagram <- function(x,
       label = .format_deg_slice_label(
         .data$n,
         .data$pct,
-        show_counts = show_counts,
-        show_percent = show_percent,
-        percent_digits = percent_digits
+        label = label,
+        label_digits = label_digits
       )
     ) |>
     dplyr::ungroup()
@@ -4182,23 +4566,23 @@ get_deg_venn_diagram <- function(x,
   }
 
   p <- p +
-    ggplot2::scale_fill_manual(values = fill_colors, drop = FALSE) +
+    ggplot2::scale_fill_manual(values = colors, drop = FALSE) +
     ggplot2::labs(fill = "Regulation") +
-    ggplot2::theme_void(base_size = font_size) +
+    ggplot2::theme_void(base_size = base_size) +
     ggplot2::theme(
       legend.position = "bottom",
-      strip.text = ggplot2::element_text(size = font_size)
+      strip.text = ggplot2::element_text(size = base_size)
     )
 
-  if (show_counts || show_percent) {
+  if (label != "none") {
     p <- p + ggplot2::geom_text(
       ggplot2::aes(label = .data$label),
       position = ggplot2::position_stack(vjust = 0.5),
-      size = font_size / 3
+      size = base_size / 3
     )
   }
 
-  if (facet_by == "sample_comparisons") {
+  if (facet_by == "comparison") {
     p <- p + ggplot2::facet_wrap(~sample_comparisons, ncol = ncol)
   }
 
@@ -4209,85 +4593,81 @@ get_deg_venn_diagram <- function(x,
 #' Barplot of DEG counts (Up/Down) across comparisons
 #' @param x A `VISTA` object containing DEG summaries.
 #' @param sample_comparisons Optional character vector of comparison names to display.
-#' @param show_counts Logical; overlay numeric counts above bars when `TRUE`.
-#' @param font_size Numeric base font size for the plot.
-#' @param fill_colors Named vector giving fill colors for `"Up"` and `"Down"` bars.
-#' @param facet_by Either `"none"`, `"regulation"`, or `"sample_comparisons"` (alias `"sample_comparison"`) describing the facet variable.
+#' @param label Logical; overlay numeric counts above bars when `TRUE`.
+#' @param base_size Numeric base font size for the plot.
+#' @param colors Named vector giving fill colors for `"Up"` and `"Down"` bars.
+#' @param facet_by Either `"none"`, `"regulation"`, or `"comparison"` describing the facet variable.
 #'   Use `"none"` for a single panel.
-#' @param facet_scale Scale option passed to `facet_wrap()` when faceting.
+#' @param facet_scales Scale option passed to `facet_wrap()` when faceting.
 #' @export
 get_deg_count_barplot <- function(x,
                                   sample_comparisons = NULL,
-                                  show_counts = TRUE,
-                                  font_size = 12,
-                                  fill_colors = c(Up = "red4", Down = "blue4"),
-                                  facet_by = c("none", "regulation", "sample_comparisons", "sample_comparison"),
-                                  facet_scale = "fixed") {
+                                  label = TRUE,
+                                  base_size = 12,
+                                  colors = c(Up = "red4", Down = "blue4"),
+                                  facet_by = c("none", "regulation", "comparison"),
+                                  facet_scales = "fixed") {
   stopifnot(inherits(x, "VISTA"))
   facet_by <- match.arg(facet_by)
-  if (facet_by == "sample_comparison") facet_by <- "sample_comparisons"
 
   df <- .collect_deg_count_data(
     x = x,
     sample_comparisons = sample_comparisons
   )
   if (is.null(df)) return(invisible(NULL))
-  fill_colors <- .normalize_deg_fill_colors(fill_colors)
+  colors <- .normalize_deg_colors(colors)
 
   # x-axis is always comparison; faceting optional
   df$sample_comparisons <- factor(df$sample_comparisons,
                                   levels = if (!is.null(sample_comparisons)) sample_comparisons else unique(df$sample_comparisons))
   df <- droplevels(df)
   aes_x <- "sample_comparisons"
-  facet_by <- if (facet_by == "sample_comparisons" || facet_by == "sample_comparison") "sample_comparisons" else facet_by
   facet_formula <- switch(facet_by,
                           regulation = ~regulation,
-                          sample_comparisons = ~sample_comparisons,
+                          comparison = ~sample_comparisons,
                           NULL)
-  facet_scales <- if (identical(facet_by, "sample_comparisons")) "free_x" else facet_scale
+  facet_scale_mode <- if (identical(facet_by, "comparison")) "free_x" else facet_scales
 
   # plot
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data[[aes_x]], y = .data$n, fill = .data$regulation)) +
     ggplot2::geom_col(position = "dodge") +
     ggplot2::scale_x_discrete(drop = TRUE) +
-    ggplot2::scale_fill_manual(values = fill_colors) +
+    ggplot2::scale_fill_manual(values = colors) +
     ggplot2::labs(x = NULL, y = "Gene Count", fill = "Regulation") +
-    ggplot2::theme_minimal(base_size = font_size) +
+    ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-  if (show_counts) {
+  if (label) {
     p <- p + ggplot2::geom_text(
       ggplot2::aes(label = .data$n),
       position = ggplot2::position_dodge(width = 0.9),
       vjust = -0.3,
-      size = font_size / 3
+      size = base_size / 3
     )
   }
 
-  if (!is.null(facet_formula)) p <- p + ggplot2::facet_wrap(facet_formula, scales = facet_scales)
+  if (!is.null(facet_formula)) p <- p + ggplot2::facet_wrap(facet_formula, scales = facet_scale_mode)
   p
 }
 
 #' Pie chart of DEG counts (Up/Down) across comparisons
 #' @param x A `VISTA` object containing DEG summaries.
 #' @param sample_comparisons Optional character vector of comparison names to display.
-#' @param show_counts Logical; include raw count labels in slices.
-#' @param show_percent Logical; include percent labels in slices.
-#' @param percent_digits Integer number of decimals used for percentage labels.
-#' @param font_size Numeric base font size for the plot.
-#' @param fill_colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
-#' @param facet_by Either `"sample_comparisons"` (default) to draw one pie per comparison,
+#' @param label Label mode: `"both"` (default), `"count"`, `"percent"`, or `"none"`.
+#' @param label_digits Integer number of decimals used for percentage labels.
+#' @param base_size Numeric base font size for the plot.
+#' @param colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
+#' @param facet_by Either `"comparison"` (default) to draw one pie per comparison,
 #'   or `"none"` for a single pie.
 #' @param ncol Optional number of columns when faceting.
 #' @export
 get_deg_count_pieplot <- function(x,
                                   sample_comparisons = NULL,
-                                  show_counts = TRUE,
-                                  show_percent = TRUE,
-                                  percent_digits = 1,
-                                  font_size = 12,
-                                  fill_colors = c(Up = "red4", Down = "blue4"),
-                                  facet_by = c("sample_comparisons", "none"),
+                                  label = c("both", "count", "percent", "none"),
+                                  label_digits = 1,
+                                  base_size = 12,
+                                  colors = c(Up = "red4", Down = "blue4"),
+                                  facet_by = c("comparison", "none"),
                                   ncol = NULL) {
   stopifnot(inherits(x, "VISTA"))
   df <- .collect_deg_count_data(
@@ -4297,11 +4677,10 @@ get_deg_count_pieplot <- function(x,
   if (is.null(df)) return(invisible(NULL))
   .plot_deg_count_circular(
     df = df,
-    show_counts = show_counts,
-    show_percent = show_percent,
-    percent_digits = percent_digits,
-    font_size = font_size,
-    fill_colors = fill_colors,
+    label = label,
+    label_digits = label_digits,
+    base_size = base_size,
+    colors = colors,
     donut = FALSE,
     facet_by = facet_by,
     ncol = ncol
@@ -4311,23 +4690,21 @@ get_deg_count_pieplot <- function(x,
 #' Donut chart of DEG counts (Up/Down) across comparisons
 #' @param x A `VISTA` object containing DEG summaries.
 #' @param sample_comparisons Optional character vector of comparison names to display.
-#' @param show_counts Logical; include raw count labels in slices.
-#' @param show_percent Logical; include percent labels in slices.
-#' @param percent_digits Integer number of decimals used for percentage labels.
-#' @param font_size Numeric base font size for the plot.
-#' @param fill_colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
-#' @param facet_by Either `"sample_comparisons"` (default) to draw one donut per comparison,
+#' @param label Label mode: `"both"` (default), `"count"`, `"percent"`, or `"none"`.
+#' @param label_digits Integer number of decimals used for percentage labels.
+#' @param base_size Numeric base font size for the plot.
+#' @param colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
+#' @param facet_by Either `"comparison"` (default) to draw one donut per comparison,
 #'   or `"none"` for a single donut.
 #' @param ncol Optional number of columns when faceting.
 #' @export
 get_deg_count_donutplot <- function(x,
                                     sample_comparisons = NULL,
-                                    show_counts = TRUE,
-                                    show_percent = TRUE,
-                                    percent_digits = 1,
-                                    font_size = 12,
-                                    fill_colors = c(Up = "red4", Down = "blue4"),
-                                    facet_by = c("sample_comparisons", "none"),
+                                    label = c("both", "count", "percent", "none"),
+                                    label_digits = 1,
+                                    base_size = 12,
+                                    colors = c(Up = "red4", Down = "blue4"),
+                                    facet_by = c("comparison", "none"),
                                     ncol = NULL) {
   stopifnot(inherits(x, "VISTA"))
   df <- .collect_deg_count_data(
@@ -4337,11 +4714,10 @@ get_deg_count_donutplot <- function(x,
   if (is.null(df)) return(invisible(NULL))
   .plot_deg_count_circular(
     df = df,
-    show_counts = show_counts,
-    show_percent = show_percent,
-    percent_digits = percent_digits,
-    font_size = font_size,
-    fill_colors = fill_colors,
+    label = label,
+    label_digits = label_digits,
+    base_size = base_size,
+    colors = colors,
     donut = TRUE,
     facet_by = facet_by,
     ncol = ncol
@@ -4364,11 +4740,11 @@ get_deg_count_donutplot <- function(x,
 #'   one of \code{names(comparisons(x))}.
 #' @param point_size Numeric point size. Default: 1.2.
 #' @param alpha Numeric transparency (0-1). Default: 0.6.
-#' @param fill_colors Named character vector of colors for \code{"Up"},
+#' @param colors Named character vector of colors for \code{"Up"},
 #'   \code{"Down"}, and \code{"Other"} genes.
-#' @param topn Integer number of genes to label. Default: 0.
+#' @param label_n Integer number of genes to label. Default: 0.
 #' @param label_size Text size for labels. Default: 3.
-#' @param repair Logical; if \code{TRUE}, attempt to shorten gene identifiers to
+#' @param repair_genes Logical; if \code{TRUE}, attempt to shorten gene identifiers to
 #'   symbols by stripping prefixes. Default: \code{FALSE}.
 #' @param display_id Optional ID/column name to use for labels. If supplied and
 #'   present in `rowData(x)`, those values are used; otherwise falls back to ID
@@ -4384,15 +4760,25 @@ get_ma_plot <- function(x,
                         sample_comparison,
                         point_size = 1.2,
                         alpha = 0.6,
-                        fill_colors = c(Up = "#a40000", Down = "#16317d", Other = "gray70"),
-                        topn = 0,
+                        colors = c(Up = "#a40000", Down = "#16317d", Other = "gray70"),
+                        label_n = 0,
                         label_size = 3,
-                        repair = FALSE,
+                        repair_genes = FALSE,
                         display_id = NULL,
                         display_from = NULL,
                         display_orgdb = NULL) {
 
   stopifnot(inherits(x, "VISTA"))
+
+  color_names <- names(colors)
+  colors <- as.character(colors)
+  if (is.null(color_names) && length(colors) == 3L) {
+    color_names <- c("Up", "Down", "Other")
+  }
+  names(colors) <- color_names
+  if (is.null(names(colors)) || any(!c("Up", "Down", "Other") %in% names(colors))) {
+    cli::cli_abort("{.arg colors} must be a named vector with entries for {.val Up}, {.val Down}, and {.val Other}.")
+  }
 
   `%||%` <- function(a, b) if (!is.null(a)) a else b
   to_num <- function(v) { if (is.numeric(v)) return(v); suppressWarnings(as.numeric(gsub(",", "", as.character(v), fixed = TRUE))) }
@@ -4485,28 +4871,28 @@ get_ma_plot <- function(x,
       label = display_gene
     )
 
-  if (repair) plot_df$label <- sub(".*:", "", plot_df$label)
+  if (repair_genes) plot_df$label <- sub(".*:", "", plot_df$label)
 
   # top labels
   label_df <- NULL
-  if (topn > 0) {
+  if (label_n > 0) {
     if (!is.na(p_col)) {
       label_df <- plot_df |>
         dplyr::filter(regulation %in% c("Up","Down")) |>
         dplyr::arrange(.data[[p_col]], dplyr::desc(abs(log2fc))) |>
-        dplyr::slice_head(n = topn)
+        dplyr::slice_head(n = label_n)
     } else {
       label_df <- plot_df |>
         dplyr::filter(regulation %in% c("Up","Down")) |>
         dplyr::arrange(dplyr::desc(abs(log2fc))) |>
-        dplyr::slice_head(n = topn)
+        dplyr::slice_head(n = label_n)
     }
   }
 
   # plot
   p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = log10_baseMean, y = log2fc, color = regulation)) +
     ggplot2::geom_point(alpha = alpha, size = point_size) +
-    ggplot2::scale_color_manual(values = fill_colors) +
+    ggplot2::scale_color_manual(values = colors) +
     ggplot2::labs(
       x = "log10(Mean Expression + 1)",
       y = "log2 Fold Change",
@@ -4537,13 +4923,14 @@ get_ma_plot <- function(x,
 #' @param sample_comparisons Character vector of comparison names to include.
 #' @param genes Optional character vector of gene identifiers to plot. Defaults to all genes.
 #' @param km Optional integer specifying the number of k-means clusters to compute; `NULL` disables clustering.
-#' @param facet_clusters Logical; facet the plot by cluster when k-means clustering is requested.
-#' @param line_transparency Numeric alpha applied to individual gene lines.
-#' @param show_average_line Logical; overlay a summary line per cluster when `TRUE`.
-#' @param average_line_color Color used for the summary line. When `NULL`, uses
+#' @param facet_by Faceting mode: `"none"` (default) or `"cluster"` when
+#'   k-means clustering is requested.
+#' @param alpha Numeric alpha applied to individual gene lines.
+#' @param show_summary Logical; overlay a summary line per cluster when `TRUE`.
+#' @param summary_color Color used for the summary line. When `NULL`, uses
 #'   the first comparison color (if stored) for consistency across plots.
-#' @param average_line_size Numeric line width for the summary line.
-#' @param average_line_summary_method Character string selecting `"median"` or `"mean"` for the summary statistic.
+#' @param summary_linewidth Numeric line width for the summary line.
+#' @param summary_fun Character string selecting `"median"` or `"mean"` for the summary statistic.
 # ──────────────────────────────────────────────────────────────────────────────
 
 #' @export
@@ -4551,24 +4938,26 @@ get_foldchange_lineplot <- function(x,
                                     sample_comparisons,
                                     genes = NULL,
                                     km = NULL,
-                                    facet_clusters = FALSE,
-                                    line_transparency = 0.5,
-                                    show_average_line = TRUE,
-                                    average_line_color = NULL,
-                                    average_line_size = 1,
-                                    average_line_summary_method = "median") {
+                                    facet_by = c("none", "cluster"),
+                                    alpha = 0.5,
+                                    show_summary = TRUE,
+                                    summary_color = NULL,
+                                    summary_linewidth = 1,
+                                    summary_fun = c("median", "mean")) {
 
   stopifnot(inherits(x, "VISTA"))
   stopifnot(is.character(sample_comparisons))
+  facet_by <- match.arg(facet_by)
+  summary_fun <- match.arg(summary_fun)
 
   comps <- .vista_comparisons(x)
   if (!all(sample_comparisons %in% names(comps))) {
     cli::cli_abort("Some requested comparisons are not found in `metadata(x)$de_results`.")
   }
 
-  if (is.null(average_line_color)) {
+  if (is.null(summary_color)) {
     pal <- .vista_comparison_colors(x, sample_comparisons)
-    average_line_color <- pal[[1]] %||% "black"
+    summary_color <- pal[[1]] %||% "black"
   }
 
   comps_df <- purrr::map(comps[sample_comparisons], as.data.frame)
@@ -4592,27 +4981,26 @@ get_foldchange_lineplot <- function(x,
   }
 
   p <- ggplot2::ggplot(res, ggplot2::aes(x = comparison, y = log2fc, group = display_gene, color = cluster)) +
-    ggplot2::geom_line(alpha = line_transparency) +
+    ggplot2::geom_line(alpha = alpha) +
     ggplot2::labs(x = "Comparisons", y = "Log2FC", color = "Cluster") +
     ggplot2::theme_minimal(base_size = 14) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-  if (show_average_line) {
-    summary_fun <- switch(average_line_summary_method,
-                          median = stats::median,
-                          mean = mean,
-                          stop("Invalid average_line_summary_method: must be 'median' or 'mean'"))
+  if (show_summary) {
+    summary_fn <- switch(summary_fun,
+                         median = stats::median,
+                         mean = mean)
     summary_df <- res |>
       dplyr::group_by(cluster, comparison) |>
-      dplyr::summarise(avg_log2FC = summary_fun(log2fc, na.rm = TRUE), .groups = "drop")
+      dplyr::summarise(avg_log2FC = summary_fn(log2fc, na.rm = TRUE), .groups = "drop")
 
     p <- p + ggplot2::geom_line(data = summary_df,
                                 ggplot2::aes(x = comparison, y = avg_log2FC, group = cluster),
-                                color = average_line_color,
-                                linewidth = average_line_size)
+                                color = summary_color,
+                                linewidth = summary_linewidth)
   }
 
-  if (facet_clusters && !is.null(km)) {
+  if (facet_by == "cluster" && !is.null(km)) {
     cluster_counts <- res |>
       dplyr::distinct(display_gene, cluster) |>
       dplyr::count(cluster) |>
@@ -4638,33 +5026,33 @@ get_foldchange_lineplot <- function(x,
 
 #' Plot alluvial diagram showing gene regulation transitions across comparisons
 #'
-#' @param vista_obj A VISTA object (DE results in metadata(vista_obj)$de_results).
+#' @param x A VISTA object (DE results in `comparisons(x)`).
 #' @param sample_comparisons Character vector of comparison names to include (>= 2).
 #' @param show_other Logical; include "Other" genes. Default FALSE.
 #' @return A ggplot object.
 #' @export
-plot_deg_alluvial <- function(vista_obj,
-                              sample_comparisons,
-                              show_other = FALSE) {
+get_deg_alluvial <- function(x,
+                             sample_comparisons,
+                             show_other = FALSE) {
 
-  stopifnot(inherits(vista_obj, "VISTA"))
+  stopifnot(inherits(x, "VISTA"))
   if (!requireNamespace("ComplexHeatmap", quietly = TRUE) ||
       !requireNamespace("circlize", quietly = TRUE)) {
     cli::cli_abort("Packages {.pkg ComplexHeatmap} and {.pkg circlize} must be installed to draw heatmaps.")
   }
   if (!requireNamespace("ggalluvial", quietly = TRUE)) {
-    cli::cli_abort("Package {.pkg ggalluvial} must be installed to use `plot_deg_alluvial()`.")
+    cli::cli_abort("Package {.pkg ggalluvial} must be installed to use `get_deg_alluvial()`.")
   }
   `%or%` <- function(a, b) if (!is.null(a)) a else b
   to_num <- function(v) { if (is.numeric(v)) return(v); suppressWarnings(as.numeric(gsub(",", "", as.character(v), fixed = TRUE))) }
 
-  comps <- comparisons(vista_obj)
-  if (is.null(comps) || !length(comps)) cli::cli_abort("No DE results found in comparisons(vista_obj).")
+  comps <- comparisons(x)
+  if (is.null(comps) || !length(comps)) cli::cli_abort("No DE results found in comparisons(x).")
   if (!all(sample_comparisons %in% names(comps))) cli::cli_abort("Unknown comparisons: {.val {setdiff(sample_comparisons, names(comps))}}")
   if (length(sample_comparisons) < 2) cli::cli_abort("At least two comparisons required.")
 
   # cutoffs to derive regulation if it's missing
-  cuts <- cutoffs(vista_obj) %or% list()
+  cuts <- cutoffs(x) %or% list()
   lfc_cut <- cuts$log2fc %or% 1
   p_cut   <- cuts$pval %or% 0.05
 
@@ -4779,8 +5167,9 @@ plot_deg_alluvial <- function(vista_obj,
 # ──────────────────────────────────────────────────────────────────────────────
 
 #' @export
-#' @param vista_obj A `VISTA` object.
-#' @param samples Character vector of group labels specifying which samples to include (based on the selected grouping column).
+#' @param x A `VISTA` object.
+#' @param sample_group Character vector of group labels specifying which samples
+#'   to include (based on the selected grouping column).
 #' @param genes Character vector of gene identifiers to display.
 #' @param value_transform One of `"zscore"`, `"log2"`, or `"raw"` controlling how expression values are transformed.
 #' @param repair_genes Logical; if `TRUE`, split `gene_id` strings such as `ID:SYMBOL` to display the symbol.
@@ -4792,7 +5181,7 @@ plot_deg_alluvial <- function(vista_obj,
 #' @param show_row_names Logical; display row names (genes) beside the heatmap.
 #' @param cluster_rows Logical; cluster rows when drawing the heatmap.
 #' @param show_row_dend Logical; display the row dendrogram.
-#' @param row_names_font_size Numeric font size for row names.
+#' @param label_size Numeric font size for row names.
 #' @param label_specific_rows Optional character vector of row names to highlight via `anno_mark()`.
 #' @param label_specific_rows_gp `grid::gpar()` object controlling the highlighted row labels.
 #' @param show_column_names Logical; draw column names when `TRUE`.
@@ -4810,12 +5199,12 @@ plot_deg_alluvial <- function(vista_obj,
 #' @param display_id Optional ID/column name to use for row labels. If supplied
 #' @param display_from Optional source ID type for mapping (used when `display_id`
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
-#' @param group_column Optional column name in `sample_info` used to interpret `samples`.
+#' @param group_column Optional column name in `sample_info` used to interpret `sample_group`.
 #' @param ... Additional arguments passed to `ComplexHeatmap::Heatmap()`.
 #' @export
-get_expression_heatmap <- function(vista_obj,
-                                   samples,
+get_expression_heatmap <- function(x,
                                    genes,
+                                   sample_group = NULL,
                                    value_transform = c("zscore", "log2", "raw"),
                                    repair_genes = FALSE,
                                    color_default = TRUE,
@@ -4826,7 +5215,7 @@ get_expression_heatmap <- function(vista_obj,
                                    show_row_names = FALSE,
                                    cluster_rows = TRUE,
                                    show_row_dend = TRUE,
-                                   row_names_font_size = 10,
+                                   label_size = 10,
                                    label_specific_rows = NULL,
                                    label_specific_rows_gp = grid::gpar(fontsize = 5),
                                    show_column_names = TRUE,
@@ -4844,7 +5233,7 @@ get_expression_heatmap <- function(vista_obj,
                                    group_column = NULL,
                                    ...) {
 
-  stopifnot(inherits(vista_obj, "VISTA"))
+  stopifnot(inherits(x, "VISTA"))
   if (!requireNamespace("ComplexHeatmap", quietly = TRUE) ||
       !requireNamespace("circlize", quietly = TRUE)) {
     cli::cli_abort("Packages {.pkg ComplexHeatmap} and {.pkg circlize} must be installed to draw heatmaps.")
@@ -4853,13 +5242,13 @@ get_expression_heatmap <- function(vista_obj,
   summarise_method <- match.arg(summarise_method)
   return_type <- match.arg(return_type)
 
-  group_col <- group_column %||% .vista_group_col(vista_obj)
+  group_col <- group_column %||% .vista_group_col(x)
 
-  expr <- SummarizedExperiment::assay(vista_obj) |>
+  expr <- SummarizedExperiment::assay(x) |>
     as.data.frame() |>
     tibble::rownames_to_column("gene_id")
 
-  sample_info <- as.data.frame(SummarizedExperiment::colData(vista_obj)) |>
+  sample_info <- as.data.frame(SummarizedExperiment::colData(x)) |>
     tibble::rownames_to_column("sample")
 
   if (!(group_col %in% names(sample_info))) {
@@ -4886,18 +5275,23 @@ get_expression_heatmap <- function(vista_obj,
       )
     }
   }
-  missing_groups <- setdiff(samples, unique(sample_info[[group_col]]))
+  if (is.null(sample_group)) {
+    sample_group <- unique(sample_info[[group_col]])
+  }
+  sample_group <- unique(as.character(sample_group))
+
+  missing_groups <- setdiff(sample_group, unique(sample_info[[group_col]]))
   if (length(missing_groups) > 0) {
     cli::cli_abort(
       c(
-        "Unknown group labels in {.arg samples}.",
+        "Unknown group labels in {.arg sample_group}.",
         "x" = "Missing: {.val {missing_groups}}",
         "i" = "Available: {.val {unique(sample_info[[group_col]])}}"
       )
     )
   }
 
-  sample_ids <- unlist(purrr::map(samples, function(grp) {
+  sample_ids <- unlist(purrr::map(sample_group, function(grp) {
     sample_info$sample[sample_info[[group_col]] == grp]
   }))
 
@@ -4908,10 +5302,10 @@ get_expression_heatmap <- function(vista_obj,
   mat <- expr |> tibble::column_to_rownames("gene_id") |> as.matrix()
   mat <- mat[match(genes, rownames(mat)), , drop = FALSE]
 
-  rd <- tryCatch(SummarizedExperiment::rowData(vista_obj), error = function(e) NULL)
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
   if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
     map <- rd[[display_id]]
-    names(map) <- rownames(vista_obj)
+    names(map) <- rownames(x)
     mapped <- map[match(rownames(mat), names(map))]
     rownames(mat) <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, rownames(mat))
   } else {
@@ -5028,7 +5422,7 @@ get_expression_heatmap <- function(vista_obj,
       col_df <- as.data.frame(col_df, stringsAsFactors = FALSE)
       rownames(col_df) <- colnames(mat)
     } else {
-      col_df <- SummarizedExperiment::colData(vista_obj) |>
+      col_df <- SummarizedExperiment::colData(x) |>
         as.data.frame() |>
         tibble::rownames_to_column("sample") |>
         dplyr::filter(sample %in% colnames(mat)) |>
@@ -5076,7 +5470,7 @@ get_expression_heatmap <- function(vista_obj,
       cluster_rows = cluster_rows,
       show_row_dend = show_row_dend,
       show_row_names = show_row_names,
-      row_names_gp = grid::gpar(fontsize = row_names_font_size),
+      row_names_gp = grid::gpar(fontsize = label_size),
       show_column_names = show_column_names,
       cluster_columns = cluster_columns,
       show_heatmap_legend = show_heatmap_legend,
@@ -5117,27 +5511,21 @@ get_expression_heatmap <- function(vista_obj,
 #' Plot fold-change barplots across comparisons for selected genes
 #'
 #' Plots log2 fold changes for selected genes across one or more comparisons.
-#' `facet_by` provides an explicit, backward-compatible way to request
-#' per-gene or per-comparison panels without changing the current
-#' `facet` / `facet_comparison` defaults.
+#' `facet_by` controls per-gene or per-comparison layout explicitly.
 #'
 #' @param x A `VISTA` object containing differential expression results.
 #' @param genes Character vector of gene IDs to plot.
 #' @param sample_comparisons Optional character vector of comparison names to include; defaults to all available.
-#' @param facet Logical; facet by gene when `TRUE`.
 #' @param coord_flip Logical; flip axes when `TRUE`.
 #' @param display_id Optional column in `rowData(x)` to use for gene labels. Input
 #'   gene matching still uses `gene_id`.
 #' @param sort_by How to order genes when faceting: `"input"` (use supplied order),
 #'   `"log2fc"` (descending log2FC of the first comparison), or `"abs_log2fc"`
 #'   (descending max absolute log2FC across comparisons).
-#' @param facet_comparison Logical; facet by comparison (x = gene) instead of
-#'   faceting by gene (x = comparison).
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` when faceting
 #'   (default `"free_y"`).
-#' @param facet_by Optional faceting mode. Use `NULL` (default) to preserve the
-#'   current `facet` / `facet_comparison` behavior. Otherwise choose one of
-#'   `"auto"`, `"gene"`, `"comparison"`, or `"none"`.
+#' @param facet_by Faceting mode: `"auto"` (default), `"gene"`,
+#'   `"comparison"`, or `"none"`.
 #' @return A `ggplot2` object.
 #'
 #' @examples
@@ -5161,13 +5549,11 @@ get_expression_heatmap <- function(vista_obj,
 get_foldchange_barplot <- function(x,
                                    genes,
                                    sample_comparisons = NULL,
-                                   facet = TRUE,
                                    coord_flip = FALSE,
                                    display_id = NULL,
                                    sort_by = c("input", "log2fc", "abs_log2fc"),
-                                   facet_comparison = FALSE,
                                    facet_scales = "free_y",
-                                   facet_by = NULL) {
+                                   facet_by = c("auto", "gene", "comparison", "none")) {
   stopifnot(inherits(x, "VISTA"))
   stopifnot(length(genes) > 0)
   sort_by <- match.arg(sort_by)
@@ -5223,8 +5609,6 @@ get_foldchange_barplot <- function(x,
   df$comparison <- factor(df$comparison, levels = sample_comparisons)
   facet_mode <- .resolve_foldchange_facet_mode(
     facet_by = facet_by,
-    facet = facet,
-    facet_comparison = facet_comparison,
     n_genes = length(gene_levels)
   )
 
@@ -5286,7 +5670,7 @@ get_foldchange_barplot <- function(x,
 # ──────────────────────────────────────────────────────────────────────────────
 
 #' @export
-#' @param vista_obj A `VISTA` object with stored differential expression results.
+#' @param x A `VISTA` object with stored differential expression results.
 #' @param sample_comparisons Character vector of comparison names to include.
 #' @param genes Character vector of gene identifiers to display.
 #' @param repair_genes Logical; attempt to simplify `gene_id` strings by removing prefixes.
@@ -5295,7 +5679,7 @@ get_foldchange_barplot <- function(x,
 #' @param show_row_names Logical; draw row (gene) names.
 #' @param cluster_rows Logical; cluster rows.
 #' @param show_row_dend Logical; display the row dendrogram.
-#' @param row_names_font_size Numeric font size for row names.
+#' @param label_size Numeric font size for row names.
 #' @param label_specific_rows Optional character vector of genes to highlight with `anno_mark()`.
 #' @param label_specific_rows_gp `grid::gpar()` object controlling highlighted labels.
 #' @param show_column_names Logical; draw column labels.
@@ -5310,7 +5694,7 @@ get_foldchange_barplot <- function(x,
 #' @param display_from Optional source ID type for mapping (used when `display_id`
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #' @param ... Additional arguments forwarded to `ComplexHeatmap::Heatmap()`.
-get_foldchange_heatmap <- function(vista_obj,
+get_foldchange_heatmap <- function(x,
                                    sample_comparisons,
                                    genes,
                                    repair_genes = FALSE,
@@ -5319,7 +5703,7 @@ get_foldchange_heatmap <- function(vista_obj,
                                    show_row_names = FALSE,
                                    cluster_rows = TRUE,
                                    show_row_dend = TRUE,
-                                   row_names_font_size = 10,
+                                   label_size = 10,
                                    label_specific_rows = NULL,
                                    label_specific_rows_gp = grid::gpar(fontsize = 5),
                                    show_column_names = TRUE,
@@ -5335,14 +5719,14 @@ get_foldchange_heatmap <- function(vista_obj,
                                    display_orgdb = NULL,
                                    ...) {
 
-  stopifnot(inherits(vista_obj, "VISTA"))
+  stopifnot(inherits(x, "VISTA"))
   if (!requireNamespace("ComplexHeatmap", quietly = TRUE) ||
       !requireNamespace("circlize", quietly = TRUE)) {
     cli::cli_abort("Packages {.pkg ComplexHeatmap} and {.pkg circlize} must be installed to draw heatmaps.")
   }
   return_type <- match.arg(return_type)
 
-  comps <- .vista_comparisons(vista_obj)
+  comps <- .vista_comparisons(x)
   stopifnot(all(sample_comparisons %in% names(comps)))
 
   fc_mat <- purrr::map_dfc(sample_comparisons, \(nm) {
@@ -5352,10 +5736,10 @@ get_foldchange_heatmap <- function(vista_obj,
     as.data.frame()
   colnames(fc_mat) <- sample_comparisons
   rownames(fc_mat) <- genes
-  rd <- tryCatch(SummarizedExperiment::rowData(vista_obj), error = function(e) NULL)
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
   if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
     map <- rd[[display_id]]
-    names(map) <- rownames(vista_obj)
+    names(map) <- rownames(x)
     mapped <- map[match(rownames(fc_mat), names(map))]
     disp_genes <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, rownames(fc_mat))
   } else {
@@ -5392,7 +5776,7 @@ get_foldchange_heatmap <- function(vista_obj,
   if (!is.null(label_specific_rows)) {
     if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
       map <- rd[[display_id]]
-      names(map) <- rownames(vista_obj)
+      names(map) <- rownames(x)
       mapped <- map[match(label_specific_rows, names(map))]
       label_specific_rows <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, label_specific_rows)
     } else {
@@ -5416,8 +5800,8 @@ get_foldchange_heatmap <- function(vista_obj,
 
   col_anno <- NULL
   if (annotate_columns) {
-    group_col <- .vista_group_col(vista_obj)
-    col_df <- SummarizedExperiment::colData(vista_obj) |>
+    group_col <- .vista_group_col(x)
+    col_df <- SummarizedExperiment::colData(x) |>
       as.data.frame() |>
       tibble::rownames_to_column("sample") |>
       dplyr::filter(sample %in% colnames(fc_mat)) |>
@@ -5441,7 +5825,7 @@ get_foldchange_heatmap <- function(vista_obj,
                                 cluster_rows = cluster_rows,
                                 show_row_dend = show_row_dend,
                                 show_row_names = show_row_names,
-                                row_names_gp = grid::gpar(fontsize = row_names_font_size),
+                                row_names_gp = grid::gpar(fontsize = label_size),
                                 show_column_names = show_column_names,
                                 cluster_columns = cluster_columns,
                                 show_heatmap_legend = show_heatmap_legend,

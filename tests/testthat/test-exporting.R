@@ -113,3 +113,54 @@ test_that("export_vista_assets creates plot/data bundle and manifest", {
   expect_true(is.data.frame(result$manifest))
   expect_true(nrow(result$manifest) >= 4)
 })
+
+test_that("save_vista_plot validates dimensions", {
+  vista <- make_small_vista()
+  p <- get_pca_plot(vista)
+
+  expect_error(
+    save_vista_plot(p, file = tempfile(fileext = ".png"), width = -1),
+    "width"
+  )
+  expect_error(
+    save_vista_plot(p, file = tempfile(fileext = ".png"), height = 0),
+    "height"
+  )
+})
+
+test_that("save_vista_data validates format-specific rules", {
+  vista <- make_small_vista()
+
+  expect_error(
+    save_vista_data(
+      vista,
+      what = c("comparison", "norm_counts"),
+      file = tempfile(fileext = ".csv"),
+      format = "csv"
+    ),
+    "exactly one value"
+  )
+
+  expect_error(
+    save_vista_data(vista, what = "not_supported", file = tempfile(fileext = ".rds"), format = "rds"),
+    "Unsupported"
+  )
+})
+
+test_that("export_vista_assets validates include keys and overwrite mode", {
+  vista <- make_small_vista()
+
+  expect_error(
+    export_vista_assets(vista, out_dir = tempfile("vista_assets_bad_"), include_plots = "not_a_plot"),
+    "Unsupported"
+  )
+
+  tmp_dir <- tempfile("vista_assets_existing_")
+  dir.create(tmp_dir, recursive = TRUE)
+  writeLines("x", file.path(tmp_dir, "already_here.txt"))
+
+  expect_error(
+    export_vista_assets(vista, out_dir = tmp_dir, overwrite = FALSE),
+    "already contains files"
+  )
+})

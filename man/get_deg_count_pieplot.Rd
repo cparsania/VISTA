@@ -7,12 +7,11 @@
 get_deg_count_pieplot(
   x,
   sample_comparisons = NULL,
-  show_counts = TRUE,
-  show_percent = TRUE,
-  percent_digits = 1,
-  font_size = 12,
-  fill_colors = c(Up = "red4", Down = "blue4"),
-  facet_by = c("sample_comparisons", "none"),
+  label = c("both", "count", "percent", "none"),
+  label_digits = 1,
+  base_size = 12,
+  colors = c(Up = "red4", Down = "blue4"),
+  facet_by = c("comparison", "none"),
   ncol = NULL
 )
 }
@@ -21,17 +20,15 @@ get_deg_count_pieplot(
 
 \item{sample_comparisons}{Optional character vector of comparison names to display.}
 
-\item{show_counts}{Logical; include raw count labels in slices.}
+\item{label}{Label mode: \code{"both"} (default), \code{"count"}, \code{"percent"}, or \code{"none"}.}
 
-\item{show_percent}{Logical; include percent labels in slices.}
+\item{label_digits}{Integer number of decimals used for percentage labels.}
 
-\item{percent_digits}{Integer number of decimals used for percentage labels.}
+\item{base_size}{Numeric base font size for the plot.}
 
-\item{font_size}{Numeric base font size for the plot.}
+\item{colors}{Named vector giving fill colors for \code{"Up"} and \code{"Down"} slices.}
 
-\item{fill_colors}{Named vector giving fill colors for \code{"Up"} and \code{"Down"} slices.}
-
-\item{facet_by}{Either \code{"sample_comparisons"} (default) to draw one pie per comparison,
+\item{facet_by}{Either \code{"comparison"} (default) to draw one pie per comparison,
 or \code{"none"} for a single pie.}
 
 \item{ncol}{Optional number of columns when faceting.}

@@ -8,8 +8,7 @@ get_foldchange_boxplot(
   x,
   genes = NULL,
   sample_comparisons = NULL,
-  sample_comparison = NULL,
-  facet = TRUE,
+  facet_by = c("auto", "comparison", "none"),
   p.label = "p.signif",
   stats_group = FALSE,
   stats_method = "t.test"
@@ -22,9 +21,7 @@ get_foldchange_boxplot(
 
 \item{sample_comparisons}{Optional character vector of comparison names to plot.}
 
-\item{sample_comparison}{Deprecated alias for \code{sample_comparisons}.}
-
-\item{facet}{Logical; facet each comparison when \code{TRUE}.}
+\item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"comparison"}, or \code{"none"}.}
 
 \item{p.label}{Label type passed to \code{ggpubr::stat_compare_means()}.}
 

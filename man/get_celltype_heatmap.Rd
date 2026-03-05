@@ -7,14 +7,14 @@
 get_celltype_heatmap(
   x,
   group_column = NULL,
-  samples = NULL,
+  sample_names = NULL,
   cell_types = NULL,
   top_n = 20,
   transform = c("none", "zscore", "log1p"),
   cluster_rows = TRUE,
   cluster_columns = TRUE,
-  show_values = FALSE,
-  font_size = 11,
+  label = FALSE,
+  base_size = 11,
   return_type = c("plot", "matrix", "both")
 )
 }
@@ -24,7 +24,7 @@ get_celltype_heatmap(
 \item{group_column}{Optional grouping column from \code{sample_info(x)}.
 If provided and \code{cluster_columns = FALSE}, samples are ordered by this group.}
 
-\item{samples}{Optional character vector of samples to include.}
+\item{sample_names}{Optional character vector of sample names to include.}
 
 \item{cell_types}{Optional character vector of cell types to include.}
 
@@ -36,9 +36,9 @@ If provided and \code{cluster_columns = FALSE}, samples are ordered by this grou
 
 \item{cluster_columns}{Logical; hierarchical cluster samples.}
 
-\item{show_values}{Logical; overlay numeric values on tiles.}
+\item{label}{Logical; overlay numeric values on tiles.}
 
-\item{font_size}{Base font size.}
+\item{base_size}{Base font size.}
 
 \item{return_type}{One of \code{"plot"}, \code{"matrix"}, or \code{"both"}.}
 }

@@ -377,7 +377,7 @@ vista <- set_rowdata(
 ## Step 3: PCA Plot
 
 ```{r vista-pca, fig.width=7, fig.height=5}
-get_pca_plot(vista, label_replicates = TRUE)
+get_pca_plot(vista, label = TRUE)
 ```
 
 **1 line.** Colors are inherited from the VISTA object. Axis labels with variance percentages are generated automatically.
@@ -405,8 +405,8 @@ top_genes <- head(de_tbl$gene_id[de_tbl$regulation != "Other"][
 ], 50)
 
 get_expression_heatmap(
-  vista_obj        = vista,
-  samples          = c("Untreated", "Dexamethasone"),
+  x               = vista,
+  sample_group    = c("Untreated", "Dexamethasone"),
   genes            = top_genes,
   value_transform  = "zscore",
   display_id       = "SYMBOL",

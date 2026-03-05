@@ -8,7 +8,10 @@ get_pairwise_corr_plot(
   x,
   sample_group = NULL,
   group_column = NULL,
-  genes = NULL
+  genes = NULL,
+  sample_order = c("input", "group"),
+  value_transform = c("log2", "none"),
+  title = "Pairwise Sample Correlations"
 )
 }
 \arguments{
@@ -19,6 +22,13 @@ get_pairwise_corr_plot(
 \item{group_column}{Optional column name in \code{sample_info} defining the grouping used for filtering.}
 
 \item{genes}{Optional character vector of gene IDs to include; defaults to all genes.}
+
+\item{sample_order}{Ordering for selected samples: \code{"input"} keeps the
+current order, while \code{"group"} sorts by \code{group_column}.}
+
+\item{value_transform}{Value transformation: \code{"log2"} (default) or \code{"none"}.}
+
+\item{title}{Plot title.}
 }
 \value{
 An object returned by this function.

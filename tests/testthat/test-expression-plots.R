@@ -2,13 +2,14 @@ test_that("expression distribution plots return ggplot objects", {
   vista <- make_small_vista()
   genes <- rownames(vista)[1:3]
 
-  p1 <- get_expression_violinplot(vista, genes = genes, facet = FALSE)
+  p1 <- get_expression_violinplot(vista, genes = genes, facet_by = "none")
   expect_s3_class(p1, "ggplot")
 
   p2 <- get_expression_density(vista, genes = genes)
   expect_s3_class(p2, "ggplot")
 
-  p3 <- get_expression_raincloud(vista, genes = genes, facet = FALSE)
+  skip_if_not_installed("ggrain")
+  p3 <- get_expression_raincloud(vista, genes = genes, facet_by = "none")
   expect_s3_class(p3, "ggplot")
 })
 
@@ -31,6 +32,29 @@ test_that("get_expression_barplot returns ggplot object", {
 
   p <- get_expression_barplot(vista, genes = genes)
   expect_s3_class(p, "ggplot")
+})
+
+test_that("get_expression_barplot bar heights match group means", {
+  vista <- make_small_vista()
+  gene <- rownames(vista)[1]
+  p <- get_expression_barplot(
+    vista,
+    genes = gene,
+    log_transform = FALSE,
+    by = "group",
+    facet_by = "none"
+  )
+  expect_s3_class(p, "ggplot")
+
+  si <- as.data.frame(SummarizedExperiment::colData(vista))
+  si$sample <- rownames(si)
+  group_col <- S4Vectors::metadata(vista)$group$column
+  expr <- as.numeric(SummarizedExperiment::assay(vista)[gene, si$sample])
+  expected_means <- tapply(expr, si[[group_col]], mean, na.rm = TRUE)
+
+  gb <- ggplot2::ggplot_build(p)
+  bar_y <- gb$data[[1]]$y
+  expect_equal(sort(as.numeric(bar_y)), sort(as.numeric(expected_means)))
 })
 
 test_that("get_expression_barplot handles sample subsetting", {
@@ -83,6 +107,21 @@ test_that("get_expression_boxplot handles log transformation", {
   genes <- rownames(vista)[1:5]
 
   p <- get_expression_boxplot(vista, genes = genes, log_transform = TRUE)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("get_expression_boxplot supports harmonized by alias and sample ordering", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:3]
+
+  p <- get_expression_boxplot(
+    vista,
+    genes = genes,
+    pool_genes = TRUE,
+    by = "sample",
+    sample_order = "group",
+    facet_by = "auto"
+  )
   expect_s3_class(p, "ggplot")
 })
 
@@ -152,11 +191,35 @@ test_that("expression plots handle faceting options", {
   vista <- make_small_vista()
   genes <- rownames(vista)[1:3]
 
-  p_facet <- get_expression_violinplot(vista, genes = genes, facet = TRUE)
+  p_facet <- get_expression_violinplot(vista, genes = genes, facet_by = "auto")
   expect_s3_class(p_facet, "ggplot")
 
-  p_no_facet <- get_expression_violinplot(vista, genes = genes, facet = FALSE)
+  p_no_facet <- get_expression_violinplot(vista, genes = genes, facet_by = "none")
   expect_s3_class(p_no_facet, "ggplot")
+
+  p_gene <- get_expression_violinplot(vista, genes = genes, facet_by = "gene")
+  expect_s3_class(p_gene, "ggplot")
+})
+
+test_that("expression violin plot enforces group-based semantics", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:3]
+
+  expect_error(
+    get_expression_violinplot(vista, genes = genes, by = "sample"),
+    "supports only"
+  )
+})
+
+test_that("expression raincloud enforces group-based semantics", {
+  skip_if_not_installed("ggrain")
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:3]
+
+  expect_error(
+    get_expression_raincloud(vista, genes = genes, by = "sample"),
+    "supports only"
+  )
 })
 
 test_that("expression plots respect gene limits", {
@@ -169,10 +232,80 @@ test_that("expression plots respect gene limits", {
 })
 
 test_that("get_expression_raincloud handles parameters correctly", {
+  skip_if_not_installed("ggrain")
   vista <- make_small_vista()
   genes <- rownames(vista)[1:3]
 
-  p <- get_expression_raincloud(vista, genes = genes, facet = TRUE)
+  p <- get_expression_raincloud(vista, genes = genes, facet_by = "gene", label = FALSE)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("get_expression_raincloud supports gene-level group summaries", {
+  skip_if_not_installed("ggrain")
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  p <- get_expression_raincloud(
+    vista,
+    genes = genes,
+    summarise = TRUE,
+    facet_by = "none",
+    id.long.var = "gene"
+  )
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("get_expression_raincloud warns when summarised values are faceted by gene", {
+  skip_if_not_installed("ggrain")
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  expect_warning(
+    get_expression_raincloud(
+      vista,
+      genes = genes,
+      summarise = TRUE,
+      facet_by = "gene"
+    ),
+    "not informative"
+  )
+})
+
+test_that("distribution plots support sample ordering and palette overrides", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  p_density <- get_expression_density(
+    vista,
+    genes = genes,
+    color_by = "sample",
+    sample_order = "expression",
+    palette = "Set 2"
+  )
+  expect_s3_class(p_density, "ggplot")
+
+  skip_if_not_installed("ggridges")
+  p_joy <- get_expression_joyplot(
+    vista,
+    genes = genes,
+    color_by = "sample",
+    sample_order = "group",
+    palette = "Set 2"
+  )
+  expect_s3_class(p_joy, "ggplot")
+})
+
+test_that("get_expression_scatter supports harmonized label aliases", {
+  vista <- make_small_vista()
+  samples <- colnames(vista)
+
+  p <- get_expression_scatter(
+    vista,
+    sample_x = samples[1],
+    sample_y = samples[2],
+    label_n = 5,
+    label_size = 2.5
+  )
   expect_s3_class(p, "ggplot")
 })
 

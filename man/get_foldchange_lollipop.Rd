@@ -16,8 +16,7 @@ get_foldchange_lollipop(
   label_digits = 2,
   display_id = NULL,
   dodge_width = 0.5,
-  facet_comparison = FALSE,
-  facet_by = NULL
+  facet_by = c("auto", "gene", "comparison", "none")
 )
 }
 \arguments{
@@ -53,12 +52,8 @@ Input gene matching still uses \code{gene_id}.}
 \item{dodge_width}{Horizontal separation between comparisons when plotting
 two comparisons on the same axis.}
 
-\item{facet_comparison}{Logical; when two comparisons are provided, facet by
-comparison instead of dodging side-by-side.}
-
-\item{facet_by}{Optional faceting mode. Use \code{NULL} (default) to preserve the
-current \code{facet_comparison} behavior. Otherwise choose one of \code{"auto"},
-\code{"gene"}, \code{"comparison"}, or \code{"none"}.}
+\item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"gene"},
+\code{"comparison"}, or \code{"none"}.}
 }
 \value{
 An object returned by this function.
@@ -84,10 +79,6 @@ Extracts log2 fold changes from stored differential expression results and
 plots them as stems and dots, with labels and a zero reference line. You can
 optionally provide two comparisons; in that case both comparisons are drawn
 side-by-side, coloured by comparison.
-
-\code{facet_by = "gene"} provides an explicit per-gene layout, while
-\code{facet_by = "comparison"} mirrors the historical \code{facet_comparison = TRUE}
-behavior. Leaving \code{facet_by = NULL} preserves current defaults for existing code.
 }
 \examples{
 NULL

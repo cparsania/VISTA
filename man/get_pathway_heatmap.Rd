@@ -5,9 +5,9 @@
 \title{Plot pathway-specific expression heatmaps from enrichment output}
 \usage{
 get_pathway_heatmap(
-  vista_obj,
+  x,
   enrichment,
-  samples,
+  sample_group = NULL,
   pathways = NULL,
   top_n = 5,
   pathway_column = c("Description", "ID"),
@@ -21,12 +21,12 @@ get_pathway_heatmap(
 )
 }
 \arguments{
-\item{vista_obj}{A \code{VISTA} object.}
+\item{x}{A \code{VISTA} object.}
 
 \item{enrichment}{An \code{enrichResult}/\code{gseaResult}, or a list with element
 \code{enrich} as returned by \verb{get_*_enrichment()} helpers.}
 
-\item{samples}{Character vector of group labels to include (same semantics as
+\item{sample_group}{Character vector of group labels to include (same semantics as
 \code{\link[=get_expression_heatmap]{get_expression_heatmap()}}).}
 
 \item{pathways}{Optional pathway names to include. When \code{NULL}, top pathways
@@ -44,7 +44,7 @@ are selected using \code{top_n}.}
 \item{gene_mode}{How to combine pathway genes for plotting: \code{"union"} (default)
 or \code{"intersection"}.}
 
-\item{gene_id_column}{Optional column in \code{rowData(vista_obj)} used to map
+\item{gene_id_column}{Optional column in \code{rowData(x)} used to map
 enrichment genes back to VISTA rownames (e.g., \code{"SYMBOL"} or \code{"ENTREZID"}).
 Leave \code{NULL} when enrichment genes already match VISTA rownames.}
 
@@ -92,7 +92,7 @@ msig <- get_msigdb_enrichment(
 get_pathway_heatmap(
   vista,
   enrichment = msig,
-  samples = c("control", "treatment1"),
+  sample_group = c("control", "treatment1"),
   top_n = 3,
   value_transform = "zscore",
   annotate_columns = TRUE,

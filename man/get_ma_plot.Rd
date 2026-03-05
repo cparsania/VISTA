@@ -9,10 +9,10 @@ get_ma_plot(
   sample_comparison,
   point_size = 1.2,
   alpha = 0.6,
-  fill_colors = c(Up = "#a40000", Down = "#16317d", Other = "gray70"),
-  topn = 0,
+  colors = c(Up = "#a40000", Down = "#16317d", Other = "gray70"),
+  label_n = 0,
   label_size = 3,
-  repair = FALSE,
+  repair_genes = FALSE,
   display_id = NULL,
   display_from = NULL,
   display_orgdb = NULL
@@ -28,14 +28,14 @@ one of \code{names(comparisons(x))}.}
 
 \item{alpha}{Numeric transparency (0-1). Default: 0.6.}
 
-\item{fill_colors}{Named character vector of colors for \code{"Up"},
+\item{colors}{Named character vector of colors for \code{"Up"},
 \code{"Down"}, and \code{"Other"} genes.}
 
-\item{topn}{Integer number of genes to label. Default: 0.}
+\item{label_n}{Integer number of genes to label. Default: 0.}
 
 \item{label_size}{Text size for labels. Default: 3.}
 
-\item{repair}{Logical; if \code{TRUE}, attempt to shorten gene identifiers to
+\item{repair_genes}{Logical; if \code{TRUE}, attempt to shorten gene identifiers to
 symbols by stripping prefixes. Default: \code{FALSE}.}
 
 \item{display_id}{Optional ID/column name to use for labels. If supplied and

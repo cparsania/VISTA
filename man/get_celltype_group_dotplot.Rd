@@ -13,7 +13,7 @@ get_celltype_group_dotplot(
   error = c("se", "sd", "none"),
   add_points = TRUE,
   point_size = 2.5,
-  font_size = 12
+  base_size = 12
 )
 }
 \arguments{
@@ -34,7 +34,7 @@ If \code{NULL}, uses the active VISTA group column when available.}
 
 \item{point_size}{Point size for summary points.}
 
-\item{font_size}{Base font size.}
+\item{base_size}{Base font size.}
 }
 \value{
 A ggplot object.

@@ -262,7 +262,7 @@ save_vista_data <- function(x,
     if (colname %in% colnames(df)) return(df)
     out <- data.frame(tmp = rn, stringsAsFactors = FALSE, check.names = FALSE)
     colnames(out) <- colname
-    cbind(out, as.data.frame(df, stringsAsFactors = FALSE, check.names = FALSE))
+    cbind(out, as.data.frame(df, stringsAsFactors = FALSE))
   }
 
   to_df <- function(obj, key) {
@@ -278,7 +278,7 @@ save_vista_data <- function(x,
     }
 
     if (is.matrix(obj)) obj <- as.data.frame(obj, stringsAsFactors = FALSE, check.names = FALSE)
-    if (inherits(obj, "DataFrame")) obj <- as.data.frame(obj, stringsAsFactors = FALSE, check.names = FALSE)
+    if (inherits(obj, "DataFrame")) obj <- as.data.frame(obj, stringsAsFactors = FALSE)
     if (!is.data.frame(obj)) {
       obj <- data.frame(value = as.character(obj), stringsAsFactors = FALSE, check.names = FALSE)
     }
@@ -301,12 +301,12 @@ save_vista_data <- function(x,
   get_object <- function(key) {
     switch(
       key,
-      comparison = as.data.frame(comps[[comp_name]], stringsAsFactors = FALSE, check.names = FALSE),
-      comparisons = lapply(comps, as.data.frame, stringsAsFactors = FALSE, check.names = FALSE),
+      comparison = as.data.frame(comps[[comp_name]], stringsAsFactors = FALSE),
+      comparisons = lapply(comps, as.data.frame, stringsAsFactors = FALSE),
       norm_counts = norm_counts(x),
-      sample_info = as.data.frame(sample_info(x), stringsAsFactors = FALSE, check.names = FALSE),
-      row_data = as.data.frame(row_data(x), stringsAsFactors = FALSE, check.names = FALSE),
-      deg_summary = as.data.frame(deg_summary(x), stringsAsFactors = FALSE, check.names = FALSE),
+      sample_info = as.data.frame(sample_info(x), stringsAsFactors = FALSE),
+      row_data = as.data.frame(row_data(x), stringsAsFactors = FALSE),
+      deg_summary = as.data.frame(deg_summary(x), stringsAsFactors = FALSE),
       cutoffs = cutoffs(x)
     )
   }
@@ -593,22 +593,22 @@ export_vista_assets <- function(x,
   }
 
   if ("pca" %in% include_plots) {
-    save_plot_item("pca", get_pca_plot(x, label_replicates = TRUE), "pca")
+    save_plot_item("pca", get_pca_plot(x, label = TRUE), "pca")
   }
   if ("mds" %in% include_plots) {
-    save_plot_item("mds", get_mds_plot(x, label_replicates = TRUE), "mds")
+    save_plot_item("mds", get_mds_plot(x, label = TRUE), "mds")
   }
   if ("corr_heatmap" %in% include_plots) {
     save_plot_item("corr_heatmap", get_corr_heatmap(x), "corr_heatmap")
   }
   if ("deg_bar" %in% include_plots) {
-    save_plot_item("deg_bar", get_deg_count_barplot(x, facet_by = "sample_comparisons"), "deg_count_barplot")
+    save_plot_item("deg_bar", get_deg_count_barplot(x, facet_by = "comparison"), "deg_count_barplot")
   }
   if ("deg_pie" %in% include_plots) {
-    save_plot_item("deg_pie", get_deg_count_pieplot(x, facet_by = "sample_comparisons"), "deg_count_pieplot")
+    save_plot_item("deg_pie", get_deg_count_pieplot(x, facet_by = "comparison"), "deg_count_pieplot")
   }
   if ("deg_donut" %in% include_plots) {
-    save_plot_item("deg_donut", get_deg_count_donutplot(x, facet_by = "sample_comparisons"), "deg_count_donutplot")
+    save_plot_item("deg_donut", get_deg_count_donutplot(x, facet_by = "comparison"), "deg_count_donutplot")
   }
   if ("volcano" %in% include_plots) {
     save_plot_item(
@@ -624,7 +624,7 @@ export_vista_assets <- function(x,
         x,
         sample_comparison = comp_name,
         display_id = display_id,
-        topn = top_n_labels
+        label_n = top_n_labels
       ),
       paste0("ma_", comp_tag)
     )
@@ -651,7 +651,7 @@ export_vista_assets <- function(x,
     hm_genes <- hm_genes[!is.na(hm_genes) & nzchar(hm_genes)]
     hm_genes <- head(hm_genes, heatmap_n_genes)
 
-    si <- as.data.frame(sample_info(x), stringsAsFactors = FALSE, check.names = FALSE)
+    si <- as.data.frame(sample_info(x), stringsAsFactors = FALSE)
     group_col <- (S4Vectors::metadata(x)$group$column %||% colnames(si)[1])
     group_values <- unique(as.character(si[[group_col]]))
     group_values <- group_values[!is.na(group_values) & nzchar(group_values)]
@@ -660,8 +660,8 @@ export_vista_assets <- function(x,
       save_plot_item(
         "expression_heatmap",
         get_expression_heatmap(
-          vista_obj = x,
-          samples = group_values,
+          x = x,
+          sample_group = group_values,
           genes = hm_genes,
           display_id = display_id,
           value_transform = "zscore",

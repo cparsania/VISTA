@@ -11,16 +11,18 @@ get_umap_plot(
   color_by = NULL,
   genes = NULL,
   top_n_genes = NULL,
-  label_replicates = FALSE,
+  label = FALSE,
   label_size = 3,
-  circle_size = 10,
-  sample_colors = TRUE,
+  point_size = 10,
   shape_by = NULL,
   shape_values = NULL,
   n_neighbors = 15,
   min_dist = 0.1,
   metric = "euclidean",
-  seed = 123
+  seed = 123,
+  use_vista_colors = TRUE,
+  palette = NULL,
+  colors = NULL
 )
 }
 \arguments{
@@ -39,14 +41,11 @@ Defaults to \code{group_column}.}
 
 \item{top_n_genes}{Optional integer selecting top variable genes to include.}
 
-\item{label_replicates}{Logical; draw sample labels when \code{TRUE}.}
+\item{label}{Logical; draw sample labels when \code{TRUE}.}
 
-\item{label_size}{Numeric label size when \code{label_replicates = TRUE}.}
+\item{label_size}{Numeric label size when \code{label = TRUE}.}
 
-\item{circle_size}{Numeric point size.}
-
-\item{sample_colors}{Logical; when \code{TRUE}, apply VISTA group colors if
-coloring by the grouping column. Otherwise generate a qualitative palette.}
+\item{point_size}{Numeric point size.}
 
 \item{shape_by}{Optional column name in \code{sample_info} used to map point shape.}
 
@@ -60,6 +59,15 @@ coloring by the grouping column. Otherwise generate a qualitative palette.}
 \item{metric}{UMAP distance metric.}
 
 \item{seed}{Integer random seed passed to UMAP.}
+
+\item{use_vista_colors}{Logical; when \code{TRUE}, prefer the stored VISTA group
+colours when colouring by the grouping column.}
+
+\item{palette}{Optional qualitative palette name used when generating colours
+for non-group metadata levels.}
+
+\item{colors}{Optional named character vector of manual colours overriding
+both \code{palette} and stored VISTA colours.}
 }
 \value{
 A ggplot object with UMAP1/UMAP2 coordinates.

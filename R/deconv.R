@@ -323,7 +323,7 @@ get_cell_fractions <- function(x) {
   NULL
 }
 
-.deconv_long_table <- function(x, samples = NULL) {
+.deconv_long_table <- function(x, sample_names = NULL) {
   frac <- as.data.frame(get_cell_fractions(x), stringsAsFactors = FALSE, check.names = FALSE)
 
   if ("sample_names" %in% colnames(frac)) {
@@ -357,11 +357,11 @@ get_cell_fractions <- function(x) {
     frac <- frac[, numeric_cols, drop = FALSE]
   }
 
-  if (!is.null(samples)) {
-    samples <- as.character(samples)
-    keep <- intersect(samples, rownames(frac))
+  if (!is.null(sample_names)) {
+    sample_names <- as.character(sample_names)
+    keep <- intersect(sample_names, rownames(frac))
     if (!length(keep)) {
-      cli::cli_abort("None of the requested {.arg samples} are present in cell fractions.")
+      cli::cli_abort("None of the requested {.arg sample_names} are present in cell fractions.")
     }
     frac <- frac[keep, , drop = FALSE]
   }
@@ -409,13 +409,13 @@ get_cell_fractions <- function(x) {
 #' @param x A VISTA object.
 #' @param group_column Optional column in `sample_info(x)` used to facet/order samples.
 #'   If `NULL`, uses the active VISTA group column when available.
-#' @param samples Optional character vector of sample names to include.
-#' @param font_size Base font size.
+#' @param sample_names Optional character vector of sample names to include.
+#' @param base_size Base font size.
 #' @param cell_types Optional character vector of cell types to keep.
 #' @param top_n Optional top-N cell types by mean score (ignored when `cell_types` is provided).
 #' @param collapse_other Logical; collapse non-selected cell types into `"Other"`.
 #' @param normalize One of `"sample"` (default; per-sample relative scores) or `"none"`.
-#' @param facet_by_group Logical; facet by group when `group_column` is available.
+#' @param facet_by Faceting mode: `"group"` (default) or `"none"`.
 #'
 #' @return A ggplot object.
 #' @examples
@@ -441,21 +441,22 @@ get_cell_fractions <- function(x) {
 #'   row.names = colnames(mat)
 #' )
 #' S4Vectors::metadata(v) <- md
-#' plot_celltype_barplot(v, group_column = "cond")
+#' get_celltype_barplot(v, group_column = "cond")
 #' @export
-plot_celltype_barplot <- function(x,
-                                  group_column = NULL,
-                                  samples = NULL,
-                                  font_size = 12,
-                                  cell_types = NULL,
-                                  top_n = NULL,
-                                  collapse_other = TRUE,
-                                  normalize = c("sample", "none"),
-                                  facet_by_group = TRUE) {
+get_celltype_barplot <- function(x,
+                                 group_column = NULL,
+                                 sample_names = NULL,
+                                 base_size = 12,
+                                 cell_types = NULL,
+                                 top_n = NULL,
+                                 collapse_other = TRUE,
+                                 normalize = c("sample", "none"),
+                                 facet_by = c("group", "none")) {
   stopifnot(inherits(x, "VISTA"))
   normalize <- match.arg(normalize)
+  facet_by <- match.arg(facet_by)
 
-  df <- .deconv_long_table(x, samples = samples)
+  df <- .deconv_long_table(x, sample_names = sample_names)
   gcol <- .resolve_celltype_group_column(x, group_column, colnames(df))
   df$group <- if (!is.null(gcol)) as.character(df[[gcol]]) else "All"
 
@@ -500,13 +501,13 @@ plot_celltype_barplot <- function(x,
 
   p <- ggplot2::ggplot(df, ggplot2::aes(x = sample, y = score, fill = cell_type)) +
     ggplot2::geom_col(width = 0.9) +
-    ggplot2::theme_minimal(base_size = font_size) +
+    ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::xlab("Sample") +
     ggplot2::ylab(ifelse(normalize == "sample", "Relative deconvolution score", "Deconvolution score")) +
     ggplot2::labs(fill = "Cell type")
 
-  if (isTRUE(facet_by_group) && length(unique(df$group)) > 1) {
+  if (facet_by == "group" && length(unique(df$group)) > 1) {
     p <- p + ggplot2::facet_wrap(~group, scales = "free_x")
   }
 
@@ -524,7 +525,7 @@ plot_celltype_barplot <- function(x,
 #' @param error Error-bar type: `"se"`, `"sd"`, or `"none"`.
 #' @param add_points Logical; overlay sample-level jittered points.
 #' @param point_size Point size for summary points.
-#' @param font_size Base font size.
+#' @param base_size Base font size.
 #'
 #' @return A ggplot object.
 #' @examples
@@ -560,7 +561,7 @@ get_celltype_group_dotplot <- function(x,
                                        error = c("se", "sd", "none"),
                                        add_points = TRUE,
                                        point_size = 2.5,
-                                       font_size = 12) {
+                                       base_size = 12) {
   stopifnot(inherits(x, "VISTA"))
   summary_fun <- match.arg(summary_fun)
   error <- match.arg(error)
@@ -641,7 +642,7 @@ get_celltype_group_dotplot <- function(x,
 
   p +
     ggplot2::coord_flip() +
-    ggplot2::theme_minimal(base_size = font_size) +
+    ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::labs(
       x = "Cell type",
       y = paste0(summary_fun, " deconvolution score"),
@@ -654,14 +655,14 @@ get_celltype_group_dotplot <- function(x,
 #' @param x A VISTA object.
 #' @param group_column Optional grouping column from `sample_info(x)`.
 #'   If provided and `cluster_columns = FALSE`, samples are ordered by this group.
-#' @param samples Optional character vector of samples to include.
+#' @param sample_names Optional character vector of sample names to include.
 #' @param cell_types Optional character vector of cell types to include.
 #' @param top_n Number of top cell types by mean score when `cell_types` is `NULL`.
 #' @param transform One of `"none"`, `"zscore"`, or `"log1p"`.
 #' @param cluster_rows Logical; hierarchical cluster cell types.
 #' @param cluster_columns Logical; hierarchical cluster samples.
-#' @param show_values Logical; overlay numeric values on tiles.
-#' @param font_size Base font size.
+#' @param label Logical; overlay numeric values on tiles.
+#' @param base_size Base font size.
 #' @param return_type One of `"plot"`, `"matrix"`, or `"both"`.
 #'
 #' @return A ggplot object, matrix, or list depending on `return_type`.
@@ -692,20 +693,20 @@ get_celltype_group_dotplot <- function(x,
 #' @export
 get_celltype_heatmap <- function(x,
                                  group_column = NULL,
-                                 samples = NULL,
+                                 sample_names = NULL,
                                  cell_types = NULL,
                                  top_n = 20,
                                  transform = c("none", "zscore", "log1p"),
                                  cluster_rows = TRUE,
                                  cluster_columns = TRUE,
-                                 show_values = FALSE,
-                                 font_size = 11,
+                                 label = FALSE,
+                                 base_size = 11,
                                  return_type = c("plot", "matrix", "both")) {
   stopifnot(inherits(x, "VISTA"))
   transform <- match.arg(transform)
   return_type <- match.arg(return_type)
 
-  df <- .deconv_long_table(x, samples = samples)
+  df <- .deconv_long_table(x, sample_names = sample_names)
   selected <- .choose_celltypes(df, cell_types = cell_types, top_n = top_n)
   df <- df %>% dplyr::filter(cell_type %in% selected)
 
@@ -755,16 +756,16 @@ get_celltype_heatmap <- function(x,
   p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = sample, y = cell_type, fill = value)) +
     ggplot2::geom_tile() +
     ggplot2::scale_fill_viridis_c(name = fill_title) +
-    ggplot2::theme_minimal(base_size = font_size) +
+    ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::theme(
       axis.title = ggplot2::element_blank(),
       axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
     )
 
-  if (isTRUE(show_values)) {
+  if (isTRUE(label)) {
     p <- p + ggplot2::geom_text(
       ggplot2::aes(label = sprintf("%.2f", value)),
-      size = max(2.5, font_size / 4)
+      size = max(2.5, base_size / 4)
     )
   }
 

@@ -90,7 +90,7 @@ vista
 head(comparisons(vista)[[comp]][, c("gene_id", "log2fc", "padj")])
 
 # QC
-get_pca_plot(vista, label_replicates = TRUE)
+get_pca_plot(vista, label = TRUE)
 get_mds_plot(vista)
 get_corr_heatmap(vista)
 # Optional nonlinear view (requires uwot)
@@ -109,7 +109,7 @@ up_genes <- get_genes_by_regulation(
   regulation = "Up"
 )[[comp]]
 
-get_expression_heatmap(vista, genes = up_genes[1:40], kmeans_k = 3)
+get_expression_heatmap(vista, sample_group = unique(sample_info(vista)$cond_long), genes = up_genes[1:40], kmeans_k = 3)
 get_expression_barplot(vista, genes = up_genes[1:3], by = "sample", facet_by = "gene")
 get_expression_lollipop(vista, genes = up_genes[1:3], by = "sample", facet_by = "gene")
 
@@ -225,7 +225,7 @@ run_vista_report("vista-report.yml")
 - `get_deg_count_pieplot()`
 - `get_deg_count_donutplot()`
 - `get_deg_venn_diagram()`
-- `plot_deg_alluvial()`
+- `get_deg_alluvial()`
 
 ### Expression patterns
 
@@ -266,9 +266,23 @@ run_vista_report("vista-report.yml")
 ### Deconvolution (optional workflow)
 
 - `run_cell_deconvolution()`
-- `plot_celltype_barplot()`
+- `get_celltype_barplot()`
 - `get_celltype_group_dotplot()`
 - `get_celltype_heatmap()`
+
+## Harmonized Plot API
+
+VISTA plotting functions are converging on a shared argument grammar so that the same concepts use the same names across plot families.
+
+- `sample_group` and `group_column` control sample filtering and grouping.
+- `sample_comparison` is used for one contrast; `sample_comparisons` is used for multiple contrasts.
+- `by` controls the plotting unit when a plot can switch between group-level and sample-level views.
+- `facet_by` controls layout when a plot can switch between gene, group, comparison, or no faceting.
+- `sample_order` controls sample sequencing for per-sample plots.
+- `display_id` controls user-facing gene labels when feature annotations are available.
+- `color_by`, `palette`, and `colors` are available on sample-embedding and selected distribution plots for more explicit color control.
+
+This keeps older code working while making new plots easier to predict.
 
 ## Example Analyses
 

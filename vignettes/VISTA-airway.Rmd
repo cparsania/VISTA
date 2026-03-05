@@ -380,7 +380,7 @@ Visualize sample clustering and variation.
 ```{r pca-basic, fig.width=8, fig.height=6}
 get_pca_plot(
   vista,
-  label_replicates = TRUE
+  label = TRUE
 ) + theme_minimal(base_size = 16)
 ```
 
@@ -390,7 +390,7 @@ get_pca_plot(
 # Shape points by cell line
 get_pca_plot(
   vista,
-  label_replicates = TRUE,
+  label = TRUE,
   shape_by = "cell"
 )
 ```
@@ -413,8 +413,8 @@ get_pca_plot(
 # Larger points for better visibility
 get_pca_plot(
   vista,
-  label_replicates = TRUE,
-  circle_size = 15
+  label = TRUE,
+  point_size = 15
 )
 ```
 
@@ -424,8 +424,8 @@ get_pca_plot(
 # Clean plot without sample labels
 get_pca_plot(
   vista,
-  label_replicates = FALSE,
-  circle_size = 12
+  label = FALSE,
+  point_size = 12
 )
 ```
 
@@ -438,7 +438,7 @@ Alternative dimensionality reduction method.
 ```{r mds-basic, fig.width=8, fig.height=6}
 get_mds_plot(
   vista,
-  label_replicates = TRUE
+  label = TRUE
 )
 ```
 
@@ -448,7 +448,7 @@ get_mds_plot(
 get_mds_plot(
   vista,
   top_n_genes = 500,
-  label_replicates = TRUE
+  label = TRUE
 )
 ```
 
@@ -458,7 +458,7 @@ get_mds_plot(
 # Shape points by cell line
 get_mds_plot(
   vista,
-  label_replicates = TRUE,
+  label = TRUE,
   shape_by = "cell"
 )
 ```
@@ -472,7 +472,7 @@ Non-linear sample embedding for exploratory structure.
 ```{r umap-basic, fig.width=8, fig.height=6, eval=requireNamespace("uwot", quietly=TRUE)}
 get_umap_plot(
   vista,
-  label_replicates = TRUE
+  label = TRUE
 )
 ```
 
@@ -483,7 +483,7 @@ get_umap_plot(
   vista,
   color_by = "cell",
   shape_by = "treatment",
-  label_replicates = TRUE
+  label = TRUE
 )
 ```
 
@@ -527,7 +527,7 @@ get_volcano_plot(
   sample_comparison = comp_names[1],
   log2fc_cutoff = 1.5,
   pval_cutoff = 0.01,
-  lab_size = 3,
+  label_size = 3,
   display_id = "SYMBOL"
 )
 ```
@@ -564,7 +564,7 @@ get_ma_plot(
 get_ma_plot(
   vista,
   sample_comparison = comp_names[1],
-  topn = 10,
+  label_n = 10,
   point_size = 2,
   display_id = "SYMBOL"
 )
@@ -576,7 +576,7 @@ get_ma_plot(
 get_ma_plot(
   vista,
   sample_comparison = comp_names[1],
-  topn = 5,
+  label_n = 5,
   display_id = "SYMBOL",
   point_size = 1.5,
   alpha = 0.8
@@ -623,7 +623,7 @@ print(top_down)
 ```{r heatmap-basic, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL"
 )
@@ -634,7 +634,7 @@ get_expression_heatmap(
 ```{r heatmap-kmeans, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL",
   kmeans_k = 3,
@@ -647,7 +647,7 @@ get_expression_heatmap(
 ```{r heatmap-annotated, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   show_row_names = FALSE,
   display_id = "SYMBOL",
@@ -665,7 +665,7 @@ get_expression_heatmap(
 # By default, columns are split by the first annotation column.
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   show_row_names = FALSE,
   display_id = "SYMBOL",
@@ -680,7 +680,7 @@ get_expression_heatmap(
 ```{r heatmap-summarized, fig.width=7, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL",
   summarise_replicates = TRUE,
@@ -695,11 +695,11 @@ get_expression_heatmap(
 # Smaller gene set to show names
 get_expression_heatmap(
   vista,
-  samples = levels(colData(vista)$treatment),
+  sample_group = levels(colData(vista)$treatment),
   genes = top_degs[1:25],
   display_id = "SYMBOL",
   show_row_names = TRUE,
-  row_names_font_size = 8
+  label_size = 8
 )
 ```
 
@@ -774,7 +774,7 @@ get_expression_boxplot(
   vista,
   genes = top_up$gene_id[1:3],
   display_id = "SYMBOL",
-  facet = FALSE
+  facet_by = "none"
 )
 ```
 
@@ -843,7 +843,7 @@ get_expression_boxplot(
 ```{r violin-basic, fig.width=9, fig.height=6}
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id[1:4]
+  genes = top_up$gene_id
 )
 ```
 
@@ -852,7 +852,7 @@ get_expression_violinplot(
 ```{r violin-log, fig.width=9, fig.height=6}
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up$gene_id,
   value_transform = "log2"
 )
 ```
@@ -862,7 +862,7 @@ get_expression_violinplot(
 ```{r violin-zscore, fig.width=8, fig.height=6}
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up$gene_id,
   value_transform = "zscore"
 )
 ```
@@ -889,7 +889,7 @@ get_expression_scatter(
   sample_x = samples[1],
   sample_y = samples[2],
   log_transform = TRUE,
-  label_top_n = 10
+  label_n = 10
 )
 ```
 
@@ -954,17 +954,17 @@ get_expression_joyplot(
 
 ### Raincloud plot (expression)
 
-```{r raincloud-expression-message, eval=!requireNamespace("ggrain", quietly=TRUE)}
+```{r raincloud-expression-message, eval=!requireNamespace("ggrain", quietly=TRUE), echo=FALSE}
 cat("Package 'ggrain' is not installed; expression raincloud plot example is skipped.\n")
 ```
 
 ```{r raincloud-expression, fig.width=9, fig.height=6, eval=requireNamespace("ggrain", quietly=TRUE)}
 get_expression_raincloud(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up$gene_id,
   value_transform = "log2",
   summarise = TRUE,
-  facet = FALSE,
+  facet_by = "none",
   id.long.var = "gene",
   stats_group = TRUE
 )
@@ -1068,8 +1068,8 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_enrichment_chord(
     msig_up,
-    vista_obj  = vista,
-    comparison = names(comparisons(vista))[1],
+    vista  = vista,
+    sample_comparison = names(comparisons(vista))[1],
     top_n      = 6,
     color_by   = "foldchange",
     display_id = "SYMBOL",
@@ -1083,8 +1083,8 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   chord_result <- get_enrichment_chord(
     msig_up,
-    vista_obj    = vista,
-    comparison   = names(comparisons(vista))[1],
+    vista    = vista,
+    sample_comparison   = names(comparisons(vista))[1],
     top_n        = 8,
     min_pathways = 2,
     color_by     = "regulation",
@@ -1123,9 +1123,9 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ```{r pathway-heatmap, fig.width=8, fig.height=10, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("ComplexHeatmap", quietly=TRUE)}
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_pathway_heatmap(
-    vista_obj = vista,
+    x = vista,
     enrichment = msig_up$enrich,
-    samples = c("Untreated", "Dexamethasone"),
+    sample_group = c("Untreated", "Dexamethasone"),
     top_n = 2,
     gene_mode = "union",
     max_genes = 60,
@@ -1338,7 +1338,7 @@ get_foldchange_lollipop(
 
 ## Fold-change Raincloud
 
-```{r raincloud-foldchange-message, eval=!requireNamespace("ggrain", quietly=TRUE)}
+```{r raincloud-foldchange-message, eval=!requireNamespace("ggrain", quietly=TRUE), echo=FALSE}
 cat("Package 'ggrain' is not installed; fold-change raincloud plot example is skipped.\n")
 ```
 
@@ -1346,7 +1346,7 @@ cat("Package 'ggrain' is not installed; fold-change raincloud plot example is sk
 get_foldchange_raincloud(
   vista,
   sample_comparisons = comp_names,
-  facet = FALSE,
+  facet_by = "none",
   id.long.var = "gene_id",
   stats_group = TRUE
 )
@@ -1426,10 +1426,10 @@ write.csv(
 
 ```{r save-vista, eval=FALSE}
 # Save the complete VISTA object for later use
-saveRDS(vista, file = "airway_vista_object.rds")
+saveRDS(vista, file = "airway_vistaect.rds")
 
 # Load it back
-# vista <- readRDS("airway_vista_object.rds")
+# vista <- readRDS("airway_vistaect.rds")
 ```
 
 # Summary

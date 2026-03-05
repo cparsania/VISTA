@@ -10,12 +10,15 @@ get_mds_plot(
   group_column = NULL,
   genes = NULL,
   top_n_genes = NULL,
-  label_replicates = FALSE,
+  label = FALSE,
   label_size = 3,
-  circle_size = 10,
-  sample_colors = TRUE,
+  point_size = 10,
   shape_by = NULL,
-  shape_values = NULL
+  shape_values = NULL,
+  color_by = NULL,
+  use_vista_colors = TRUE,
+  palette = NULL,
+  colors = NULL
 )
 }
 \arguments{
@@ -29,19 +32,29 @@ get_mds_plot(
 
 \item{top_n_genes}{Optional integer selecting the top variable genes to include.}
 
-\item{label_replicates}{Logical; draw sample labels when \code{TRUE}.}
+\item{label}{Logical; draw sample labels when \code{TRUE}.}
 
-\item{label_size}{Numeric size of replicate labels when \code{label_replicates = TRUE}.}
+\item{label_size}{Numeric size of sample labels when \code{label = TRUE}.}
 
-\item{circle_size}{Numeric size for points.}
-
-\item{sample_colors}{Logical; apply stored group colors when \code{TRUE}.}
+\item{point_size}{Numeric size for points.}
 
 \item{shape_by}{Optional column name in \code{sample_info} used to map point shape. When \code{NULL},
 shapes are not mapped.}
 
 \item{shape_values}{Optional vector of shapes passed to \code{scale_shape_manual()} when
 \code{shape_by} is set. Use a named vector to map shapes to specific levels.}
+
+\item{color_by}{Optional column name in \code{sample_info} used for point colour.
+Defaults to the active grouping column.}
+
+\item{use_vista_colors}{Logical; when \code{TRUE}, prefer the stored VISTA group
+colours when colouring by the grouping column.}
+
+\item{palette}{Optional qualitative palette name used when generating colours
+for non-group metadata levels.}
+
+\item{colors}{Optional named character vector of manual colours overriding
+both \code{palette} and stored VISTA colours.}
 }
 \value{
 An object returned by this function.
