@@ -21,5 +21,10 @@ vector. Comparison colors are used in fold-change and comparison-level plots.
 The color map must include all currently active comparisons.
 }
 \examples{
-NULL
+v <- example_vista()
+comps <- names(comparisons(v))
+if (length(comps)) {
+  cmap <- stats::setNames(rep('#1b9e77', length(comps)), comps)
+  set_vista_comparison_colors(v, cmap)
+}
 }

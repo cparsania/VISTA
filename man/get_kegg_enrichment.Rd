@@ -44,5 +44,10 @@ An object returned by this function.
 Run KEGG enrichment directly from a VISTA comparison
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+if (requireNamespace('org.Mm.eg.db', quietly = TRUE)) {
+  out <- try(get_kegg_enrichment(v, sample_comparison = comp, from_type = 'ENSEMBL', orgdb = org.Mm.eg.db::org.Mm.eg.db), silent = TRUE)
+  if (!inherits(out, 'try-error')) out
+}
 }

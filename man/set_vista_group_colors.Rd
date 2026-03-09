@@ -21,5 +21,8 @@ This controls group-level coloring across VISTA plots that use group mapping
 groups currently present in the object.
 }
 \examples{
-NULL
+v <- example_vista()
+groups <- unique(as.character(sample_info(v)$cond_long))
+gmap <- stats::setNames(c('#1b9e77', '#d95f02')[seq_along(groups)], groups)
+set_vista_group_colors(v, gmap)
 }

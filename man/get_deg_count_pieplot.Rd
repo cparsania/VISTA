@@ -40,5 +40,7 @@ An object returned by this function.
 Pie chart of DEG counts (Up/Down) across comparisons
 }
 \examples{
-NULL
+v <- example_vista()
+p <- get_deg_count_pieplot(v)
+print(p)
 }

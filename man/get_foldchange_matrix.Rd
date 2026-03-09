@@ -20,5 +20,7 @@ A numeric matrix with genes in rows and comparisons in columns.
 Returns a gene-by-comparison matrix of log2 fold changes stored in a VISTA object.
 }
 \examples{
-NULL
+v <- example_vista()
+mat <- get_foldchange_matrix(v)
+dim(mat)
 }

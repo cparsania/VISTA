@@ -47,5 +47,8 @@ Shows per-sample (or per-group) expression distributions as violins with
 optional faceting by group.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(rownames(v), 4)
+p <- get_expression_violinplot(v, genes = genes)
+print(p)
 }

@@ -77,7 +77,10 @@ expression is summarized per group (mean across replicates). With
 \code{by = "sample"}, the plot shows individual samples.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(rownames(v), 5)
+p <- get_expression_lollipop(v, genes = genes)
+print(p)
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 

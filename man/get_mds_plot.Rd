@@ -64,5 +64,7 @@ Runs classical multidimensional scaling on normalized counts, optionally
 restricting to groups or genes.
 }
 \examples{
-NULL
+v <- example_vista()
+p <- get_mds_plot(v)
+print(p)
 }

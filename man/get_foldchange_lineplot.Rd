@@ -48,5 +48,9 @@ Plots log2 fold-change trajectories for selected genes across multiple compariso
 optionally clustering genes.
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+genes <- head(as.character(comparisons(v)[[comp]]$gene_id), 5)
+p <- get_foldchange_lineplot(v, sample_comparison = comp, genes = genes)
+print(p)
 }

@@ -60,6 +60,7 @@ Suggests:
     knitr,
     patchwork,
     org.Hs.eg.db,
+    org.Mm.eg.db,
     quarto,
     rmarkdown,
     yaml,
@@ -67,7 +68,6 @@ Suggests:
     testthat (>= 3.0.0),
     uwot,
     xCell2
-Additional_repositories: https://bioconductor.org/packages/3.18/bioc
 biocViews: RNASeq, DifferentialExpression, GeneExpression, Transcriptomics, Visualization
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

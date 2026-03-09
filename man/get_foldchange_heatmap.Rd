@@ -88,5 +88,17 @@ Visualizes log2 fold-change matrices across comparisons with
 ComplexHeatmap, supporting clustering and annotations.
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+genes <- unique(stats::na.omit(as.character(comparisons(v)[[comp]]$gene_id)))[1:20]
+if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
+    requireNamespace('circlize', quietly = TRUE)) {
+  hm <- get_foldchange_heatmap(
+    v,
+    sample_comparisons = comp,
+    genes = genes,
+    return_type = 'heatmap'
+  )
+  ComplexHeatmap::draw(hm)
+}
 }

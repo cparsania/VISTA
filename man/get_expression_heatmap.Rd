@@ -110,5 +110,16 @@ Summarizes expression for selected genes/groups via ComplexHeatmap
 with optional transformations and annotations.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(rownames(v), 20)
+if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
+    requireNamespace('circlize', quietly = TRUE)) {
+  hm <- get_expression_heatmap(
+    v,
+    genes = genes,
+    sample_group = unique(as.character(sample_info(v)$cond_long)),
+    return_type = 'heatmap'
+  )
+  ComplexHeatmap::draw(hm)
+}
 }

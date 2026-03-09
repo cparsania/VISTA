@@ -55,5 +55,14 @@ colours points by local density (viridis), labels the most divergent genes,
 and reports Pearson/Spearman correlation.
 }
 \examples{
-NULL
+v <- example_vista()
+si <- as.data.frame(sample_info(v))
+genes <- head(rownames(v), 50)
+p <- get_expression_scatter(
+  v,
+  sample_x = si$sample_names[1],
+  sample_y = si$sample_names[2],
+  genes = genes
+)
+print(p)
 }

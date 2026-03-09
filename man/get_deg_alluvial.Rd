@@ -20,5 +20,9 @@ A ggplot object.
 Plot alluvial diagram showing gene regulation transitions across comparisons
 }
 \examples{
-NULL
+v <- example_vista()
+if (requireNamespace('ggalluvial', quietly = TRUE)) {
+  p <- get_deg_alluvial(v, sample_comparisons = names(comparisons(v)))
+  print(p)
+}
 }

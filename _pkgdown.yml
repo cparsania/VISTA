@@ -134,5 +134,6 @@ reference:
     desc: >
       Built-in datasets for examples and testing.
     contents:
+      - example_vista
       - count_data
       - sample_metadata

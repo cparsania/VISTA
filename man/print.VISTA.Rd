@@ -20,5 +20,6 @@ Forwards to SummarizedExperiment's \code{show()} so the output is identical to a
 plain SE. Invisibly returns \code{x}.
 }
 \examples{
-NULL
+v <- example_vista()
+print(v)
 }

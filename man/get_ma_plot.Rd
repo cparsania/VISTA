@@ -57,5 +57,7 @@ comparison contained in a VISTA object. Genes are coloured by their
 regulation class and the top results can be optionally labeled with gene IDs.
 }
 \examples{
-NULL
+v <- example_vista()
+p <- get_ma_plot(v, sample_comparison = names(comparisons(v))[1])
+print(p)
 }

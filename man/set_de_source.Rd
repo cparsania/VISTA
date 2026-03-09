@@ -4,12 +4,16 @@
 \alias{set_de_source}
 \title{Set active DE source in a VISTA object}
 \usage{
-set_de_source(object, source = c("deseq2", "edger", "limma", "consensus"))
+set_de_source(
+  object,
+  source = c("deseq2", "edger", "limma", "consensus", "active")
+)
 }
 \arguments{
 \item{object}{A \code{VISTA} object.}
 
-\item{source}{One of \code{"deseq2"}, \code{"edger"}, \code{"limma"}, or \code{"consensus"}.}
+\item{source}{One of \code{"active"}, \code{"deseq2"}, \code{"edger"}, \code{"limma"}, or \code{"consensus"}.
+When \code{"active"}, the currently active DE source is kept.}
 }
 \value{
 A modified \code{VISTA} object with updated active DE source.
@@ -19,5 +23,7 @@ Switches the DE result source used by all downstream VISTA plotting and
 accessor functions that read the active metadata slots.
 }
 \examples{
-NULL
+v <- example_vista(method = "both")
+v <- set_de_source(v, "edger")
+names(comparisons(v, source = "active"))
 }

@@ -63,5 +63,10 @@ optionally converted via \code{orgdb} to match the identifier type required by
 the MSigDB gene sets.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(as.character(row_data(v)$gene_id), 20)
+if (requireNamespace('msigdbr', quietly = TRUE)) {
+  out <- try(enrichMsigDB(v, gene_list = genes, from_type = 'ENSEMBL', msigdb_category = 'H'), silent = TRUE)
+  if (!inherits(out, 'try-error')) out
+}
 }

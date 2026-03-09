@@ -41,5 +41,7 @@ Returns the specified assay (default \code{"norm_counts"}) with optional gene/sa
 subsetting, replicate summarization by group, and simple transformations.
 }
 \examples{
-NULL
+v <- example_vista()
+m <- get_expression_matrix(v)
+dim(m)
 }

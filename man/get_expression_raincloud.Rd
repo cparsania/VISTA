@@ -118,5 +118,8 @@ For identifier display consistency with other VISTA plotting functions, set
 in that ID space, and default point labels use the mapped display IDs.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(rownames(v), 5)
+p <- get_expression_raincloud(v, genes = genes, summarise = TRUE)
+print(p)
 }

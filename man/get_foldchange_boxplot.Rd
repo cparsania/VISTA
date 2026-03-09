@@ -37,5 +37,9 @@ Builds boxplots of log2 fold changes for selected genes and comparisons,
 optionally adding statistics.
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+genes <- head(as.character(comparisons(v)[[comp]]$gene_id), 10)
+p <- get_foldchange_boxplot(v, sample_comparison = comp, genes = genes)
+print(p)
 }

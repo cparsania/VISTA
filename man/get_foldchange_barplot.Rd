@@ -47,7 +47,11 @@ Plots log2 fold changes for selected genes across one or more comparisons.
 \code{facet_by} controls per-gene or per-comparison layout explicitly.
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+genes <- head(as.character(comparisons(v)[[comp]]$gene_id), 10)
+p <- get_foldchange_barplot(v, sample_comparison = comp, genes = genes)
+print(p)
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 

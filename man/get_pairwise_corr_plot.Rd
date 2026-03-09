@@ -38,5 +38,7 @@ Uses GGally::ggpairs on normalized expression to display correlations among
 samples from selected groups/genes.
 }
 \examples{
-NULL
+v <- example_vista()
+p <- get_pairwise_corr_plot(v)
+print(p)
 }

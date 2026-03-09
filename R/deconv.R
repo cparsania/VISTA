@@ -125,6 +125,8 @@
 #' @param gene_id_type Type of gene identifiers: `"auto"`, `"symbol"`, `"ensembl"`, or `"ensembl_symbol"`.
 #' @param xcell2_reference Optional xCell2 reference object or dataset name
 #'   (e.g., `"DICE_demo.xCell2Ref"`). Used when xCell2 exposes `xCell2Analysis()`.
+#' @param xcell2_min_shared_genes Optional numeric shortcut for xCell2's
+#'   `minSharedGenes` argument (when supported by the installed xCell2 API).
 #' @param transform Expression transformation: "log2" or "raw".
 #' @param ... Additional arguments passed to the specific method.
 #'
@@ -137,6 +139,7 @@ run_cell_deconvolution <- function(
     reference_labels = NULL,
     gene_id_type = c("auto", "symbol", "ensembl", "ensembl_symbol"),
     xcell2_reference = NULL,
+    xcell2_min_shared_genes = NULL,
     transform = c("log2", "raw"),
     ...
 ) {
@@ -192,6 +195,12 @@ run_cell_deconvolution <- function(
       if (!is.null(score_gid_arg) && !score_gid_arg %in% names(dots)) {
         dots[[score_gid_arg]] <- gene_id_type
       }
+      if (!is.null(xcell2_min_shared_genes)) {
+        min_shared_arg <- resolve_formal(score_fun, c("minSharedGenes", "min_shared_genes"))
+        if (!is.null(min_shared_arg) && !min_shared_arg %in% names(dots)) {
+          dots[[min_shared_arg]] <- xcell2_min_shared_genes
+        }
+      }
 
       scores <- tryCatch(
         do.call(score_fun, dots),
@@ -237,6 +246,12 @@ run_cell_deconvolution <- function(
       analysis_gid_arg <- resolve_formal(analysis_fun, c("gene_id_type", "geneIdType", "gene_type", "id_type"))
       if (!is.null(analysis_gid_arg) && !analysis_gid_arg %in% names(dots)) {
         dots[[analysis_gid_arg]] <- gene_id_type
+      }
+      if (!is.null(xcell2_min_shared_genes)) {
+        min_shared_arg <- resolve_formal(analysis_fun, c("minSharedGenes", "min_shared_genes"))
+        if (!is.null(min_shared_arg) && !min_shared_arg %in% names(dots)) {
+          dots[[min_shared_arg]] <- xcell2_min_shared_genes
+        }
       }
 
       scores <- tryCatch(

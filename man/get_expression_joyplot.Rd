@@ -56,5 +56,8 @@ selected genes using ridge (joy) plots. Genes are pooled; no faceting to keep
 shapes comparable.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(rownames(v), 3)
+p <- get_expression_joyplot(v, genes = genes)
+print(p)
 }

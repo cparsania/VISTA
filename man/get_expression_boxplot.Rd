@@ -77,5 +77,8 @@ normalized counts. The x-axis unit is controlled by \code{by}, and faceting is
 controlled explicitly by \code{facet_by}.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(rownames(v), 3)
+p <- get_expression_boxplot(v, genes = genes)
+print(p)
 }

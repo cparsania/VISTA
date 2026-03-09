@@ -28,7 +28,7 @@ primary end-user constructor. Advanced users can convert an existing
 \code{SummarizedExperiment} with \code{as_vista()}.
 }
 \examples{
-NULL
+methods::showClass('VISTA')
 }
 \seealso{
 \code{\link{create_vista}}, \code{\link{as_vista}}, \code{\link{validate_vista}}

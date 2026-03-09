@@ -37,5 +37,7 @@ An object returned by this function.
 Barplot of DEG counts (Up/Down) across comparisons
 }
 \examples{
-NULL
+v <- example_vista()
+p <- get_deg_count_barplot(v)
+print(p)
 }

@@ -75,5 +75,7 @@ Plots sample-sample correlation matrix derived from normalized counts with
 optional clustering and annotations.
 }
 \examples{
-NULL
+v <- example_vista()
+p <- get_corr_heatmap(v)
+print(p)
 }

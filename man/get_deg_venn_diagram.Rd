@@ -36,5 +36,10 @@ An object returned by this function.
 Visualizes overlaps between DEG sets for two to four comparisons.
 }
 \examples{
-NULL
+v <- example_vista()
+comps <- names(comparisons(v))
+if (length(comps) >= 2) {
+  p <- get_deg_venn_diagram(v, sample_comparisons = comps[1:2])
+  print(p)
+}
 }

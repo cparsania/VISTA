@@ -11,6 +11,7 @@ run_cell_deconvolution(
   reference_labels = NULL,
   gene_id_type = c("auto", "symbol", "ensembl", "ensembl_symbol"),
   xcell2_reference = NULL,
+  xcell2_min_shared_genes = NULL,
   transform = c("log2", "raw"),
   ...
 )
@@ -29,6 +30,9 @@ run_cell_deconvolution(
 \item{xcell2_reference}{Optional xCell2 reference object or dataset name
 (e.g., \code{"DICE_demo.xCell2Ref"}). Used when xCell2 exposes \code{xCell2Analysis()}.}
 
+\item{xcell2_min_shared_genes}{Optional numeric shortcut for xCell2's
+\code{minSharedGenes} argument (when supported by the installed xCell2 API).}
+
 \item{transform}{Expression transformation: "log2" or "raw".}
 
 \item{...}{Additional arguments passed to the specific method.}
@@ -40,5 +44,9 @@ VISTA object with cell_fractions added to metadata.
 Estimates cell-type proportions in bulk RNA-seq using single-cell reference or xCell2.
 }
 \examples{
-NULL
+v <- example_vista()
+if (requireNamespace('xCell2', quietly = TRUE)) {
+  out <- try(run_cell_deconvolution(v, method = 'xCell2'), silent = TRUE)
+  if (!inherits(out, 'try-error')) out
+}
 }

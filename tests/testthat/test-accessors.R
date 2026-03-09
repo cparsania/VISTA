@@ -167,6 +167,9 @@ test_that("set_de_source switches active DE source when available", {
   vista_switched <- set_de_source(vista_both, "edger")
   expect_identical(S4Vectors::metadata(vista_switched)$de_active_source, "edger")
   expect_named(comparisons(vista_switched))
+
+  vista_same <- set_de_source(vista_switched, "active")
+  expect_identical(S4Vectors::metadata(vista_same)$de_active_source, "edger")
 })
 
 test_that("set_vista_group_colors updates group colors", {

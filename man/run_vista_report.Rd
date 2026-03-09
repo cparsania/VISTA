@@ -33,5 +33,19 @@ includes:
 }
 }
 \examples{
-NULL
+data('count_data', package = 'VISTA')
+data('sample_metadata', package = 'VISTA')
+cfg <- list(
+  counts = count_data[1:100, ],
+  sample_info = sample_metadata[1:6, ],
+  column_geneid = 'gene_id',
+  group_column = 'cond_long',
+  group_numerator = 'treatment1',
+  group_denominator = 'control',
+  include_msigdb = FALSE, include_go = FALSE, include_kegg = FALSE
+)
+if (requireNamespace('quarto', quietly = TRUE)) {
+  out <- tempfile(fileext = '.html')
+  try(run_vista_report(cfg, output_file = out), silent = TRUE)
+}
 }

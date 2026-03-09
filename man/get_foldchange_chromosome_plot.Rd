@@ -61,5 +61,7 @@ When multiple comparisons are supplied, panels are facetted by comparison
 with log2FC clipped to +/-2.
 }
 \examples{
-NULL
+v <- example_vista()
+p <- try(get_foldchange_chromosome_plot(v, sample_comparison = names(comparisons(v))[1]), silent = TRUE)
+if (!inherits(p, 'try-error')) print(p)
 }

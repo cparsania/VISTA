@@ -20,6 +20,8 @@ docs/
 tmp_render/
 
 # renv local library/cache state
+renv.lock
+renv/
 renv/library/
 renv/staging/
 renv/python/

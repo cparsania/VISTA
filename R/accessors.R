@@ -326,14 +326,25 @@ set_vista_comparison_colors <- function(object, color_map) {
 #' accessor functions that read the active metadata slots.
 #'
 #' @param object A `VISTA` object.
-#' @param source One of `"deseq2"`, `"edger"`, `"limma"`, or `"consensus"`.
+#' @param source One of `"active"`, `"deseq2"`, `"edger"`, `"limma"`, or `"consensus"`.
+#'   When `"active"`, the currently active DE source is kept.
 #'
 #' @return A modified `VISTA` object with updated active DE source.
 #' @export
-set_de_source <- function(object, source = c("deseq2", "edger", "limma", "consensus")) {
+set_de_source <- function(object, source = c("deseq2", "edger", "limma", "consensus", "active")) {
   stopifnot(inherits(object, "VISTA"))
   source <- match.arg(source)
   md <- S4Vectors::metadata(object)
+  if (identical(source, "active")) {
+    source <- md$de_active_source %||% NULL
+    if (is.null(source)) {
+      # Backward compatibility for older VISTA objects without DE source metadata.
+      if (!is.null(md$de_results) && !is.null(md$de_summary)) {
+        return(object)
+      }
+      cli::cli_abort("{.arg source} = {.val active} is not available because this object has no active DE source.")
+    }
+  }
   if (is.null(md$de_results_by_method) || !source %in% names(md$de_results_by_method)) {
     available <- if (is.null(md$de_results_by_method)) character(0) else names(md$de_results_by_method)
     cli::cli_abort("DE source {.val {source}} is not available in this object. Available: {.val {available}}")

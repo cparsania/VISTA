@@ -57,5 +57,8 @@ Shows expression distributions pooled across the selected genes, coloured by
 group (or sample), with optional faceting by group or sample.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(rownames(v), 3)
+p <- get_expression_density(v, genes = genes)
+print(p)
 }

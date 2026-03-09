@@ -60,5 +60,15 @@ Regulation is derived from the \code{log2fc} and \code{pval} cutoffs stored in
 \code{cutoffs(x)} (and \code{p_value_type} from the same list, defaulting to \code{"padj"}).
 }
 \examples{
-NULL
+data('count_data', package = 'VISTA')
+data('sample_metadata', package = 'VISTA')
+cell_levels <- unique(sample_metadata$cell)
+if (length(cell_levels) >= 3) {
+  v <- create_vista(count_data[1:150, ], sample_metadata, column_geneid = 'gene_id', group_column = 'cell',
+                    group_numerator = cell_levels[2:3], group_denominator = rep(cell_levels[1], 2),
+                    min_counts = 5, min_replicates = 1)
+  comp_names <- names(comparisons(v))[1:2]
+  p <- get_foldchange_scatter(v, sample_comparisons = comp_names)
+  print(p)
+}
 }

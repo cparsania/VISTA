@@ -81,7 +81,11 @@ optionally provide two comparisons; in that case both comparisons are drawn
 side-by-side, coloured by comparison.
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+genes <- head(as.character(comparisons(v)[[comp]]$gene_id), 10)
+p <- get_foldchange_lollipop(v, sample_comparison = comp, genes = genes)
+print(p)
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 

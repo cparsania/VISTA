@@ -143,5 +143,7 @@ data-driven colour scale. Ignored when \code{value_column} is supplied.
 }
 }
 \examples{
-NULL
+v <- example_vista()
+p <- try(get_expression_chromosome_plot(v), silent = TRUE)
+if (!inherits(p, 'try-error')) print(p)
 }

@@ -16,5 +16,9 @@ A data.frame of cell fraction estimates with samples in rows.
 Retrieve stored cell fraction estimates
 }
 \examples{
-NULL
+v <- example_vista()
+if (requireNamespace('xCell2', quietly = TRUE)) {
+  vx <- try(run_cell_deconvolution(v, method = 'xCell2'), silent = TRUE)
+  if (!inherits(vx, 'try-error')) head(get_cell_fractions(vx))
+}
 }

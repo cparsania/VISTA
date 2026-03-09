@@ -57,5 +57,8 @@ Plots normalized expression for selected genes across samples or
 summarized groups with optional transformations and group faceting.
 }
 \examples{
-NULL
+v <- example_vista()
+genes <- head(rownames(v), 3)
+p <- get_expression_lineplot(v, genes = genes)
+print(p)
 }

@@ -43,5 +43,10 @@ An object returned by this function.
 Gene set enrichment analysis (GSEA) from a VISTA comparison
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+if (requireNamespace('msigdbr', quietly = TRUE)) {
+  out <- try(get_gsea(v, sample_comparison = comp, set_type = 'msigdb', from_type = 'ENSEMBL', species = 'Homo sapiens'), silent = TRUE)
+  if (!inherits(out, 'try-error')) out
+}
 }

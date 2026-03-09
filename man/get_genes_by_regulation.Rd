@@ -20,5 +20,8 @@ A named list of character vectors (one per comparison).
 Extract gene IDs by regulation class from selected comparisons in a VISTA object.
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+genes <- get_genes_by_regulation(v, sample_comparisons = comp, regulation = 'Up')
+str(genes, max.level = 1)
 }

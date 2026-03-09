@@ -97,5 +97,9 @@ For identifier display consistency with other VISTA plotting functions, set
 in that ID space, and default point labels use the mapped display IDs.
 }
 \examples{
-NULL
+v <- example_vista()
+comp <- names(comparisons(v))[1]
+genes <- head(as.character(comparisons(v)[[comp]]$gene_id), 20)
+p <- get_foldchange_raincloud(v, sample_comparison = comp, genes = genes)
+print(p)
 }
