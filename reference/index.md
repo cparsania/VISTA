@@ -184,6 +184,8 @@ Save publication-ready plots, tables, and reproducible asset bundles.
 
 Built-in datasets for examples and testing.
 
+- [`example_vista()`](example_vista.md) : Build a small example VISTA
+  object
 - [`count_data`](count_data.md) : Example RNA-seq count matrix shipped
   with VISTA
 - [`sample_metadata`](sample_metadata.md) : Sample metadata accompanying

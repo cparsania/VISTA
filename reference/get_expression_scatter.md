@@ -80,6 +80,20 @@ A `ggplot2` object.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+si <- as.data.frame(sample_info(v))
+genes <- head(rownames(v), 50)
+p <- get_expression_scatter(
+  v,
+  sample_x = si$sample_names[1],
+  sample_y = si$sample_names[2],
+  genes = genes
+)
+print(p)
 ```

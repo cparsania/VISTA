@@ -30,6 +30,16 @@ A ggplot object.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+if (requireNamespace('ggalluvial', quietly = TRUE)) {
+  p <- get_deg_alluvial(v, sample_comparisons = names(comparisons(v)))
+  print(p)
+}
+#> Error in get_deg_alluvial(v, sample_comparisons = names(comparisons(v))): At least two comparisons required.
 ```

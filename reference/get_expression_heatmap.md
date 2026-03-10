@@ -183,6 +183,22 @@ An object returned by this function.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+genes <- head(rownames(v), 20)
+if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
+    requireNamespace('circlize', quietly = TRUE)) {
+  hm <- get_expression_heatmap(
+    v,
+    genes = genes,
+    sample_group = unique(as.character(sample_info(v)$cond_long)),
+    return_type = 'heatmap'
+  )
+  ComplexHeatmap::draw(hm)
+}
 ```

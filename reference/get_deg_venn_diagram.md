@@ -61,6 +61,16 @@ An object returned by this function.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+comps <- names(comparisons(v))
+if (length(comps) >= 2) {
+  p <- get_deg_venn_diagram(v, sample_comparisons = comps[1:2])
+  print(p)
+}
 ```

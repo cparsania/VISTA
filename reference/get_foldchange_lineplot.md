@@ -74,6 +74,30 @@ An object returned by this function.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+comp <- names(comparisons(v))[1]
+genes <- head(as.character(comparisons(v)[[comp]]$gene_id), 5)
+p <- get_foldchange_lineplot(v, sample_comparison = comp, genes = genes)
+print(p)
+#> $plot
+#> `geom_line()`: Each group consists of only one observation.
+#> ℹ Do you need to adjust the group aesthetic?
+#> `geom_line()`: Each group consists of only one observation.
+#> ℹ Do you need to adjust the group aesthetic?
+
+#> 
+#> $clustered_data
+#>                         gene_id cluster
+#> ENSG00000000003 ENSG00000000003     All
+#> ENSG00000000419 ENSG00000000419     All
+#> ENSG00000000457 ENSG00000000457     All
+#> ENSG00000000460 ENSG00000000460     All
+#> ENSG00000000971 ENSG00000000971     All
+#> 
 ```

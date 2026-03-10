@@ -87,6 +87,16 @@ A list containing a single `enrichResult` object named `"enrich"`.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+genes <- head(as.character(row_data(v)$gene_id), 20)
+if (requireNamespace('msigdbr', quietly = TRUE)) {
+  out <- try(enrichMsigDB(v, gene_list = genes, from_type = 'ENSEMBL', msigdb_category = 'H'), silent = TRUE)
+  if (!inherits(out, 'try-error')) out
+}
 ```

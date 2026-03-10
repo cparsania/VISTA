@@ -708,7 +708,7 @@ sessionInfo()
 #> tzcode source: system (glibc)
 #> 
 #> attached base packages:
-#> [1] stats     graphics  grDevices datasets  utils     methods   base     
+#> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
 #> [1] patchwork_1.3.2  dplyr_1.2.0      ggplot2_4.0.2    VISTA_0.99.0    
@@ -741,54 +741,54 @@ sessionInfo()
 #>  [47] farver_2.1.2                matrixStats_1.5.0          
 #>  [49] stats4_4.5.2                Seqinfo_1.0.0              
 #>  [51] jsonlite_2.0.0              Formula_1.2-5              
-#>  [53] systemfonts_1.3.1           tools_4.5.2                
+#>  [53] systemfonts_1.3.2           tools_4.5.2                
 #>  [55] ggnewscale_0.5.2            treeio_1.34.0              
-#>  [57] ragg_1.5.0                  Rcpp_1.1.1                 
-#>  [59] glue_1.8.0                  SparseArray_1.10.8         
+#>  [57] ragg_1.5.1                  Rcpp_1.1.1                 
+#>  [59] glue_1.8.0                  SparseArray_1.10.9         
 #>  [61] xfun_0.56                   DESeq2_1.50.2              
 #>  [63] qvalue_2.42.0               MatrixGenerics_1.22.0      
 #>  [65] withr_3.0.2                 BiocManager_1.30.27        
 #>  [67] fastmap_1.2.0               GGally_2.4.0               
 #>  [69] digest_0.6.39               R6_2.6.1                   
-#>  [71] gridGraphics_0.5-1          textshaping_1.0.4          
+#>  [71] gridGraphics_0.5-1          textshaping_1.0.5          
 #>  [73] colorspace_2.1-2            GO.db_3.22.0               
 #>  [75] RSQLite_2.4.6               R.methodsS3_1.8.2          
 #>  [77] utf8_1.2.6                  tidyr_1.3.2                
 #>  [79] generics_0.1.4              fontLiberation_0.1.0       
-#>  [81] renv_1.1.4                  data.table_1.18.2.1        
-#>  [83] httr_1.4.8                  htmlwidgets_1.6.4          
-#>  [85] S4Arrays_1.10.1             scatterpie_0.2.6           
-#>  [87] ggstats_0.12.0              pkgconfig_2.0.3            
-#>  [89] gtable_0.3.6                blob_1.3.0                 
-#>  [91] S7_0.2.1                    XVector_0.50.0             
-#>  [93] clusterProfiler_4.18.4      htmltools_0.5.9            
-#>  [95] fontBitstreamVera_0.1.1     carData_3.0-6              
-#>  [97] bookdown_0.46               fgsea_1.36.2               
-#>  [99] scales_1.4.0                Biobase_2.70.0             
-#> [101] png_0.1-8                   ggfun_0.2.0                
-#> [103] knitr_1.51                  reshape2_1.4.5             
-#> [105] nlme_3.1-168                curl_7.0.0                 
-#> [107] cachem_1.1.0                stringr_1.6.0              
-#> [109] parallel_4.5.2              AnnotationDbi_1.72.0       
-#> [111] desc_1.4.3                  pillar_1.11.1              
-#> [113] grid_4.5.2                  vctrs_0.7.1                
-#> [115] ggpubr_0.6.3                car_3.1-5                  
-#> [117] tidydr_0.0.6                cluster_2.1.8.1            
-#> [119] evaluate_1.0.5              cli_3.6.5                  
-#> [121] locfit_1.5-9.12             compiler_4.5.2             
-#> [123] rlang_1.1.7                 crayon_1.5.3               
-#> [125] ggsignif_0.6.4              labeling_0.4.3             
-#> [127] plyr_1.8.9                  fs_1.6.6                   
-#> [129] ggiraph_0.9.6               stringi_1.8.7              
-#> [131] viridisLite_0.4.3           BiocParallel_1.44.0        
-#> [133] assertthat_0.2.1            babelgene_22.9             
-#> [135] Biostrings_2.78.0           lazyeval_0.2.2             
-#> [137] GOSemSim_2.36.0             fontquiver_0.2.1           
-#> [139] Matrix_1.7-4                bit64_4.6.0-1              
-#> [141] KEGGREST_1.50.0             statmod_1.5.1              
-#> [143] SummarizedExperiment_1.40.0 igraph_2.2.2               
-#> [145] broom_1.0.12                memoise_2.0.1              
-#> [147] bslib_0.10.0                ggtree_4.0.4               
-#> [149] fastmatch_1.1-8             bit_4.6.0                  
-#> [151] ape_5.8-1                   gson_0.1.0
+#>  [81] data.table_1.18.2.1         httr_1.4.8                 
+#>  [83] htmlwidgets_1.6.4           S4Arrays_1.10.1            
+#>  [85] scatterpie_0.2.6            ggstats_0.13.0             
+#>  [87] pkgconfig_2.0.3             gtable_0.3.6               
+#>  [89] blob_1.3.0                  S7_0.2.1                   
+#>  [91] XVector_0.50.0              clusterProfiler_4.18.4     
+#>  [93] htmltools_0.5.9             fontBitstreamVera_0.1.1    
+#>  [95] carData_3.0-6               bookdown_0.46              
+#>  [97] fgsea_1.36.2                scales_1.4.0               
+#>  [99] Biobase_2.70.0              png_0.1-8                  
+#> [101] ggfun_0.2.0                 knitr_1.51                 
+#> [103] reshape2_1.4.5              nlme_3.1-168               
+#> [105] curl_7.0.0                  cachem_1.1.0               
+#> [107] stringr_1.6.0               parallel_4.5.2             
+#> [109] AnnotationDbi_1.72.0        desc_1.4.3                 
+#> [111] pillar_1.11.1               grid_4.5.2                 
+#> [113] vctrs_0.7.1                 ggpubr_0.6.3               
+#> [115] car_3.1-5                   tidydr_0.0.6               
+#> [117] cluster_2.1.8.1             evaluate_1.0.5             
+#> [119] cli_3.6.5                   locfit_1.5-9.12            
+#> [121] compiler_4.5.2              rlang_1.1.7                
+#> [123] crayon_1.5.3                ggsignif_0.6.4             
+#> [125] labeling_0.4.3              plyr_1.8.9                 
+#> [127] fs_1.6.7                    ggiraph_0.9.6              
+#> [129] stringi_1.8.7               viridisLite_0.4.3          
+#> [131] BiocParallel_1.44.0         assertthat_0.2.1           
+#> [133] babelgene_22.9              Biostrings_2.78.0          
+#> [135] lazyeval_0.2.2              GOSemSim_2.36.0            
+#> [137] fontquiver_0.2.1            Matrix_1.7-4               
+#> [139] bit64_4.6.0-1               KEGGREST_1.50.0            
+#> [141] statmod_1.5.1               SummarizedExperiment_1.40.0
+#> [143] igraph_2.2.2                broom_1.0.12               
+#> [145] memoise_2.0.1               bslib_0.10.0               
+#> [147] ggtree_4.0.4                fastmatch_1.1-8            
+#> [149] bit_4.6.0                   ape_5.8-1                  
+#> [151] gson_0.1.0
 ```

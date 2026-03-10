@@ -32,6 +32,14 @@ A numeric matrix with genes in rows and comparisons in columns.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+mat <- get_foldchange_matrix(v)
+dim(mat)
+#> [1] 123   1
 ```

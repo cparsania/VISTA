@@ -63,6 +63,45 @@ An object returned by this function.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+comp <- names(comparisons(v))[1]
+if (requireNamespace('msigdbr', quietly = TRUE)) {
+  out <- try(get_gsea(v, sample_comparison = comp, set_type = 'msigdb', from_type = 'ENSEMBL', species = 'Homo sapiens'), silent = TRUE)
+  if (!inherits(out, 'try-error')) out
+}
+#> 
+#> using 'fgsea' for GSEA analysis, please cite Korotkevich et al (2019).
+#> preparing geneSet collections...
+#> GSEA analysis...
+#> no term enriched under specific pvalueCutoff...
+#> $enrich
+#> #
+#> # Gene Set Enrichment Analysis
+#> #
+#> #...@organism     UNKNOWN 
+#> #...@setType      UNKNOWN 
+#> #...@geneList     Named num [1:123] 2.918 1.328 1.089 0.984 0.697 ...
+#>  - attr(*, "names")= chr [1:123] "ENSG00000004799" "ENSG00000006210" "ENSG00000003402" "ENSG00000003987" ...
+#> #...nPerm     
+#> #...pvalues adjusted by 'BH' with cutoff <0.05 
+#> #...0 enriched terms found
+#> 'data.frame':    0 obs. of  8 variables:
+#>  $ ID             : chr 
+#>  $ Description    : chr 
+#>  $ setSize        : int 
+#>  $ enrichmentScore: num 
+#>  $ NES            : num 
+#>  $ pvalue         : num 
+#>  $ p.adjust       : num 
+#>  $ qvalue         : num 
+#> #...Citation
+#> S Xu, E Hu, Y Cai, Z Xie, X Luo, L Zhan, W Tang, Q Wang, B Liu, R Wang, W Xie, T Wu, L Xie, G Yu. Using clusterProfiler to characterize multiomics data. Nature Protocols. 2024, 19(11):3292-3320 
+#> 
+#> 
 ```

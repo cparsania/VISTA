@@ -611,7 +611,7 @@ sessionInfo()
 #> tzcode source: system (glibc)
 #> 
 #> attached base packages:
-#> [1] grid      stats4    stats     graphics  grDevices datasets  utils    
+#> [1] grid      stats4    stats     graphics  grDevices utils     datasets 
 #> [8] methods   base     
 #> 
 #> other attached packages:
@@ -644,38 +644,38 @@ sessionInfo()
 #>  [37] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          
 #>  [40] aplot_0.2.9             farver_2.1.2            jsonlite_2.0.0         
 #>  [43] GetoptLong_1.1.0        Formula_1.2-5           iterators_1.0.14       
-#>  [46] systemfonts_1.3.1       foreach_1.5.2           tools_4.5.2            
-#>  [49] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.0             
-#>  [52] Rcpp_1.1.1              glue_1.8.0              SparseArray_1.10.8     
+#>  [46] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.2            
+#>  [49] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.1             
+#>  [52] Rcpp_1.1.1              glue_1.8.0              SparseArray_1.10.9     
 #>  [55] xfun_0.56               qvalue_2.42.0           withr_3.0.2            
 #>  [58] BiocManager_1.30.27     fastmap_1.2.0           GGally_2.4.0           
 #>  [61] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     
-#>  [64] textshaping_1.0.4       colorspace_2.1-2        GO.db_3.22.0           
+#>  [64] textshaping_1.0.5       colorspace_2.1-2        GO.db_3.22.0           
 #>  [67] RSQLite_2.4.6           R.methodsS3_1.8.2       tidyr_1.3.2            
-#>  [70] fontLiberation_0.1.0    renv_1.1.4              data.table_1.18.2.1    
-#>  [73] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.10.1        
-#>  [76] scatterpie_0.2.6        ggstats_0.12.0          pkgconfig_2.0.3        
-#>  [79] gtable_0.3.6            blob_1.3.0              S7_0.2.1               
-#>  [82] XVector_0.50.0          htmltools_0.5.9         fontBitstreamVera_0.1.1
-#>  [85] carData_3.0-6           bookdown_0.46           fgsea_1.36.2           
-#>  [88] clue_0.3-67             scales_1.4.0            png_0.1-8              
-#>  [91] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         
-#>  [94] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             
-#>  [97] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          
-#> [100] parallel_4.5.2          desc_1.4.3              pillar_1.11.1          
-#> [103] vctrs_0.7.1             ggpubr_0.6.3            car_3.1-5              
-#> [106] tidydr_0.0.6            cluster_2.1.8.1         evaluate_1.0.5         
-#> [109] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         
-#> [112] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
-#> [115] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
-#> [118] fs_1.6.6                ggiraph_0.9.6           stringi_1.8.7          
-#> [121] BiocParallel_1.44.0     assertthat_0.2.1        babelgene_22.9         
-#> [124] Biostrings_2.78.0       lazyeval_0.2.2          GOSemSim_2.36.0        
-#> [127] fontquiver_0.2.1        Matrix_1.7-4            patchwork_1.3.2        
-#> [130] bit64_4.6.0-1           KEGGREST_1.50.0         statmod_1.5.1          
-#> [133] igraph_2.2.2            broom_1.0.12            memoise_2.0.1          
-#> [136] bslib_0.10.0            ggtree_4.0.4            fastmatch_1.1-8        
-#> [139] bit_4.6.0               ape_5.8-1               gson_0.1.0
+#>  [70] fontLiberation_0.1.0    data.table_1.18.2.1     httr_1.4.8             
+#>  [73] htmlwidgets_1.6.4       S4Arrays_1.10.1         scatterpie_0.2.6       
+#>  [76] ggstats_0.13.0          pkgconfig_2.0.3         gtable_0.3.6           
+#>  [79] blob_1.3.0              S7_0.2.1                XVector_0.50.0         
+#>  [82] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          
+#>  [85] bookdown_0.46           fgsea_1.36.2            clue_0.3-67            
+#>  [88] scales_1.4.0            png_0.1-8               ggfun_0.2.0            
+#>  [91] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
+#>  [94] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
+#>  [97] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.2         
+#> [100] desc_1.4.3              pillar_1.11.1           vctrs_0.7.1            
+#> [103] ggpubr_0.6.3            car_3.1-5               tidydr_0.0.6           
+#> [106] cluster_2.1.8.1         evaluate_1.0.5          cli_3.6.5              
+#> [109] locfit_1.5-9.12         compiler_4.5.2          rlang_1.1.7            
+#> [112] crayon_1.5.3            ggsignif_0.6.4          labeling_0.4.3         
+#> [115] forcats_1.0.1           plyr_1.8.9              fs_1.6.7               
+#> [118] ggiraph_0.9.6           stringi_1.8.7           BiocParallel_1.44.0    
+#> [121] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
+#> [124] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       
+#> [127] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          
+#> [130] KEGGREST_1.50.0         statmod_1.5.1           igraph_2.2.2           
+#> [133] broom_1.0.12            memoise_2.0.1           bslib_0.10.0           
+#> [136] ggtree_4.0.4            fastmatch_1.1-8         bit_4.6.0              
+#> [139] ape_5.8-1               gson_0.1.0
 ```
 
 ## References

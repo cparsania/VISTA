@@ -30,6 +30,16 @@ A named list of character vectors (one per comparison).
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+comp <- names(comparisons(v))[1]
+genes <- get_genes_by_regulation(v, sample_comparisons = comp, regulation = 'Up')
+str(genes, max.level = 1)
+#> List of 1
+#>  $ treatment1_VS_control: chr [1:2] "ENSG00000003402" "ENSG00000004799"
 ```

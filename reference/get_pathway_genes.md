@@ -92,7 +92,6 @@ msig <- get_msigdb_enrichment(
   species = "Homo sapiens",
   from_type = "ENSEMBL"
 )
-#> 
 
 pathway_tbl <- get_pathway_genes(msig, top_n = 5, return_type = "long")
 head(pathway_tbl)

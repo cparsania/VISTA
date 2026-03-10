@@ -144,6 +144,25 @@ An object returned by this function.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+comp <- names(comparisons(v))[1]
+genes <- unique(stats::na.omit(as.character(comparisons(v)[[comp]]$gene_id)))[1:20]
+if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
+    requireNamespace('circlize', quietly = TRUE)) {
+  hm <- get_foldchange_heatmap(
+    v,
+    sample_comparisons = comp,
+    genes = genes,
+    return_type = 'heatmap'
+  )
+  ComplexHeatmap::draw(hm)
+}
+#> New names:
+#> • `` -> `...1`
 ```

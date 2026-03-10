@@ -191,6 +191,7 @@ msig <- get_msigdb_enrichment(
   sample_comparison = names(comparisons(vista))[1],
   regulation = "Up", from_type = "ENSEMBL"
 )
+#> 
 #> Using human MSigDB with ortholog mapping to mouse. Use `db_species = "MM"` for mouse-native gene sets.
 #> This message is displayed once per session.
 

@@ -181,6 +181,57 @@ display IDs.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+genes <- head(rownames(v), 5)
+p <- get_expression_raincloud(v, genes = genes, summarise = TRUE)
+#> Warning: `summarise = TRUE` with `facet_by = 'gene'` gives one summarized value per
+#> group in each facet, so raincloud distributions are not informative. Consider
+#> `facet_by = 'none'` with `id.long.var = 'gene'`.
+print(p)
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: no non-missing arguments to max; returning -Inf
+#> Warning: Computation failed in `stat_half_ydensity()`.
+#> Caused by error in `$<-.data.frame`:
+#> ! replacement has 1 row, data has 0
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: no non-missing arguments to max; returning -Inf
+#> Warning: Computation failed in `stat_half_ydensity()`.
+#> Caused by error in `$<-.data.frame`:
+#> ! replacement has 1 row, data has 0
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: no non-missing arguments to max; returning -Inf
+#> Warning: Computation failed in `stat_half_ydensity()`.
+#> Caused by error in `$<-.data.frame`:
+#> ! replacement has 1 row, data has 0
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: no non-missing arguments to max; returning -Inf
+#> Warning: Computation failed in `stat_half_ydensity()`.
+#> Caused by error in `$<-.data.frame`:
+#> ! replacement has 1 row, data has 0
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: Groups with fewer than two datapoints have been dropped.
+#> ℹ Set `drop = FALSE` to consider such groups for position adjustment purposes.
+#> Warning: no non-missing arguments to max; returning -Inf
+#> Warning: Computation failed in `stat_half_ydensity()`.
+#> Caused by error in `$<-.data.frame`:
+#> ! replacement has 1 row, data has 0
 ```

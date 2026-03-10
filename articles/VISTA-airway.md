@@ -1926,7 +1926,7 @@ sessionInfo()
 #> tzcode source: system (glibc)
 #> 
 #> attached base packages:
-#> [1] stats4    stats     graphics  grDevices datasets  utils     methods  
+#> [1] stats4    stats     graphics  grDevices utils     datasets  methods  
 #> [8] base     
 #> 
 #> other attached packages:
@@ -1958,43 +1958,42 @@ sessionInfo()
 #>  [43] tidyselect_1.2.1        shape_1.4.6.1           aplot_0.2.9            
 #>  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.0       
 #>  [49] Formula_1.2-5           ggridges_0.5.7          iterators_1.0.14       
-#>  [52] systemfonts_1.3.1       foreach_1.5.2           tools_4.5.2            
-#>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.0             
+#>  [52] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.2            
+#>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.1             
 #>  [58] Rcpp_1.1.1              glue_1.8.0              gridExtra_2.3          
-#>  [61] SparseArray_1.10.8      xfun_0.56               DESeq2_1.50.2          
+#>  [61] SparseArray_1.10.9      xfun_0.56               DESeq2_1.50.2          
 #>  [64] qvalue_2.42.0           dplyr_1.2.0             withr_3.0.2            
 #>  [67] BiocManager_1.30.27     fastmap_1.2.0           GGally_2.4.0           
 #>  [70] ggpointdensity_0.2.1    digest_0.6.39           R6_2.6.1               
-#>  [73] gridGraphics_0.5-1      textshaping_1.0.4       colorspace_2.1-2       
+#>  [73] gridGraphics_0.5-1      textshaping_1.0.5       colorspace_2.1-2       
 #>  [76] GO.db_3.22.0            RSQLite_2.4.6           ggrain_0.1.2           
 #>  [79] R.methodsS3_1.8.2       utf8_1.2.6              tidyr_1.3.2            
-#>  [82] fontLiberation_0.1.0    renv_1.1.4              data.table_1.18.2.1    
-#>  [85] FNN_1.1.4.1             httr_1.4.8              htmlwidgets_1.6.4      
-#>  [88] S4Arrays_1.10.1         scatterpie_0.2.6        ggstats_0.12.0         
-#>  [91] uwot_0.2.4              pkgconfig_2.0.3         gtable_0.3.6           
-#>  [94] blob_1.3.0              ComplexHeatmap_2.26.1   S7_0.2.1               
-#>  [97] XVector_0.50.0          clusterProfiler_4.18.4  htmltools_0.5.9        
-#> [100] carData_3.0-6           fontBitstreamVera_0.1.1 bookdown_0.46          
-#> [103] fgsea_1.36.2            clue_0.3-67             scales_1.4.0           
-#> [106] png_0.1-8               ggfun_0.2.0             knitr_1.51             
-#> [109] reshape2_1.4.5          rjson_0.2.23            nlme_3.1-168           
-#> [112] curl_7.0.0              cachem_1.1.0            GlobalOptions_0.1.3    
-#> [115] stringr_1.6.0           parallel_4.5.2          desc_1.4.3             
-#> [118] pillar_1.11.1           grid_4.5.2              vctrs_0.7.1            
-#> [121] ggpubr_0.6.3            car_3.1-5               tidydr_0.0.6           
-#> [124] cluster_2.1.8.1         evaluate_1.0.5          cli_3.6.5              
-#> [127] locfit_1.5-9.12         compiler_4.5.2          rlang_1.1.7            
-#> [130] crayon_1.5.3            ggsignif_0.6.4          labeling_0.4.3         
-#> [133] forcats_1.0.1           plyr_1.8.9              fs_1.6.6               
-#> [136] ggiraph_0.9.6           stringi_1.8.7           viridisLite_0.4.3      
-#> [139] BiocParallel_1.44.0     assertthat_0.2.1        babelgene_22.9         
-#> [142] Biostrings_2.78.0       lazyeval_0.2.2          GOSemSim_2.36.0        
-#> [145] fontquiver_0.2.1        Matrix_1.7-4            patchwork_1.3.2        
-#> [148] bit64_4.6.0-1           KEGGREST_1.50.0         statmod_1.5.1          
-#> [151] broom_1.0.12            igraph_2.2.2            memoise_2.0.1          
-#> [154] bslib_0.10.0            ggtree_4.0.4            fastmatch_1.1-8        
-#> [157] bit_4.6.0               ape_5.8-1               gson_0.1.0             
-#> [160] polynom_1.4-1
+#>  [82] fontLiberation_0.1.0    data.table_1.18.2.1     FNN_1.1.4.1            
+#>  [85] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.10.1        
+#>  [88] scatterpie_0.2.6        ggstats_0.13.0          uwot_0.2.4             
+#>  [91] pkgconfig_2.0.3         gtable_0.3.6            blob_1.3.0             
+#>  [94] ComplexHeatmap_2.26.1   S7_0.2.1                XVector_0.50.0         
+#>  [97] clusterProfiler_4.18.4  htmltools_0.5.9         carData_3.0-6          
+#> [100] fontBitstreamVera_0.1.1 bookdown_0.46           fgsea_1.36.2           
+#> [103] clue_0.3-67             scales_1.4.0            png_0.1-8              
+#> [106] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         
+#> [109] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             
+#> [112] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          
+#> [115] parallel_4.5.2          desc_1.4.3              pillar_1.11.1          
+#> [118] grid_4.5.2              vctrs_0.7.1             ggpubr_0.6.3           
+#> [121] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.1        
+#> [124] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        
+#> [127] compiler_4.5.2          rlang_1.1.7             crayon_1.5.3           
+#> [130] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          
+#> [133] plyr_1.8.9              fs_1.6.7                ggiraph_0.9.6          
+#> [136] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    
+#> [139] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
+#> [142] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       
+#> [145] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          
+#> [148] KEGGREST_1.50.0         statmod_1.5.1           broom_1.0.12           
+#> [151] igraph_2.2.2            memoise_2.0.1           bslib_0.10.0           
+#> [154] ggtree_4.0.4            fastmatch_1.1-8         bit_4.6.0              
+#> [157] ape_5.8-1               gson_0.1.0              polynom_1.4-1
 ```
 
 ## References

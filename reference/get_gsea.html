@@ -105,8 +105,47 @@ depending on <code>set_type</code>.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="cn">NULL</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_vista.html">example_vista</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> estimating size factors</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> estimating dispersions</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gene-wise dispersion estimates</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> mean-dispersion relationship</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> final dispersion estimates</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> fitting model and testing</span>
+<span class="r-in"><span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">'msigdbr'</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu">get_gsea</span><span class="op">(</span><span class="va">v</span>, sample_comparison <span class="op">=</span> <span class="va">comp</span>, set_type <span class="op">=</span> <span class="st">'msigdb'</span>, from_type <span class="op">=</span> <span class="st">'ENSEMBL'</span>, species <span class="op">=</span> <span class="st">'Homo sapiens'</span><span class="op">)</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">'try-error'</span><span class="op">)</span><span class="op">)</span> <span class="va">out</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using 'fgsea' for GSEA analysis, please cite Korotkevich et al (2019).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> preparing geneSet collections...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> GSEA analysis...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> no term enriched under specific pvalueCutoff...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $enrich</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Gene Set Enrichment Analysis</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #...@organism 	 UNKNOWN </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #...@setType 	 UNKNOWN </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #...@geneList 	 Named num [1:123] 2.918 1.328 1.089 0.984 0.697 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "names")= chr [1:123] "ENSG00000004799" "ENSG00000006210" "ENSG00000003402" "ENSG00000003987" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #...nPerm 	 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #...pvalues adjusted by 'BH' with cutoff &lt;0.05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #...0 enriched terms found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 'data.frame':	0 obs. of  8 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ID             : chr </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ Description    : chr </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ setSize        : int </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ enrichmentScore: num </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ NES            : num </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ pvalue         : num </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ p.adjust       : num </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ qvalue         : num </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #...Citation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> S Xu, E Hu, Y Cai, Z Xie, X Luo, L Zhan, W Tang, Q Wang, B Liu, R Wang, W Xie, T Wu, L Xie, G Yu. Using clusterProfiler to characterize multiomics data. Nature Protocols. 2024, 19(11):3292-3320 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

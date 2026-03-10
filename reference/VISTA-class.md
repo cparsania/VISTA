@@ -42,6 +42,21 @@ Advanced users can convert an existing `SummarizedExperiment` with
 ## Examples
 
 ``` r
-NULL
-#> NULL
+methods::showClass('VISTA')
+#> Class "VISTA" [package "VISTA"]
+#> 
+#> Slots:
+#>                                                                               
+#> Name:            colData            assays             NAMES   elementMetadata
+#> Class:         DataFrame    Assays_OR_NULL character_OR_NULL         DataFrame
+#>                         
+#> Name:           metadata
+#> Class:              list
+#> 
+#> Extends: 
+#> Class "SummarizedExperiment", directly
+#> Class "RectangularData", by class "SummarizedExperiment", distance 2
+#> Class "Vector", by class "SummarizedExperiment", distance 2
+#> Class "Annotated", by class "SummarizedExperiment", distance 3
+#> Class "vector_OR_Vector", by class "SummarizedExperiment", distance 3
 ```

@@ -1,6 +1,5 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>/404.html</loc></url>
-<url><loc>/GITHUB_ENTRY.html</loc></url>
 <url><loc>/articles/VISTA-airway.html</loc></url>
 <url><loc>/articles/VISTA-chord.html</loc></url>
 <url><loc>/articles/VISTA-code-economy.html</loc></url>
@@ -33,6 +32,7 @@
 <url><loc>/reference/dot-run_deseq_comparisons.html</loc></url>
 <url><loc>/reference/dot-tidy_de_results.html</loc></url>
 <url><loc>/reference/enrichMsigDB.html</loc></url>
+<url><loc>/reference/example_vista.html</loc></url>
 <url><loc>/reference/export_vista_assets.html</loc></url>
 <url><loc>/reference/get_cell_fractions.html</loc></url>
 <url><loc>/reference/get_celltype_barplot.html</loc></url>

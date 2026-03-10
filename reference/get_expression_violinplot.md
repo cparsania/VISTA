@@ -69,6 +69,14 @@ A `ggplot2` object.
 ## Examples
 
 ``` r
-NULL
-#> NULL
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+genes <- head(rownames(v), 4)
+p <- get_expression_violinplot(v, genes = genes)
+print(p)
 ```
