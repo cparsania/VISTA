@@ -343,7 +343,22 @@ NULL
 
 #' @name get_deg_alluvial
 #' @examples
-#' v <- example_vista()
+#' data("count_data", package = "VISTA")
+#' data("sample_metadata", package = "VISTA")
+#' si <- as.data.frame(sample_metadata[1:8, ], stringsAsFactors = FALSE)
+#' trt_idx <- which(si$cond_long == "treatment1")
+#' si$cond_long[trt_idx] <- rep(c("treatment1", "treatment2"), length.out = length(trt_idx))
+#' si$groups <- si$cond_long
+#' v <- create_vista(
+#'   counts = count_data[1:120, c("gene_id", si$sample_names)],
+#'   sample_info = si,
+#'   column_geneid = "gene_id",
+#'   group_column = "cond_long",
+#'   group_numerator = c("treatment1", "treatment2"),
+#'   group_denominator = c("control", "control"),
+#'   min_counts = 5,
+#'   min_replicates = 1
+#' )
 #' if (requireNamespace('ggalluvial', quietly = TRUE)) {
 #'   p <- get_deg_alluvial(v, sample_comparisons = names(comparisons(v)))
 #'   print(p)
