@@ -390,7 +390,7 @@ sessionInfo()
 #> [131] BiocManager_1.30.27         ggplotify_0.1.3            
 #> [133] cli_3.6.5                   systemfonts_1.3.2          
 #> [135] jquerylib_0.1.4             Rcpp_1.1.1                 
-#> [137] png_0.1-8                   parallel_4.5.3             
+#> [137] png_0.1-9                   parallel_4.5.3             
 #> [139] pkgdown_2.2.0               assertthat_0.2.1           
 #> [141] blob_1.3.0                  clusterProfiler_4.18.4     
 #> [143] DOSE_4.4.0                  tidytree_0.4.7             

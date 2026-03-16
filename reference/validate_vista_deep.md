@@ -1,8 +1,8 @@
 # Deep validation of VISTA differential-expression fidelity
 
-Combines structural validation from
-[`validate_vista`](validate_vista.md) with backend-to-backend
-equivalence checks against standalone DESeq2, edgeR, and limma runs.
+This validator combines [`validate_vista()`](validate_vista.md) with
+backend-to-backend numerical equivalence checks against standalone
+DESeq2, edgeR, and limma runs.
 
 ## Usage
 
@@ -32,31 +32,33 @@ validate_vista_deep(
 
 - counts:
 
-  Raw counts with a gene-id column and sample columns.
+  Raw counts (matrix/data.frame) with a gene-id column and sample
+  columns.
 
 - sample_info:
 
-  Sample metadata.
+  Data frame with sample metadata.
 
 - column_geneid:
 
-  Column name in `counts` containing gene identifiers.
+  Column name in `counts` that contains gene identifiers.
 
 - group_column:
 
-  Grouping column in `sample_info`.
+  Column in `sample_info` used to group samples.
 
 - group_numerator:
 
-  Numerator group(s) for pairwise comparisons.
+  Character vector of numerator groups for pairwise comparisons.
 
 - group_denominator:
 
-  Denominator group(s) for pairwise comparisons.
+  Character vector of denominator groups.
 
 - methods:
 
-  Subset of `c("deseq2", "edger", "limma")` to benchmark.
+  Character vector of backends to benchmark. Any subset of
+  `c("deseq2", "edger", "limma")`.
 
 - min_counts:
 
@@ -72,36 +74,70 @@ validate_vista_deep(
 
 - pval_cutoff:
 
-  P-value or adjusted p-value threshold.
+  P-value (or adjusted p-value) threshold.
 
 - p_value_type:
 
-  One of `"padj"` or `"pvalue"`.
+  Either `"padj"` or `"pvalue"`.
 
 - covariates:
 
-  Optional covariates included in the design.
+  Optional character vector of additional sample_info columns.
 
 - design_formula:
 
-  Optional design formula overriding automatic design construction.
+  Optional model formula (or formula string) including `group_column`.
 
 - tolerance:
 
-  Floating-point tolerance for numerical comparisons.
+  Numeric tolerance used for floating-point comparisons.
 
 - return_plots:
 
-  When `TRUE`, include paired VISTA/reference plots for MA, volcano, DEG
-  count, and PCA checks.
+  Logical; if `TRUE`, return paired VISTA/reference plots for MA,
+  volcano, DEG count, and PCA views.
 
 - error:
 
-  When `TRUE`, abort if any discrepancy is detected.
+  Logical; if `TRUE`, abort when any discrepancy is detected.
 
 ## Value
 
-Invisibly returns the full benchmark report from
-[`benchmark_vista_equivalence`](benchmark_vista_equivalence.md).
+Invisibly returns the full benchmark report.
 
 ## Examples
+
+``` r
+# \donttest{
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+target_groups <- c("control", "treatment1")
+sample_subset <- sample_metadata[sample_metadata$cond_long %in% target_groups, ]
+count_subset <- count_data[1:150, c("gene_id", sample_subset$sample_names)]
+
+validate_vista_deep(
+  counts = count_subset,
+  sample_info = sample_subset,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  methods = c("deseq2", "edger"),
+  min_counts = 5,
+  min_replicates = 1
+)
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+# }
+```

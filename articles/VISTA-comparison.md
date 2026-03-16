@@ -764,7 +764,7 @@ sessionInfo()
 #>  [93] htmltools_0.5.9             fontBitstreamVera_0.1.1    
 #>  [95] carData_3.0-6               bookdown_0.46              
 #>  [97] fgsea_1.36.2                scales_1.4.0               
-#>  [99] Biobase_2.70.0              png_0.1-8                  
+#>  [99] Biobase_2.70.0              png_0.1-9                  
 #> [101] ggfun_0.2.0                 knitr_1.51                 
 #> [103] reshape2_1.4.5              nlme_3.1-168               
 #> [105] curl_7.0.0                  cachem_1.1.0               

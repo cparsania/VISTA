@@ -1,8 +1,9 @@
 # Benchmark VISTA against standalone differential-expression backends
 
-Runs VISTA and direct DESeq2, edgeR, and limma pipelines with matched
-preprocessing, contrasts, and DEG thresholds, then compares DE tables,
-normalized counts, DEG calls, and critical visualization payloads.
+Run VISTA and direct DESeq2, edgeR, and limma pipelines with matched
+preprocessing, contrast definitions, and DEG thresholds, then compare
+the resulting tables, DEG calls, normalized matrices, and critical plot
+inputs.
 
 ## Usage
 
@@ -31,31 +32,33 @@ benchmark_vista_equivalence(
 
 - counts:
 
-  Raw counts with a gene-id column and sample columns.
+  Raw counts (matrix/data.frame) with a gene-id column and sample
+  columns.
 
 - sample_info:
 
-  Sample metadata.
+  Data frame with sample metadata.
 
 - column_geneid:
 
-  Column name in `counts` containing gene identifiers.
+  Column name in `counts` that contains gene identifiers.
 
 - group_column:
 
-  Grouping column in `sample_info`.
+  Column in `sample_info` used to group samples.
 
 - group_numerator:
 
-  Numerator group(s) for pairwise comparisons.
+  Character vector of numerator groups for pairwise comparisons.
 
 - group_denominator:
 
-  Denominator group(s) for pairwise comparisons.
+  Character vector of denominator groups.
 
 - methods:
 
-  Subset of `c("deseq2", "edger", "limma")` to benchmark.
+  Character vector of backends to benchmark. Any subset of
+  `c("deseq2", "edger", "limma")`.
 
 - min_counts:
 
@@ -71,34 +74,95 @@ benchmark_vista_equivalence(
 
 - pval_cutoff:
 
-  P-value or adjusted p-value threshold.
+  P-value (or adjusted p-value) threshold.
 
 - p_value_type:
 
-  One of `"padj"` or `"pvalue"`.
+  Either `"padj"` or `"pvalue"`.
 
 - covariates:
 
-  Optional covariates included in the design.
+  Optional character vector of additional sample_info columns.
 
 - design_formula:
 
-  Optional design formula overriding automatic design construction.
+  Optional model formula (or formula string) including `group_column`.
 
 - tolerance:
 
-  Floating-point tolerance for numerical comparisons.
+  Numeric tolerance used for floating-point comparisons.
 
 - return_plots:
 
-  When `TRUE`, include paired VISTA/reference plots for MA, volcano, DEG
-  count, and PCA checks.
+  Logical; if `TRUE`, return paired VISTA/reference plots for MA,
+  volcano, DEG count, and PCA views.
 
 ## Value
 
-A list with `valid`, `comparison_summary`, `visual_summary`, and
-`methods`. The `methods` element contains the VISTA object, direct
-backend outputs, structural validation, self-consistency checks, and
-optional plot objects.
+A list with fields `valid`, `comparison_summary`, `visual_summary`, and
+`methods`. Each element of `methods` contains the VISTA object, direct
+backend results, structural validation output, self-consistency checks,
+and optional plot objects.
 
 ## Examples
+
+``` r
+# \donttest{
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+target_groups <- c("control", "treatment1")
+sample_subset <- sample_metadata[sample_metadata$cond_long %in% target_groups, ]
+count_subset <- count_data[1:150, c("gene_id", sample_subset$sample_names)]
+
+bm <- benchmark_vista_equivalence(
+  counts = count_subset,
+  sample_info = sample_subset,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  methods = c("deseq2", "edger"),
+  min_counts = 5,
+  min_replicates = 1
+)
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+
+bm$comparison_summary
+#> # A tibble: 2 × 20
+#>   method comparison            n_genes up_genes_identical down_genes_identical
+#>   <chr>  <chr>                   <int> <lgl>              <lgl>               
+#> 1 deseq2 treatment1_VS_control     123 TRUE               TRUE                
+#> 2 edger  treatment1_VS_control     130 TRUE               TRUE                
+#> # ℹ 15 more variables: deg_sets_identical <lgl>, regulation_identical <lgl>,
+#> #   norm_counts_identical <lgl>, baseMean_within_tolerance <lgl>,
+#> #   log2fc_within_tolerance <lgl>, pvalue_within_tolerance <lgl>,
+#> #   padj_within_tolerance <lgl>, max_abs_norm_counts_diff <dbl>,
+#> #   max_abs_baseMean_diff <dbl>, max_abs_log2fc_diff <dbl>,
+#> #   max_abs_pvalue_diff <dbl>, max_abs_padj_diff <dbl>, all_checks_pass <lgl>,
+#> #   structural_valid <lgl>, self_consistency_valid <lgl>
+bm$visual_summary
+#> # A tibble: 8 × 7
+#>   method comparison  visual pass  detail structural_valid self_consistency_valid
+#>   <chr>  <chr>       <chr>  <lgl> <chr>  <lgl>            <lgl>                 
+#> 1 deseq2 treatment1… ma     TRUE  ident… TRUE             TRUE                  
+#> 2 deseq2 treatment1… volca… TRUE  ident… TRUE             TRUE                  
+#> 3 deseq2 NA          deg_c… TRUE  ident… TRUE             TRUE                  
+#> 4 deseq2 NA          pca    TRUE  ident… TRUE             TRUE                  
+#> 5 edger  treatment1… ma     TRUE  ident… TRUE             TRUE                  
+#> 6 edger  treatment1… volca… TRUE  ident… TRUE             TRUE                  
+#> 7 edger  NA          deg_c… TRUE  ident… TRUE             TRUE                  
+#> 8 edger  NA          pca    TRUE  ident… TRUE             TRUE                  
+# }
+```
