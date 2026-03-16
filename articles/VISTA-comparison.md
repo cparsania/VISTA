@@ -690,7 +690,7 @@ cat("Fold-change Pearson r:", round(r_val, 3), "\n")
 
 ``` r
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
+#> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.3 LTS
 #> 
@@ -715,11 +715,11 @@ sessionInfo()
 #> [5] BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] splines_4.5.2               ggplotify_0.1.3            
+#>   [1] splines_4.5.3               ggplotify_0.1.3            
 #>   [3] tibble_3.3.1                R.oo_1.27.1                
 #>   [5] polyclip_1.10-7             lifecycle_1.0.5            
 #>   [7] rstatix_0.7.3               edgeR_4.8.2                
-#>   [9] lattice_0.22-7              MASS_7.3-65                
+#>   [9] lattice_0.22-9              MASS_7.3-65                
 #>  [11] backports_1.5.0             magrittr_2.0.4             
 #>  [13] limma_3.66.0                sass_0.4.10                
 #>  [15] rmarkdown_2.30              jquerylib_0.1.4            
@@ -729,7 +729,7 @@ sessionInfo()
 #>  [23] DBI_1.3.0                   RColorBrewer_1.1-3         
 #>  [25] abind_1.4-8                 GenomicRanges_1.62.1       
 #>  [27] purrr_1.2.1                 R.utils_2.13.0             
-#>  [29] BiocGenerics_0.56.0         msigdbr_25.1.1             
+#>  [29] BiocGenerics_0.56.0         msigdbr_26.1.0             
 #>  [31] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [33] rappdirs_0.3.4              gdtools_0.5.0              
 #>  [35] IRanges_2.44.0              S4Vectors_0.48.0           
@@ -739,9 +739,9 @@ sessionInfo()
 #>  [43] DOSE_4.4.0                  ggforce_0.5.0              
 #>  [45] tidyselect_1.2.1            aplot_0.2.9                
 #>  [47] farver_2.1.2                matrixStats_1.5.0          
-#>  [49] stats4_4.5.2                Seqinfo_1.0.0              
+#>  [49] stats4_4.5.3                Seqinfo_1.0.0              
 #>  [51] jsonlite_2.0.0              Formula_1.2-5              
-#>  [53] systemfonts_1.3.2           tools_4.5.2                
+#>  [53] systemfonts_1.3.2           tools_4.5.3                
 #>  [55] ggnewscale_0.5.2            treeio_1.34.0              
 #>  [57] ragg_1.5.1                  Rcpp_1.1.1                 
 #>  [59] glue_1.8.0                  SparseArray_1.10.9         
@@ -768,14 +768,14 @@ sessionInfo()
 #> [101] ggfun_0.2.0                 knitr_1.51                 
 #> [103] reshape2_1.4.5              nlme_3.1-168               
 #> [105] curl_7.0.0                  cachem_1.1.0               
-#> [107] stringr_1.6.0               parallel_4.5.2             
+#> [107] stringr_1.6.0               parallel_4.5.3             
 #> [109] AnnotationDbi_1.72.0        desc_1.4.3                 
-#> [111] pillar_1.11.1               grid_4.5.2                 
+#> [111] pillar_1.11.1               grid_4.5.3                 
 #> [113] vctrs_0.7.1                 ggpubr_0.6.3               
 #> [115] car_3.1-5                   tidydr_0.0.6               
-#> [117] cluster_2.1.8.1             evaluate_1.0.5             
+#> [117] cluster_2.1.8.2             evaluate_1.0.5             
 #> [119] cli_3.6.5                   locfit_1.5-9.12            
-#> [121] compiler_4.5.2              rlang_1.1.7                
+#> [121] compiler_4.5.3              rlang_1.1.7                
 #> [123] crayon_1.5.3                ggsignif_0.6.4             
 #> [125] labeling_0.4.3              plyr_1.8.9                 
 #> [127] fs_1.6.7                    ggiraph_0.9.6              

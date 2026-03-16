@@ -456,7 +456,6 @@ Create and manage VISTA objects for differential expression analysis.
 - [`create_vista()`](create_vista.md) : Create a VISTA Object with
   Internal DE Analysis
 - [`as_vista()`](as_vista.md) : Coerce SummarizedExperiment to VISTA
-- [`validate_vista()`](validate_vista.md) : Validate a VISTA object
 - [`run_deseq_analysis()`](run_deseq_analysis.md)
   [`run_edger_analysis()`](run_deseq_analysis.md)
   [`run_limma_analysis()`](run_deseq_analysis.md) : Run Differential
@@ -616,6 +615,17 @@ Generate automated analysis reports.
 
 - [`run_vista_report()`](run_vista_report.md) : Generate a
   publication-ready VISTA workflow report
+
+## Validation & Benchmarking
+
+Verify VISTA objects and benchmark backend fidelity against standalone
+workflows.
+
+- [`validate_vista()`](validate_vista.md) : Validate a VISTA object
+- [`validate_vista_deep()`](validate_vista_deep.md) : Deep validation of
+  VISTA differential-expression fidelity
+- [`benchmark_vista_equivalence()`](benchmark_vista_equivalence.md) :
+  Benchmark VISTA against standalone differential-expression backends
 
 ## Exporting
 

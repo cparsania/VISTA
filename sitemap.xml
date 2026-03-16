@@ -15,6 +15,7 @@
 <url><loc>/reference/VISTA-accessors.html</loc></url>
 <url><loc>/reference/VISTA-class.html</loc></url>
 <url><loc>/reference/as_vista.html</loc></url>
+<url><loc>/reference/benchmark_vista_equivalence.html</loc></url>
 <url><loc>/reference/count_data.html</loc></url>
 <url><loc>/reference/create_vista.html</loc></url>
 <url><loc>/reference/dot-EnhancedVolcano2.html</loc></url>
@@ -94,5 +95,6 @@
 <url><loc>/reference/set_vista_comparison_colors.html</loc></url>
 <url><loc>/reference/set_vista_group_colors.html</loc></url>
 <url><loc>/reference/validate_vista.html</loc></url>
+<url><loc>/reference/validate_vista_deep.html</loc></url>
 </urlset>
 

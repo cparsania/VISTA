@@ -260,7 +260,7 @@ get_celltype_heatmap(
 
 ``` r
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
+#> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.3 LTS
 #> 
@@ -294,13 +294,13 @@ sessionInfo()
 #> [19] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] splines_4.5.2               filelock_1.0.3             
+#>   [1] splines_4.5.3               filelock_1.0.3             
 #>   [3] ggplotify_0.1.3             R.oo_1.27.1                
 #>   [5] polyclip_1.10-7             graph_1.88.1               
 #>   [7] minpack.lm_1.2-4            XML_3.99-0.22              
 #>   [9] httr2_1.2.2                 lifecycle_1.0.5            
 #>  [11] rstatix_0.7.3               edgeR_4.8.2                
-#>  [13] lattice_0.22-7              MASS_7.3-65                
+#>  [13] lattice_0.22-9              MASS_7.3-65                
 #>  [15] backports_1.5.0             magrittr_2.0.4             
 #>  [17] limma_3.66.0                sass_0.4.10                
 #>  [19] rmarkdown_2.30              jquerylib_0.1.4            
@@ -309,7 +309,7 @@ sessionInfo()
 #>  [25] DBI_1.3.0                   RColorBrewer_1.1-3         
 #>  [27] abind_1.4-8                 quadprog_1.5-8             
 #>  [29] purrr_1.2.1                 R.utils_2.13.0             
-#>  [31] msigdbr_25.1.1              pracma_2.4.6               
+#>  [31] msigdbr_26.1.0              pracma_2.4.6               
 #>  [33] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [35] rappdirs_0.3.4              gdtools_0.5.0              
 #>  [37] enrichplot_1.30.5           ggrepel_0.9.7              
@@ -320,7 +320,7 @@ sessionInfo()
 #>  [47] aplot_0.2.9                 farver_2.1.2               
 #>  [49] BiocFileCache_3.0.0         jsonlite_2.0.0             
 #>  [51] Formula_1.2-5               systemfonts_1.3.2          
-#>  [53] progress_1.2.3              tools_4.5.2                
+#>  [53] progress_1.2.3              tools_4.5.3                
 #>  [55] ggnewscale_0.5.2            treeio_1.34.0              
 #>  [57] xCell2_1.2.3                ragg_1.5.1                 
 #>  [59] Rcpp_1.1.1                  glue_1.8.0                 
@@ -349,15 +349,15 @@ sessionInfo()
 #> [105] reshape2_1.4.5              nlme_3.1-168               
 #> [107] curl_7.0.0                  cachem_1.1.0               
 #> [109] stringr_1.6.0               BiocVersion_3.22.0         
-#> [111] parallel_4.5.2              desc_1.4.3                 
-#> [113] pillar_1.11.1               grid_4.5.2                 
+#> [111] parallel_4.5.3              desc_1.4.3                 
+#> [113] pillar_1.11.1               grid_4.5.3                 
 #> [115] vctrs_0.7.1                 ggpubr_0.6.3               
 #> [117] car_3.1-5                   tidydr_0.0.6               
 #> [119] dbplyr_2.5.2                xtable_1.8-8               
-#> [121] cluster_2.1.8.1             singscore_1.30.0           
+#> [121] cluster_2.1.8.2             singscore_1.30.0           
 #> [123] evaluate_1.0.5              readr_2.2.0                
 #> [125] cli_3.6.5                   locfit_1.5-9.12            
-#> [127] compiler_4.5.2              rlang_1.1.7                
+#> [127] compiler_4.5.3              rlang_1.1.7                
 #> [129] crayon_1.5.3                ggsignif_0.6.4             
 #> [131] labeling_0.4.3              plyr_1.8.9                 
 #> [133] fs_1.6.7                    ggiraph_0.9.6              

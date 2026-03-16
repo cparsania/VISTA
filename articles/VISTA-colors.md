@@ -363,7 +363,7 @@ if (requireNamespace("patchwork", quietly = TRUE)) {
 
 ``` r
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
+#> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.3 LTS
 #> 
@@ -413,7 +413,7 @@ sessionInfo()
 #>  [45] GenomicRanges_1.62.1        RSQLite_2.4.6              
 #>  [47] ggpubr_0.6.3                labeling_0.4.3             
 #>  [49] polyclip_1.10-7             httr_1.4.8                 
-#>  [51] abind_1.4-8                 compiler_4.5.2             
+#>  [51] abind_1.4-8                 compiler_4.5.3             
 #>  [53] withr_3.0.2                 bit64_4.6.0-1              
 #>  [55] fontquiver_0.2.1            backports_1.5.0            
 #>  [57] S7_0.2.1                    BiocParallel_1.44.0        
@@ -421,12 +421,12 @@ sessionInfo()
 #>  [61] ggstats_0.13.0              ggforce_0.5.0              
 #>  [63] R.utils_2.13.0              ggsignif_0.6.4             
 #>  [65] MASS_7.3-65                 rappdirs_0.3.4             
-#>  [67] DelayedArray_0.36.0         tools_4.5.2                
+#>  [67] DelayedArray_0.36.0         tools_4.5.3                
 #>  [69] otel_0.2.0                  scatterpie_0.2.6           
-#>  [71] ape_5.8-1                   msigdbr_25.1.1             
+#>  [71] ape_5.8-1                   msigdbr_26.1.0             
 #>  [73] R.oo_1.27.1                 glue_1.8.0                 
 #>  [75] nlme_3.1-168                GOSemSim_2.36.0            
-#>  [77] grid_4.5.2                  cluster_2.1.8.1            
+#>  [77] grid_4.5.3                  cluster_2.1.8.2            
 #>  [79] reshape2_1.4.5              fgsea_1.36.2               
 #>  [81] generics_0.1.4              gtable_0.3.6               
 #>  [83] R.methodsS3_1.8.2           tidyr_1.3.2                
@@ -435,15 +435,15 @@ sessionInfo()
 #>  [89] ggrepel_0.9.7               pillar_1.11.1              
 #>  [91] stringr_1.6.0               limma_3.66.0               
 #>  [93] yulab.utils_0.2.4           babelgene_22.9             
-#>  [95] splines_4.5.2               tweenr_2.0.3               
-#>  [97] treeio_1.34.0               lattice_0.22-7             
+#>  [95] splines_4.5.3               tweenr_2.0.3               
+#>  [97] treeio_1.34.0               lattice_0.22-9             
 #>  [99] bit_4.6.0                   tidyselect_1.2.1           
 #> [101] fontLiberation_0.1.0        GO.db_3.22.0               
 #> [103] locfit_1.5-9.12             Biostrings_2.78.0          
 #> [105] knitr_1.51                  fontBitstreamVera_0.1.1    
 #> [107] bookdown_0.46               IRanges_2.44.0             
 #> [109] Seqinfo_1.0.0               edgeR_4.8.2                
-#> [111] SummarizedExperiment_1.40.0 stats4_4.5.2               
+#> [111] SummarizedExperiment_1.40.0 stats4_4.5.3               
 #> [113] xfun_0.56                   Biobase_2.70.0             
 #> [115] statmod_1.5.1               matrixStats_1.5.0          
 #> [117] stringi_1.8.7               lazyeval_0.2.2             
@@ -453,7 +453,7 @@ sessionInfo()
 #> [125] BiocManager_1.30.27         ggplotify_0.1.3            
 #> [127] cli_3.6.5                   systemfonts_1.3.2          
 #> [129] jquerylib_0.1.4             Rcpp_1.1.1                 
-#> [131] png_0.1-8                   parallel_4.5.2             
+#> [131] png_0.1-8                   parallel_4.5.3             
 #> [133] pkgdown_2.2.0               assertthat_0.2.1           
 #> [135] blob_1.3.0                  clusterProfiler_4.18.4     
 #> [137] DOSE_4.4.0                  tidytree_0.4.7             

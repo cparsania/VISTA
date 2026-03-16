@@ -1207,12 +1207,12 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 #> HALLMARK_HYPOXIA                                                     HALLMARK_HYPOXIA
 #> HALLMARK_P53_PATHWAY                                             HALLMARK_P53_PATHWAY
 #>                                                  pvalue     p.adjust Count
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           3.145403e-13 1.541248e-11    28
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.134269e-06 2.778958e-05    19
-#> HALLMARK_ADIPOGENESIS                      2.270046e-04 3.707742e-03    15
-#> HALLMARK_UV_RESPONSE_DN                    3.660663e-04 4.484313e-03    12
-#> HALLMARK_HYPOXIA                           7.252767e-04 5.923093e-03    14
-#> HALLMARK_P53_PATHWAY                       7.252767e-04 5.923093e-03    14
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           3.153757e-13 1.545341e-11    28
+#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.136118e-06 2.783488e-05    19
+#> HALLMARK_ADIPOGENESIS                      2.272727e-04 3.712120e-03    15
+#> HALLMARK_UV_RESPONSE_DN                    3.664291e-04 4.488757e-03    12
+#> HALLMARK_HYPOXIA                           7.260526e-04 5.929430e-03    14
+#> HALLMARK_P53_PATHWAY                       7.260526e-04 5.929430e-03    14
 ```
 
 #### Hallmark gene sets - Downregulated
@@ -1238,12 +1238,12 @@ if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
 #> HALLMARK_MYOGENESIS                                               HALLMARK_MYOGENESIS
 #> HALLMARK_APOPTOSIS                                                 HALLMARK_APOPTOSIS
 #>                                                  pvalue     p.adjust Count
-#> HALLMARK_P53_PATHWAY                       1.667296e-06 7.169373e-05    17
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           4.162402e-04 8.949164e-03    13
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.376651e-03 1.973200e-02    12
-#> HALLMARK_MTORC1_SIGNALING                  4.194278e-03 3.607079e-02    11
-#> HALLMARK_MYOGENESIS                        4.194278e-03 3.607079e-02    11
-#> HALLMARK_APOPTOSIS                         8.306424e-03 5.952937e-02     9
+#> HALLMARK_P53_PATHWAY                       1.669778e-06 7.180044e-05    17
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           4.166736e-04 8.958483e-03    13
+#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.377933e-03 1.975037e-02    12
+#> HALLMARK_MTORC1_SIGNALING                  4.197724e-03 3.610043e-02    11
+#> HALLMARK_MYOGENESIS                        4.197724e-03 3.610043e-02    11
+#> HALLMARK_APOPTOSIS                         8.312106e-03 5.673959e-02     9
 ```
 
 ### Enrichment Visualizations
@@ -1908,7 +1908,7 @@ In this workflow, we:
 
 ``` r
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
+#> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.3 LTS
 #> 
@@ -1941,16 +1941,16 @@ sessionInfo()
 #> [17] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] splines_4.5.2           ggplotify_0.1.3         tibble_3.3.1           
+#>   [1] splines_4.5.3           ggplotify_0.1.3         tibble_3.3.1           
 #>   [4] R.oo_1.27.1             ggpp_0.6.0              polyclip_1.10-7        
 #>   [7] lifecycle_1.0.5         rstatix_0.7.3           edgeR_4.8.2            
-#>  [10] doParallel_1.0.17       lattice_0.22-7          MASS_7.3-65            
+#>  [10] doParallel_1.0.17       lattice_0.22-9          MASS_7.3-65            
 #>  [13] backports_1.5.0         limma_3.66.0            sass_0.4.10            
 #>  [16] rmarkdown_2.30          jquerylib_0.1.4         yaml_2.3.12            
 #>  [19] otel_0.2.0              ggtangle_0.1.1          EnhancedVolcano_1.28.2 
 #>  [22] cowplot_1.2.0           DBI_1.3.0               RColorBrewer_1.1-3     
 #>  [25] abind_1.4-8             purrr_1.2.1             R.utils_2.13.0         
-#>  [28] msigdbr_25.1.1          yulab.utils_0.2.4       tweenr_2.0.3           
+#>  [28] msigdbr_26.1.0          yulab.utils_0.2.4       tweenr_2.0.3           
 #>  [31] rappdirs_0.3.4          gdtools_0.5.0           circlize_0.4.17        
 #>  [34] enrichplot_1.30.5       ggrepel_0.9.7           tidytree_0.4.7         
 #>  [37] RSpectra_0.16-2         pkgdown_2.2.0           codetools_0.2-20       
@@ -1958,7 +1958,7 @@ sessionInfo()
 #>  [43] tidyselect_1.2.1        shape_1.4.6.1           aplot_0.2.9            
 #>  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.0       
 #>  [49] Formula_1.2-5           ggridges_0.5.7          iterators_1.0.14       
-#>  [52] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.2            
+#>  [52] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
 #>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.1             
 #>  [58] Rcpp_1.1.1              glue_1.8.0              gridExtra_2.3          
 #>  [61] SparseArray_1.10.9      xfun_0.56               DESeq2_1.50.2          
@@ -1979,11 +1979,11 @@ sessionInfo()
 #> [106] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         
 #> [109] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             
 #> [112] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          
-#> [115] parallel_4.5.2          desc_1.4.3              pillar_1.11.1          
-#> [118] grid_4.5.2              vctrs_0.7.1             ggpubr_0.6.3           
-#> [121] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.1        
+#> [115] parallel_4.5.3          desc_1.4.3              pillar_1.11.1          
+#> [118] grid_4.5.3              vctrs_0.7.1             ggpubr_0.6.3           
+#> [121] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.2        
 #> [124] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        
-#> [127] compiler_4.5.2          rlang_1.1.7             crayon_1.5.3           
+#> [127] compiler_4.5.3          rlang_1.1.7             crayon_1.5.3           
 #> [130] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          
 #> [133] plyr_1.8.9              fs_1.6.7                ggiraph_0.9.6          
 #> [136] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    

@@ -176,12 +176,12 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 #> HALLMARK_HYPOXIA                                                     HALLMARK_HYPOXIA
 #> HALLMARK_P53_PATHWAY                                             HALLMARK_P53_PATHWAY
 #>                                                p.adjust Count
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           1.541248e-11    28
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 2.778958e-05    19
-#> HALLMARK_ADIPOGENESIS                      3.707742e-03    15
-#> HALLMARK_UV_RESPONSE_DN                    4.484313e-03    12
-#> HALLMARK_HYPOXIA                           5.923093e-03    14
-#> HALLMARK_P53_PATHWAY                       5.923093e-03    14
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           1.545341e-11    28
+#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 2.783488e-05    19
+#> HALLMARK_ADIPOGENESIS                      3.712120e-03    15
+#> HALLMARK_UV_RESPONSE_DN                    4.488757e-03    12
+#> HALLMARK_HYPOXIA                           5.929430e-03    14
+#> HALLMARK_P53_PATHWAY                       5.929430e-03    14
 ```
 
 This table tells us *what* is enriched. But it does not tell us whether
@@ -411,7 +411,7 @@ if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
 
 ![](VISTA-chord_files/figure-html/chord-hub-strict-1.png)
 
-    #> Top hub genes: ENSG00000004799, ENSG00000046653, ENSG00000048540, ENSG00000060718, ENSG00000071282, ENSG00000095637, ENSG00000096060, ENSG00000099860, ENSG00000101347, ENSG00000101938, ENSG00000107796, ENSG00000109906, ENSG00000116962, ENSG00000118257, ENSG00000119138
+    #> Top hub genes: ENSG00000004799, ENSG00000046653, ENSG00000048540, ENSG00000060718, ENSG00000071282, ENSG00000096060, ENSG00000099860, ENSG00000101347, ENSG00000101938, ENSG00000107796, ENSG00000109906, ENSG00000116962, ENSG00000119138, ENSG00000119711, ENSG00000120129
 
 ## Visual Customisation
 
@@ -605,7 +605,7 @@ form a complete picture of functional enrichment.
 
 ``` r
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
+#> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.3 LTS
 #> 
@@ -638,15 +638,15 @@ sessionInfo()
 #> [17] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] splines_4.5.2           ggplotify_0.1.3         tibble_3.3.1           
+#>   [1] splines_4.5.3           ggplotify_0.1.3         tibble_3.3.1           
 #>   [4] R.oo_1.27.1             polyclip_1.10-7         lifecycle_1.0.5        
 #>   [7] rstatix_0.7.3           edgeR_4.8.2             doParallel_1.0.17      
-#>  [10] lattice_0.22-7          MASS_7.3-65             backports_1.5.0        
+#>  [10] lattice_0.22-9          MASS_7.3-65             backports_1.5.0        
 #>  [13] magrittr_2.0.4          limma_3.66.0            sass_0.4.10            
 #>  [16] rmarkdown_2.30          jquerylib_0.1.4         yaml_2.3.12            
 #>  [19] otel_0.2.0              ggtangle_0.1.1          cowplot_1.2.0          
 #>  [22] DBI_1.3.0               RColorBrewer_1.1-3      abind_1.4-8            
-#>  [25] purrr_1.2.1             R.utils_2.13.0          msigdbr_25.1.1         
+#>  [25] purrr_1.2.1             R.utils_2.13.0          msigdbr_26.1.0         
 #>  [28] yulab.utils_0.2.4       tweenr_2.0.3            rappdirs_0.3.4         
 #>  [31] gdtools_0.5.0           circlize_0.4.17         enrichplot_1.30.5      
 #>  [34] ggrepel_0.9.7           tidytree_0.4.7          pkgdown_2.2.0          
@@ -654,7 +654,7 @@ sessionInfo()
 #>  [40] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          
 #>  [43] aplot_0.2.9             farver_2.1.2            jsonlite_2.0.0         
 #>  [46] GetoptLong_1.1.0        Formula_1.2-5           iterators_1.0.14       
-#>  [49] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.2            
+#>  [49] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
 #>  [52] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.1             
 #>  [55] Rcpp_1.1.1              glue_1.8.0              SparseArray_1.10.9     
 #>  [58] xfun_0.56               DESeq2_1.50.2           qvalue_2.42.0          
@@ -672,11 +672,11 @@ sessionInfo()
 #>  [94] scales_1.4.0            png_0.1-8               ggfun_0.2.0            
 #>  [97] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
 #> [100] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
-#> [103] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.2         
-#> [106] desc_1.4.3              pillar_1.11.1           grid_4.5.2             
+#> [103] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.3         
+#> [106] desc_1.4.3              pillar_1.11.1           grid_4.5.3             
 #> [109] vctrs_0.7.1             ggpubr_0.6.3            car_3.1-5              
-#> [112] tidydr_0.0.6            cluster_2.1.8.1         evaluate_1.0.5         
-#> [115] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.2         
+#> [112] tidydr_0.0.6            cluster_2.1.8.2         evaluate_1.0.5         
+#> [115] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.3         
 #> [118] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
 #> [121] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
 #> [124] fs_1.6.7                ggiraph_0.9.6           stringi_1.8.7          
