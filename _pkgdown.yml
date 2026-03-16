@@ -15,7 +15,6 @@ reference:
       - VISTA-class
       - create_vista
       - as_vista
-      - validate_vista
       - run_deseq_analysis
       - run_edger_analysis
       - run_limma_analysis
@@ -121,6 +120,14 @@ reference:
       Generate automated analysis reports.
     contents:
       - run_vista_report
+
+  - title: "Validation & Benchmarking"
+    desc: >
+      Verify VISTA objects and benchmark backend fidelity against standalone workflows.
+    contents:
+      - validate_vista
+      - validate_vista_deep
+      - benchmark_vista_equivalence
 
   - title: "Exporting"
     desc: >
