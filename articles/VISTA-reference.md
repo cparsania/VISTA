@@ -206,7 +206,8 @@ Common label arguments: `display_id`, `display_from`, `display_orgdb`.
 ## Fold change utilities
 
 - `get_foldchange_matrix(...)`: log2FC matrix for comparisons.
-- `get_foldchange_heatmap(...)`: heatmap of log2FC.
+- `get_foldchange_heatmap(...)`: heatmap of log2FC; with no genes
+  supplied, uses the top DE genes from each comparison.
 - `get_foldchange_lineplot(...)`: line plot across comparisons.
 - `get_foldchange_boxplot(...)`: distribution across comparisons.
 - `get_foldchange_raincloud(...)`: raincloud distribution across

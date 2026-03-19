@@ -1,35 +1,38 @@
 # Fold-change heatmap
 
 Visualizes log2 fold-change matrices across comparisons with
-ComplexHeatmap, supporting clustering and annotations.
+ComplexHeatmap, supporting clustering and annotations. With only a
+`VISTA` object, the function will plot the top DE genes across the
+stored comparisons.
 
 ## Usage
 
 ``` r
 get_foldchange_heatmap(
   x,
-  sample_comparisons,
-  genes,
+  sample_comparisons = NULL,
+  genes = NULL,
+  top_n = 10,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   repair_genes = FALSE,
-  color_default = TRUE,
-  col = NULL,
-  show_row_names = FALSE,
-  cluster_rows = TRUE,
-  show_row_dend = TRUE,
+  show_row_names = NULL,
   label_size = 10,
   label_specific_rows = NULL,
   label_specific_rows_gp = grid::gpar(fontsize = 5),
   show_column_names = TRUE,
+  cluster_rows = TRUE,
+  show_row_dend = TRUE,
   cluster_columns = TRUE,
-  show_heatmap_legend = TRUE,
   kmeans_k = NULL,
-  return_type = c("heatmap", "clusters", "both"),
   annotate_columns = FALSE,
   column_anno_palette = "Set2",
+  color_default = TRUE,
+  col = NULL,
   heatmap_name = NULL,
-  display_id = NULL,
-  display_from = NULL,
-  display_orgdb = NULL,
+  show_heatmap_legend = TRUE,
+  return_type = c("heatmap", "clusters", "both"),
   ...
 )
 ```
@@ -42,38 +45,40 @@ get_foldchange_heatmap(
 
 - sample_comparisons:
 
-  Character vector of comparison names to include.
+  Optional character vector of comparison names to include. Defaults to
+  all available comparisons.
 
 - genes:
 
-  Character vector of gene identifiers to display.
+  Optional character vector of gene identifiers to display. When
+  omitted, VISTA selects the top DE genes from each comparison by
+  absolute log2 fold-change.
+
+- top_n:
+
+  Integer number of genes to select per comparison when `genes = NULL`.
+  Defaults to `10`.
+
+- display_id:
+
+  Optional ID/column name to use for plot labels. If supplied
+
+- display_from:
+
+  Optional source ID type for mapping (used when `display_id`
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for ID mapping when
 
 - repair_genes:
 
   Logical; attempt to simplify `gene_id` strings by removing prefixes.
 
-- color_default:
-
-  Logical; use the default diverging palette when `TRUE`. Set to `FALSE`
-  to supply `col`.
-
-- col:
-
-  Optional
-  [`circlize::colorRamp2`](https://rdrr.io/pkg/circlize/man/colorRamp2.html)
-  color function used when `color_default = FALSE`.
-
 - show_row_names:
 
-  Logical; draw row (gene) names.
-
-- cluster_rows:
-
-  Logical; cluster rows.
-
-- show_row_dend:
-
-  Logical; display the row dendrogram.
+  Logical; draw row (gene) names. When `NULL`, VISTA turns labels on
+  automatically for auto-selected genes.
 
 - label_size:
 
@@ -92,21 +97,21 @@ get_foldchange_heatmap(
 
   Logical; draw column labels.
 
+- cluster_rows:
+
+  Logical; cluster rows.
+
+- show_row_dend:
+
+  Logical; display the row dendrogram.
+
 - cluster_columns:
 
   Logical; cluster columns.
 
-- show_heatmap_legend:
-
-  Logical; display the heatmap legend.
-
 - kmeans_k:
 
   Optional integer specifying the number of k-means clusters for rows.
-
-- return_type:
-
-  `"heatmap"`, `"clusters"`, or `"both"` selecting the returned value.
 
 - annotate_columns:
 
@@ -116,21 +121,28 @@ get_foldchange_heatmap(
 
   Qualitative palette name used for column annotations.
 
+- color_default:
+
+  Logical; use the default diverging palette when `TRUE`. Set to `FALSE`
+  to supply `col`.
+
+- col:
+
+  Optional
+  [`circlize::colorRamp2`](https://rdrr.io/pkg/circlize/man/colorRamp2.html)
+  color function used when `color_default = FALSE`.
+
 - heatmap_name:
 
   Optional legend title.
 
-- display_id:
+- show_heatmap_legend:
 
-  Optional ID/column name to use for plot labels. If supplied
+  Logical; display the heatmap legend.
 
-- display_from:
+- return_type:
 
-  Optional source ID type for mapping (used when `display_id`
-
-- display_orgdb:
-
-  Optional `OrgDb` object used for ID mapping when
+  `"heatmap"`, `"clusters"`, or `"both"` selecting the returned value.
 
 - ...:
 
@@ -140,6 +152,9 @@ get_foldchange_heatmap(
 ## Value
 
 An object returned by this function.
+
+A `ComplexHeatmap` object, a cluster data frame, or a list containing
+both depending on `return_type`.
 
 ## Examples
 
@@ -163,6 +178,17 @@ if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
   )
   ComplexHeatmap::draw(hm)
 }
-#> New names:
-#> • `` -> `...1`
+
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
+    requireNamespace("circlize", quietly = TRUE)) {
+  hm <- get_foldchange_heatmap(v, return_type = "heatmap")
+  ComplexHeatmap::draw(hm)
+}
 ```

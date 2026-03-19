@@ -117,11 +117,13 @@ up_genes <- get_genes_by_regulation(
   regulation = "Up"
 )[[comp]]
 
+get_expression_heatmap(vista)
 get_expression_heatmap(vista, sample_group = unique(sample_info(vista)$cond_long), genes = up_genes[1:40], kmeans_k = 3)
 get_expression_barplot(vista, genes = up_genes[1:3], by = "sample", facet_by = "gene")
 get_expression_lollipop(vista, genes = up_genes[1:3], by = "sample", facet_by = "gene")
 
 # Fold-change views
+get_foldchange_heatmap(vista)
 get_foldchange_barplot(vista, genes = up_genes[1:6], sample_comparisons = comp, facet_by = "gene")
 get_foldchange_lollipop(vista, sample_comparison = comp, genes = up_genes[1:6], facet_by = "gene")
 ```

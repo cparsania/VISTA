@@ -733,7 +733,7 @@ sessionInfo()
 #>  [31] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [33] rappdirs_0.3.4              gdtools_0.5.0              
 #>  [35] IRanges_2.44.0              S4Vectors_0.48.0           
-#>  [37] enrichplot_1.30.5           ggrepel_0.9.7              
+#>  [37] enrichplot_1.30.5           ggrepel_0.9.8              
 #>  [39] tidytree_0.4.7              pkgdown_2.2.0              
 #>  [41] codetools_0.2-20            DelayedArray_0.36.0        
 #>  [43] DOSE_4.4.0                  ggforce_0.5.0              
@@ -788,7 +788,7 @@ sessionInfo()
 #> [141] statmod_1.5.1               SummarizedExperiment_1.40.0
 #> [143] igraph_2.2.2                broom_1.0.12               
 #> [145] memoise_2.0.1               bslib_0.10.0               
-#> [147] ggtree_4.0.4                fastmatch_1.1-8            
+#> [147] ggtree_4.0.5                fastmatch_1.1-8            
 #> [149] bit_4.6.0                   ape_5.8-1                  
 #> [151] gson_0.1.0
 ```

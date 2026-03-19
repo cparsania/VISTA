@@ -63,5 +63,8 @@ metadata management and rich visualization capabilities.
 - Added missing `@importFrom` declarations across all modules
 - Improved error messages for invalid inputs
 - Enhanced edge case handling in visualization functions
+- Heatmap utilities now validate non-character `genes` input explicitly,
+  support minimal-call defaults, and allow custom colours for
+  multi-column annotations
 
 ------------------------------------------------------------------------

@@ -328,7 +328,7 @@ sessionInfo()
 #>   [7] farver_2.1.2                rmarkdown_2.30             
 #>   [9] fs_1.6.7                    ragg_1.5.1                 
 #>  [11] vctrs_0.7.1                 memoise_2.0.1              
-#>  [13] ggtree_4.0.4                rstatix_0.7.3              
+#>  [13] ggtree_4.0.5                rstatix_0.7.3              
 #>  [15] htmltools_0.5.9             S4Arrays_1.10.1            
 #>  [17] polynom_1.4-1               curl_7.0.0                 
 #>  [19] broom_1.0.12                Formula_1.2-5              
@@ -368,7 +368,7 @@ sessionInfo()
 #>  [87] R.methodsS3_1.8.2           tidyr_1.3.2                
 #>  [89] data.table_1.18.2.1         car_3.1-5                  
 #>  [91] XVector_0.50.0              BiocGenerics_0.56.0        
-#>  [93] ggrepel_0.9.7               pillar_1.11.1              
+#>  [93] ggrepel_0.9.8               pillar_1.11.1              
 #>  [95] stringr_1.6.0               limma_3.66.0               
 #>  [97] yulab.utils_0.2.4           babelgene_22.9             
 #>  [99] splines_4.5.3               tweenr_2.0.3               

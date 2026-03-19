@@ -1,41 +1,44 @@
 # Expression heatmap
 
 Summarizes expression for selected genes/groups via ComplexHeatmap with
-optional transformations and annotations.
+optional transformations and annotations. With only a `VISTA` object,
+the function will plot the top variable genes across all samples.
 
 ## Usage
 
 ``` r
 get_expression_heatmap(
   x,
-  genes,
+  genes = NULL,
+  top_n = 50,
   sample_group = NULL,
+  group_column = NULL,
   value_transform = c("zscore", "log2", "raw"),
-  repair_genes = FALSE,
-  color_default = TRUE,
-  col = NULL,
   summarise_replicates = TRUE,
   summarise_method = c("mean", "median"),
   convert_rowmeans = FALSE,
-  show_row_names = FALSE,
-  cluster_rows = TRUE,
-  show_row_dend = TRUE,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
+  repair_genes = FALSE,
+  show_row_names = NULL,
   label_size = 10,
   label_specific_rows = NULL,
   label_specific_rows_gp = grid::gpar(fontsize = 5),
   show_column_names = TRUE,
+  cluster_rows = TRUE,
+  show_row_dend = TRUE,
   cluster_columns = TRUE,
-  show_heatmap_legend = TRUE,
   kmeans_k = NULL,
-  return_type = c("heatmap", "clusters", "both"),
   annotate_columns = FALSE,
   cluster_by = NULL,
   column_anno_palette = "Dark 3",
+  column_anno_colors = NULL,
+  color_default = TRUE,
+  col = NULL,
   heatmap_name = NULL,
-  display_id = NULL,
-  display_from = NULL,
-  display_orgdb = NULL,
-  group_column = NULL,
+  show_heatmap_legend = TRUE,
+  return_type = c("heatmap", "clusters", "both"),
   ...
 )
 ```
@@ -48,33 +51,29 @@ get_expression_heatmap(
 
 - genes:
 
-  Character vector of gene identifiers to display.
+  Optional character vector of gene identifiers to display. When
+  omitted, VISTA selects the top variable genes across the included
+  samples.
+
+- top_n:
+
+  Integer number of genes to select automatically when `genes = NULL`.
+  Defaults to `50`.
 
 - sample_group:
 
   Character vector of group labels specifying which samples to include
   (based on the selected grouping column).
 
+- group_column:
+
+  Optional column name in `sample_info` used to interpret
+  `sample_group`.
+
 - value_transform:
 
   One of `"zscore"`, `"log2"`, or `"raw"` controlling how expression
   values are transformed.
-
-- repair_genes:
-
-  Logical; if `TRUE`, split `gene_id` strings such as `ID:SYMBOL` to
-  display the symbol.
-
-- color_default:
-
-  Logical; use the default blue-white-red palette when `TRUE`. Set to
-  `FALSE` to supply `col`.
-
-- col:
-
-  Optional
-  [`circlize::colorRamp2`](https://rdrr.io/pkg/circlize/man/colorRamp2.html)
-  function used when `color_default = FALSE`.
 
 - summarise_replicates:
 
@@ -89,17 +88,27 @@ get_expression_heatmap(
 
   Logical; subtract row means prior to plotting.
 
+- display_id:
+
+  Optional ID/column name to use for row labels. If supplied
+
+- display_from:
+
+  Optional source ID type for mapping (used when `display_id`
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for ID mapping when
+
+- repair_genes:
+
+  Logical; if `TRUE`, split `gene_id` strings such as `ID:SYMBOL` to
+  display the symbol.
+
 - show_row_names:
 
-  Logical; display row names (genes) beside the heatmap.
-
-- cluster_rows:
-
-  Logical; cluster rows when drawing the heatmap.
-
-- show_row_dend:
-
-  Logical; display the row dendrogram.
+  Logical; display row names (genes) beside the heatmap. When `NULL`,
+  VISTA turns labels on automatically for auto-selected genes.
 
 - label_size:
 
@@ -118,28 +127,28 @@ get_expression_heatmap(
 
   Logical; draw column names when `TRUE`.
 
+- cluster_rows:
+
+  Logical; cluster rows when drawing the heatmap.
+
+- show_row_dend:
+
+  Logical; display the row dendrogram.
+
 - cluster_columns:
 
   Logical; cluster columns.
-
-- show_heatmap_legend:
-
-  Logical; display the heatmap legend.
 
 - kmeans_k:
 
   Optional integer specifying the number of k-means clusters to compute
   for rows.
 
-- return_type:
-
-  `"heatmap"`, `"clusters"`, or `"both"` selecting the returned object.
-
 - annotate_columns:
 
-  Logical or character vector. `TRUE` adds one column annotation using
-  `group_column`; a character vector adds multiple annotations from
-  `sample_info`.
+  Logical or character vector. `TRUE` adds the `group_column` annotation
+  and also includes `cluster_by` when supplied; a character vector adds
+  multiple annotations from `sample_info`.
 
 - cluster_by:
 
@@ -150,26 +159,34 @@ get_expression_heatmap(
 
   Qualitative palette name used for the column annotation.
 
+- column_anno_colors:
+
+  Optional named list of annotation color vectors. Each element should
+  be a named character vector keyed by the levels of one annotation
+  column.
+
+- color_default:
+
+  Logical; use the default blue-white-red palette when `TRUE`. Set to
+  `FALSE` to supply `col`.
+
+- col:
+
+  Optional
+  [`circlize::colorRamp2`](https://rdrr.io/pkg/circlize/man/colorRamp2.html)
+  function used when `color_default = FALSE`.
+
 - heatmap_name:
 
   Optional legend title.
 
-- display_id:
+- show_heatmap_legend:
 
-  Optional ID/column name to use for row labels. If supplied
+  Logical; display the heatmap legend.
 
-- display_from:
+- return_type:
 
-  Optional source ID type for mapping (used when `display_id`
-
-- display_orgdb:
-
-  Optional `OrgDb` object used for ID mapping when
-
-- group_column:
-
-  Optional column name in `sample_info` used to interpret
-  `sample_group`.
+  `"heatmap"`, `"clusters"`, or `"both"` selecting the returned object.
 
 - ...:
 
@@ -179,6 +196,9 @@ get_expression_heatmap(
 ## Value
 
 An object returned by this function.
+
+A `ComplexHeatmap` object, a cluster data frame, or a list containing
+both depending on `return_type`.
 
 ## Examples
 
@@ -199,6 +219,19 @@ if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
     sample_group = unique(as.character(sample_info(v)$cond_long)),
     return_type = 'heatmap'
   )
+  ComplexHeatmap::draw(hm)
+}
+
+v <- example_vista()
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
+    requireNamespace("circlize", quietly = TRUE)) {
+  hm <- get_expression_heatmap(v, return_type = "heatmap")
   ComplexHeatmap::draw(hm)
 }
 ```

@@ -312,7 +312,7 @@ sessionInfo()
 #>  [31] msigdbr_26.1.0              pracma_2.4.6               
 #>  [33] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [35] rappdirs_0.3.4              gdtools_0.5.0              
-#>  [37] enrichplot_1.30.5           ggrepel_0.9.7              
+#>  [37] enrichplot_1.30.5           ggrepel_0.9.8              
 #>  [39] tidytree_0.4.7              annotate_1.88.0            
 #>  [41] pkgdown_2.2.0               codetools_0.2-20           
 #>  [43] DelayedArray_0.36.0         DOSE_4.4.0                 
@@ -372,7 +372,7 @@ sessionInfo()
 #> [151] Rfast_2.1.5.2               igraph_2.2.2               
 #> [153] broom_1.0.12                memoise_2.0.1              
 #> [155] RcppParallel_5.1.11-2       bslib_0.10.0               
-#> [157] ggtree_4.0.4                fastmatch_1.1-8            
+#> [157] ggtree_4.0.5                fastmatch_1.1-8            
 #> [159] bit_4.6.0                   ape_5.8-1                  
 #> [161] gson_0.1.0
 ```

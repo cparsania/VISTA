@@ -618,7 +618,7 @@ sessionInfo()
 #>  [1] VISTA_0.99.0                circlize_0.4.17            
 #>  [3] ComplexHeatmap_2.26.1       msigdbr_26.1.0             
 #>  [5] clusterProfiler_4.18.4      tibble_3.3.1               
-#>  [7] dplyr_1.2.0                 ggrepel_0.9.7              
+#>  [7] dplyr_1.2.0                 ggrepel_0.9.8              
 #>  [9] ggplot2_4.0.2               DESeq2_1.50.2              
 #> [11] org.Hs.eg.db_3.22.0         AnnotationDbi_1.72.0       
 #> [13] airway_1.30.0               SummarizedExperiment_1.40.0
@@ -674,7 +674,7 @@ sessionInfo()
 #> [127] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          
 #> [130] KEGGREST_1.50.0         statmod_1.5.1           igraph_2.2.2           
 #> [133] broom_1.0.12            memoise_2.0.1           bslib_0.10.0           
-#> [136] ggtree_4.0.4            fastmatch_1.1-8         bit_4.6.0              
+#> [136] ggtree_4.0.5            fastmatch_1.1-8         bit_4.6.0              
 #> [139] ape_5.8-1               gson_0.1.0
 ```
 

@@ -470,8 +470,9 @@ get_corr_heatmap(
 # Display correlation coefficients
 get_corr_heatmap(
   vista,
-  show_corr_values = TRUE,col_corr_values = 'white',
-  viridis_option = "mako",
+  show_corr_values = TRUE,
+  col_corr_values = 'white',
+  viridis_option = "mako"
 ) 
 ```
 
@@ -780,6 +781,14 @@ print(top_down)
 #### Basic heatmap
 
 ``` r
+get_expression_heatmap(vista)
+```
+
+![](VISTA-airway_files/figure-html/heatmap-basic-1.png)
+
+#### Heatmap with explicit gene set
+
+``` r
 get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
@@ -788,7 +797,7 @@ get_expression_heatmap(
 )
 ```
 
-![](VISTA-airway_files/figure-html/heatmap-basic-1.png)
+![](VISTA-airway_files/figure-html/heatmap-explicit-1.png)
 
 #### Heatmap with k-means clustering
 
@@ -828,6 +837,14 @@ get_expression_heatmap(
 ``` r
 # Use multiple sample-level columns in top annotation.
 # By default, columns are split by the first annotation column.
+anno_cols <- list(
+  treatment = c(Untreated = "#1b9e77", Dexamethasone = "#d95f02"),
+  cell = stats::setNames(
+    colorspace::qualitative_hcl(length(unique(colData(vista)$cell)), palette = "Set 2"),
+    unique(as.character(colData(vista)$cell))
+  )
+)
+
 get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
@@ -836,6 +853,7 @@ get_expression_heatmap(
   display_id = "SYMBOL",
   summarise_replicates = FALSE,
   annotate_columns = c("treatment", "cell"),
+  column_anno_colors = anno_cols,
   cluster_by = "cell"
 )
 ```
@@ -1717,6 +1735,14 @@ get_foldchange_raincloud(
 #### Basic FC heatmap
 
 ``` r
+get_foldchange_heatmap(vista)
+```
+
+![](VISTA-airway_files/figure-html/fc-heatmap-basic-1.png)
+
+#### FC heatmap for selected genes
+
+``` r
 # Select genes with large fold-changes
 fc_genes <- rownames(fc_matrix)[abs(fc_matrix[, 1]) > 2][1:30]
 
@@ -1728,7 +1754,7 @@ get_foldchange_heatmap(
 )
 ```
 
-![](VISTA-airway_files/figure-html/fc-heatmap-basic-1.png)
+![](VISTA-airway_files/figure-html/fc-heatmap-explicit-1.png)
 
 #### FC heatmap with gene names
 
@@ -1952,7 +1978,7 @@ sessionInfo()
 #>  [25] abind_1.4-8             purrr_1.2.1             R.utils_2.13.0         
 #>  [28] msigdbr_26.1.0          yulab.utils_0.2.4       tweenr_2.0.3           
 #>  [31] rappdirs_0.3.4          gdtools_0.5.0           circlize_0.4.17        
-#>  [34] enrichplot_1.30.5       ggrepel_0.9.7           tidytree_0.4.7         
+#>  [34] enrichplot_1.30.5       ggrepel_0.9.8           tidytree_0.4.7         
 #>  [37] RSpectra_0.16-2         pkgdown_2.2.0           codetools_0.2-20       
 #>  [40] DelayedArray_0.36.0     DOSE_4.4.0              ggforce_0.5.0          
 #>  [43] tidyselect_1.2.1        shape_1.4.6.1           aplot_0.2.9            
@@ -1992,7 +2018,7 @@ sessionInfo()
 #> [145] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          
 #> [148] KEGGREST_1.50.0         statmod_1.5.1           broom_1.0.12           
 #> [151] igraph_2.2.2            memoise_2.0.1           bslib_0.10.0           
-#> [154] ggtree_4.0.4            fastmatch_1.1-8         bit_4.6.0              
+#> [154] ggtree_4.0.5            fastmatch_1.1-8         bit_4.6.0              
 #> [157] ape_5.8-1               gson_0.1.0              polynom_1.4-1
 ```
 
