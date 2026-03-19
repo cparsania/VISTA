@@ -21,6 +21,41 @@ test_that("expression heatmap supports rowData display_id", {
   expect_true(inherits(hm, "Heatmap") || inherits(hm, "HeatmapList"))
 })
 
+test_that("expression heatmap rejects non-character genes", {
+  skip_if_not_installed("ComplexHeatmap")
+  skip_if_not_installed("circlize")
+
+  vista <- make_small_vista()
+
+  expect_error(
+    get_expression_heatmap(
+      vista,
+      genes = 1:5,
+      return_type = "heatmap"
+    ),
+    "must be a character vector"
+  )
+})
+
+test_that("expression heatmap works with minimal inputs and auto-selects labeled genes", {
+  skip_if_not_installed("ComplexHeatmap")
+  skip_if_not_installed("circlize")
+
+  vista <- make_small_vista()
+  rowData(vista)$SYMBOL <- paste0("SYM", seq_len(nrow(vista)))
+
+  hm <- get_expression_heatmap(
+    vista,
+    return_type = "heatmap",
+    cluster_rows = FALSE,
+    cluster_columns = FALSE
+  )
+
+  expect_s4_class(hm, "Heatmap")
+  expect_lte(nrow(hm@matrix), 50)
+  expect_true(all(grepl("^SYM", rownames(hm@matrix))))
+})
+
 test_that("expression heatmap supports column annotation with summarised replicates", {
   skip_if_not_installed("ComplexHeatmap")
   skip_if_not_installed("circlize")
@@ -40,6 +75,33 @@ test_that("expression heatmap supports column annotation with summarised replica
     return_type = "heatmap"
   )
   expect_true(inherits(hm, "Heatmap") || inherits(hm, "HeatmapList"))
+})
+
+test_that("expression heatmap supports custom colors for multiple annotations", {
+  skip_if_not_installed("ComplexHeatmap")
+  skip_if_not_installed("circlize")
+
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:12]
+  groups <- unique(SummarizedExperiment::colData(vista)$cond_long)
+  SummarizedExperiment::colData(vista)$sample_batch <- rep(c("B1", "B2"), length.out = ncol(vista))
+
+  hm <- get_expression_heatmap(
+    vista,
+    sample_group = groups,
+    genes = genes,
+    annotate_columns = c("cond_long", "sample_batch"),
+    column_anno_colors = list(
+      cond_long = c(control = "#1b9e77", treatment1 = "#d95f02"),
+      sample_batch = c(B1 = "#7570b3", B2 = "#e7298a")
+    ),
+    summarise_replicates = FALSE,
+    cluster_rows = FALSE,
+    cluster_columns = FALSE,
+    return_type = "heatmap"
+  )
+
+  expect_s4_class(hm, "Heatmap")
 })
 
 test_that("expression heatmap supports multiple column annotations and custom cluster_by", {
@@ -62,6 +124,29 @@ test_that("expression heatmap supports multiple column annotations and custom cl
     cluster_columns = TRUE,
     return_type = "heatmap"
   )
+  expect_true(inherits(hm, "Heatmap") || inherits(hm, "HeatmapList"))
+})
+
+test_that("expression heatmap includes cluster_by when annotate_columns is TRUE", {
+  skip_if_not_installed("ComplexHeatmap")
+  skip_if_not_installed("circlize")
+
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:12]
+  groups <- unique(SummarizedExperiment::colData(vista)$cond_long)
+
+  hm <- get_expression_heatmap(
+    vista,
+    sample_group = groups,
+    genes = genes,
+    annotate_columns = TRUE,
+    cluster_by = "dex",
+    summarise_replicates = FALSE,
+    cluster_rows = FALSE,
+    cluster_columns = TRUE,
+    return_type = "heatmap"
+  )
+
   expect_true(inherits(hm, "Heatmap") || inherits(hm, "HeatmapList"))
 })
 
@@ -224,6 +309,74 @@ test_that("fold-change heatmap matrix values and row order match foldchange matr
   expect_equal(rownames(hm@matrix), genes)
   expect_equal(colnames(hm@matrix), colnames(expected))
   expect_equal(unname(hm@matrix), unname(expected))
+})
+
+test_that("fold-change heatmap rejects non-character genes", {
+  skip_if_not_installed("ComplexHeatmap")
+  skip_if_not_installed("circlize")
+
+  fixture <- .prepare_foldchange_fixture(make_small_vista(), min_genes = 2L)
+
+  expect_error(
+    get_foldchange_heatmap(
+      fixture$vista,
+      sample_comparisons = fixture$comps,
+      genes = 1:5,
+      return_type = "heatmap"
+    ),
+    "must be a character vector"
+  )
+})
+
+test_that("fold-change heatmap works with minimal inputs and auto-selects top genes", {
+  skip_if_not_installed("ComplexHeatmap")
+  skip_if_not_installed("circlize")
+
+  fixture <- .prepare_foldchange_fixture(make_small_vista(), min_genes = 2L)
+  vista <- fixture$vista
+  rowData(vista)$SYMBOL <- paste0("SYM", seq_len(nrow(vista)))
+  comps <- fixture$comps
+  tbl <- as.data.frame(comparisons(vista)[[comps[1]]], stringsAsFactors = FALSE)
+  tbl <- tbl[tbl$regulation %in% c("Up", "Down"), , drop = FALSE]
+  if (!nrow(tbl)) {
+    tbl <- as.data.frame(comparisons(vista)[[comps[1]]], stringsAsFactors = FALSE)
+  }
+  tbl <- tbl[order(abs(tbl$log2fc), decreasing = TRUE), , drop = FALSE]
+  expected_genes <- utils::head(as.character(tbl$gene_id), 10)
+  symbol_map <- stats::setNames(as.character(rowData(vista)$SYMBOL), as.character(rowData(vista)$gene_id))
+  expected_labels <- unname(symbol_map[expected_genes])
+  expected_labels[is.na(expected_labels) | !nzchar(expected_labels)] <- expected_genes[is.na(expected_labels) | !nzchar(expected_labels)]
+
+  hm <- get_foldchange_heatmap(
+    vista,
+    return_type = "heatmap",
+    cluster_rows = FALSE,
+    cluster_columns = FALSE
+  )
+
+  expect_s4_class(hm, "Heatmap")
+  expect_equal(rownames(hm@matrix), expected_labels)
+})
+
+test_that("fold-change heatmap minimal call works without rowData gene_id", {
+  skip_if_not_installed("ComplexHeatmap")
+  skip_if_not_installed("circlize")
+
+  vista <- make_small_vista()
+  if ("gene_id" %in% colnames(rowData(vista))) {
+    rowData(vista)$gene_id <- NULL
+  }
+
+  hm <- get_foldchange_heatmap(
+    vista,
+    return_type = "heatmap",
+    cluster_rows = FALSE,
+    cluster_columns = FALSE
+  )
+
+  expect_s4_class(hm, "Heatmap")
+  expect_gt(nrow(hm@matrix), 0)
+  expect_gt(ncol(hm@matrix), 0)
 })
 
 test_that("fold-change heatmap kmeans clusters match matrix clustering partition", {

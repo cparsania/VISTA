@@ -366,8 +366,9 @@ get_corr_heatmap(
 # Display correlation coefficients
 get_corr_heatmap(
   vista,
-  show_corr_values = TRUE,col_corr_values = 'white',
-  viridis_option = "mako",
+  show_corr_values = TRUE,
+  col_corr_values = 'white',
+  viridis_option = "mako"
 ) 
 ```
 
@@ -621,6 +622,12 @@ print(top_down)
 ### Basic heatmap
 
 ```{r heatmap-basic, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+get_expression_heatmap(vista)
+```
+
+### Heatmap with explicit gene set
+
+```{r heatmap-explicit, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
@@ -663,6 +670,14 @@ get_expression_heatmap(
 ```{r heatmap-annotated-multi, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 # Use multiple sample-level columns in top annotation.
 # By default, columns are split by the first annotation column.
+anno_cols <- list(
+  treatment = c(Untreated = "#1b9e77", Dexamethasone = "#d95f02"),
+  cell = stats::setNames(
+    colorspace::qualitative_hcl(length(unique(colData(vista)$cell)), palette = "Set 2"),
+    unique(as.character(colData(vista)$cell))
+  )
+)
+
 get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
@@ -671,6 +686,7 @@ get_expression_heatmap(
   display_id = "SYMBOL",
   summarise_replicates = FALSE,
   annotate_columns = c("treatment", "cell"),
+  column_anno_colors = anno_cols,
   cluster_by = "cell"
 )
 ```
@@ -1357,6 +1373,12 @@ get_foldchange_raincloud(
 ### Basic FC heatmap
 
 ```{r fc-heatmap-basic, fig.width=7, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
+get_foldchange_heatmap(vista)
+```
+
+### FC heatmap for selected genes
+
+```{r fc-heatmap-explicit, fig.width=7, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 # Select genes with large fold-changes
 fc_genes <- rownames(fc_matrix)[abs(fc_matrix[, 1]) > 2][1:30]
 

@@ -5160,77 +5160,245 @@ get_deg_alluvial <- function(x,
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-#' @title Expression heatmap
-#' @description Summarizes expression for selected genes/groups via ComplexHeatmap
-#' with optional transformations and annotations.
-#' @aliases get_expression_heatmap
+# Expression heatmap helpers
 # ──────────────────────────────────────────────────────────────────────────────
 
-#' @export
+.validate_heatmap_gene_input <- function(genes, arg = "genes") {
+  if (is.null(genes)) {
+    return(NULL)
+  }
+  if (!is.character(genes)) {
+    cli::cli_abort("{.arg {arg}} must be a character vector of gene identifiers.")
+  }
+  genes <- unique(stats::na.omit(as.character(genes)))
+  genes <- genes[nzchar(genes)]
+  if (!length(genes)) {
+    cli::cli_abort("{.arg {arg}} must contain at least one non-empty gene identifier.")
+  }
+  genes
+}
+
+.auto_expression_heatmap_genes <- function(x, sample_ids, top_n = 50L) {
+  top_n <- as.integer(top_n)[1]
+  if (!is.finite(top_n) || is.na(top_n) || top_n < 1) {
+    cli::cli_abort("{.arg top_n} must be a positive integer when {.arg genes} is omitted.")
+  }
+
+  mat <- SummarizedExperiment::assay(x)[, sample_ids, drop = FALSE]
+  vars <- matrixStats::rowVars(as.matrix(mat), na.rm = TRUE)
+  means <- rowMeans(mat, na.rm = TRUE)
+  ord <- order(vars, means, decreasing = TRUE, na.last = NA)
+  rownames(mat)[utils::head(ord, n = min(top_n, nrow(mat)))]
+}
+
+.auto_foldchange_heatmap_genes <- function(x, sample_comparisons, top_n = 10L) {
+  top_n <- as.integer(top_n)[1]
+  if (!is.finite(top_n) || is.na(top_n) || top_n < 1) {
+    cli::cli_abort("{.arg top_n} must be a positive integer when {.arg genes} is omitted.")
+  }
+
+  comps <- .vista_comparisons(x)
+  picked <- character()
+
+  for (comp_name in sample_comparisons) {
+    tbl <- .tidy_de_results(comps[[comp_name]], rowname_col = "gene_id")
+    if (!nrow(tbl)) {
+      next
+    }
+    tbl <- tbl[!is.na(tbl$gene_id) & nzchar(tbl$gene_id), , drop = FALSE]
+    if (!nrow(tbl)) {
+      next
+    }
+    if ("regulation" %in% colnames(tbl)) {
+      sig_tbl <- tbl[tbl$regulation %in% c("Up", "Down"), , drop = FALSE]
+      if (nrow(sig_tbl)) {
+        tbl <- sig_tbl
+      }
+    }
+    ord <- order(abs(.safe_numeric(tbl$log2fc, default = NA_real_)), decreasing = TRUE, na.last = NA)
+    picked <- c(picked, tbl$gene_id[utils::head(ord, n = min(top_n, length(ord)))])
+  }
+
+  picked <- unique(stats::na.omit(as.character(picked)))
+  picked <- picked[nzchar(picked)]
+
+  if (length(picked)) {
+    return(picked)
+  }
+
+  fallback <- rownames(x)
+  fallback <- fallback[!is.na(fallback) & nzchar(fallback)]
+  utils::head(fallback, n = min(top_n, length(fallback)))
+}
+
+.resolve_heatmap_row_labels <- function(x,
+                                        gene_ids,
+                                        display_id = NULL,
+                                        display_from = NULL,
+                                        display_orgdb = NULL,
+                                        repair_genes = FALSE,
+                                        prefer_symbol = FALSE) {
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
+  display_id_use <- display_id
+
+  if (isTRUE(prefer_symbol) && is.null(display_id_use) && !is.null(rd) && "SYMBOL" %in% colnames(rd)) {
+    display_id_use <- "SYMBOL"
+  }
+
+  labels <- gene_ids
+  if (!is.null(display_id_use) && !is.null(rd) && display_id_use %in% colnames(rd)) {
+    map <- rd[[display_id_use]]
+    names(map) <- rownames(x)
+    mapped <- map[match(gene_ids, names(map))]
+    labels <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, labels)
+  } else if (!is.null(display_id_use)) {
+    labels <- .map_gene_ids(
+      gene_ids,
+      from_type = display_from,
+      to_type = display_id_use,
+      orgdb = display_orgdb
+    )
+  }
+
+  if (repair_genes || isTRUE(prefer_symbol)) {
+    labels <- gsub(".*?:", "", labels)
+  }
+
+  unname(labels)
+}
+
+.resolve_heatmap_annotation_colors <- function(col_df,
+                                               column_anno_palette = "Dark 3",
+                                               column_anno_colors = NULL) {
+  if (is.null(column_anno_colors)) {
+    column_anno_colors <- list()
+  }
+  if (!is.list(column_anno_colors)) {
+    cli::cli_abort("{.arg column_anno_colors} must be NULL or a named list of color vectors.")
+  }
+
+  anno_colors <- list()
+  for (col_nm in colnames(col_df)) {
+    col_levels <- unique(as.character(col_df[[col_nm]]))
+    col_df[[col_nm]] <- factor(as.character(col_df[[col_nm]]), levels = col_levels)
+
+    manual_cols <- column_anno_colors[[col_nm]]
+    if (!is.null(manual_cols)) {
+      manual_names <- names(manual_cols)
+      manual_cols <- as.character(manual_cols)
+      names(manual_cols) <- manual_names
+      if (is.null(names(manual_cols)) || any(!nzchar(names(manual_cols)))) {
+        cli::cli_abort(
+          c(
+            "{.arg column_anno_colors[['{col_nm}']]} must be a named vector.",
+            "i" = "Names should match the annotation levels for {.val {col_nm}}."
+          )
+        )
+      }
+      missing_levels <- setdiff(col_levels, names(manual_cols))
+      if (length(missing_levels) > 0) {
+        auto_cols <- colorspace::qualitative_hcl(length(missing_levels), palette = column_anno_palette)
+        names(auto_cols) <- missing_levels
+        manual_cols <- c(manual_cols, auto_cols)
+      }
+      anno_colors[[col_nm]] <- manual_cols[col_levels]
+    } else {
+      level_colors <- colorspace::qualitative_hcl(length(col_levels), palette = column_anno_palette)
+      names(level_colors) <- col_levels
+      anno_colors[[col_nm]] <- level_colors
+    }
+  }
+
+  list(col_df = col_df, anno_colors = anno_colors)
+}
+
+#' @title Expression heatmap
+#' @description Summarizes expression for selected genes/groups via ComplexHeatmap
+#'   with optional transformations and annotations. With only a `VISTA`
+#'   object, the function will plot the top variable genes across all samples.
+#' @aliases get_expression_heatmap
 #' @param x A `VISTA` object.
 #' @param sample_group Character vector of group labels specifying which samples
 #'   to include (based on the selected grouping column).
-#' @param genes Character vector of gene identifiers to display.
+#' @param genes Optional character vector of gene identifiers to display. When
+#'   omitted, VISTA selects the top variable genes across the included samples.
+#' @param top_n Integer number of genes to select automatically when
+#'   `genes = NULL`. Defaults to `50`.
+#' @param group_column Optional column name in `sample_info` used to interpret `sample_group`.
 #' @param value_transform One of `"zscore"`, `"log2"`, or `"raw"` controlling how expression values are transformed.
-#' @param repair_genes Logical; if `TRUE`, split `gene_id` strings such as `ID:SYMBOL` to display the symbol.
-#' @param color_default Logical; use the default blue-white-red palette when `TRUE`. Set to `FALSE` to supply `col`.
-#' @param col Optional `circlize::colorRamp2` function used when `color_default = FALSE`.
 #' @param summarise_replicates Logical; average replicates per group before plotting when `TRUE`.
 #' @param summarise_method `"mean"` or `"median"` summarization used when `summarise_replicates = TRUE`.
 #' @param convert_rowmeans Logical; subtract row means prior to plotting.
+#' @param display_id Optional ID/column name to use for row labels. If supplied
+#' @param display_from Optional source ID type for mapping (used when `display_id`
+#' @param display_orgdb Optional `OrgDb` object used for ID mapping when
+#' @param repair_genes Logical; if `TRUE`, split `gene_id` strings such as `ID:SYMBOL` to display the symbol.
 #' @param show_row_names Logical; display row names (genes) beside the heatmap.
-#' @param cluster_rows Logical; cluster rows when drawing the heatmap.
-#' @param show_row_dend Logical; display the row dendrogram.
+#'   When `NULL`, VISTA turns labels on automatically for auto-selected genes.
 #' @param label_size Numeric font size for row names.
 #' @param label_specific_rows Optional character vector of row names to highlight via `anno_mark()`.
 #' @param label_specific_rows_gp `grid::gpar()` object controlling the highlighted row labels.
 #' @param show_column_names Logical; draw column names when `TRUE`.
+#' @param cluster_rows Logical; cluster rows when drawing the heatmap.
+#' @param show_row_dend Logical; display the row dendrogram.
 #' @param cluster_columns Logical; cluster columns.
-#' @param show_heatmap_legend Logical; display the heatmap legend.
 #' @param kmeans_k Optional integer specifying the number of k-means clusters to compute for rows.
-#' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned object.
-#' @param annotate_columns Logical or character vector. `TRUE` adds one column
-#'   annotation using `group_column`; a character vector adds multiple
-#'   annotations from `sample_info`.
+#' @param annotate_columns Logical or character vector. `TRUE` adds the
+#'   `group_column` annotation and also includes `cluster_by` when supplied; a
+#'   character vector adds multiple annotations from `sample_info`.
 #' @param cluster_by Optional annotation column used to split/cluster columns.
 #'   Defaults to the first annotation column when `annotate_columns` is enabled.
 #' @param column_anno_palette Qualitative palette name used for the column annotation.
+#' @param column_anno_colors Optional named list of annotation color vectors.
+#'   Each element should be a named character vector keyed by the levels of one
+#'   annotation column.
+#' @param color_default Logical; use the default blue-white-red palette when `TRUE`. Set to `FALSE` to supply `col`.
+#' @param col Optional `circlize::colorRamp2` function used when `color_default = FALSE`.
 #' @param heatmap_name Optional legend title.
-#' @param display_id Optional ID/column name to use for row labels. If supplied
-#' @param display_from Optional source ID type for mapping (used when `display_id`
-#' @param display_orgdb Optional `OrgDb` object used for ID mapping when
-#' @param group_column Optional column name in `sample_info` used to interpret `sample_group`.
+#' @param show_heatmap_legend Logical; display the heatmap legend.
+#' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned object.
+#' @return A `ComplexHeatmap` object, a cluster data frame, or a list containing
+#'   both depending on `return_type`.
+#' @examples
+#' v <- example_vista()
+#' if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
+#'     requireNamespace("circlize", quietly = TRUE)) {
+#'   hm <- get_expression_heatmap(v, return_type = "heatmap")
+#'   ComplexHeatmap::draw(hm)
+#' }
 #' @param ... Additional arguments passed to `ComplexHeatmap::Heatmap()`.
 #' @export
 get_expression_heatmap <- function(x,
-                                   genes,
+                                   genes = NULL,
+                                   top_n = 50,
                                    sample_group = NULL,
+                                   group_column = NULL,
                                    value_transform = c("zscore", "log2", "raw"),
-                                   repair_genes = FALSE,
-                                   color_default = TRUE,
-                                   col = NULL,
                                    summarise_replicates = TRUE,
                                    summarise_method = c("mean", "median"),
                                    convert_rowmeans = FALSE,
-                                   show_row_names = FALSE,
-                                   cluster_rows = TRUE,
-                                   show_row_dend = TRUE,
+                                   display_id = NULL,
+                                   display_from = NULL,
+                                   display_orgdb = NULL,
+                                   repair_genes = FALSE,
+                                   show_row_names = NULL,
                                    label_size = 10,
                                    label_specific_rows = NULL,
                                    label_specific_rows_gp = grid::gpar(fontsize = 5),
                                    show_column_names = TRUE,
+                                   cluster_rows = TRUE,
+                                   show_row_dend = TRUE,
                                    cluster_columns = TRUE,
-                                   show_heatmap_legend = TRUE,
                                    kmeans_k = NULL,
-                                   return_type = c("heatmap", "clusters", "both"),
                                    annotate_columns = FALSE,
                                    cluster_by = NULL,
                                    column_anno_palette = "Dark 3",
+                                   column_anno_colors = NULL,
+                                   color_default = TRUE,
+                                   col = NULL,
                                    heatmap_name = NULL,
-                                   display_id = NULL,
-                                   display_from = NULL,
-                                   display_orgdb = NULL,
-                                   group_column = NULL,
+                                   show_heatmap_legend = TRUE,
+                                   return_type = c("heatmap", "clusters", "both"),
                                    ...) {
 
   stopifnot(inherits(x, "VISTA"))
@@ -5257,7 +5425,8 @@ get_expression_heatmap <- function(x,
 
   annotate_cols <- character()
   if (isTRUE(annotate_columns)) {
-    annotate_cols <- group_col
+    annotate_cols <- unique(c(group_col, cluster_by))
+    annotate_cols <- annotate_cols[!is.na(annotate_cols) & nzchar(annotate_cols)]
   } else if (is.character(annotate_columns) && length(annotate_columns) > 0) {
     annotate_cols <- unique(annotate_columns)
   } else if (!isFALSE(annotate_columns)) {
@@ -5295,25 +5464,44 @@ get_expression_heatmap <- function(x,
     sample_info$sample[sample_info[[group_col]] == grp]
   }))
 
+  auto_genes <- is.null(genes)
+  genes <- .validate_heatmap_gene_input(genes)
+  if (auto_genes) {
+    genes <- .auto_expression_heatmap_genes(x, sample_ids = sample_ids, top_n = top_n)
+  }
+
   expr <- expr |>
     dplyr::select(gene_id, dplyr::all_of(sample_ids)) |>
     dplyr::filter(gene_id %in% genes)
 
+  missing_genes <- setdiff(genes, expr$gene_id)
+  if (length(missing_genes) > 0) {
+    cli::cli_abort(
+      c(
+        "Some {.arg genes} were not found in the VISTA object.",
+        "x" = "Missing: {.val {missing_genes}}"
+      )
+    )
+  }
+
   mat <- expr |> tibble::column_to_rownames("gene_id") |> as.matrix()
   mat <- mat[match(genes, rownames(mat)), , drop = FALSE]
 
-  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
-  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-    map <- rd[[display_id]]
-    names(map) <- rownames(x)
-    mapped <- map[match(rownames(mat), names(map))]
-    rownames(mat) <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, rownames(mat))
-  } else {
-    rownames(mat) <- .map_gene_ids(rownames(mat),
-                                   from_type = display_from,
-                                   to_type = display_id,
-                                   orgdb = display_orgdb)
+  if (is.null(show_row_names)) {
+    show_row_names <- auto_genes
   }
+  show_row_names <- isTRUE(show_row_names)
+
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
+  rownames(mat) <- .resolve_heatmap_row_labels(
+    x = x,
+    gene_ids = rownames(mat),
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb,
+    repair_genes = repair_genes,
+    prefer_symbol = auto_genes
+  )
 
   if (value_transform == "log2") {
     mat <- log2(mat + 1)
@@ -5344,7 +5532,7 @@ get_expression_heatmap <- function(x,
     mat <- mat[, sample_ids, drop = FALSE]
   }
 
-  if (repair_genes) {
+  if (repair_genes && !auto_genes) {
     rownames(mat) <- gsub(".*?:", "", rownames(mat))
     if (!is.null(label_specific_rows)) label_specific_rows <- gsub(".*?:", "", label_specific_rows)
   }
@@ -5372,6 +5560,15 @@ get_expression_heatmap <- function(x,
 
   row_anno <- NULL
   if (!is.null(label_specific_rows)) {
+    label_specific_rows <- .resolve_heatmap_row_labels(
+      x = x,
+      gene_ids = label_specific_rows,
+      display_id = display_id,
+      display_from = display_from,
+      display_orgdb = display_orgdb,
+      repair_genes = repair_genes,
+      prefer_symbol = auto_genes
+    )
     match_rows <- intersect(label_specific_rows, rownames(mat))
     if (length(match_rows) > 0) {
       row_indices <- which(rownames(mat) %in% match_rows)
@@ -5433,14 +5630,13 @@ get_expression_heatmap <- function(x,
     # Ensure annotation rows align with the heatmap column order
     col_df <- col_df[colnames(mat), , drop = FALSE]
 
-    anno_colors <- list()
-    for (col_nm in colnames(col_df)) {
-      col_levels <- unique(as.character(col_df[[col_nm]]))
-      col_df[[col_nm]] <- factor(as.character(col_df[[col_nm]]), levels = col_levels)
-      level_colors <- colorspace::qualitative_hcl(length(col_levels), palette = column_anno_palette)
-      names(level_colors) <- col_levels
-      anno_colors[[col_nm]] <- level_colors
-    }
+    anno_res <- .resolve_heatmap_annotation_colors(
+      col_df = col_df,
+      column_anno_palette = column_anno_palette,
+      column_anno_colors = column_anno_colors
+    )
+    col_df <- anno_res$col_df
+    anno_colors <- anno_res$anno_colors
 
     split_col <- cluster_by %||% annotate_cols[[1]]
     if (!split_col %in% colnames(col_df)) {
@@ -5664,59 +5860,78 @@ get_foldchange_barplot <- function(x,
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-#' @title Fold-change heatmap
-#' @description Visualizes log2 fold-change matrices across comparisons with
-#' ComplexHeatmap, supporting clustering and annotations.
+# Fold-change heatmap
 # ──────────────────────────────────────────────────────────────────────────────
 
-#' @export
+#' @title Fold-change heatmap
+#' @description Visualizes log2 fold-change matrices across comparisons with
+#'   ComplexHeatmap, supporting clustering and annotations. With only a
+#'   `VISTA` object, the function will plot the top DE genes across the stored
+#'   comparisons.
 #' @param x A `VISTA` object with stored differential expression results.
-#' @param sample_comparisons Character vector of comparison names to include.
-#' @param genes Character vector of gene identifiers to display.
+#' @param sample_comparisons Optional character vector of comparison names to
+#'   include. Defaults to all available comparisons.
+#' @param genes Optional character vector of gene identifiers to display. When
+#'   omitted, VISTA selects the top DE genes from each comparison by absolute
+#'   log2 fold-change.
+#' @param top_n Integer number of genes to select per comparison when
+#'   `genes = NULL`. Defaults to `10`.
+#' @param display_id Optional ID/column name to use for plot labels. If supplied
+#' @param display_from Optional source ID type for mapping (used when `display_id`
+#' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #' @param repair_genes Logical; attempt to simplify `gene_id` strings by removing prefixes.
-#' @param color_default Logical; use the default diverging palette when `TRUE`. Set to `FALSE` to supply `col`.
-#' @param col Optional `circlize::colorRamp2` color function used when `color_default = FALSE`.
-#' @param show_row_names Logical; draw row (gene) names.
-#' @param cluster_rows Logical; cluster rows.
-#' @param show_row_dend Logical; display the row dendrogram.
+#' @param show_row_names Logical; draw row (gene) names. When `NULL`, VISTA
+#'   turns labels on automatically for auto-selected genes.
 #' @param label_size Numeric font size for row names.
 #' @param label_specific_rows Optional character vector of genes to highlight with `anno_mark()`.
 #' @param label_specific_rows_gp `grid::gpar()` object controlling highlighted labels.
 #' @param show_column_names Logical; draw column labels.
+#' @param cluster_rows Logical; cluster rows.
+#' @param show_row_dend Logical; display the row dendrogram.
 #' @param cluster_columns Logical; cluster columns.
-#' @param show_heatmap_legend Logical; display the heatmap legend.
 #' @param kmeans_k Optional integer specifying the number of k-means clusters for rows.
-#' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned value.
 #' @param annotate_columns Logical; add annotation bars keyed to the sample grouping column.
 #' @param column_anno_palette Qualitative palette name used for column annotations.
+#' @param color_default Logical; use the default diverging palette when `TRUE`. Set to `FALSE` to supply `col`.
+#' @param col Optional `circlize::colorRamp2` color function used when `color_default = FALSE`.
 #' @param heatmap_name Optional legend title.
-#' @param display_id Optional ID/column name to use for plot labels. If supplied
-#' @param display_from Optional source ID type for mapping (used when `display_id`
-#' @param display_orgdb Optional `OrgDb` object used for ID mapping when
+#' @param show_heatmap_legend Logical; display the heatmap legend.
+#' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned value.
+#' @return A `ComplexHeatmap` object, a cluster data frame, or a list containing
+#'   both depending on `return_type`.
+#' @examples
+#' v <- example_vista()
+#' if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
+#'     requireNamespace("circlize", quietly = TRUE)) {
+#'   hm <- get_foldchange_heatmap(v, return_type = "heatmap")
+#'   ComplexHeatmap::draw(hm)
+#' }
 #' @param ... Additional arguments forwarded to `ComplexHeatmap::Heatmap()`.
+#' @export
 get_foldchange_heatmap <- function(x,
-                                   sample_comparisons,
-                                   genes,
+                                   sample_comparisons = NULL,
+                                   genes = NULL,
+                                   top_n = 10,
+                                   display_id = NULL,
+                                   display_from = NULL,
+                                   display_orgdb = NULL,
                                    repair_genes = FALSE,
-                                   color_default = TRUE,
-                                   col = NULL,
-                                   show_row_names = FALSE,
-                                   cluster_rows = TRUE,
-                                   show_row_dend = TRUE,
+                                   show_row_names = NULL,
                                    label_size = 10,
                                    label_specific_rows = NULL,
                                    label_specific_rows_gp = grid::gpar(fontsize = 5),
                                    show_column_names = TRUE,
+                                   cluster_rows = TRUE,
+                                   show_row_dend = TRUE,
                                    cluster_columns = TRUE,
-                                   show_heatmap_legend = TRUE,
                                    kmeans_k = NULL,
-                                   return_type = c("heatmap", "clusters", "both"),
                                    annotate_columns = FALSE,
                                    column_anno_palette = "Set2",
+                                   color_default = TRUE,
+                                   col = NULL,
                                    heatmap_name = NULL,
-                                   display_id = NULL,
-                                   display_from = NULL,
-                                   display_orgdb = NULL,
+                                   show_heatmap_legend = TRUE,
+                                   return_type = c("heatmap", "clusters", "both"),
                                    ...) {
 
   stopifnot(inherits(x, "VISTA"))
@@ -5727,30 +5942,44 @@ get_foldchange_heatmap <- function(x,
   return_type <- match.arg(return_type)
 
   comps <- .vista_comparisons(x)
-  stopifnot(all(sample_comparisons %in% names(comps)))
-
-  fc_mat <- purrr::map_dfc(sample_comparisons, \(nm) {
-    dd <- comps[[nm]]
-    dd$log2fc[match(genes, dd$gene_id)]
-  }) |>
-    as.data.frame()
-  colnames(fc_mat) <- sample_comparisons
-  rownames(fc_mat) <- genes
-  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
-  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-    map <- rd[[display_id]]
-    names(map) <- rownames(x)
-    mapped <- map[match(rownames(fc_mat), names(map))]
-    disp_genes <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, rownames(fc_mat))
-  } else {
-    disp_genes <- .map_gene_ids(rownames(fc_mat),
-                                from_type = display_from,
-                                to_type = display_id,
-                                orgdb = display_orgdb)
+  if (!length(comps)) {
+    cli::cli_abort("No differential expression results are stored in this VISTA object.")
   }
+  if (is.null(sample_comparisons)) {
+    sample_comparisons <- names(comps)
+  }
+  .validate_fc_inputs(x, sample_comparisons, genes = NULL)
+
+  auto_genes <- is.null(genes)
+  genes <- .validate_heatmap_gene_input(genes)
+  if (auto_genes) {
+    genes <- .auto_foldchange_heatmap_genes(x, sample_comparisons = sample_comparisons, top_n = top_n)
+  } else {
+    .validate_fc_inputs(x, sample_comparisons, genes)
+  }
+
+  fc_mat <- get_foldchange_matrix(
+    x,
+    sample_comparisons = sample_comparisons,
+    genes = genes
+  )
+  if (is.null(show_row_names)) {
+    show_row_names <- auto_genes
+  }
+  show_row_names <- isTRUE(show_row_names)
+
+  disp_genes <- .resolve_heatmap_row_labels(
+    x = x,
+    gene_ids = rownames(fc_mat),
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb,
+    repair_genes = repair_genes,
+    prefer_symbol = auto_genes
+  )
   rownames(fc_mat) <- disp_genes
 
-  if (repair_genes) {
+  if (repair_genes && !auto_genes) {
     rownames(fc_mat) <- gsub(".*?:", "", rownames(fc_mat))
   }
   if (!is.null(label_specific_rows) && repair_genes) {
@@ -5774,17 +6003,15 @@ get_foldchange_heatmap <- function(x,
 
   row_anno <- NULL
   if (!is.null(label_specific_rows)) {
-    if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-      map <- rd[[display_id]]
-      names(map) <- rownames(x)
-      mapped <- map[match(label_specific_rows, names(map))]
-      label_specific_rows <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, label_specific_rows)
-    } else {
-      label_specific_rows <- .map_gene_ids(label_specific_rows,
-                                           from_type = display_from,
-                                           to_type = display_id,
-                                           orgdb = display_orgdb)
-    }
+    label_specific_rows <- .resolve_heatmap_row_labels(
+      x = x,
+      gene_ids = label_specific_rows,
+      display_id = display_id,
+      display_from = display_from,
+      display_orgdb = display_orgdb,
+      repair_genes = repair_genes,
+      prefer_symbol = auto_genes
+    )
     match_rows <- intersect(label_specific_rows, rownames(fc_mat))
     if (length(match_rows) > 0) {
       row_indices <- which(rownames(fc_mat) %in% match_rows)
@@ -5878,12 +6105,7 @@ get_foldchange_matrix <- function(x,
   .validate_fc_inputs(x, sample_comparisons, genes)
 
   if (is.null(genes)) {
-    rd <- as.data.frame(row_data(x))
-    if ("gene_id" %in% names(rd)) {
-      genes <- rd$gene_id
-    } else {
-      genes <- rownames(row_data(x))
-    }
+    genes <- .available_fc_genes(x, sample_comparisons = sample_comparisons)
   }
 
   norm_genes <- as.character(genes)

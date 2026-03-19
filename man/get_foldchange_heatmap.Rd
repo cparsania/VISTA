@@ -6,49 +6,55 @@
 \usage{
 get_foldchange_heatmap(
   x,
-  sample_comparisons,
-  genes,
+  sample_comparisons = NULL,
+  genes = NULL,
+  top_n = 10,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   repair_genes = FALSE,
-  color_default = TRUE,
-  col = NULL,
-  show_row_names = FALSE,
-  cluster_rows = TRUE,
-  show_row_dend = TRUE,
+  show_row_names = NULL,
   label_size = 10,
   label_specific_rows = NULL,
   label_specific_rows_gp = grid::gpar(fontsize = 5),
   show_column_names = TRUE,
+  cluster_rows = TRUE,
+  show_row_dend = TRUE,
   cluster_columns = TRUE,
-  show_heatmap_legend = TRUE,
   kmeans_k = NULL,
-  return_type = c("heatmap", "clusters", "both"),
   annotate_columns = FALSE,
   column_anno_palette = "Set2",
+  color_default = TRUE,
+  col = NULL,
   heatmap_name = NULL,
-  display_id = NULL,
-  display_from = NULL,
-  display_orgdb = NULL,
+  show_heatmap_legend = TRUE,
+  return_type = c("heatmap", "clusters", "both"),
   ...
 )
 }
 \arguments{
 \item{x}{A \code{VISTA} object with stored differential expression results.}
 
-\item{sample_comparisons}{Character vector of comparison names to include.}
+\item{sample_comparisons}{Optional character vector of comparison names to
+include. Defaults to all available comparisons.}
 
-\item{genes}{Character vector of gene identifiers to display.}
+\item{genes}{Optional character vector of gene identifiers to display. When
+omitted, VISTA selects the top DE genes from each comparison by absolute
+log2 fold-change.}
+
+\item{top_n}{Integer number of genes to select per comparison when
+\code{genes = NULL}. Defaults to \code{10}.}
+
+\item{display_id}{Optional ID/column name to use for plot labels. If supplied}
+
+\item{display_from}{Optional source ID type for mapping (used when \code{display_id}}
+
+\item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when}
 
 \item{repair_genes}{Logical; attempt to simplify \code{gene_id} strings by removing prefixes.}
 
-\item{color_default}{Logical; use the default diverging palette when \code{TRUE}. Set to \code{FALSE} to supply \code{col}.}
-
-\item{col}{Optional \code{circlize::colorRamp2} color function used when \code{color_default = FALSE}.}
-
-\item{show_row_names}{Logical; draw row (gene) names.}
-
-\item{cluster_rows}{Logical; cluster rows.}
-
-\item{show_row_dend}{Logical; display the row dendrogram.}
+\item{show_row_names}{Logical; draw row (gene) names. When \code{NULL}, VISTA
+turns labels on automatically for auto-selected genes.}
 
 \item{label_size}{Numeric font size for row names.}
 
@@ -58,34 +64,41 @@ get_foldchange_heatmap(
 
 \item{show_column_names}{Logical; draw column labels.}
 
+\item{cluster_rows}{Logical; cluster rows.}
+
+\item{show_row_dend}{Logical; display the row dendrogram.}
+
 \item{cluster_columns}{Logical; cluster columns.}
 
-\item{show_heatmap_legend}{Logical; display the heatmap legend.}
-
 \item{kmeans_k}{Optional integer specifying the number of k-means clusters for rows.}
-
-\item{return_type}{\code{"heatmap"}, \code{"clusters"}, or \code{"both"} selecting the returned value.}
 
 \item{annotate_columns}{Logical; add annotation bars keyed to the sample grouping column.}
 
 \item{column_anno_palette}{Qualitative palette name used for column annotations.}
 
+\item{color_default}{Logical; use the default diverging palette when \code{TRUE}. Set to \code{FALSE} to supply \code{col}.}
+
+\item{col}{Optional \code{circlize::colorRamp2} color function used when \code{color_default = FALSE}.}
+
 \item{heatmap_name}{Optional legend title.}
 
-\item{display_id}{Optional ID/column name to use for plot labels. If supplied}
+\item{show_heatmap_legend}{Logical; display the heatmap legend.}
 
-\item{display_from}{Optional source ID type for mapping (used when \code{display_id}}
-
-\item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when}
+\item{return_type}{\code{"heatmap"}, \code{"clusters"}, or \code{"both"} selecting the returned value.}
 
 \item{...}{Additional arguments forwarded to \code{ComplexHeatmap::Heatmap()}.}
 }
 \value{
 An object returned by this function.
+
+A \code{ComplexHeatmap} object, a cluster data frame, or a list containing
+both depending on \code{return_type}.
 }
 \description{
 Visualizes log2 fold-change matrices across comparisons with
-ComplexHeatmap, supporting clustering and annotations.
+ComplexHeatmap, supporting clustering and annotations. With only a
+\code{VISTA} object, the function will plot the top DE genes across the stored
+comparisons.
 }
 \examples{
 v <- example_vista()
@@ -99,6 +112,12 @@ if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
     genes = genes,
     return_type = 'heatmap'
   )
+  ComplexHeatmap::draw(hm)
+}
+v <- example_vista()
+if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
+    requireNamespace("circlize", quietly = TRUE)) {
+  hm <- get_foldchange_heatmap(v, return_type = "heatmap")
   ComplexHeatmap::draw(hm)
 }
 }

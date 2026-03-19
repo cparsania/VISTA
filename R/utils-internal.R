@@ -780,6 +780,39 @@ run_limma_analysis <- function(
 
 
 
+# Internal helper for fold-change gene validation
+.available_fc_genes <- function(x, sample_comparisons = NULL) {
+  comps <- comparisons(x)
+  if (!length(comps)) {
+    return(character())
+  }
+
+  if (is.null(sample_comparisons)) {
+    sample_comparisons <- names(comps)
+  }
+
+  available <- unique(unlist(lapply(sample_comparisons, function(comp_name) {
+    tbl <- as.data.frame(comps[[comp_name]], stringsAsFactors = FALSE)
+    if ("gene_id" %in% names(tbl)) {
+      ids <- as.character(tbl$gene_id)
+    } else {
+      ids <- rownames(tbl)
+    }
+    ids[!is.na(ids) & nzchar(ids)]
+  }), use.names = FALSE))
+
+  if (!length(available)) {
+    rd <- as.data.frame(row_data(x), stringsAsFactors = FALSE)
+    if ("gene_id" %in% names(rd)) {
+      available <- as.character(rd$gene_id)
+    } else {
+      available <- rownames(x)
+    }
+  }
+
+  unique(available[!is.na(available) & nzchar(available)])
+}
+
 # Internal validator for get_foldchange_matrix
 .validate_fc_inputs <- function(x, sample_comparisons, genes) {
   comps <- comparisons(x)
@@ -796,7 +829,7 @@ run_limma_analysis <- function(
     }
   }
 
-  all_genes <- row_data(x)$gene_id
+  all_genes <- .available_fc_genes(x, sample_comparisons = sample_comparisons)
   if (!is.null(genes)) {
     missing_genes <- setdiff(genes, all_genes)
     if (length(missing_genes) > 0) {

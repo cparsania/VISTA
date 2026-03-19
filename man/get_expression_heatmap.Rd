@@ -6,52 +6,54 @@
 \usage{
 get_expression_heatmap(
   x,
-  genes,
+  genes = NULL,
+  top_n = 50,
   sample_group = NULL,
+  group_column = NULL,
   value_transform = c("zscore", "log2", "raw"),
-  repair_genes = FALSE,
-  color_default = TRUE,
-  col = NULL,
   summarise_replicates = TRUE,
   summarise_method = c("mean", "median"),
   convert_rowmeans = FALSE,
-  show_row_names = FALSE,
-  cluster_rows = TRUE,
-  show_row_dend = TRUE,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
+  repair_genes = FALSE,
+  show_row_names = NULL,
   label_size = 10,
   label_specific_rows = NULL,
   label_specific_rows_gp = grid::gpar(fontsize = 5),
   show_column_names = TRUE,
+  cluster_rows = TRUE,
+  show_row_dend = TRUE,
   cluster_columns = TRUE,
-  show_heatmap_legend = TRUE,
   kmeans_k = NULL,
-  return_type = c("heatmap", "clusters", "both"),
   annotate_columns = FALSE,
   cluster_by = NULL,
   column_anno_palette = "Dark 3",
+  column_anno_colors = NULL,
+  color_default = TRUE,
+  col = NULL,
   heatmap_name = NULL,
-  display_id = NULL,
-  display_from = NULL,
-  display_orgdb = NULL,
-  group_column = NULL,
+  show_heatmap_legend = TRUE,
+  return_type = c("heatmap", "clusters", "both"),
   ...
 )
 }
 \arguments{
 \item{x}{A \code{VISTA} object.}
 
-\item{genes}{Character vector of gene identifiers to display.}
+\item{genes}{Optional character vector of gene identifiers to display. When
+omitted, VISTA selects the top variable genes across the included samples.}
+
+\item{top_n}{Integer number of genes to select automatically when
+\code{genes = NULL}. Defaults to \code{50}.}
 
 \item{sample_group}{Character vector of group labels specifying which samples
 to include (based on the selected grouping column).}
 
+\item{group_column}{Optional column name in \code{sample_info} used to interpret \code{sample_group}.}
+
 \item{value_transform}{One of \code{"zscore"}, \code{"log2"}, or \code{"raw"} controlling how expression values are transformed.}
-
-\item{repair_genes}{Logical; if \code{TRUE}, split \code{gene_id} strings such as \code{ID:SYMBOL} to display the symbol.}
-
-\item{color_default}{Logical; use the default blue-white-red palette when \code{TRUE}. Set to \code{FALSE} to supply \code{col}.}
-
-\item{col}{Optional \code{circlize::colorRamp2} function used when \code{color_default = FALSE}.}
 
 \item{summarise_replicates}{Logical; average replicates per group before plotting when \code{TRUE}.}
 
@@ -59,11 +61,16 @@ to include (based on the selected grouping column).}
 
 \item{convert_rowmeans}{Logical; subtract row means prior to plotting.}
 
-\item{show_row_names}{Logical; display row names (genes) beside the heatmap.}
+\item{display_id}{Optional ID/column name to use for row labels. If supplied}
 
-\item{cluster_rows}{Logical; cluster rows when drawing the heatmap.}
+\item{display_from}{Optional source ID type for mapping (used when \code{display_id}}
 
-\item{show_row_dend}{Logical; display the row dendrogram.}
+\item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when}
+
+\item{repair_genes}{Logical; if \code{TRUE}, split \code{gene_id} strings such as \code{ID:SYMBOL} to display the symbol.}
+
+\item{show_row_names}{Logical; display row names (genes) beside the heatmap.
+When \code{NULL}, VISTA turns labels on automatically for auto-selected genes.}
 
 \item{label_size}{Numeric font size for row names.}
 
@@ -73,41 +80,49 @@ to include (based on the selected grouping column).}
 
 \item{show_column_names}{Logical; draw column names when \code{TRUE}.}
 
-\item{cluster_columns}{Logical; cluster columns.}
+\item{cluster_rows}{Logical; cluster rows when drawing the heatmap.}
 
-\item{show_heatmap_legend}{Logical; display the heatmap legend.}
+\item{show_row_dend}{Logical; display the row dendrogram.}
+
+\item{cluster_columns}{Logical; cluster columns.}
 
 \item{kmeans_k}{Optional integer specifying the number of k-means clusters to compute for rows.}
 
-\item{return_type}{\code{"heatmap"}, \code{"clusters"}, or \code{"both"} selecting the returned object.}
-
-\item{annotate_columns}{Logical or character vector. \code{TRUE} adds one column
-annotation using \code{group_column}; a character vector adds multiple
-annotations from \code{sample_info}.}
+\item{annotate_columns}{Logical or character vector. \code{TRUE} adds the
+\code{group_column} annotation and also includes \code{cluster_by} when supplied; a
+character vector adds multiple annotations from \code{sample_info}.}
 
 \item{cluster_by}{Optional annotation column used to split/cluster columns.
 Defaults to the first annotation column when \code{annotate_columns} is enabled.}
 
 \item{column_anno_palette}{Qualitative palette name used for the column annotation.}
 
+\item{column_anno_colors}{Optional named list of annotation color vectors.
+Each element should be a named character vector keyed by the levels of one
+annotation column.}
+
+\item{color_default}{Logical; use the default blue-white-red palette when \code{TRUE}. Set to \code{FALSE} to supply \code{col}.}
+
+\item{col}{Optional \code{circlize::colorRamp2} function used when \code{color_default = FALSE}.}
+
 \item{heatmap_name}{Optional legend title.}
 
-\item{display_id}{Optional ID/column name to use for row labels. If supplied}
+\item{show_heatmap_legend}{Logical; display the heatmap legend.}
 
-\item{display_from}{Optional source ID type for mapping (used when \code{display_id}}
-
-\item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when}
-
-\item{group_column}{Optional column name in \code{sample_info} used to interpret \code{sample_group}.}
+\item{return_type}{\code{"heatmap"}, \code{"clusters"}, or \code{"both"} selecting the returned object.}
 
 \item{...}{Additional arguments passed to \code{ComplexHeatmap::Heatmap()}.}
 }
 \value{
 An object returned by this function.
+
+A \code{ComplexHeatmap} object, a cluster data frame, or a list containing
+both depending on \code{return_type}.
 }
 \description{
 Summarizes expression for selected genes/groups via ComplexHeatmap
-with optional transformations and annotations.
+with optional transformations and annotations. With only a \code{VISTA}
+object, the function will plot the top variable genes across all samples.
 }
 \examples{
 v <- example_vista()
@@ -120,6 +135,12 @@ if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
     sample_group = unique(as.character(sample_info(v)$cond_long)),
     return_type = 'heatmap'
   )
+  ComplexHeatmap::draw(hm)
+}
+v <- example_vista()
+if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
+    requireNamespace("circlize", quietly = TRUE)) {
+  hm <- get_expression_heatmap(v, return_type = "heatmap")
   ComplexHeatmap::draw(hm)
 }
 }
