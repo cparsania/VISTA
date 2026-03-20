@@ -516,21 +516,23 @@ validate:</p>
 <span><span class="va">up_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_genes_by_regulation.html">get_genes_by_regulation</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span></span>
+<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
+<span>  top_n <span class="op">=</span> <span class="fl">50</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Extract downregulated genes</span></span>
 <span><span class="va">down_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_genes_by_regulation.html">get_genes_by_regulation</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp_names</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Down"</span></span>
+<span>  regulation <span class="op">=</span> <span class="st">"Down"</span>,</span>
+<span>  top_n <span class="op">=</span> <span class="fl">50</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Summary</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Upregulated genes:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">up_genes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Upregulated genes: 465</span></span>
+<span><span class="co">#&gt; Upregulated genes: 50</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Downregulated genes:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">down_genes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Downregulated genes: 388</span></span></code></pre></div>
+<span><span class="co">#&gt; Downregulated genes: 50</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

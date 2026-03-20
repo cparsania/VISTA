@@ -66,5 +66,13 @@ metadata management and rich visualization capabilities.
 - Heatmap utilities now validate non-character `genes` input explicitly,
   support minimal-call defaults, and allow custom colours for
   multi-column annotations
+- DEG count pie/donut plots now optionally include non-DE genes as an
+  `"Other"` slice and support configurable label text colour
+- [`get_genes_by_regulation()`](../reference/get_genes_by_regulation.md)
+  now supports top-gene ranking by `abs(log2fc)` and optional annotated
+  table output
+- PCA/MDS/UMAP plots now accept the standardized `use_group_colors`
+  argument while keeping `use_vista_colors` as a deprecated
+  compatibility alias
 
 ------------------------------------------------------------------------

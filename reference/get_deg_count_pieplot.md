@@ -12,6 +12,9 @@ get_deg_count_pieplot(
   label_digits = 1,
   base_size = 12,
   colors = c(Up = "red4", Down = "blue4"),
+  show_other = FALSE,
+  other_color = "grey70",
+  text_color = "black",
   facet_by = c("comparison", "none"),
   ncol = NULL
 )
@@ -41,7 +44,22 @@ get_deg_count_pieplot(
 
 - colors:
 
-  Named vector giving fill colors for `"Up"` and `"Down"` slices.
+  Named vector giving fill colors for `"Up"` and `"Down"` slices. When
+  `show_other = TRUE`, an `"Other"` entry may also be supplied.
+
+- show_other:
+
+  Logical; when `TRUE`, include non-DE genes as an `"Other"` slice using
+  `other_color` unless overridden in `colors`.
+
+- other_color:
+
+  Fill colour used for the `"Other"` slice when `show_other = TRUE` and
+  `colors` does not include `"Other"`.
+
+- text_color:
+
+  Colour used for pie label text.
 
 - facet_by:
 

@@ -18,9 +18,10 @@ get_mds_plot(
   shape_by = NULL,
   shape_values = NULL,
   color_by = NULL,
-  use_vista_colors = TRUE,
+  use_vista_colors = NULL,
   palette = NULL,
-  colors = NULL
+  colors = NULL,
+  use_group_colors = TRUE
 )
 ```
 
@@ -77,8 +78,8 @@ get_mds_plot(
 
 - use_vista_colors:
 
-  Logical; when `TRUE`, prefer the stored VISTA group colours when
-  colouring by the grouping column.
+  Deprecated alias for `use_group_colors`. When supplied, it overrides
+  `use_group_colors`.
 
 - palette:
 
@@ -89,6 +90,11 @@ get_mds_plot(
 
   Optional named character vector of manual colours overriding both
   `palette` and stored VISTA colours.
+
+- use_group_colors:
+
+  Logical; when `TRUE`, prefer the stored VISTA group colours when
+  colouring by the grouping column.
 
 ## Value
 

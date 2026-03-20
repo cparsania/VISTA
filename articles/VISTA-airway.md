@@ -420,21 +420,23 @@ cutoffs(vista)
 up_genes <- get_genes_by_regulation(
   vista,
   sample_comparisons = comp_names[1],
-  regulation = "Up"
+  regulation = "Up",
+  top_n = 50
 )
 
 # Extract downregulated genes
 down_genes <- get_genes_by_regulation(
   vista,
   sample_comparisons = comp_names[1],
-  regulation = "Down"
+  regulation = "Down",
+  top_n = 50
 )
 
 # Summary
 cat("Upregulated genes:", length(up_genes[[1]]), "\n")
-#> Upregulated genes: 465
+#> Upregulated genes: 50
 cat("Downregulated genes:", length(down_genes[[1]]), "\n")
-#> Downregulated genes: 388
+#> Downregulated genes: 50
 ```
 
 ## Quality Control Visualizations

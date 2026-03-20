@@ -169,7 +169,8 @@ is explicitly group-based (`by = "group"`).
 Arguments:
 
 - `x`, `sample_group`, `group_column`, `genes`, `top_n_genes`.
-- `label_replicates`, `label_size`, `circle_size`, `sample_colors`.
+- `label`, `label_size`, `point_size`, `shape_by`, `shape_values`.
+- `color_by`, `use_group_colors`, `palette`, `colors`.
 - `sample.seed`, `show_clusters`.
 
 ### `get_mds_plot()`
@@ -177,8 +178,8 @@ Arguments:
 Arguments:
 
 - `x`, `sample_group`, `group_column`, `genes`, `top_n_genes`.
-- `label_replicates`, `label_size`, `circle_size`, `sample_colors`.
-- `sample.seed`, `show_clusters`.
+- `label`, `label_size`, `point_size`, `shape_by`, `shape_values`.
+- `color_by`, `use_group_colors`, `palette`, `colors`.
 
 ## Correlation plots
 
@@ -190,9 +191,10 @@ Arguments:
 ## DEG summaries and comparison plots
 
 - `get_deg_count_barplot(...)`: DEG counts by comparison/regulation.
-- `get_deg_count_pieplot(...)`: circular DEG composition summary (pie).
+- `get_deg_count_pieplot(...)`: circular DEG composition summary (pie),
+  with optional non-DE `"Other"` slice.
 - `get_deg_count_donutplot(...)`: circular DEG composition summary
-  (donut).
+  (donut), with optional non-DE `"Other"` slice.
 - `get_deg_venn_diagram(...)`: overlap of DEG sets (2–4 comparisons).
 - `get_deg_alluvial(...)`: transitions of regulation across comparisons.
 
@@ -256,7 +258,8 @@ Common label arguments: `display_id`, `display_from`, `display_orgdb`.
 ## Utility
 
 - `get_genes_by_regulation(...)`: extract regulated gene sets for a
-  comparison.
+  comparison, optionally rank by `abs(log2fc)` and return annotation
+  tables.
 
 ## Notes
 

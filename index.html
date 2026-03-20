@@ -162,22 +162,23 @@
 <span></span>
 <span><span class="co"># QC</span></span>
 <span><span class="fu"><a href="reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span><span class="va">vista</span>, label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/get_mds_plot.html">get_mds_plot</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_mds_plot.html">get_mds_plot</a></span><span class="op">(</span><span class="va">vista</span>, use_group_colors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_corr_heatmap.html">get_corr_heatmap</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="co"># Optional nonlinear view (requires uwot)</span></span>
-<span><span class="co"># get_umap_plot(vista, color_by = "cell")</span></span>
+<span><span class="co"># get_umap_plot(vista, color_by = "cell", use_group_colors = FALSE, palette = "Set 2")</span></span>
 <span></span>
 <span><span class="co"># Differential expression</span></span>
 <span><span class="fu"><a href="reference/get_volcano_plot.html">get_volcano_plot</a></span><span class="op">(</span><span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_ma_plot.html">get_ma_plot</a></span><span class="op">(</span><span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_deg_count_barplot.html">get_deg_count_barplot</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/get_deg_count_donutplot.html">get_deg_count_donutplot</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_deg_count_donutplot.html">get_deg_count_donutplot</a></span><span class="op">(</span><span class="va">vista</span>, show_other <span class="op">=</span> <span class="cn">TRUE</span>, text_color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Expression-focused views</span></span>
 <span><span class="va">up_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_genes_by_regulation.html">get_genes_by_regulation</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="va">comp</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span></span>
+<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
+<span>  top_n <span class="op">=</span> <span class="fl">40</span></span>
 <span><span class="op">)</span><span class="op">[[</span><span class="va">comp</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>

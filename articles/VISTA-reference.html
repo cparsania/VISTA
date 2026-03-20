@@ -387,8 +387,12 @@ faceting, and plotting controls.
 <code>group_column</code>, <code>genes</code>,
 <code>top_n_genes</code>.</li>
 <li>
-<code>label_replicates</code>, <code>label_size</code>,
-<code>circle_size</code>, <code>sample_colors</code>.</li>
+<code>label</code>, <code>label_size</code>,
+<code>point_size</code>, <code>shape_by</code>,
+<code>shape_values</code>.</li>
+<li>
+<code>color_by</code>, <code>use_group_colors</code>,
+<code>palette</code>, <code>colors</code>.</li>
 <li>
 <code>sample.seed</code>, <code>show_clusters</code>.</li>
 </ul>
@@ -404,10 +408,12 @@ faceting, and plotting controls.
 <code>group_column</code>, <code>genes</code>,
 <code>top_n_genes</code>.</li>
 <li>
-<code>label_replicates</code>, <code>label_size</code>,
-<code>circle_size</code>, <code>sample_colors</code>.</li>
+<code>label</code>, <code>label_size</code>,
+<code>point_size</code>, <code>shape_by</code>,
+<code>shape_values</code>.</li>
 <li>
-<code>sample.seed</code>, <code>show_clusters</code>.</li>
+<code>color_by</code>, <code>use_group_colors</code>,
+<code>palette</code>, <code>colors</code>.</li>
 </ul>
 </div>
 </div>
@@ -432,10 +438,10 @@ optional clustering).</li>
 comparison/regulation.</li>
 <li>
 <code>get_deg_count_pieplot(...)</code>: circular DEG composition
-summary (pie).</li>
+summary (pie), with optional non-DE <code>"Other"</code> slice.</li>
 <li>
 <code>get_deg_count_donutplot(...)</code>: circular DEG composition
-summary (donut).</li>
+summary (donut), with optional non-DE <code>"Other"</code> slice.</li>
 <li>
 <code>get_deg_venn_diagram(...)</code>: overlap of DEG sets (2–4
 comparisons).</li>
@@ -560,7 +566,8 @@ report.</li>
 <ul>
 <li>
 <code>get_genes_by_regulation(...)</code>: extract regulated gene
-sets for a comparison.</li>
+sets for a comparison, optionally rank by <code>abs(log2fc)</code> and
+return annotation tables.</li>
 </ul>
 </div>
 <div class="section level2">

@@ -64,9 +64,10 @@ optionally restricting to selected groups or genes.</p>
 <span>  sample.seed <span class="op">=</span> <span class="fl">123</span>,</span>
 <span>  show_clusters <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  color_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  use_vista_colors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  use_vista_colors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  palette <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  colors <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  colors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  use_group_colors <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -135,8 +136,8 @@ Defaults to the active grouping column.</p></dd>
 
 
 <dt id="arg-use-vista-colors">use_vista_colors<a class="anchor" aria-label="anchor" href="#arg-use-vista-colors"></a></dt>
-<dd><p>Logical; when <code>TRUE</code>, prefer the stored VISTA group
-colours when colouring by the grouping column.</p></dd>
+<dd><p>Deprecated alias for <code>use_group_colors</code>. When
+supplied, it overrides <code>use_group_colors</code>.</p></dd>
 
 
 <dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
@@ -147,6 +148,11 @@ for non-group metadata levels.</p></dd>
 <dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
 <dd><p>Optional named character vector of manual colours overriding
 both <code>palette</code> and stored VISTA colours.</p></dd>
+
+
+<dt id="arg-use-group-colors">use_group_colors<a class="anchor" aria-label="anchor" href="#arg-use-group-colors"></a></dt>
+<dd><p>Logical; when <code>TRUE</code>, prefer the stored VISTA group
+colours when colouring by the grouping column.</p></dd>
 
 </dl></div>
     <div class="section level2">

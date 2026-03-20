@@ -99,22 +99,23 @@ head(comparisons(vista)[[comp]][, c("gene_id", "log2fc", "padj")])
 
 # QC
 get_pca_plot(vista, label = TRUE)
-get_mds_plot(vista)
+get_mds_plot(vista, use_group_colors = TRUE)
 get_corr_heatmap(vista)
 # Optional nonlinear view (requires uwot)
-# get_umap_plot(vista, color_by = "cell")
+# get_umap_plot(vista, color_by = "cell", use_group_colors = FALSE, palette = "Set 2")
 
 # Differential expression
 get_volcano_plot(vista, sample_comparison = comp)
 get_ma_plot(vista, sample_comparison = comp)
 get_deg_count_barplot(vista)
-get_deg_count_donutplot(vista)
+get_deg_count_donutplot(vista, show_other = TRUE, text_color = "black")
 
 # Expression-focused views
 up_genes <- get_genes_by_regulation(
   vista,
   sample_comparisons = comp,
-  regulation = "Up"
+  regulation = "Up",
+  top_n = 40
 )[[comp]]
 
 get_expression_heatmap(vista)
