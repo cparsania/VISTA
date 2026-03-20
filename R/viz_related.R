@@ -149,13 +149,13 @@ NULL
                                       values,
                                       color_col,
                                       group_col,
-                                      use_vista_colors = TRUE,
+                                      use_group_colors = TRUE,
                                       palette = NULL,
                                       colors = NULL) {
   vals <- as.character(values)
   if (!length(vals)) return(NULL)
 
-  if (isTRUE(use_vista_colors) && identical(color_col, group_col)) {
+  if (isTRUE(use_group_colors) && identical(color_col, group_col)) {
     vista_cols <- .vista_group_colors(x, groups_present = vals)
     if (!is.null(vista_cols) && length(vista_cols)) {
       return(vista_cols)
@@ -168,6 +168,23 @@ NULL
     palette = palette,
     default = "Dark 3"
   )
+}
+
+.resolve_group_color_preference <- function(use_group_colors = TRUE,
+                                            use_vista_colors = NULL) {
+  if (!is.null(use_vista_colors)) {
+    if (!is.logical(use_vista_colors) || length(use_vista_colors) != 1L || is.na(use_vista_colors)) {
+      cli::cli_abort("{.arg use_vista_colors} must be TRUE or FALSE when supplied.")
+    }
+    cli::cli_warn("{.arg use_vista_colors} is deprecated; use {.arg use_group_colors} instead.")
+    use_group_colors <- use_vista_colors
+  }
+
+  if (!is.logical(use_group_colors) || length(use_group_colors) != 1L || is.na(use_group_colors)) {
+    cli::cli_abort("{.arg use_group_colors} must be TRUE or FALSE.")
+  }
+
+  use_group_colors
 }
 
 # Filter sample metadata to selected groups and keep a tidy tibble
@@ -285,12 +302,14 @@ NULL
 #' @param show_clusters Logical; add normal ellipses per group when `TRUE`.
 #' @param color_by Optional column name in `sample_info` used to map point colour.
 #'   Defaults to the active grouping column.
-#' @param use_vista_colors Logical; when `TRUE`, prefer the stored VISTA group
-#'   colours when colouring by the grouping column.
+#' @param use_vista_colors Deprecated alias for `use_group_colors`. When
+#'   supplied, it overrides `use_group_colors`.
 #' @param palette Optional qualitative palette name used when generating colours
 #'   for non-group metadata levels.
 #' @param colors Optional named character vector of manual colours overriding
 #'   both `palette` and stored VISTA colours.
+#' @param use_group_colors Logical; when `TRUE`, prefer the stored VISTA group
+#'   colours when colouring by the grouping column.
 #' @param group_column Optional column name in `sample_info` to use for grouping. Defaults to
 #'   the stored grouping column.
 #' @return A ggplot object showing the first two PCs.
@@ -335,11 +354,16 @@ get_pca_plot <- function(x,
                          sample.seed = 123,
                          show_clusters = FALSE,
                          color_by = NULL,
-                         use_vista_colors = TRUE,
+                         use_vista_colors = NULL,
                          palette = NULL,
-                         colors = NULL) {
+                         colors = NULL,
+                         use_group_colors = TRUE) {
 
   stopifnot(inherits(x, "VISTA"))
+  use_group_colors <- .resolve_group_color_preference(
+    use_group_colors = use_group_colors,
+    use_vista_colors = use_vista_colors
+  )
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
@@ -375,7 +399,7 @@ get_pca_plot <- function(x,
     values = pca_df[[color_col]],
     color_col = color_col,
     group_col = group_col,
-    use_vista_colors = use_vista_colors,
+    use_group_colors = use_group_colors,
     palette = palette,
     colors = colors
   )
@@ -473,12 +497,14 @@ get_pca_plot <- function(x,
 #'   `shape_by` is set. Use a named vector to map shapes to specific levels.
 #' @param color_by Optional column name in `sample_info` used for point colour.
 #'   Defaults to the active grouping column.
-#' @param use_vista_colors Logical; when `TRUE`, prefer the stored VISTA group
-#'   colours when colouring by the grouping column.
+#' @param use_vista_colors Deprecated alias for `use_group_colors`. When
+#'   supplied, it overrides `use_group_colors`.
 #' @param palette Optional qualitative palette name used when generating colours
 #'   for non-group metadata levels.
 #' @param colors Optional named character vector of manual colours overriding
 #'   both `palette` and stored VISTA colours.
+#' @param use_group_colors Logical; when `TRUE`, prefer the stored VISTA group
+#'   colours when colouring by the grouping column.
 #' @param group_column Optional column name in `sample_info` to use for grouping/filtering.
 #'
 #' @export
@@ -493,11 +519,16 @@ get_mds_plot <- function(x,
                          shape_by = NULL,
                          shape_values = NULL,
                          color_by = NULL,
-                         use_vista_colors = TRUE,
+                         use_vista_colors = NULL,
                          palette = NULL,
-                         colors = NULL) {
+                         colors = NULL,
+                         use_group_colors = TRUE) {
 
   stopifnot(inherits(x, "VISTA"))
+  use_group_colors <- .resolve_group_color_preference(
+    use_group_colors = use_group_colors,
+    use_vista_colors = use_vista_colors
+  )
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
@@ -540,7 +571,7 @@ get_mds_plot <- function(x,
     values = mds_df[[color_col]],
     color_col = color_col,
     group_col = group_col,
-    use_vista_colors = use_vista_colors,
+    use_group_colors = use_group_colors,
     palette = palette,
     colors = colors
   )
@@ -624,12 +655,14 @@ get_mds_plot <- function(x,
 #' @param min_dist UMAP `min_dist` parameter.
 #' @param metric UMAP distance metric.
 #' @param seed Integer random seed passed to UMAP.
-#' @param use_vista_colors Logical; when `TRUE`, prefer the stored VISTA group
-#'   colours when colouring by the grouping column.
+#' @param use_vista_colors Deprecated alias for `use_group_colors`. When
+#'   supplied, it overrides `use_group_colors`.
 #' @param palette Optional qualitative palette name used when generating colours
 #'   for non-group metadata levels.
 #' @param colors Optional named character vector of manual colours overriding
 #'   both `palette` and stored VISTA colours.
+#' @param use_group_colors Logical; when `TRUE`, prefer the stored VISTA group
+#'   colours when colouring by the grouping column.
 #'
 #' @return A ggplot object with UMAP1/UMAP2 coordinates.
 #'
@@ -666,14 +699,19 @@ get_umap_plot <- function(x,
                           min_dist = 0.1,
                           metric = "euclidean",
                           seed = 123,
-                          use_vista_colors = TRUE,
+                          use_vista_colors = NULL,
                           palette = NULL,
-                          colors = NULL) {
+                          colors = NULL,
+                          use_group_colors = TRUE) {
 
   stopifnot(inherits(x, "VISTA"))
   if (!requireNamespace("uwot", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg uwot} must be installed to compute UMAP.")
   }
+  use_group_colors <- .resolve_group_color_preference(
+    use_group_colors = use_group_colors,
+    use_vista_colors = use_vista_colors
+  )
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
@@ -772,7 +810,7 @@ get_umap_plot <- function(x,
     values = umap_df[[color_col]],
     color_col = color_col,
     group_col = group_col,
-    use_vista_colors = use_vista_colors,
+    use_group_colors = use_group_colors,
     palette = palette,
     colors = colors
   )
@@ -2320,7 +2358,7 @@ get_expression_density <- function(x,
       values = fill_var,
       color_col = group_col,
       group_col = group_col,
-      use_vista_colors = TRUE,
+      use_group_colors = TRUE,
       palette = palette,
       colors = colors
     )
@@ -2427,7 +2465,7 @@ get_expression_joyplot <- function(x,
       values = df[[group_col]],
       color_col = group_col,
       group_col = group_col,
-      use_vista_colors = TRUE,
+      use_group_colors = TRUE,
       palette = palette,
       colors = colors
     )
@@ -4400,24 +4438,36 @@ get_deg_venn_diagram <- function(x,
 # DEG count barplot
 # ──────────────────────────────────────────────────────────────────────────────
 
-.normalize_deg_colors <- function(colors) {
+.normalize_deg_colors <- function(colors,
+                                  include_other = FALSE,
+                                  other_color = "grey70") {
   if (!is.character(colors) || !length(colors)) {
     cli::cli_abort("{.arg colors} must be a character vector.")
   }
   if (is.null(names(colors)) || any(!nzchar(names(colors)))) {
-    if (length(colors) < 2) {
+    min_len <- if (isTRUE(include_other)) 3 else 2
+    if (length(colors) < min_len) {
       cli::cli_abort("{.arg colors} must provide at least two colors for {.val Up} and {.val Down}.")
     }
-    colors <- stats::setNames(colors[seq_len(2)], c("Up", "Down"))
+    color_names <- c("Up", "Down", "Other")
+    colors <- stats::setNames(colors[seq_len(min_len)], color_names[seq_len(min_len)])
   }
   missing_keys <- setdiff(c("Up", "Down"), names(colors))
   if (length(missing_keys)) {
     cli::cli_abort("{.arg colors} must include named colors for {.val Up} and {.val Down}. Missing: {.val {missing_keys}}")
   }
+  if (isTRUE(include_other)) {
+    if (!"Other" %in% names(colors)) {
+      colors[["Other"]] <- other_color
+    }
+    return(colors[c("Up", "Down", "Other")])
+  }
   colors[c("Up", "Down")]
 }
 
-.collect_deg_count_data <- function(x, sample_comparisons = NULL) {
+.collect_deg_count_data <- function(x,
+                                    sample_comparisons = NULL,
+                                    show_other = FALSE) {
   stopifnot(inherits(x, "VISTA"))
   if (!is.null(sample_comparisons)) sample_comparisons <- as.character(sample_comparisons)
 
@@ -4505,8 +4555,38 @@ get_deg_venn_diagram <- function(x,
     regulation = c("Up", "Down"),
     fill = list(n = 0)
   )
+
+  if (isTRUE(show_other)) {
+    comps <- .vista_comparisons(x)
+    if (!is.null(sample_comparisons)) {
+      comps <- comps[sample_comparisons]
+    }
+
+    other_df <- purrr::imap_dfr(comps, function(comp_tbl, comp_name) {
+      comp_tbl <- as.data.frame(comp_tbl, stringsAsFactors = FALSE)
+      gene_col <- intersect(c("gene_id", "gene", "geneID", "GeneID", "ID", "id"), colnames(comp_tbl))[1]
+      gene_ids <- if (is.na(gene_col)) rownames(comp_tbl) else comp_tbl[[gene_col]]
+      gene_ids <- unique(stats::na.omit(as.character(gene_ids)))
+      gene_ids <- gene_ids[nzchar(gene_ids)]
+
+      sig_n <- sum(df$n[df$sample_comparisons == comp_name], na.rm = TRUE)
+      tibble::tibble(
+        sample_comparisons = comp_name,
+        regulation = "Other",
+        n = max(length(gene_ids) - sig_n, 0)
+      )
+    })
+
+    if (nrow(other_df)) {
+      df <- dplyr::bind_rows(df, other_df)
+    }
+  }
+
   df$sample_comparisons <- factor(df$sample_comparisons, levels = comp_levels)
-  df$regulation <- factor(df$regulation, levels = c("Up", "Down"))
+  df$regulation <- factor(
+    df$regulation,
+    levels = if (isTRUE(show_other)) c("Up", "Down", "Other") else c("Up", "Down")
+  )
   df
 }
 
@@ -4528,12 +4608,16 @@ get_deg_venn_diagram <- function(x,
                                      label_digits = 1,
                                      base_size = 12,
                                      colors = c(Up = "red4", Down = "blue4"),
+                                     text_color = "black",
                                      donut = FALSE,
                                      facet_by = c("comparison", "none"),
                                      ncol = NULL) {
   facet_by <- match.arg(facet_by)
   label <- match.arg(label)
-  colors <- .normalize_deg_colors(colors)
+  colors <- .normalize_deg_colors(
+    colors,
+    include_other = "Other" %in% unique(as.character(df$regulation))
+  )
 
   n_comp <- dplyr::n_distinct(df$sample_comparisons)
   if (facet_by == "none" && n_comp > 1) {
@@ -4578,7 +4662,8 @@ get_deg_venn_diagram <- function(x,
     p <- p + ggplot2::geom_text(
       ggplot2::aes(label = .data$label),
       position = ggplot2::position_stack(vjust = 0.5),
-      size = base_size / 3
+      size = base_size / 3,
+      color = text_color
     )
   }
 
@@ -4657,6 +4742,12 @@ get_deg_count_barplot <- function(x,
 #' @param label_digits Integer number of decimals used for percentage labels.
 #' @param base_size Numeric base font size for the plot.
 #' @param colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
+#'   When `show_other = TRUE`, an `"Other"` entry may also be supplied.
+#' @param show_other Logical; when `TRUE`, include non-DE genes as an `"Other"`
+#'   slice using `other_color` unless overridden in `colors`.
+#' @param other_color Fill colour used for the `"Other"` slice when
+#'   `show_other = TRUE` and `colors` does not include `"Other"`.
+#' @param text_color Colour used for pie label text.
 #' @param facet_by Either `"comparison"` (default) to draw one pie per comparison,
 #'   or `"none"` for a single pie.
 #' @param ncol Optional number of columns when faceting.
@@ -4667,20 +4758,30 @@ get_deg_count_pieplot <- function(x,
                                   label_digits = 1,
                                   base_size = 12,
                                   colors = c(Up = "red4", Down = "blue4"),
+                                  show_other = FALSE,
+                                  other_color = "grey70",
+                                  text_color = "black",
                                   facet_by = c("comparison", "none"),
                                   ncol = NULL) {
   stopifnot(inherits(x, "VISTA"))
   df <- .collect_deg_count_data(
     x = x,
-    sample_comparisons = sample_comparisons
+    sample_comparisons = sample_comparisons,
+    show_other = show_other
   )
   if (is.null(df)) return(invisible(NULL))
+  colors <- .normalize_deg_colors(
+    colors = colors,
+    include_other = show_other,
+    other_color = other_color
+  )
   .plot_deg_count_circular(
     df = df,
     label = label,
     label_digits = label_digits,
     base_size = base_size,
     colors = colors,
+    text_color = text_color,
     donut = FALSE,
     facet_by = facet_by,
     ncol = ncol
@@ -4694,6 +4795,12 @@ get_deg_count_pieplot <- function(x,
 #' @param label_digits Integer number of decimals used for percentage labels.
 #' @param base_size Numeric base font size for the plot.
 #' @param colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
+#'   When `show_other = TRUE`, an `"Other"` entry may also be supplied.
+#' @param show_other Logical; when `TRUE`, include non-DE genes as an `"Other"`
+#'   slice using `other_color` unless overridden in `colors`.
+#' @param other_color Fill colour used for the `"Other"` slice when
+#'   `show_other = TRUE` and `colors` does not include `"Other"`.
+#' @param text_color Colour used for donut label text.
 #' @param facet_by Either `"comparison"` (default) to draw one donut per comparison,
 #'   or `"none"` for a single donut.
 #' @param ncol Optional number of columns when faceting.
@@ -4704,20 +4811,30 @@ get_deg_count_donutplot <- function(x,
                                     label_digits = 1,
                                     base_size = 12,
                                     colors = c(Up = "red4", Down = "blue4"),
+                                    show_other = FALSE,
+                                    other_color = "grey70",
+                                    text_color = "black",
                                     facet_by = c("comparison", "none"),
                                     ncol = NULL) {
   stopifnot(inherits(x, "VISTA"))
   df <- .collect_deg_count_data(
     x = x,
-    sample_comparisons = sample_comparisons
+    sample_comparisons = sample_comparisons,
+    show_other = show_other
   )
   if (is.null(df)) return(invisible(NULL))
+  colors <- .normalize_deg_colors(
+    colors = colors,
+    include_other = show_other,
+    other_color = other_color
+  )
   .plot_deg_count_circular(
     df = df,
     label = label,
     label_digits = label_digits,
     base_size = base_size,
     colors = colors,
+    text_color = text_color,
     donut = TRUE,
     facet_by = facet_by,
     ncol = ncol

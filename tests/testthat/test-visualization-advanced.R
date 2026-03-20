@@ -28,7 +28,7 @@ test_that("embedding plots support harmonized color and label arguments", {
     vista,
     color_by = "cell",
     label = TRUE,
-    use_vista_colors = FALSE,
+    use_group_colors = FALSE,
     palette = "Set 2"
   )
   expect_s3_class(p_pca, "ggplot")
@@ -37,10 +37,20 @@ test_that("embedding plots support harmonized color and label arguments", {
     vista,
     color_by = "cell",
     label = FALSE,
-    use_vista_colors = FALSE,
+    use_group_colors = FALSE,
     colors = c("#1b9e77", "#d95f02", "#7570b3", "#e7298a")
   )
   expect_s3_class(p_mds, "ggplot")
+})
+
+test_that("embedding plots still accept deprecated use_vista_colors alias", {
+  vista <- make_small_vista()
+
+  expect_warning(
+    p <- get_mds_plot(vista, color_by = "cell", use_vista_colors = FALSE),
+    "deprecated"
+  )
+  expect_s3_class(p, "ggplot")
 })
 
 test_that("get_mds_plot produces valid plot", {
@@ -144,6 +154,20 @@ test_that("get_deg_count_pieplot summarizes correctly", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("get_deg_count_pieplot can include non-DE genes and set text color", {
+  vista <- make_small_vista()
+  p <- get_deg_count_pieplot(
+    vista,
+    show_other = TRUE,
+    other_color = "grey80",
+    text_color = "navy"
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_true("Other" %in% as.character(p$data$regulation))
+  expect_identical(p$layers[[2]]$aes_params$colour, "navy")
+})
+
 test_that("get_deg_count_pieplot supports single pie mode", {
   vista <- make_small_vista()
   comp_name <- names(comparisons(vista))[1]
@@ -165,6 +189,14 @@ test_that("get_deg_count_donutplot handles label toggles", {
   vista <- make_small_vista()
   p <- get_deg_count_donutplot(vista, label = "percent")
   expect_s3_class(p, "ggplot")
+})
+
+test_that("get_deg_count_donutplot can include non-DE genes", {
+  vista <- make_small_vista()
+  p <- get_deg_count_donutplot(vista, show_other = TRUE, facet_by = "comparison")
+
+  expect_s3_class(p, "ggplot")
+  expect_true("Other" %in% as.character(p$data$regulation))
 })
 
 test_that("get_expression_heatmap returns ComplexHeatmap object", {

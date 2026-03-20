@@ -11,6 +11,9 @@ get_deg_count_pieplot(
   label_digits = 1,
   base_size = 12,
   colors = c(Up = "red4", Down = "blue4"),
+  show_other = FALSE,
+  other_color = "grey70",
+  text_color = "black",
   facet_by = c("comparison", "none"),
   ncol = NULL
 )
@@ -26,7 +29,16 @@ get_deg_count_pieplot(
 
 \item{base_size}{Numeric base font size for the plot.}
 
-\item{colors}{Named vector giving fill colors for \code{"Up"} and \code{"Down"} slices.}
+\item{colors}{Named vector giving fill colors for \code{"Up"} and \code{"Down"} slices.
+When \code{show_other = TRUE}, an \code{"Other"} entry may also be supplied.}
+
+\item{show_other}{Logical; when \code{TRUE}, include non-DE genes as an \code{"Other"}
+slice using \code{other_color} unless overridden in \code{colors}.}
+
+\item{other_color}{Fill colour used for the \code{"Other"} slice when
+\code{show_other = TRUE} and \code{colors} does not include \code{"Other"}.}
+
+\item{text_color}{Colour used for pie label text.}
 
 \item{facet_by}{Either \code{"comparison"} (default) to draw one pie per comparison,
 or \code{"none"} for a single pie.}

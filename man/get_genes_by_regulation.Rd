@@ -4,7 +4,14 @@
 \alias{get_genes_by_regulation}
 \title{Get Genes by Regulation}
 \usage{
-get_genes_by_regulation(x, sample_comparisons, regulation = "Both")
+get_genes_by_regulation(
+  x,
+  sample_comparisons,
+  regulation = "Both",
+  top_n = NULL,
+  display_id = NULL,
+  return_type = c("list", "table")
+)
 }
 \arguments{
 \item{x}{A VISTA object.}
@@ -12,9 +19,20 @@ get_genes_by_regulation(x, sample_comparisons, regulation = "Both")
 \item{sample_comparisons}{Character vector of comparison names to include.}
 
 \item{regulation}{One of "Up", "Down", "Both", or "All" (default: "Both").}
+
+\item{top_n}{Optional integer limiting each comparison to the top DE genes
+ranked by absolute log2 fold change after regulation filtering.}
+
+\item{display_id}{Optional column name in \code{rowData(x)} to append when
+\code{return_type = "table"}, for example \code{"SYMBOL"}.}
+
+\item{return_type}{Either \code{"list"} (default) to return gene ID vectors or
+\code{"table"} to return one data frame per comparison with gene metadata.}
 }
 \value{
-A named list of character vectors (one per comparison).
+A named list of character vectors (one per comparison) when
+\code{return_type = "list"}, or a named list of data frames when
+\code{return_type = "table"}.
 }
 \description{
 Extract gene IDs by regulation class from selected comparisons in a VISTA object.
@@ -22,6 +40,6 @@ Extract gene IDs by regulation class from selected comparisons in a VISTA object
 \examples{
 v <- example_vista()
 comp <- names(comparisons(v))[1]
-genes <- get_genes_by_regulation(v, sample_comparisons = comp, regulation = 'Up')
+genes <- get_genes_by_regulation(v, sample_comparisons = comp, regulation = 'Up', top_n = 20)
 str(genes, max.level = 1)
 }
