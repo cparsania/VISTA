@@ -281,7 +281,7 @@ NULL
 #' @examples
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
-#' genes <- get_genes_by_regulation(v, sample_comparisons = comp, regulation = 'Up')
+#' genes <- get_genes_by_regulation(v, sample_comparisons = comp, regulation = 'Up', top_n = 20)
 #' str(genes, max.level = 1)
 NULL
 

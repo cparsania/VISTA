@@ -21,6 +21,34 @@ test_that("get_genes_by_regulation returns genes", {
   expect_named(res)
 })
 
+test_that("get_genes_by_regulation supports top_n ranking and table output", {
+  vista <- make_small_vista()
+  rowData(vista)$SYMBOL <- paste0("GENE", seq_len(nrow(vista)))
+  comp_name <- names(comparisons(vista))[1]
+
+  up_full <- get_genes_by_regulation(vista, comp_name, regulation = "Up")[[1]]
+  up_top <- get_genes_by_regulation(vista, comp_name, regulation = "Up", top_n = 3)[[1]]
+  expect_lte(length(up_top), 3)
+  expect_true(all(up_top %in% up_full))
+
+  comp_tbl <- comparisons(vista)[[comp_name]]
+  up_tbl <- comp_tbl[comp_tbl$gene_id %in% up_full, , drop = FALSE]
+  expected_top <- up_tbl$gene_id[order(abs(up_tbl$log2fc), decreasing = TRUE, na.last = NA)]
+  expect_identical(up_top, unique(utils::head(expected_top, n = length(up_top))))
+
+  res_tbl <- get_genes_by_regulation(
+    vista,
+    comp_name,
+    regulation = "Up",
+    top_n = 3,
+    display_id = "SYMBOL",
+    return_type = "table"
+  )[[1]]
+  expect_s3_class(res_tbl, "tbl_df")
+  expect_true(all(c("gene_id", "SYMBOL") %in% colnames(res_tbl)))
+  expect_lte(nrow(res_tbl), 3)
+})
+
 test_that("get_cell_fractions reports absence", {
   vista <- make_small_vista()
   expect_error(get_cell_fractions(vista), "No cell fraction estimates")

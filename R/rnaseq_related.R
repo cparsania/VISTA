@@ -492,19 +492,46 @@ get_expression_matrix <- function(x,
 #' @param x A VISTA object.
 #' @param sample_comparisons Character vector of comparison names to include.
 #' @param regulation One of "Up", "Down", "Both", or "All" (default: "Both").
-#' @return A named list of character vectors (one per comparison).
+#' @param top_n Optional integer limiting each comparison to the top DE genes
+#'   ranked by absolute log2 fold change after regulation filtering.
+#' @param display_id Optional column name in `rowData(x)` to append when
+#'   `return_type = "table"`, for example `"SYMBOL"`.
+#' @param return_type Either `"list"` (default) to return gene ID vectors or
+#'   `"table"` to return one data frame per comparison with gene metadata.
+#' @return A named list of character vectors (one per comparison) when
+#'   `return_type = "list"`, or a named list of data frames when
+#'   `return_type = "table"`.
 #' @export
-get_genes_by_regulation <- function(x, sample_comparisons, regulation = "Both") {
+get_genes_by_regulation <- function(x,
+                                    sample_comparisons,
+                                    regulation = "Both",
+                                    top_n = NULL,
+                                    display_id = NULL,
+                                    return_type = c("list", "table")) {
   stopifnot(inherits(x, "VISTA"))
+  return_type <- match.arg(return_type)
+  sample_comparisons <- as.character(sample_comparisons)
 
-  comps <- S4Vectors::metadata(x)$de_results
+  comps <- comparisons(x)
   if (is.null(comps) || !length(comps)) {
-    cli::cli_abort("No DE results found in metadata(x)$de_results.")
+    cli::cli_abort("No DE results found in the VISTA object.")
   }
   bad <- setdiff(sample_comparisons, names(comps))
   if (length(bad)) cli::cli_abort("Unknown comparisons: {.val {bad}}")
 
   regulation <- match.arg(regulation, choices = c("Up", "Down", "Both", "All"))
+  if (!is.null(top_n)) {
+    if (!is.numeric(top_n) || length(top_n) != 1L || is.na(top_n) || top_n < 1) {
+      cli::cli_abort("{.arg top_n} must be a positive integer when supplied.")
+    }
+    top_n <- as.integer(top_n)
+  }
+  rd <- tryCatch(as.data.frame(row_data(x), stringsAsFactors = FALSE), error = function(e) NULL)
+  if (!is.null(display_id) && (is.null(rd) || !display_id %in% colnames(rd))) {
+    cli::cli_abort(
+      "{.arg display_id} must be a column present in {.fn row_data}. Received: {.val {display_id}}."
+    )
+  }
 
   # cutoffs from metadata if available, else defaults
   cuts <- cutoffs(x)
@@ -543,19 +570,50 @@ get_genes_by_regulation <- function(x, sample_comparisons, regulation = "Both") 
       df$regulation <- ifelse(xv >=  lfc_cut & yv <= p_cut, "Up",
                               ifelse(xv <= -lfc_cut & yv <= p_cut, "Down", "Other"))
     }
+    if (!is.na(fc_col) && !"log2fc" %in% names(df)) {
+      df$log2fc <- suppressWarnings(as.numeric(gsub(",", "", as.character(df[[fc_col]]), fixed = TRUE)))
+    }
+    if (!is.na(p_col) && !"pvalue" %in% names(df)) {
+      df$pvalue <- suppressWarnings(as.numeric(gsub(",", "", as.character(df[[p_col]]), fixed = TRUE)))
+    }
     df
   }
 
   out <- purrr::map(sample_comparisons, function(comp) {
     df <- .ensure_regul(comps[[comp]])
     if (regulation == "All") {
-      genes <- df$gene_id
+      df <- df
     } else if (regulation == "Both") {
-      genes <- df$gene_id[df$regulation %in% c("Up", "Down")]
+      df <- df[df$regulation %in% c("Up", "Down"), , drop = FALSE]
     } else {
-      genes <- df$gene_id[df$regulation %in% regulation]
+      df <- df[df$regulation %in% regulation, , drop = FALSE]
     }
-    unique(stats::na.omit(as.character(genes)))
+
+    df <- df[!is.na(df$gene_id) & nzchar(df$gene_id), , drop = FALSE]
+    if (!is.null(top_n) && nrow(df)) {
+      if (!"log2fc" %in% colnames(df)) {
+        cli::cli_abort(
+          "{.arg top_n} requires a log2 fold-change column in comparison {.val {comp}}."
+        )
+      }
+      ord <- order(abs(df$log2fc), decreasing = TRUE, na.last = NA)
+      df <- df[utils::head(ord, n = min(top_n, length(ord))), , drop = FALSE]
+    }
+
+    df <- df[!duplicated(df$gene_id), , drop = FALSE]
+
+    if (return_type == "list") {
+      return(unique(stats::na.omit(as.character(df$gene_id))))
+    }
+
+    keep_cols <- intersect(c("gene_id", "regulation", "log2fc", "pvalue", "padj"), colnames(df))
+    df <- df[, keep_cols, drop = FALSE]
+    if (!is.null(display_id)) {
+      mapped <- rd[[display_id]]
+      names(mapped) <- rownames(x)
+      df[[display_id]] <- unname(mapped[df$gene_id])
+    }
+    tibble::as_tibble(df)
   })
   names(out) <- sample_comparisons
   out

@@ -20,9 +20,10 @@ get_umap_plot(
   min_dist = 0.1,
   metric = "euclidean",
   seed = 123,
-  use_vista_colors = TRUE,
+  use_vista_colors = NULL,
   palette = NULL,
-  colors = NULL
+  colors = NULL,
+  use_group_colors = TRUE
 )
 }
 \arguments{
@@ -60,14 +61,17 @@ Defaults to \code{group_column}.}
 
 \item{seed}{Integer random seed passed to UMAP.}
 
-\item{use_vista_colors}{Logical; when \code{TRUE}, prefer the stored VISTA group
-colours when colouring by the grouping column.}
+\item{use_vista_colors}{Deprecated alias for \code{use_group_colors}. When
+supplied, it overrides \code{use_group_colors}.}
 
 \item{palette}{Optional qualitative palette name used when generating colours
 for non-group metadata levels.}
 
 \item{colors}{Optional named character vector of manual colours overriding
 both \code{palette} and stored VISTA colours.}
+
+\item{use_group_colors}{Logical; when \code{TRUE}, prefer the stored VISTA group
+colours when colouring by the grouping column.}
 }
 \value{
 A ggplot object with UMAP1/UMAP2 coordinates.
