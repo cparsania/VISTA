@@ -27,7 +27,7 @@ get_expression_boxplot(
 \arguments{
 \item{x}{A \code{VISTA} object.}
 
-\item{genes}{Optional character vector of genes to display (≤20). Defaults to all genes.}
+\item{genes}{Optional character vector of genes to display (<=20). Defaults to all genes.}
 
 \item{sample_group}{Optional character vector specifying which groups (as defined by \code{group_column}) to include.}
 

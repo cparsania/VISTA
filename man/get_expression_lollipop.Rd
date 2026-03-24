@@ -26,7 +26,7 @@ get_expression_lollipop(
 \arguments{
 \item{x}{A \code{VISTA} object.}
 
-\item{genes}{Character vector (≤15 genes) to plot.}
+\item{genes}{Character vector (<=15 genes) to plot.}
 
 \item{sample_group}{Optional character vector of groups (from \code{group_column}) to include.}
 

@@ -1185,7 +1185,7 @@ get_corr_heatmap <- function(x,
 #' controlled explicitly by `facet_by`.
 #'
 #' @param x A `VISTA` object.
-#' @param genes Optional character vector of genes to display (≤20). Defaults to all genes.
+#' @param genes Optional character vector of genes to display (<=20). Defaults to all genes.
 #' @param sample_group Optional character vector specifying which groups (as defined by `group_column`) to include.
 #' @param group_column Optional column name in `sample_info` used as the grouping variable.
 #' @param log_transform Logical; apply log2(x + 1) transform before plotting.
@@ -2648,7 +2648,7 @@ get_expression_scatter <- function(x,
 #' `by = "sample"`, the plot shows individual samples.
 #'
 #' @param x A `VISTA` object.
-#' @param genes Character vector (≤15 genes) to plot.
+#' @param genes Character vector (<=15 genes) to plot.
 #' @param sample_group Optional character vector of groups (from `group_column`) to include.
 #' @param group_column Optional column name in `sample_info` to use for grouping samples.
 #' @param by One of `"group"` (default; summarize replicates by group) or
@@ -3797,7 +3797,7 @@ get_foldchange_scatter <- function(x,
 #' With `by = "sample"`, each sample is drawn separately.
 #'
 #' @param x A `VISTA` object.
-#' @param genes Character vector (≤10 genes) to plot.
+#' @param genes Character vector (<=10 genes) to plot.
 #' @param sample_group Optional character vector of groups (from `group_column`) to include.
 #' @param log_transform Logical; log2-transform expression before plotting.
 #' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.

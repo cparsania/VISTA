@@ -26,7 +26,7 @@ get_expression_barplot(
 \arguments{
 \item{x}{A \code{VISTA} object.}
 
-\item{genes}{Character vector (≤10 genes) to plot.}
+\item{genes}{Character vector (<=10 genes) to plot.}
 
 \item{sample_group}{Optional character vector of groups (from \code{group_column}) to include.}
 
