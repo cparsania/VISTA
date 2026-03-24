@@ -35,7 +35,7 @@ get_expression_barplot(
 
 - genes:
 
-  Character vector (≤10 genes) to plot.
+  Character vector (\<=10 genes) to plot.
 
 - sample_group:
 

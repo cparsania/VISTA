@@ -634,7 +634,7 @@ sessionInfo()
 #>  [9] S4Vectors_0.48.0            BiocGenerics_0.56.0        
 #> [11] generics_0.1.4              MatrixGenerics_1.22.0      
 #> [13] matrixStats_1.5.0           dplyr_1.2.0                
-#> [15] ggplot2_4.0.2               VISTA_0.99.0               
+#> [15] ggplot2_4.0.2               VISTA_0.99.1               
 #> [17] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
@@ -657,7 +657,7 @@ sessionInfo()
 #>  [49] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
 #>  [52] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.1             
 #>  [55] Rcpp_1.1.1              glue_1.8.0              SparseArray_1.10.9     
-#>  [58] xfun_0.56               DESeq2_1.50.2           qvalue_2.42.0          
+#>  [58] xfun_0.57               DESeq2_1.50.2           qvalue_2.42.0          
 #>  [61] withr_3.0.2             BiocManager_1.30.27     fastmap_1.2.0          
 #>  [64] GGally_2.4.0            digest_0.6.39           R6_2.6.1               
 #>  [67] gridGraphics_0.5-1      textshaping_1.0.5       colorspace_2.1-2       
@@ -674,12 +674,12 @@ sessionInfo()
 #> [100] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
 #> [103] GlobalOptions_0.1.3     stringr_1.6.0           parallel_4.5.3         
 #> [106] desc_1.4.3              pillar_1.11.1           grid_4.5.3             
-#> [109] vctrs_0.7.1             ggpubr_0.6.3            car_3.1-5              
+#> [109] vctrs_0.7.2             ggpubr_0.6.3            car_3.1-5              
 #> [112] tidydr_0.0.6            cluster_2.1.8.2         evaluate_1.0.5         
 #> [115] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.3         
 #> [118] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
 #> [121] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
-#> [124] fs_1.6.7                ggiraph_0.9.6           stringi_1.8.7          
+#> [124] fs_2.0.0                ggiraph_0.9.6           stringi_1.8.7          
 #> [127] BiocParallel_1.44.0     assertthat_0.2.1        babelgene_22.9         
 #> [130] Biostrings_2.78.0       lazyeval_0.2.2          GOSemSim_2.36.0        
 #> [133] fontquiver_0.2.1        Matrix_1.7-4            patchwork_1.3.2        

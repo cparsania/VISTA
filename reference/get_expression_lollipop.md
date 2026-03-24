@@ -35,7 +35,7 @@ get_expression_lollipop(
 
 - genes:
 
-  Character vector (≤15 genes) to plot.
+  Character vector (\<=15 genes) to plot.
 
 - sample_group:
 

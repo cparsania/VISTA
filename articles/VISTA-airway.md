@@ -1965,7 +1965,7 @@ sessionInfo()
 #>  [9] IRanges_2.44.0              S4Vectors_0.48.0           
 #> [11] BiocGenerics_0.56.0         generics_0.1.4             
 #> [13] MatrixGenerics_1.22.0       matrixStats_1.5.0          
-#> [15] ggplot2_4.0.2               VISTA_0.99.0               
+#> [15] ggplot2_4.0.2               VISTA_0.99.1               
 #> [17] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
@@ -1989,7 +1989,7 @@ sessionInfo()
 #>  [52] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
 #>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.1             
 #>  [58] Rcpp_1.1.1              glue_1.8.0              gridExtra_2.3          
-#>  [61] SparseArray_1.10.9      xfun_0.56               DESeq2_1.50.2          
+#>  [61] SparseArray_1.10.9      xfun_0.57               DESeq2_1.50.2          
 #>  [64] qvalue_2.42.0           dplyr_1.2.0             withr_3.0.2            
 #>  [67] BiocManager_1.30.27     fastmap_1.2.0           GGally_2.4.0           
 #>  [70] ggpointdensity_0.2.1    digest_0.6.39           R6_2.6.1               
@@ -2008,12 +2008,12 @@ sessionInfo()
 #> [109] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             
 #> [112] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          
 #> [115] parallel_4.5.3          desc_1.4.3              pillar_1.11.1          
-#> [118] grid_4.5.3              vctrs_0.7.1             ggpubr_0.6.3           
+#> [118] grid_4.5.3              vctrs_0.7.2             ggpubr_0.6.3           
 #> [121] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.2        
 #> [124] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        
 #> [127] compiler_4.5.3          rlang_1.1.7             crayon_1.5.3           
 #> [130] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          
-#> [133] plyr_1.8.9              fs_1.6.7                ggiraph_0.9.6          
+#> [133] plyr_1.8.9              fs_2.0.0                ggiraph_0.9.6          
 #> [136] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    
 #> [139] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
 #> [142] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       

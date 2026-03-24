@@ -131,7 +131,7 @@ Notes: `genes` capped at 20 when provided. If `facet_by = "gene"` and
 
 Arguments:
 
-- `x`, `genes` (≤10), `sample_group`, `group_column`, `log_transform`.
+- `x`, `genes` (\<=10), `sample_group`, `group_column`, `log_transform`.
 - `stats_group`, `facet_scale`, `p.label`, `comparisons`.
 - `display_id`, `display_from`, `display_orgdb`.
 
@@ -139,7 +139,7 @@ Arguments:
 
 Arguments:
 
-- `x`, `genes` (≤15), `sample_group`, `group_column`, `log_transform`.
+- `x`, `genes` (\<=15), `sample_group`, `group_column`, `log_transform`.
 - `facet_scale`, `point_size`, `line_size`, `label`, `label_digits`.
 - `display_id`, `display_from`, `display_orgdb`.
 

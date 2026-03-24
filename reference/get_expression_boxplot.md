@@ -36,7 +36,7 @@ get_expression_boxplot(
 
 - genes:
 
-  Optional character vector of genes to display (≤20). Defaults to all
+  Optional character vector of genes to display (\<=20). Defaults to all
   genes.
 
 - sample_group:

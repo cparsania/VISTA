@@ -290,14 +290,14 @@ sessionInfo()
 #> [11] Seqinfo_1.0.0               IRanges_2.44.0             
 #> [13] S4Vectors_0.48.0            BiocGenerics_0.56.0        
 #> [15] generics_0.1.4              MatrixGenerics_1.22.0      
-#> [17] matrixStats_1.5.0           VISTA_0.99.0               
+#> [17] matrixStats_1.5.0           VISTA_0.99.1               
 #> [19] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] splines_4.5.3               filelock_1.0.3             
 #>   [3] ggplotify_0.1.3             R.oo_1.27.1                
 #>   [5] polyclip_1.10-7             graph_1.88.1               
-#>   [7] minpack.lm_1.2-4            XML_3.99-0.22              
+#>   [7] minpack.lm_1.2-4            XML_3.99-0.23              
 #>   [9] httr2_1.2.2                 lifecycle_1.0.5            
 #>  [11] rstatix_0.7.3               edgeR_4.8.2                
 #>  [13] lattice_0.22-9              MASS_7.3-65                
@@ -324,7 +324,7 @@ sessionInfo()
 #>  [55] ggnewscale_0.5.2            treeio_1.34.0              
 #>  [57] xCell2_1.2.3                ragg_1.5.1                 
 #>  [59] Rcpp_1.1.1                  glue_1.8.0                 
-#>  [61] SparseArray_1.10.9          xfun_0.56                  
+#>  [61] SparseArray_1.10.9          xfun_0.57                  
 #>  [63] DESeq2_1.50.2               qvalue_2.42.0              
 #>  [65] withr_3.0.2                 BiocManager_1.30.27        
 #>  [67] fastmap_1.2.0               GGally_2.4.0               
@@ -351,7 +351,7 @@ sessionInfo()
 #> [109] stringr_1.6.0               BiocVersion_3.22.0         
 #> [111] parallel_4.5.3              desc_1.4.3                 
 #> [113] pillar_1.11.1               grid_4.5.3                 
-#> [115] vctrs_0.7.1                 ggpubr_0.6.3               
+#> [115] vctrs_0.7.2                 ggpubr_0.6.3               
 #> [117] car_3.1-5                   tidydr_0.0.6               
 #> [119] dbplyr_2.5.2                xtable_1.8-8               
 #> [121] cluster_2.1.8.2             singscore_1.30.0           
@@ -360,7 +360,7 @@ sessionInfo()
 #> [127] compiler_4.5.3              rlang_1.1.7                
 #> [129] crayon_1.5.3                ggsignif_0.6.4             
 #> [131] labeling_0.4.3              plyr_1.8.9                 
-#> [133] fs_1.6.7                    ggiraph_0.9.6              
+#> [133] fs_2.0.0                    ggiraph_0.9.6              
 #> [135] stringi_1.8.7               viridisLite_0.4.3          
 #> [137] BiocParallel_1.44.0         assertthat_0.2.1           
 #> [139] babelgene_22.9              Biostrings_2.78.0          

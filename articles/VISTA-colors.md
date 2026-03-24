@@ -385,14 +385,14 @@ sessionInfo()
 #> 
 #> other attached packages:
 #> [1] colorspace_2.1-2 tibble_3.3.1     dplyr_1.2.0      ggplot2_4.0.2   
-#> [5] VISTA_0.99.0     BiocStyle_2.38.0
+#> [5] VISTA_0.99.1     BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             
 #>   [3] tidydr_0.0.6                magrittr_2.0.4             
 #>   [5] ggtangle_0.1.1              farver_2.1.2               
-#>   [7] rmarkdown_2.30              fs_1.6.7                   
-#>   [9] ragg_1.5.1                  vctrs_0.7.1                
+#>   [7] rmarkdown_2.30              fs_2.0.0                   
+#>   [9] ragg_1.5.1                  vctrs_0.7.2                
 #>  [11] memoise_2.0.1               ggtree_4.0.5               
 #>  [13] rstatix_0.7.3               htmltools_0.5.9            
 #>  [15] S4Arrays_1.10.1             curl_7.0.0                 
@@ -444,7 +444,7 @@ sessionInfo()
 #> [107] bookdown_0.46               IRanges_2.44.0             
 #> [109] Seqinfo_1.0.0               edgeR_4.8.2                
 #> [111] SummarizedExperiment_1.40.0 stats4_4.5.3               
-#> [113] xfun_0.56                   Biobase_2.70.0             
+#> [113] xfun_0.57                   Biobase_2.70.0             
 #> [115] statmod_1.5.1               matrixStats_1.5.0          
 #> [117] stringi_1.8.7               lazyeval_0.2.2             
 #> [119] ggfun_0.2.0                 yaml_2.3.12                

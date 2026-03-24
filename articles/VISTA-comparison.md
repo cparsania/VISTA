@@ -711,7 +711,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] patchwork_1.3.2  dplyr_1.2.0      ggplot2_4.0.2    VISTA_0.99.0    
+#> [1] patchwork_1.3.2  dplyr_1.2.0      ggplot2_4.0.2    VISTA_0.99.1    
 #> [5] BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
@@ -745,7 +745,7 @@ sessionInfo()
 #>  [55] ggnewscale_0.5.2            treeio_1.34.0              
 #>  [57] ragg_1.5.1                  Rcpp_1.1.1                 
 #>  [59] glue_1.8.0                  SparseArray_1.10.9         
-#>  [61] xfun_0.56                   DESeq2_1.50.2              
+#>  [61] xfun_0.57                   DESeq2_1.50.2              
 #>  [63] qvalue_2.42.0               MatrixGenerics_1.22.0      
 #>  [65] withr_3.0.2                 BiocManager_1.30.27        
 #>  [67] fastmap_1.2.0               GGally_2.4.0               
@@ -771,14 +771,14 @@ sessionInfo()
 #> [107] stringr_1.6.0               parallel_4.5.3             
 #> [109] AnnotationDbi_1.72.0        desc_1.4.3                 
 #> [111] pillar_1.11.1               grid_4.5.3                 
-#> [113] vctrs_0.7.1                 ggpubr_0.6.3               
+#> [113] vctrs_0.7.2                 ggpubr_0.6.3               
 #> [115] car_3.1-5                   tidydr_0.0.6               
 #> [117] cluster_2.1.8.2             evaluate_1.0.5             
 #> [119] cli_3.6.5                   locfit_1.5-9.12            
 #> [121] compiler_4.5.3              rlang_1.1.7                
 #> [123] crayon_1.5.3                ggsignif_0.6.4             
 #> [125] labeling_0.4.3              plyr_1.8.9                 
-#> [127] fs_1.6.7                    ggiraph_0.9.6              
+#> [127] fs_2.0.0                    ggiraph_0.9.6              
 #> [129] stringi_1.8.7               viridisLite_0.4.3          
 #> [131] BiocParallel_1.44.0         assertthat_0.2.1           
 #> [133] babelgene_22.9              Biostrings_2.78.0          
