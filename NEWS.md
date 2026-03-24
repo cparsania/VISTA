@@ -1,3 +1,5 @@
+# VISTA 0.99.1
+
 # VISTA 0.99.0
 
 *Submitted to Bioconductor 2026-02-11*
