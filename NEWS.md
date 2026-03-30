@@ -1,3 +1,5 @@
+# VISTA 0.99.2
+
 # VISTA 0.99.1
 
 - `example_vista()` now uses a precomputed default object to reduce example,
