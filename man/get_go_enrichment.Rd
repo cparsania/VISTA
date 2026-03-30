@@ -43,11 +43,13 @@ A list with \code{enrich} containing an \code{enrichResult}.
 Run GO enrichment directly from a VISTA comparison
 }
 \examples{
+\dontrun{
 v <- example_vista()
 comp <- names(comparisons(v))[1]
 if (requireNamespace('org.Mm.eg.db', quietly = TRUE)) {
   out <- try(get_go_enrichment(v, sample_comparison = comp, ont = 'BP', from_type = 'ENSEMBL',
                                orgdb = org.Mm.eg.db::org.Mm.eg.db), silent = TRUE)
   if (!inherits(out, 'try-error')) out
+}
 }
 }

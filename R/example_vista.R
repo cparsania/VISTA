@@ -1,21 +1,7 @@
-#' Build a small example VISTA object
-#'
-#' Creates a lightweight `VISTA` object from built-in package datasets
-#' (`count_data` and `sample_metadata`) for use in examples and tutorials.
-#'
-#' @param n_genes Number of genes to include (default `150`).
-#' @param n_per_group Number of samples per group (`control` and `treatment1`)
-#'   to include (default `3`).
-#' @param method Differential expression backend passed to [create_vista()].
-#'
-#' @return A `VISTA` object.
-#' @export
-#' @examples
-#' v <- example_vista()
-#' v
-example_vista <- function(n_genes = 150,
-                          n_per_group = 3,
-                          method = "deseq2") {
+#' @keywords internal
+.build_example_vista <- function(n_genes = 150,
+                                 n_per_group = 3,
+                                 method = "deseq2") {
   data("count_data", package = "VISTA", envir = environment())
   data("sample_metadata", package = "VISTA", envir = environment())
 
@@ -48,6 +34,43 @@ example_vista <- function(n_genes = 150,
     group_denominator = "control",
     min_counts = 5,
     min_replicates = 1,
+    method = method
+  )
+}
+
+#' Build a small example VISTA object
+#'
+#' Creates a lightweight `VISTA` object from built-in package datasets
+#' (`count_data` and `sample_metadata`) for use in examples and tutorials.
+#' The default call returns a precomputed object to keep examples and package
+#' checks fast. Non-default argument combinations fall back to rebuilding the
+#' object from the packaged example inputs.
+#'
+#' @param n_genes Number of genes to include (default `150`).
+#' @param n_per_group Number of samples per group (`control` and `treatment1`)
+#'   to include (default `3`).
+#' @param method Differential expression backend passed to [create_vista()].
+#'
+#' @return A `VISTA` object.
+#' @export
+#' @examples
+#' v <- example_vista()
+#' v
+example_vista <- function(n_genes = 150,
+                          n_per_group = 3,
+                          method = "deseq2") {
+  stopifnot(is.numeric(n_genes), length(n_genes) == 1L, n_genes > 0)
+  stopifnot(is.numeric(n_per_group), length(n_per_group) == 1L, n_per_group > 0)
+
+  if (identical(as.integer(n_genes), 150L) &&
+      identical(as.integer(n_per_group), 3L) &&
+      identical(method, "deseq2")) {
+    return(vista_example_default)
+  }
+
+  .build_example_vista(
+    n_genes = n_genes,
+    n_per_group = n_per_group,
     method = method
   )
 }

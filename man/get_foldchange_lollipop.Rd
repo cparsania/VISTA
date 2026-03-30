@@ -86,20 +86,8 @@ comp <- names(comparisons(v))[1]
 genes <- head(as.character(comparisons(v)[[comp]]$gene_id), 10)
 p <- get_foldchange_lollipop(v, sample_comparison = comp, genes = genes)
 print(p)
-data("count_data", package = "VISTA")
-data("sample_metadata", package = "VISTA")
-
-vista <- create_vista(
-  counts = count_data[1:200, ],
-  sample_info = sample_metadata[1:6, ],
-  column_geneid = "gene_id",
-  group_column = "cond_long",
-  group_numerator = "treatment1",
-  group_denominator = "control"
-)
-
+vista <- example_vista()
 comp_name <- names(comparisons(vista))[1]
 genes <- rownames(vista)[1:3]
 get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes)
-get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes, facet_by = "gene")
 }

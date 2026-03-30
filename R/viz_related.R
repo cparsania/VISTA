@@ -668,20 +668,8 @@ get_mds_plot <- function(x,
 #'
 #' @examples
 #' if (requireNamespace("uwot", quietly = TRUE)) {
-#'   data("count_data", package = "VISTA")
-#'   data("sample_metadata", package = "VISTA")
-#'
-#'   vista <- create_vista(
-#'     counts = count_data[1:200, ],
-#'     sample_info = sample_metadata[1:6, ],
-#'     column_geneid = "gene_id",
-#'     group_column = "cond_long",
-#'     group_numerator = "treatment1",
-#'     group_denominator = "control"
-#'   )
-#'
-#'   get_umap_plot(vista)
-#'   get_umap_plot(vista, color_by = "cell")
+#'   vista <- example_vista()
+#'   get_umap_plot(vista, top_n_genes = 50)
 #' }
 #' @export
 get_umap_plot <- function(x,
@@ -4040,22 +4028,10 @@ get_expression_barplot <- function(x,
 #' @return A `ggplot2` object.
 #'
 #' @examples
-#' data("count_data", package = "VISTA")
-#' data("sample_metadata", package = "VISTA")
-#'
-#' vista <- create_vista(
-#'   counts = count_data[1:200, ],
-#'   sample_info = sample_metadata[1:6, ],
-#'   column_geneid = "gene_id",
-#'   group_column = "cond_long",
-#'   group_numerator = "treatment1",
-#'   group_denominator = "control"
-#' )
-#'
+#' vista <- example_vista()
 #' comp_name <- names(comparisons(vista))[1]
 #' genes <- rownames(vista)[1:3]
 #' get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes)
-#' get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes, facet_by = "gene")
 #' @export
 get_foldchange_lollipop <- function(x,
                                     sample_comparison,

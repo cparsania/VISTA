@@ -140,45 +140,15 @@ vista
 
 ## Run enrichment
 
-We need enrichment results as input.  Let's run MSigDB Hallmark and C2
-canonical pathways for upregulated genes, plus Hallmark sets for downregulated
-and combined (Up+Down) genes.
+We need one enrichment result as input. For this vignette, a single MSigDB
+Hallmark run on the combined Up+Down gene set is enough to demonstrate the full
+chord workflow while keeping render time lower.
 
 ```{r run-enrichment, eval=requireNamespace("msigdbr", quietly=TRUE)}
 comp_name <- names(comparisons(vista))[1]
 
 # Hallmark gene sets (broad biological themes)
 msig_hallmark <- get_msigdb_enrichment(
-  vista,
-  sample_comparison = comp_name,
-  regulation  = "Up",
-  msigdb_category = "H",
-  species     = "Homo sapiens",
-  from_type   = "ENSEMBL"
-)
-
-# C2 curated pathways (more granular, more gene overlap)
-msig_c2 <- get_msigdb_enrichment(
-  vista,
-  sample_comparison = comp_name,
-  regulation  = "Up",
-  msigdb_category = "C2",
-  species     = "Homo sapiens",
-  from_type   = "ENSEMBL"
-)
-
-# Downregulated genes -- Hallmark
-msig_down <- get_msigdb_enrichment(
-  vista,
-  sample_comparison = comp_name,
-  regulation  = "Down",
-  msigdb_category = "H",
-  species     = "Homo sapiens",
-  from_type   = "ENSEMBL"
-)
-
-# Combined Up+Down genes -- Hallmark
-msig_both <- get_msigdb_enrichment(
   vista,
   sample_comparison = comp_name,
   regulation  = "Both",
@@ -213,7 +183,7 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
     msig_hallmark,
     top_n    = 6,
     color_by = "pathway",
-    title    = "Hallmark Enrichment (Up-regulated, top 6 pathways)"
+    title    = "Hallmark Enrichment (Up+Down genes, top 6 pathways)"
   )
 }
 ```
@@ -272,9 +242,7 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 **What to look for:**
 
 - **Red chords** indicate strongly upregulated genes
-- **Blue/white chords** would indicate weakly changed or downregulated genes
-  (rare here since we enriched on upregulated genes, but meaningful when using
-  `regulation = "Both"`)
+- **Blue/white chords** indicate weakly changed or downregulated genes
 - The gradient legend (bottom-left) shows the fold-change scale
 
 ## Regulation-based colouring
@@ -283,15 +251,15 @@ A categorical alternative -- chords coloured as Up (red), Down (green), or
 Other (grey):
 
 ```{r chord-regulation, fig.width=9, fig.height=9, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("circlize", quietly=TRUE)}
-if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
+if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
-    msig_down,
+    msig_hallmark,
     vista  = vista,
     sample_comparison = comp_name,
     top_n      = 6,
     color_by   = "regulation",
     display_id = "SYMBOL",
-    title      = "Down-regulated pathways (regulation colouring)"
+    title      = "Combined enrichment (regulation colouring)"
   )
 }
 ```
@@ -321,13 +289,13 @@ where a pathway may contain a mix of up and downregulated genes.
 
 ## Combined Up + Down genes (fold-change coloured + FC-sorted)
 
-This example uses an enrichment built from both up and down genes, colours
-chords by fold-change, and orders gene sectors by fold-change.
+This example uses the same combined enrichment, colours chords by fold-change,
+and orders gene sectors by fold-change.
 
 ```{r chord-both-fc-sorted, fig.width=9, fig.height=9, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("circlize", quietly=TRUE)}
-if (!is.null(msig_both$enrich) && nrow(msig_both$enrich@result) > 0) {
+if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
-    msig_both,
+    msig_hallmark,
     vista     = vista,
     sample_comparison    = comp_name,
     top_n         = 6,
@@ -374,13 +342,12 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 
 ## Increasing the threshold
 
-For dense enrichments (e.g. C2 canonical pathways), you can raise the
-threshold further:
+For denser enrichments, you can raise the threshold further:
 
 ```{r chord-hub-strict, fig.width=9, fig.height=9, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("circlize", quietly=TRUE)}
-if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
-  c2_result <- get_enrichment_chord(
-    msig_c2,
+if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
+  hub_strict <- get_enrichment_chord(
+    msig_hallmark,
     vista    = vista,
     sample_comparison   = comp_name,
     top_n        = 8,
@@ -388,11 +355,11 @@ if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
     max_genes    = 30,
     color_by     = "regulation",
     display_id   = "SYMBOL",
-    title        = "C2 Pathways: genes in 3+ pathways"
+    title        = "Combined Hallmark: genes in 3+ pathways"
   )
 
-  if (length(c2_result$hub_genes)) {
-    cat("Top hub genes:", paste(head(c2_result$hub_genes, 15), collapse = ", "), "\n")
+  if (length(hub_strict$hub_genes)) {
+    cat("Top hub genes:", paste(head(hub_strict$hub_genes, 15), collapse = ", "), "\n")
   }
 }
 ```
@@ -564,7 +531,7 @@ complete picture of functional enrichment.
 | Identify hub genes          | 8       | 2              | `"foldchange"`|
 | Publication figure          | 5--6    | 2              | `"foldchange"`|
 | Present to collaborators    | 4--5    | 1              | `"regulation"`|
-| Dense pathway sets (C2/C5)  | 6       | 3              | `"regulation"`|
+| Denser pathway sets         | 6       | 3              | `"regulation"`|
 
 # Session Information
 

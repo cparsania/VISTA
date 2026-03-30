@@ -20,6 +20,9 @@ A \code{VISTA} object.
 \description{
 Creates a lightweight \code{VISTA} object from built-in package datasets
 (\code{count_data} and \code{sample_metadata}) for use in examples and tutorials.
+The default call returns a precomputed object to keep examples and package
+checks fast. Non-default argument combinations fall back to rebuilding the
+object from the packaged example inputs.
 }
 \examples{
 v <- example_vista()

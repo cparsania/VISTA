@@ -60,6 +60,7 @@ Regulation is derived from the \code{log2fc} and \code{pval} cutoffs stored in
 \code{cutoffs(x)} (and \code{p_value_type} from the same list, defaulting to \code{"padj"}).
 }
 \examples{
+\dontrun{
 data('count_data', package = 'VISTA')
 data('sample_metadata', package = 'VISTA')
 cell_levels <- unique(sample_metadata$cell)
@@ -70,5 +71,6 @@ if (length(cell_levels) >= 3) {
   comp_names <- names(comparisons(v))[1:2]
   p <- get_foldchange_scatter(v, sample_comparisons = comp_names)
   print(p)
+}
 }
 }

@@ -69,11 +69,13 @@ NULL
 
 #' @name get_enrichment_plot
 #' @examples
+#' \dontrun{
 #' v <- example_vista()
 #' com <- names(comparisons(v))[1]
 #' if (requireNamespace('msigdbr', quietly = TRUE)) {
 #'   ms <- try(get_msigdb_enrichment(v, sample_comparison = com, regulation = 'Up', from_type = 'ENSEMBL'), silent = TRUE)
 #'   if (!inherits(ms, 'try-error') && !is.null(ms$enrich)) print(get_enrichment_plot(ms$enrich))
+#' }
 #' }
 NULL
 
@@ -264,6 +266,7 @@ NULL
 
 #' @name get_foldchange_scatter
 #' @examples
+#' \dontrun{
 #' data('count_data', package = 'VISTA')
 #' data('sample_metadata', package = 'VISTA')
 #' cell_levels <- unique(sample_metadata$cell)
@@ -274,6 +277,7 @@ NULL
 #'   comp_names <- names(comparisons(v))[1:2]
 #'   p <- get_foldchange_scatter(v, sample_comparisons = comp_names)
 #'   print(p)
+#' }
 #' }
 NULL
 
@@ -287,6 +291,7 @@ NULL
 
 #' @name get_go_enrichment
 #' @examples
+#' \dontrun{
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
 #' if (requireNamespace('org.Mm.eg.db', quietly = TRUE)) {
@@ -294,16 +299,19 @@ NULL
 #'                                orgdb = org.Mm.eg.db::org.Mm.eg.db), silent = TRUE)
 #'   if (!inherits(out, 'try-error')) out
 #' }
+#' }
 NULL
 
 #' @name get_gsea
 #' @return An object returned by this function.
 #' @examples
+#' \dontrun{
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
 #' if (requireNamespace('msigdbr', quietly = TRUE)) {
 #'   out <- try(get_gsea(v, sample_comparison = comp, set_type = 'msigdb', from_type = 'ENSEMBL', species = 'Homo sapiens'), silent = TRUE)
 #'   if (!inherits(out, 'try-error')) out
+#' }
 #' }
 NULL
 
@@ -384,6 +392,7 @@ NULL
 
 #' @name run_vista_report
 #' @examples
+#' \dontrun{
 #' data('count_data', package = 'VISTA')
 #' data('sample_metadata', package = 'VISTA')
 #' cfg <- list(
@@ -398,6 +407,7 @@ NULL
 #' if (requireNamespace('quarto', quietly = TRUE)) {
 #'   out <- tempfile(fileext = '.html')
 #'   try(run_vista_report(cfg, output_file = out), silent = TRUE)
+#' }
 #' }
 NULL
 

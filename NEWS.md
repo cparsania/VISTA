@@ -1,5 +1,8 @@
 # VISTA 0.99.1
 
+- `example_vista()` now uses a precomputed default object to reduce example,
+  test, and package-check runtime while preserving the existing API.
+
 # VISTA 0.99.0
 
 *Submitted to Bioconductor 2026-02-11*

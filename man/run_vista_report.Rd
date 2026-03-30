@@ -33,6 +33,7 @@ includes:
 }
 }
 \examples{
+\dontrun{
 data('count_data', package = 'VISTA')
 data('sample_metadata', package = 'VISTA')
 cfg <- list(
@@ -47,5 +48,6 @@ cfg <- list(
 if (requireNamespace('quarto', quietly = TRUE)) {
   out <- tempfile(fileext = '.html')
   try(run_vista_report(cfg, output_file = out), silent = TRUE)
+}
 }
 }

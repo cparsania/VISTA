@@ -25,10 +25,12 @@ or \code{compareClusterResult} objects (including those returned by
 top terms selected per cluster.
 }
 \examples{
+\dontrun{
 v <- example_vista()
 com <- names(comparisons(v))[1]
 if (requireNamespace('msigdbr', quietly = TRUE)) {
   ms <- try(get_msigdb_enrichment(v, sample_comparison = com, regulation = 'Up', from_type = 'ENSEMBL'), silent = TRUE)
   if (!inherits(ms, 'try-error') && !is.null(ms$enrich)) print(get_enrichment_plot(ms$enrich))
+}
 }
 }
