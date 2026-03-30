@@ -60,12 +60,6 @@ A numeric matrix with genes in rows and samples (or groups) in columns.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 m <- get_expression_matrix(v)
 dim(m)
 #> [1] 123   6

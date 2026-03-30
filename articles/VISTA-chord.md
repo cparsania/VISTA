@@ -114,45 +114,15 @@ vista
 
 ### Run enrichment
 
-We need enrichment results as input. Let’s run MSigDB Hallmark and C2
-canonical pathways for upregulated genes, plus Hallmark sets for
-downregulated and combined (Up+Down) genes.
+We need one enrichment result as input. For this vignette, a single
+MSigDB Hallmark run on the combined Up+Down gene set is enough to
+demonstrate the full chord workflow while keeping render time lower.
 
 ``` r
 comp_name <- names(comparisons(vista))[1]
 
 # Hallmark gene sets (broad biological themes)
 msig_hallmark <- get_msigdb_enrichment(
-  vista,
-  sample_comparison = comp_name,
-  regulation  = "Up",
-  msigdb_category = "H",
-  species     = "Homo sapiens",
-  from_type   = "ENSEMBL"
-)
-
-# C2 curated pathways (more granular, more gene overlap)
-msig_c2 <- get_msigdb_enrichment(
-  vista,
-  sample_comparison = comp_name,
-  regulation  = "Up",
-  msigdb_category = "C2",
-  species     = "Homo sapiens",
-  from_type   = "ENSEMBL"
-)
-
-# Downregulated genes -- Hallmark
-msig_down <- get_msigdb_enrichment(
-  vista,
-  sample_comparison = comp_name,
-  regulation  = "Down",
-  msigdb_category = "H",
-  species     = "Homo sapiens",
-  from_type   = "ENSEMBL"
-)
-
-# Combined Up+Down genes -- Hallmark
-msig_both <- get_msigdb_enrichment(
   vista,
   sample_comparison = comp_name,
   regulation  = "Both",
@@ -171,17 +141,17 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 #>                                                                           Description
 #> HALLMARK_TNFA_SIGNALING_VIA_NFKB                     HALLMARK_TNFA_SIGNALING_VIA_NFKB
 #> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION
-#> HALLMARK_ADIPOGENESIS                                           HALLMARK_ADIPOGENESIS
+#> HALLMARK_P53_PATHWAY                                             HALLMARK_P53_PATHWAY
 #> HALLMARK_UV_RESPONSE_DN                                       HALLMARK_UV_RESPONSE_DN
 #> HALLMARK_HYPOXIA                                                     HALLMARK_HYPOXIA
-#> HALLMARK_P53_PATHWAY                                             HALLMARK_P53_PATHWAY
+#> HALLMARK_APOPTOSIS                                                 HALLMARK_APOPTOSIS
 #>                                                p.adjust Count
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           1.545341e-11    28
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 2.783488e-05    19
-#> HALLMARK_ADIPOGENESIS                      3.712120e-03    15
-#> HALLMARK_UV_RESPONSE_DN                    4.488757e-03    12
-#> HALLMARK_HYPOXIA                           5.929430e-03    14
-#> HALLMARK_P53_PATHWAY                       5.929430e-03    14
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           5.930643e-14    41
+#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 9.092248e-08    31
+#> HALLMARK_P53_PATHWAY                       9.092248e-08    31
+#> HALLMARK_UV_RESPONSE_DN                    1.871169e-04    20
+#> HALLMARK_HYPOXIA                           7.702140e-04    23
+#> HALLMARK_APOPTOSIS                         1.870028e-03    19
 ```
 
 This table tells us *what* is enriched. But it does not tell us whether
@@ -202,7 +172,7 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
     msig_hallmark,
     top_n    = 6,
     color_by = "pathway",
-    title    = "Hallmark Enrichment (Up-regulated, top 6 pathways)"
+    title    = "Hallmark Enrichment (Up+Down genes, top 6 pathways)"
   )
 }
 ```
@@ -242,8 +212,8 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 ![](VISTA-chord_files/figure-html/chord-inspect-1.png)
 
     #> 
-    #> Hub genes: ENSG00000060718, ENSG00000067082, ENSG00000099860, ENSG00000102804, ENSG00000118689, ENSG00000120129, ENSG00000122641, ENSG00000130066, ENSG00000132170, ENSG00000132334, ENSG00000142871, ENSG00000143878, ENSG00000148175, ENSG00000162772, ENSG00000163110 
-    #> Total hub genes: 22
+    #> Hub genes: ENSG00000003402, ENSG00000060718, ENSG00000067082, ENSG00000099860, ENSG00000100292, ENSG00000102804, ENSG00000108821, ENSG00000112715, ENSG00000117152, ENSG00000118689, ENSG00000120129, ENSG00000122641, ENSG00000124762, ENSG00000125657, ENSG00000128342 
+    #> Total hub genes: 34
 
 ## Fold-Change Colouring
 
@@ -271,9 +241,7 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 **What to look for:**
 
 - **Red chords** indicate strongly upregulated genes
-- **Blue/white chords** would indicate weakly changed or downregulated
-  genes (rare here since we enriched on upregulated genes, but
-  meaningful when using `regulation = "Both"`)
+- **Blue/white chords** indicate weakly changed or downregulated genes
 - The gradient legend (bottom-left) shows the fold-change scale
 
 ### Regulation-based colouring
@@ -282,15 +250,15 @@ A categorical alternative – chords coloured as Up (red), Down (green),
 or Other (grey):
 
 ``` r
-if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
+if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
-    msig_down,
+    msig_hallmark,
     vista  = vista,
     sample_comparison = comp_name,
     top_n      = 6,
     color_by   = "regulation",
     display_id = "SYMBOL",
-    title      = "Down-regulated pathways (regulation colouring)"
+    title      = "Combined enrichment (regulation colouring)"
   )
 }
 ```
@@ -325,13 +293,13 @@ downregulated genes.
 
 ### Combined Up + Down genes (fold-change coloured + FC-sorted)
 
-This example uses an enrichment built from both up and down genes,
-colours chords by fold-change, and orders gene sectors by fold-change.
+This example uses the same combined enrichment, colours chords by
+fold-change, and orders gene sectors by fold-change.
 
 ``` r
-if (!is.null(msig_both$enrich) && nrow(msig_both$enrich@result) > 0) {
+if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
-    msig_both,
+    msig_hallmark,
     vista     = vista,
     sample_comparison    = comp_name,
     top_n         = 6,
@@ -373,8 +341,8 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 
 ![](VISTA-chord_files/figure-html/chord-hub-1.png)
 
-    #> Hub genes found: 25 
-    #> Genes: ENSG00000003402, ENSG00000060718, ENSG00000067082, ENSG00000099860, ENSG00000102804, ENSG00000118689, ENSG00000120129, ENSG00000122641, ENSG00000130066, ENSG00000131979, ENSG00000132170, ENSG00000132334, ENSG00000142871, ENSG00000143878, ENSG00000148175, ENSG00000162772, ENSG00000163110, ENSG00000163661, ENSG00000164442, ENSG00000165030
+    #> Hub genes found: 43 
+    #> Genes: ENSG00000003402, ENSG00000060718, ENSG00000067082, ENSG00000085117, ENSG00000099860, ENSG00000100292, ENSG00000102804, ENSG00000105835, ENSG00000108821, ENSG00000112715, ENSG00000117152, ENSG00000118689, ENSG00000120129, ENSG00000122641, ENSG00000123610, ENSG00000124762, ENSG00000125657, ENSG00000128342, ENSG00000130066, ENSG00000131979
 
 **Interpretation:**
 
@@ -386,13 +354,12 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 
 ### Increasing the threshold
 
-For dense enrichments (e.g. C2 canonical pathways), you can raise the
-threshold further:
+For denser enrichments, you can raise the threshold further:
 
 ``` r
-if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
-  c2_result <- get_enrichment_chord(
-    msig_c2,
+if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
+  hub_strict <- get_enrichment_chord(
+    msig_hallmark,
     vista    = vista,
     sample_comparison   = comp_name,
     top_n        = 8,
@@ -400,18 +367,18 @@ if (!is.null(msig_c2$enrich) && nrow(msig_c2$enrich@result) > 0) {
     max_genes    = 30,
     color_by     = "regulation",
     display_id   = "SYMBOL",
-    title        = "C2 Pathways: genes in 3+ pathways"
+    title        = "Combined Hallmark: genes in 3+ pathways"
   )
 
-  if (length(c2_result$hub_genes)) {
-    cat("Top hub genes:", paste(head(c2_result$hub_genes, 15), collapse = ", "), "\n")
+  if (length(hub_strict$hub_genes)) {
+    cat("Top hub genes:", paste(head(hub_strict$hub_genes, 15), collapse = ", "), "\n")
   }
 }
 ```
 
 ![](VISTA-chord_files/figure-html/chord-hub-strict-1.png)
 
-    #> Top hub genes: ENSG00000004799, ENSG00000046653, ENSG00000048540, ENSG00000060718, ENSG00000071282, ENSG00000096060, ENSG00000099860, ENSG00000101347, ENSG00000101938, ENSG00000107796, ENSG00000109906, ENSG00000116962, ENSG00000119138, ENSG00000119711, ENSG00000120129
+    #> Top hub genes: ENSG00000003402, ENSG00000060718, ENSG00000067082, ENSG00000085117, ENSG00000099860, ENSG00000100292, ENSG00000102804, ENSG00000105835, ENSG00000108821, ENSG00000112715, ENSG00000117152, ENSG00000118689, ENSG00000120129, ENSG00000122641, ENSG00000123610
 
 ## Visual Customisation
 
@@ -593,13 +560,13 @@ form a complete picture of functional enrichment.
 
 ### Recommended defaults for common scenarios
 
-| Scenario                   | `top_n` | `min_pathways` | `color_by`     |
-|----------------------------|---------|----------------|----------------|
-| First exploration          | 6       | 1              | `"pathway"`    |
-| Identify hub genes         | 8       | 2              | `"foldchange"` |
-| Publication figure         | 5–6     | 2              | `"foldchange"` |
-| Present to collaborators   | 4–5     | 1              | `"regulation"` |
-| Dense pathway sets (C2/C5) | 6       | 3              | `"regulation"` |
+| Scenario                 | `top_n` | `min_pathways` | `color_by`     |
+|--------------------------|---------|----------------|----------------|
+| First exploration        | 6       | 1              | `"pathway"`    |
+| Identify hub genes       | 8       | 2              | `"foldchange"` |
+| Publication figure       | 5–6     | 2              | `"foldchange"` |
+| Present to collaborators | 4–5     | 1              | `"regulation"` |
+| Denser pathway sets      | 6       | 3              | `"regulation"` |
 
 ## Session Information
 
@@ -607,7 +574,7 @@ form a complete picture of functional enrichment.
 sessionInfo()
 #> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.3 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -634,7 +601,7 @@ sessionInfo()
 #>  [9] S4Vectors_0.48.0            BiocGenerics_0.56.0        
 #> [11] generics_0.1.4              MatrixGenerics_1.22.0      
 #> [13] matrixStats_1.5.0           dplyr_1.2.0                
-#> [15] ggplot2_4.0.2               VISTA_0.99.1               
+#> [15] ggplot2_4.0.2               VISTA_0.99.2               
 #> [17] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
@@ -643,7 +610,7 @@ sessionInfo()
 #>   [7] rstatix_0.7.3           edgeR_4.8.2             doParallel_1.0.17      
 #>  [10] lattice_0.22-9          MASS_7.3-65             backports_1.5.0        
 #>  [13] magrittr_2.0.4          limma_3.66.0            sass_0.4.10            
-#>  [16] rmarkdown_2.30          jquerylib_0.1.4         yaml_2.3.12            
+#>  [16] rmarkdown_2.31          jquerylib_0.1.4         yaml_2.3.12            
 #>  [19] otel_0.2.0              ggtangle_0.1.1          cowplot_1.2.0          
 #>  [22] DBI_1.3.0               RColorBrewer_1.1-3      abind_1.4-8            
 #>  [25] purrr_1.2.1             R.utils_2.13.0          msigdbr_26.1.0         
@@ -655,7 +622,7 @@ sessionInfo()
 #>  [43] aplot_0.2.9             farver_2.1.2            jsonlite_2.0.0         
 #>  [46] GetoptLong_1.1.0        Formula_1.2-5           iterators_1.0.14       
 #>  [49] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
-#>  [52] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.1             
+#>  [52] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.2             
 #>  [55] Rcpp_1.1.1              glue_1.8.0              SparseArray_1.10.9     
 #>  [58] xfun_0.57               DESeq2_1.50.2           qvalue_2.42.0          
 #>  [61] withr_3.0.2             BiocManager_1.30.27     fastmap_1.2.0          
@@ -668,7 +635,7 @@ sessionInfo()
 #>  [82] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
 #>  [85] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
 #>  [88] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          
-#>  [91] bookdown_0.46           fgsea_1.36.2            clue_0.3-67            
+#>  [91] bookdown_0.46           fgsea_1.36.2            clue_0.3-68            
 #>  [94] scales_1.4.0            png_0.1-9               ggfun_0.2.0            
 #>  [97] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
 #> [100] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
@@ -679,7 +646,7 @@ sessionInfo()
 #> [115] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.3         
 #> [118] rlang_1.1.7             crayon_1.5.3            ggsignif_0.6.4         
 #> [121] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
-#> [124] fs_2.0.0                ggiraph_0.9.6           stringi_1.8.7          
+#> [124] fs_2.0.1                ggiraph_0.9.6           stringi_1.8.7          
 #> [127] BiocParallel_1.44.0     assertthat_0.2.1        babelgene_22.9         
 #> [130] Biostrings_2.78.0       lazyeval_0.2.2          GOSemSim_2.36.0        
 #> [133] fontquiver_0.2.1        Matrix_1.7-4            patchwork_1.3.2        

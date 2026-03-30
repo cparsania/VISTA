@@ -48,6 +48,7 @@ and includes:
 ## Examples
 
 ``` r
+if (FALSE) { # \dontrun{
 data('count_data', package = 'VISTA')
 data('sample_metadata', package = 'VISTA')
 cfg <- list(
@@ -63,10 +64,5 @@ if (requireNamespace('quarto', quietly = TRUE)) {
   out <- tempfile(fileext = '.html')
   try(run_vista_report(cfg, output_file = out), silent = TRUE)
 }
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
+} # }
 ```

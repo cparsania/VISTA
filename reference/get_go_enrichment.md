@@ -64,23 +64,13 @@ A list with `enrich` containing an `enrichResult`.
 ## Examples
 
 ``` r
+if (FALSE) { # \dontrun{
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 comp <- names(comparisons(v))[1]
 if (requireNamespace('org.Mm.eg.db', quietly = TRUE)) {
   out <- try(get_go_enrichment(v, sample_comparison = comp, ont = 'BP', from_type = 'ENSEMBL',
                                orgdb = org.Mm.eg.db::org.Mm.eg.db), silent = TRUE)
   if (!inherits(out, 'try-error')) out
 }
-#> --> No gene can be mapped....
-#> --> Expected input gene ID: ENSMUSG00000022672,ENSMUSG00000024240,ENSMUSG00000030697,ENSMUSG00000029275,ENSMUSG00000021177,ENSMUSG00000020152
-#> --> return NULL...
-#> $enrich
-#> NULL
-#> 
+} # }
 ```

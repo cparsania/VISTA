@@ -30,12 +30,6 @@ A modified `VISTA` object with updated comparison colors.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 comps <- names(comparisons(v))
 if (length(comps)) {
   cmap <- stats::setNames(rep('#1b9e77', length(comps)), comps)

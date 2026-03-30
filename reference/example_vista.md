@@ -2,6 +2,9 @@
 
 Creates a lightweight `VISTA` object from built-in package datasets
 (`count_data` and `sample_metadata`) for use in examples and tutorials.
+The default call returns a precomputed object to keep examples and
+package checks fast. Non-default argument combinations fall back to
+rebuilding the object from the packaged example inputs.
 
 ## Usage
 
@@ -33,12 +36,6 @@ A `VISTA` object.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 v
 #> class: SummarizedExperiment 
 #> dim: 123 6 

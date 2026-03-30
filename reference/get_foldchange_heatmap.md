@@ -160,12 +160,6 @@ both depending on `return_type`.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 comp <- names(comparisons(v))[1]
 genes <- unique(stats::na.omit(as.character(comparisons(v)[[comp]]$gene_id)))[1:20]
 if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
@@ -180,12 +174,6 @@ if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
 }
 
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
     requireNamespace("circlize", quietly = TRUE)) {
   hm <- get_foldchange_heatmap(v, return_type = "heatmap")

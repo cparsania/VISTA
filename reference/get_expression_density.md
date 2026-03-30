@@ -91,12 +91,6 @@ A `ggplot2` object.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 genes <- head(rownames(v), 3)
 p <- get_expression_density(v, genes = genes)
 print(p)

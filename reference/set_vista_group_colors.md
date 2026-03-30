@@ -29,12 +29,6 @@ A modified `VISTA` object with updated group colors.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 groups <- unique(as.character(sample_info(v)$cond_long))
 gmap <- stats::setNames(c('#1b9e77', '#d95f02')[seq_along(groups)], groups)
 set_vista_group_colors(v, gmap)

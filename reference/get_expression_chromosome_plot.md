@@ -207,12 +207,6 @@ A `ggplot2` object or a list of `ggplot2` objects when multiple
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 p <- try(get_expression_chromosome_plot(v), silent = TRUE)
 if (!inherits(p, 'try-error')) print(p)
 ```

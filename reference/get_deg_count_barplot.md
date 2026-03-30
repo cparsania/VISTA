@@ -55,12 +55,6 @@ An object returned by this function.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 p <- get_deg_count_barplot(v)
 print(p)
 ```

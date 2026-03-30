@@ -68,12 +68,6 @@ VISTA object with cell_fractions added to metadata.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 if (requireNamespace('xCell2', quietly = TRUE)) {
   out <- try(run_cell_deconvolution(v, method = 'xCell2'), silent = TRUE)
   if (!inherits(out, 'try-error')) out

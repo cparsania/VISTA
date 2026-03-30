@@ -1,6 +1,12 @@
 # Changelog
 
+## VISTA 0.99.2
+
 ## VISTA 0.99.1
+
+- [`example_vista()`](../reference/example_vista.md) now uses a
+  precomputed default object to reduce example, test, and package-check
+  runtime while preserving the existing API.
 
 ## VISTA 0.99.0
 

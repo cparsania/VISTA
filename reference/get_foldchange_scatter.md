@@ -90,6 +90,7 @@ Regulation is derived from the `log2fc` and `pval` cutoffs stored in
 ## Examples
 
 ``` r
+if (FALSE) { # \dontrun{
 data('count_data', package = 'VISTA')
 data('sample_metadata', package = 'VISTA')
 cell_levels <- unique(sample_metadata$cell)
@@ -101,10 +102,5 @@ if (length(cell_levels) >= 3) {
   p <- get_foldchange_scatter(v, sample_comparisons = comp_names)
   print(p)
 }
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
+} # }
 ```

@@ -124,27 +124,8 @@ A ggplot object with UMAP1/UMAP2 coordinates.
 
 ``` r
 if (requireNamespace("uwot", quietly = TRUE)) {
-  data("count_data", package = "VISTA")
-  data("sample_metadata", package = "VISTA")
-
-  vista <- create_vista(
-    counts = count_data[1:200, ],
-    sample_info = sample_metadata[1:6, ],
-    column_geneid = "gene_id",
-    group_column = "cond_long",
-    group_numerator = "treatment1",
-    group_denominator = "control"
-  )
-
-  get_umap_plot(vista)
-  get_umap_plot(vista, color_by = "cell")
+  vista <- example_vista()
+  get_umap_plot(vista, top_n_genes = 50)
 }
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
-#> Warning: `n_neighbors` (15) must be smaller than sample size (6); using 5.
 #> Warning: `n_neighbors` (15) must be smaller than sample size (6); using 5.
 ```

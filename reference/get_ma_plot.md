@@ -85,12 +85,6 @@ plot.
 
 ``` r
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 p <- get_ma_plot(v, sample_comparison = names(comparisons(v))[1])
 print(p)
 ```

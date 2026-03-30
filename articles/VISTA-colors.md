@@ -365,7 +365,7 @@ if (requireNamespace("patchwork", quietly = TRUE)) {
 sessionInfo()
 #> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.3 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -385,14 +385,14 @@ sessionInfo()
 #> 
 #> other attached packages:
 #> [1] colorspace_2.1-2 tibble_3.3.1     dplyr_1.2.0      ggplot2_4.0.2   
-#> [5] VISTA_0.99.1     BiocStyle_2.38.0
+#> [5] VISTA_0.99.2     BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             
 #>   [3] tidydr_0.0.6                magrittr_2.0.4             
 #>   [5] ggtangle_0.1.1              farver_2.1.2               
-#>   [7] rmarkdown_2.30              fs_2.0.0                   
-#>   [9] ragg_1.5.1                  vctrs_0.7.2                
+#>   [7] rmarkdown_2.31              fs_2.0.1                   
+#>   [9] ragg_1.5.2                  vctrs_0.7.2                
 #>  [11] memoise_2.0.1               ggtree_4.0.5               
 #>  [13] rstatix_0.7.3               htmltools_0.5.9            
 #>  [15] S4Arrays_1.10.1             curl_7.0.0                 

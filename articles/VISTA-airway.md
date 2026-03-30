@@ -1938,7 +1938,7 @@ In this workflow, we:
 sessionInfo()
 #> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.3 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -1965,7 +1965,7 @@ sessionInfo()
 #>  [9] IRanges_2.44.0              S4Vectors_0.48.0           
 #> [11] BiocGenerics_0.56.0         generics_0.1.4             
 #> [13] MatrixGenerics_1.22.0       matrixStats_1.5.0          
-#> [15] ggplot2_4.0.2               VISTA_0.99.1               
+#> [15] ggplot2_4.0.2               VISTA_0.99.2               
 #> [17] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
@@ -1974,7 +1974,7 @@ sessionInfo()
 #>   [7] lifecycle_1.0.5         rstatix_0.7.3           edgeR_4.8.2            
 #>  [10] doParallel_1.0.17       lattice_0.22-9          MASS_7.3-65            
 #>  [13] backports_1.5.0         limma_3.66.0            sass_0.4.10            
-#>  [16] rmarkdown_2.30          jquerylib_0.1.4         yaml_2.3.12            
+#>  [16] rmarkdown_2.31          jquerylib_0.1.4         yaml_2.3.12            
 #>  [19] otel_0.2.0              ggtangle_0.1.1          EnhancedVolcano_1.28.2 
 #>  [22] cowplot_1.2.0           DBI_1.3.0               RColorBrewer_1.1-3     
 #>  [25] abind_1.4-8             purrr_1.2.1             R.utils_2.13.0         
@@ -1987,7 +1987,7 @@ sessionInfo()
 #>  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.0       
 #>  [49] Formula_1.2-5           ggridges_0.5.7          iterators_1.0.14       
 #>  [52] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
-#>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.1             
+#>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.2             
 #>  [58] Rcpp_1.1.1              glue_1.8.0              gridExtra_2.3          
 #>  [61] SparseArray_1.10.9      xfun_0.57               DESeq2_1.50.2          
 #>  [64] qvalue_2.42.0           dplyr_1.2.0             withr_3.0.2            
@@ -2003,7 +2003,7 @@ sessionInfo()
 #>  [94] ComplexHeatmap_2.26.1   S7_0.2.1                XVector_0.50.0         
 #>  [97] clusterProfiler_4.18.4  htmltools_0.5.9         carData_3.0-6          
 #> [100] fontBitstreamVera_0.1.1 bookdown_0.46           fgsea_1.36.2           
-#> [103] clue_0.3-67             scales_1.4.0            png_0.1-9              
+#> [103] clue_0.3-68             scales_1.4.0            png_0.1-9              
 #> [106] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         
 #> [109] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             
 #> [112] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          
@@ -2013,7 +2013,7 @@ sessionInfo()
 #> [124] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        
 #> [127] compiler_4.5.3          rlang_1.1.7             crayon_1.5.3           
 #> [130] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          
-#> [133] plyr_1.8.9              fs_2.0.0                ggiraph_0.9.6          
+#> [133] plyr_1.8.9              fs_2.0.1                ggiraph_0.9.6          
 #> [136] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    
 #> [139] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
 #> [142] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       

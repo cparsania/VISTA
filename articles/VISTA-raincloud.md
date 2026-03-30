@@ -300,7 +300,7 @@ while staying consistent with the rest of the plotting API.
 sessionInfo()
 #> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.3 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -319,14 +319,14 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.2    VISTA_0.99.1     BiocStyle_2.38.0
+#> [1] ggplot2_4.0.2    VISTA_0.99.2     BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          ggrain_0.1.2               
 #>   [3] jsonlite_2.0.0              tidydr_0.0.6               
 #>   [5] magrittr_2.0.4              ggtangle_0.1.1             
-#>   [7] farver_2.1.2                rmarkdown_2.30             
-#>   [9] fs_2.0.0                    ragg_1.5.1                 
+#>   [7] farver_2.1.2                rmarkdown_2.31             
+#>   [9] fs_2.0.1                    ragg_1.5.2                 
 #>  [11] vctrs_0.7.2                 memoise_2.0.1              
 #>  [13] ggtree_4.0.5                rstatix_0.7.3              
 #>  [15] htmltools_0.5.9             S4Arrays_1.10.1            

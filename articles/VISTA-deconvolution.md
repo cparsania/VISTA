@@ -262,7 +262,7 @@ get_celltype_heatmap(
 sessionInfo()
 #> R version 4.5.3 (2026-03-11)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.3 LTS
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -290,7 +290,7 @@ sessionInfo()
 #> [11] Seqinfo_1.0.0               IRanges_2.44.0             
 #> [13] S4Vectors_0.48.0            BiocGenerics_0.56.0        
 #> [15] generics_0.1.4              MatrixGenerics_1.22.0      
-#> [17] matrixStats_1.5.0           VISTA_0.99.1               
+#> [17] matrixStats_1.5.0           VISTA_0.99.2               
 #> [19] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
@@ -303,7 +303,7 @@ sessionInfo()
 #>  [13] lattice_0.22-9              MASS_7.3-65                
 #>  [15] backports_1.5.0             magrittr_2.0.4             
 #>  [17] limma_3.66.0                sass_0.4.10                
-#>  [19] rmarkdown_2.30              jquerylib_0.1.4            
+#>  [19] rmarkdown_2.31              jquerylib_0.1.4            
 #>  [21] yaml_2.3.12                 otel_0.2.0                 
 #>  [23] ggtangle_0.1.1              cowplot_1.2.0              
 #>  [25] DBI_1.3.0                   RColorBrewer_1.1-3         
@@ -322,7 +322,7 @@ sessionInfo()
 #>  [51] Formula_1.2-5               systemfonts_1.3.2          
 #>  [53] progress_1.2.3              tools_4.5.3                
 #>  [55] ggnewscale_0.5.2            treeio_1.34.0              
-#>  [57] xCell2_1.2.3                ragg_1.5.1                 
+#>  [57] xCell2_1.2.3                ragg_1.5.2                 
 #>  [59] Rcpp_1.1.1                  glue_1.8.0                 
 #>  [61] SparseArray_1.10.9          xfun_0.57                  
 #>  [63] DESeq2_1.50.2               qvalue_2.42.0              
@@ -360,7 +360,7 @@ sessionInfo()
 #> [127] compiler_4.5.3              rlang_1.1.7                
 #> [129] crayon_1.5.3                ggsignif_0.6.4             
 #> [131] labeling_0.4.3              plyr_1.8.9                 
-#> [133] fs_2.0.0                    ggiraph_0.9.6              
+#> [133] fs_2.0.1                    ggiraph_0.9.6              
 #> [135] stringi_1.8.7               viridisLite_0.4.3          
 #> [137] BiocParallel_1.44.0         assertthat_0.2.1           
 #> [139] babelgene_22.9              Biostrings_2.78.0          

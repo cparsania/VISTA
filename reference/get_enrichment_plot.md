@@ -34,16 +34,12 @@ A `ggplot2` object.
 ## Examples
 
 ``` r
+if (FALSE) { # \dontrun{
 v <- example_vista()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 com <- names(comparisons(v))[1]
 if (requireNamespace('msigdbr', quietly = TRUE)) {
   ms <- try(get_msigdb_enrichment(v, sample_comparison = com, regulation = 'Up', from_type = 'ENSEMBL'), silent = TRUE)
   if (!inherits(ms, 'try-error') && !is.null(ms$enrich)) print(get_enrichment_plot(ms$enrich))
 }
+} # }
 ```
