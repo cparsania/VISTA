@@ -2807,18 +2807,36 @@ get_expression_lollipop <- function(x,
 #' @param x A `VISTA` object.
 #' @param genes Character vector of gene identifiers to plot.
 #' @param sample_group Optional character vector specifying which groups (values taken from `group_column`) to include.
+#' @param group_column Optional column name in `sample_info` defining the grouping/faceting variable.
+#' @param log_transform Logical; log2-transform expression values before plotting.
+#' @param display_id Optional ID/column name to use for gene labels. If supplied
+#'   and present in `rowData(x)`, those values are used.
+#' @param display_from Optional source ID type for mapping (reserved for
+#'   compatibility with other expression plotting APIs).
+#' @param display_orgdb Optional `OrgDb` object used for ID mapping when
+#'   `display_id` is set but not found in `rowData`.
+#' @param facet_scales Scaling option passed to `facet_wrap()`.
+#' @param stats_group Logical retained for API consistency. Statistical overlays
+#'   are not currently added by `get_expression_lineplot()`.
+#' @param p.label Label format retained for API consistency with other
+#'   expression plots.
+#' @param comparisons Optional list of comparisons retained for API consistency.
+#' @param pool_genes Logical; when `TRUE`, average the selected genes into a
+#'   single trajectory.
 #' @param by Plot unit: `"sample"` (default) or `"group"` to average
 #'   replicates before plotting.
-#' @param value_transform Transformation applied to expression values; one of `"log2"`, `"zscore"`, or `"none"`.
-#' @param facet_by Faceting mode: `"none"` (default), `"group"`, or `"gene"`.
+#' @param facet_by Faceting mode: `"auto"` (default), `"none"`, `"group"`, or `"gene"`.
+#' @param fill_by Argument retained for API consistency; ignored because line
+#'   plots use colour rather than fill.
 #' @param sample_order Ordering used for sample-level plots: `"input"`,
 #'   `"group"`, or `"expression"`.
+#' @param value_transform Deprecated compatibility alias for transformation
+#'   choice; one of `"log2"`, `"zscore"`, or `"none"`.
 #' @param palette Optional qualitative palette name used for gene colours.
 #' @param colors Optional named character vector of manual gene colours.
 #' @param line_width Line width.
 #' @param point_size Point size.
 #' @param base_size Base theme size.
-#' @param group_column Optional column name in `sample_info` defining the grouping/faceting variable.
 #' @aliases get_expression_lineplot
 #' @export
 get_expression_lineplot <- function(x,

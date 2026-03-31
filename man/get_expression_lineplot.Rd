@@ -39,15 +39,43 @@ get_expression_lineplot(
 
 \item{group_column}{Optional column name in \code{sample_info} defining the grouping/faceting variable.}
 
+\item{log_transform}{Logical; log2-transform expression values before plotting.}
+
+\item{display_id}{Optional ID/column name to use for gene labels. If supplied
+and present in \code{rowData(x)}, those values are used.}
+
+\item{display_from}{Optional source ID type for mapping (reserved for
+compatibility with other expression plotting APIs).}
+
+\item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when
+\code{display_id} is set but not found in \code{rowData}.}
+
+\item{facet_scales}{Scaling option passed to \code{facet_wrap()}.}
+
+\item{stats_group}{Logical retained for API consistency. Statistical overlays
+are not currently added by \code{get_expression_lineplot()}.}
+
+\item{p.label}{Label format retained for API consistency with other
+expression plots.}
+
+\item{comparisons}{Optional list of comparisons retained for API consistency.}
+
+\item{pool_genes}{Logical; when \code{TRUE}, average the selected genes into a
+single trajectory.}
+
 \item{by}{Plot unit: \code{"sample"} (default) or \code{"group"} to average
 replicates before plotting.}
 
-\item{facet_by}{Faceting mode: \code{"none"} (default), \code{"group"}, or \code{"gene"}.}
+\item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"none"}, \code{"group"}, or \code{"gene"}.}
+
+\item{fill_by}{Argument retained for API consistency; ignored because line
+plots use colour rather than fill.}
 
 \item{sample_order}{Ordering used for sample-level plots: \code{"input"},
 \code{"group"}, or \code{"expression"}.}
 
-\item{value_transform}{Transformation applied to expression values; one of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
+\item{value_transform}{Deprecated compatibility alias for transformation
+choice; one of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
 
 \item{palette}{Optional qualitative palette name used for gene colours.}
 
