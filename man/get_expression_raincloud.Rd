@@ -33,27 +33,30 @@ get_expression_raincloud(
 \arguments{
 \item{x}{A \code{VISTA} object.}
 
-\item{genes}{Optional character vector of gene IDs to include; defaults to all.}
+\item{genes}{Optional character vector of gene IDs to include; defaults to
+all genes selected by the plotting mode.}
 
 \item{sample_group}{Optional subset of groups (values of \code{group_column}) to keep.}
 
 \item{group_column}{Grouping column in \code{sample_info}; defaults to the stored grouping.}
 
-\item{by}{Plot unit. Violin plots currently support only \code{"group"}, because
-a violin needs replicate-level distributions within groups rather than
-single values per sample.}
+\item{by}{Plot unit. Violin plots currently support only \code{"group"}.}
 
-\item{value_transform}{One of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
+\item{value_transform}{Deprecated compatibility alias. \code{"log2"} maps to
+\code{log_transform = TRUE}, \code{"none"} maps to \code{FALSE}, and \code{"zscore"} applies a
+per-gene z-score transform.}
 
 \item{summarise}{Logical; when \code{TRUE}, collapse replicates within each
 group for each gene (one value per gene per group). This is useful for
 pooled multi-gene raincloud plots where each dot represents one gene-level
 summary in a group.}
 
-\item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"gene"}, or \code{"none"}.}
+\item{facet_by}{Faceting mode. Uses the same argument pattern as
+\code{\link[=get_expression_boxplot]{get_expression_boxplot()}}, but \code{pool_genes = TRUE} falls back to \code{"none"}
+because pooled violins already aggregate across genes.}
 
-\item{sample_order}{Ordering for sample-level x-axis display: \code{"input"},
-\code{"group"}, or \code{"expression"} before values are grouped into violins.}
+\item{sample_order}{Ordering for sample-level display before values are
+grouped into violins.}
 
 \item{rain_side}{Side specification passed to \code{ggrain::geom_rain()}; one of
 \code{"r"}, \code{"l"}, \code{"f"}, \code{"f1x1"}, or \code{"f2x2"}.}

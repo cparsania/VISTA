@@ -323,7 +323,7 @@ up_genes <- get_genes_by_regulation(
   vista,
   sample_comparisons = comp_names[1],
   regulation = "Up",
-  top_n = 50
+  #top_n = 50
 )
 
 # Extract downregulated genes
@@ -331,7 +331,7 @@ down_genes <- get_genes_by_regulation(
   vista,
   sample_comparisons = comp_names[1],
   regulation = "Down",
-  top_n = 50
+  #top_n = 50
 )
 
 # Summary
@@ -348,7 +348,7 @@ Check sample relationships and potential batch effects.
 ### Basic correlation heatmap
 
 ```{r corr-heatmap-basic, fig.width=7, fig.height=6}
-get_corr_heatmap(vista)
+  get_corr_heatmap(vista, label_size = 18,base_size = 18, viridis_direction = -1)
 ```
 
 ### Customize color scheme
@@ -358,7 +358,9 @@ get_corr_heatmap(vista)
 get_corr_heatmap(
   vista,
   viridis_direction = -1,
-  viridis_option = "plasma"
+  viridis_option = "plasma",
+  label_size = 18,
+  base_size = 18
 )
 ```
 
@@ -368,9 +370,12 @@ get_corr_heatmap(
 # Display correlation coefficients
 get_corr_heatmap(
   vista,
+  viridis_direction = -1,
   show_corr_values = TRUE,
   col_corr_values = 'white',
-  viridis_option = "mako"
+  viridis_option = "mako",
+  label_size = 14,
+  base_size = 14
 ) 
 ```
 
@@ -383,8 +388,8 @@ Visualize sample clustering and variation.
 ```{r pca-basic, fig.width=8, fig.height=6}
 get_pca_plot(
   vista,
-  label = TRUE
-) + theme_minimal(base_size = 16)
+  label = TRUE,label_size = 5
+)
 ```
 
 ### PCA colored by different metadata
@@ -394,6 +399,7 @@ get_pca_plot(
 get_pca_plot(
   vista,
   label = TRUE,
+  label_size = 5,
   shape_by = "cell"
 )
 ```
@@ -417,7 +423,7 @@ get_pca_plot(
 get_pca_plot(
   vista,
   label = TRUE,
-  point_size = 15
+  point_size = 15,label_size = 5
 )
 ```
 
@@ -593,25 +599,13 @@ get_ma_plot(
 ```{r prep-gene-sets}
 # Get top 50 DEGs by adjusted p-value
 de_table <- comparisons(vista)[[1]]
-top_degs <- de_table[order(de_table$padj), ][1:50, "gene_id"]
 
-# Select genes with known symbols
-de_with_symbols <- merge(
-  de_results,
-  as.data.frame(rowData(vista)),
-  by.x = "gene_id",
-  by.y = "row.names"
-)
+top_degs <- get_genes_by_regulation(vista, names(comparisons(vista))[1],regulation = "Both",top_n = 50)[[1]]  # top 50 by abs fold change 
 
-# Top upregulated genes
-top_up <- de_with_symbols[
-  de_with_symbols$regulation == "Up" & !is.na(de_with_symbols$SYMBOL),
-][1:6, c("gene_id", "SYMBOL", "log2fc", "padj")]
+top_up <- get_genes_by_regulation(vista, names(comparisons(vista))[1],regulation = "Up",top_n = 50)[[1]]  
 
-# Top downregulated genes
-top_down <- de_with_symbols[
-  de_with_symbols$regulation == "Down" & !is.na(de_with_symbols$SYMBOL),
-][1:6, c("gene_id", "SYMBOL", "log2fc", "padj")]
+top_down <- get_genes_by_regulation(vista, names(comparisons(vista))[1],regulation = "Down",top_n = 50)[[1]]  
+
 
 cat("Top upregulated genes:\n")
 print(top_up)
@@ -634,7 +628,8 @@ get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
-  display_id = "SYMBOL"
+  display_id = "SYMBOL",
+  show_row_names = T
 )
 ```
 
@@ -647,7 +642,7 @@ get_expression_heatmap(
   genes = top_degs,
   display_id = "SYMBOL",
   kmeans_k = 3,
-  show_row_names = FALSE
+  show_row_names = T
 )
 ```
 
@@ -658,7 +653,7 @@ get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
-  show_row_names = FALSE,
+  show_row_names = T,
   display_id = "SYMBOL",
   kmeans_k = 3,
   cluster_row_slice = FALSE,
@@ -672,13 +667,7 @@ get_expression_heatmap(
 ```{r heatmap-annotated-multi, fig.width=8, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 # Use multiple sample-level columns in top annotation.
 # By default, columns are split by the first annotation column.
-anno_cols <- list(
-  treatment = c(Untreated = "#1b9e77", Dexamethasone = "#d95f02"),
-  cell = stats::setNames(
-    colorspace::qualitative_hcl(length(unique(colData(vista)$cell)), palette = "Set 2"),
-    unique(as.character(colData(vista)$cell))
-  )
-)
+
 
 get_expression_heatmap(
   vista,
@@ -688,12 +677,11 @@ get_expression_heatmap(
   display_id = "SYMBOL",
   summarise_replicates = FALSE,
   annotate_columns = c("treatment", "cell"),
-  column_anno_colors = anno_cols,
   cluster_by = "cell"
 )
 ```
 
-### Heatmap with summarized replicates
+### Heatmap showing each replicate
 
 ```{r heatmap-summarized, fig.width=7, fig.height=9, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
 get_expression_heatmap(
@@ -701,25 +689,13 @@ get_expression_heatmap(
   sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL",
-  summarise_replicates = TRUE,
+  summarise_replicates = FALSE,
   show_row_names = FALSE,
+  annotate_columns = T,
   kmeans_k = 2
 )
 ```
 
-### Heatmap showing gene names
-
-```{r heatmap-gene-names, fig.width=8, fig.height=10, eval=requireNamespace("ComplexHeatmap", quietly=TRUE)}
-# Smaller gene set to show names
-get_expression_heatmap(
-  vista,
-  sample_group = levels(colData(vista)$treatment),
-  genes = top_degs[1:25],
-  display_id = "SYMBOL",
-  show_row_names = TRUE,
-  label_size = 8
-)
-```
 
 ## Expression Barplots
 
@@ -728,9 +704,9 @@ get_expression_heatmap(
 ```{r barplot-basic, fig.width=9, fig.height=6}
 get_expression_barplot(
   vista,
-  genes = top_up$gene_id[1:4],
-  display_id = "SYMBOL"
-)
+  genes = top_up[1:4],
+  display_id = "SYMBOL",
+)+theme_minimal(base_size = 16)
 ```
 
 ### Log-transformed with statistics
@@ -739,11 +715,11 @@ get_expression_barplot(
 # Add statistical comparisons between groups
 get_expression_barplot(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE,
   stats_group = TRUE  # Enable statistical annotations
-)
+) + theme_minimal(base_size = 16)
 ```
 
 ### Per-sample barplot for selected genes
@@ -751,25 +727,25 @@ get_expression_barplot(
 ```{r barplot-per-sample, fig.width=10, fig.height=6}
 get_expression_barplot(
   vista,
-  genes = top_up$gene_id[1:2],
+  genes = top_up[1:2],
   display_id = "SYMBOL",
   by = "sample",
   sample_order = "group"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ### Compare up and down regulated genes
 
 ```{r barplot-comparison, fig.width=10, fig.height=6}
 # Compare expression of both up- and down-regulated genes
-selected_genes <- c(top_up$gene_id[1:3], top_down$gene_id[1:3])
+selected_genes <- c(top_up[1:3], top_down[1:3])
 get_expression_barplot(
   vista,
   genes = selected_genes,
   display_id = "SYMBOL",
   log_transform = TRUE,
   stats_group = TRUE
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ## Expression Boxplots
@@ -779,9 +755,9 @@ get_expression_barplot(
 ```{r boxplot-basic, fig.width=9, fig.height=6}
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ### Boxplot without faceting
@@ -790,10 +766,10 @@ get_expression_boxplot(
 # All genes overlaid on same plot
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   display_id = "SYMBOL",
   facet_by = "none"
-)
+) + theme(text = element_text(size = 16))
 ```
 
 ### Boxplot with faceting by gene
@@ -802,11 +778,11 @@ get_expression_boxplot(
 # Each gene in separate panel - must specify facet_by = "gene"
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   display_id = "SYMBOL",
   facet_by = "gene",
   facet_scales = "free_y"
-)
+) + theme(text = element_text(size = 16))
 ```
 
 ### Boxplot with gene facets AND statistics
@@ -815,14 +791,14 @@ get_expression_boxplot(
 # Each gene in separate panel WITH statistical comparisons
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE,
   facet_by = "gene",
   facet_scales = "free_y",
   stats_group = TRUE,  # Add statistics to each gene panel
   p.label = "p.signif"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ### Pooled genes with statistics
@@ -831,13 +807,14 @@ get_expression_boxplot(
 # Pool all genes together for group comparison with statistical test
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:5],
+  genes = top_up[1:5],
   display_id = "SYMBOL",
   log_transform = TRUE,
   pool_genes = TRUE,
+  facet_by = "none",
   stats_group = TRUE,  # Required for statistical annotations
   p.label = "p.signif"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ### Log-transformed with p-values
@@ -846,12 +823,12 @@ get_expression_boxplot(
 # Show statistical comparisons between treatment groups
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE,
   stats_group = TRUE,  # Enable statistical annotations
   p.label = "p.signif"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ## Expression Violin Plots
@@ -861,8 +838,9 @@ get_expression_boxplot(
 ```{r violin-basic, fig.width=9, fig.height=6}
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id
-)
+  genes = top_up[1:4],
+  display_id = "SYMBOL"
+)+ theme(text = element_text(size = 16))
 ```
 
 ### Violin with log2 transformation
@@ -870,9 +848,10 @@ get_expression_violinplot(
 ```{r violin-log, fig.width=9, fig.height=6}
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id,
-  value_transform = "log2"
-)
+  genes = top_up[1:4],,
+  display_id = "SYMBOL",
+  value_transform = "none"
+)+ theme(text = element_text(size = 16))
 ```
 
 ### Violin with z-score transformation
@@ -880,9 +859,9 @@ get_expression_violinplot(
 ```{r violin-zscore, fig.width=8, fig.height=6}
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id,
+  genes = top_up[1:4],
   value_transform = "zscore"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ## Additional Expression Plots
@@ -892,9 +871,9 @@ get_expression_violinplot(
 ```{r density-plot, fig.width=9, fig.height=6}
 get_expression_density(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:50],
   log_transform = TRUE
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ### Scatter plot (sample vs sample)
@@ -907,8 +886,8 @@ get_expression_scatter(
   sample_x = samples[1],
   sample_y = samples[2],
   log_transform = TRUE,
-  label_n = 10
-)
+  label_n = 50,display_id = "SYMBOL",label_size = 4
+)+ theme(text = element_text(size = 16))
 ```
 
 ### Line plot (expression across samples)
@@ -916,8 +895,10 @@ get_expression_scatter(
 ```{r line-plot, fig.width=9, fig.height=6}
 get_expression_lineplot(
   vista,
-  genes = top_up$gene_id[1:3],
-  value_transform = "log2"
+  genes = top_up[1:3],
+  log_transform = T,display_id = "SYMBOL",
+  by = "sample",facet_by = "none",
+  group_column = "treatment",sample_group = c("Untreated","Dexamethasone")
 )
 ```
 
@@ -926,7 +907,7 @@ get_expression_lineplot(
 ```{r lollipop-plot, fig.width=9, fig.height=6}
 get_expression_lollipop(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE
 )
@@ -937,7 +918,7 @@ get_expression_lollipop(
 ```{r lollipop-per-sample, fig.width=10, fig.height=6}
 get_expression_lollipop(
   vista,
-  genes = top_up$gene_id[1:2],
+  genes = top_up[1:2],
   display_id = "SYMBOL",
   by = "sample",
   sample_order = "expression"
@@ -950,7 +931,7 @@ get_expression_lollipop(
 # Ridges by treatment group - shows distribution for each group
 get_expression_joyplot(
   vista,
-  genes = top_up$gene_id[1:5],
+  genes = top_up[1:5],
   log_transform = TRUE,
   y_by = "group",      # Each treatment group gets a ridge
   color_by = "group"   # Color by treatment group
@@ -963,7 +944,7 @@ get_expression_joyplot(
 # Ridges by individual sample - shows distribution for each sample
 get_expression_joyplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   log_transform = TRUE,
   y_by = "sample",     # Each sample gets a ridge
   color_by = "group"   # Color by treatment group
@@ -979,7 +960,7 @@ cat("Package 'ggrain' is not installed; expression raincloud plot example is ski
 ```{r raincloud-expression, fig.width=9, fig.height=6, eval=requireNamespace("ggrain", quietly=TRUE)}
 get_expression_raincloud(
   vista,
-  genes = top_up$gene_id,
+  genes = top_up,
   value_transform = "log2",
   summarise = TRUE,
   facet_by = "none",
@@ -1034,7 +1015,7 @@ if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
 ```{r enrichment-dotplot, fig.width=9, fig.height=7, eval=requireNamespace("msigdbr", quietly=TRUE)}
 # VISTA's wrapper function
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
-  get_enrichment_plot(msig_up$enrich, top_n = 15)
+  get_enrichment_plot(msig_up$enrich, top_n = 10)
 }
 ```
 
@@ -1043,7 +1024,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ```{r enrichment-barplot, fig.width=9, fig.height=6, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("enrichplot", quietly=TRUE)}
 # Use generic barplot with enrichResult method
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
-  barplot(msig_up$enrich, showCategory = 15)
+  barplot(msig_up$enrich, showCategory = 10)
 }
 ```
 
@@ -1052,7 +1033,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ```{r enrichment-dotplot-native, fig.width=9, fig.height=7, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("enrichplot", quietly=TRUE)}
 # Customized dotplot with more categories
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
-  enrichplot::dotplot(msig_up$enrich, showCategory = 20, font.size = 10)
+  enrichplot::dotplot(msig_up$enrich, showCategory = 20, font.size = 12)
 }
 ```
 
@@ -1335,7 +1316,7 @@ head(fc_matrix, n = 10)
 ```{r fc-barplot-gene, fig.width=9, fig.height=6}
 get_foldchange_barplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   sample_comparisons = comp_names,
   display_id = "SYMBOL",
   facet_by = "gene"
@@ -1348,7 +1329,7 @@ get_foldchange_barplot(
 get_foldchange_lollipop(
   vista,
   sample_comparison = comp_names[1],
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   display_id = "SYMBOL",
   facet_by = "gene"
 )
@@ -1411,7 +1392,7 @@ get_foldchange_heatmap(
 get_foldchange_heatmap(
   vista,
   sample_comparisons = comp_names,
-  genes = top_up$gene_id,
+  genes = top_up,
   show_row_names = TRUE,
   display_id = "SYMBOL"
 )

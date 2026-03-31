@@ -6,13 +6,23 @@
 \usage{
 get_expression_lineplot(
   x,
-  genes,
+  genes = NULL,
   sample_group = NULL,
   group_column = NULL,
+  log_transform = TRUE,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
+  facet_scales = "free_y",
+  stats_group = FALSE,
+  p.label = "p.signif",
+  comparisons = NULL,
+  pool_genes = FALSE,
   by = c("sample", "group"),
-  value_transform = c("log2", "zscore", "none"),
-  facet_by = c("none", "group", "gene"),
+  facet_by = c("auto", "group", "gene", "none"),
+  fill_by = NULL,
   sample_order = c("input", "group", "expression"),
+  value_transform = NULL,
   palette = NULL,
   colors = NULL,
   line_width = 1,
@@ -32,12 +42,12 @@ get_expression_lineplot(
 \item{by}{Plot unit: \code{"sample"} (default) or \code{"group"} to average
 replicates before plotting.}
 
-\item{value_transform}{Transformation applied to expression values; one of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
-
 \item{facet_by}{Faceting mode: \code{"none"} (default), \code{"group"}, or \code{"gene"}.}
 
 \item{sample_order}{Ordering used for sample-level plots: \code{"input"},
 \code{"group"}, or \code{"expression"}.}
+
+\item{value_transform}{Transformation applied to expression values; one of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
 
 \item{palette}{Optional qualitative palette name used for gene colours.}
 

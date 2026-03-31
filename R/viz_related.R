@@ -2822,13 +2822,23 @@ get_expression_lollipop <- function(x,
 #' @aliases get_expression_lineplot
 #' @export
 get_expression_lineplot <- function(x,
-                                    genes,
+                                    genes = NULL,
                                     sample_group = NULL,
                                     group_column = NULL,
+                                    log_transform = TRUE,
+                                    display_id = NULL,
+                                    display_from = NULL,
+                                    display_orgdb = NULL,
+                                    facet_scales = "free_y",
+                                    stats_group = FALSE,
+                                    p.label = "p.signif",
+                                    comparisons = NULL,
+                                    pool_genes = FALSE,
                                     by = c("sample", "group"),
-                                    value_transform = c("log2", "zscore", "none"),
-                                    facet_by = c("none", "group", "gene"),
+                                    facet_by = c("auto", "group", "gene", "none"),
+                                    fill_by = NULL,
                                     sample_order = c("input", "group", "expression"),
+                                    value_transform = NULL,
                                     palette = NULL,
                                     colors = NULL,
                                     line_width = 1,
@@ -2836,14 +2846,62 @@ get_expression_lineplot <- function(x,
                                     base_size = 12) {
   stopifnot(inherits(x, "VISTA"))
   by <- match.arg(by)
-  value_transform <- match.arg(value_transform)
   facet_by <- match.arg(facet_by)
   sample_order <- match.arg(sample_order)
+
+  if (!is.null(value_transform)) {
+    value_transform <- match.arg(value_transform, c("log2", "zscore", "none"))
+    if (value_transform == "log2") {
+      log_transform <- TRUE
+    } else if (value_transform == "none") {
+      log_transform <- FALSE
+    }
+  } else {
+    value_transform <- if (log_transform) "log2" else "none"
+  }
+  if (!is.null(fill_by)) {
+    cli::cli_warn("{.arg fill_by} is ignored by {.fun get_expression_lineplot}; line plots use colour rather than fill.")
+  }
+  if (stats_group) {
+    cli::cli_warn("{.arg stats_group} is not currently supported for {.fun get_expression_lineplot}; ignoring it.")
+  }
+  if (!is.null(comparisons)) {
+    cli::cli_warn("{.arg comparisons} is ignored by {.fun get_expression_lineplot}.")
+  }
+  if (!is.null(display_from) || !is.null(display_orgdb)) {
+    cli::cli_warn("{.arg display_from} and {.arg display_orgdb} are reserved for API compatibility and are not used when {.arg display_id} maps from {.field rowData(x)}.")
+  }
+
   summarise <- identical(by, "group")
+  mat <- SummarizedExperiment::assay(x)
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
+  genes_use <- genes
+  if (!is.null(genes_use) && !is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
+    map <- as.character(rd[[display_id]])
+    names(map) <- rownames(x)
+    mapped <- names(map)[match(genes_use, map)]
+    mapped <- mapped[!is.na(mapped)]
+    if (length(mapped)) genes_use <- mapped
+  }
+  if (is.null(genes_use)) {
+    if (pool_genes) {
+      genes_use <- rownames(mat)
+      cli::cli_warn("No {.arg genes} provided; pooling all genes in the object.")
+    } else {
+      gene_vars <- matrixStats::rowVars(mat, na.rm = TRUE)
+      if (all(is.na(gene_vars)) || all(gene_vars == 0)) {
+        genes_use <- head(rownames(mat), 20)
+      } else {
+        top_idx <- order(gene_vars, decreasing = TRUE)[seq_len(min(20, length(gene_vars)))]
+        genes_use <- rownames(mat)[top_idx]
+      }
+      cli::cli_warn("No {.arg genes} provided; using the top variable genes for plotting.")
+    }
+  }
 
   prep <- .vista_expression_long(
     x = x,
-    genes = genes,
+    genes = genes_use,
     sample_group = sample_group,
     group_column = group_column,
     value_transform = value_transform,
@@ -2852,20 +2910,27 @@ get_expression_lineplot <- function(x,
   )
   df <- prep$df
   group_col <- prep$group_col
-
-  if (value_transform == "log2") {
-    ylab <- "log2(Normalized Counts + 1)"
-  } else if (value_transform == "zscore") {
-    ylab <- "Z-score"
-  } else {
-    ylab <- "Normalized Counts"
-  }
+  ylab <- prep$ylab
 
   if (facet_by == "group" && summarise) {
     cli::cli_warn("{.arg facet_by = 'group'} is ignored when {.arg by = 'group'}.")
     facet_by <- "none"
   }
 
+  if (pool_genes) {
+    df <- df |>
+      dplyr::group_by(.data$sample, .data[[group_col]]) |>
+      dplyr::summarise(expression = mean(.data$expression, na.rm = TRUE), .groups = "drop") |>
+      dplyr::mutate(gene = "All genes")
+    facet_by <- "none"
+  } else if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
+    map <- as.character(rd[[display_id]])
+    names(map) <- rownames(x)
+    mapped <- map[match(df$gene, names(map))]
+    df$gene <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, df$gene)
+  }
+
+  facet_mode <- .resolve_expression_plot_facet(facet_by, n_genes = length(unique(df$gene)))
   gene_cols <- .resolve_palette_values(
     levels = unique(df$gene),
     colors = colors,
@@ -2884,10 +2949,10 @@ get_expression_lineplot <- function(x,
     ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-  if (facet_by == "group" && !summarise && group_col %in% colnames(df)) {
-    plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste("~", group_col)))
-  } else if (facet_by == "gene") {
-    plt <- plt + ggplot2::facet_wrap(~gene, scales = "free_y")
+  if (facet_mode == "group" && !summarise && group_col %in% colnames(df)) {
+    plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste("~", group_col)), scales = facet_scales)
+  } else if (facet_mode == "gene") {
+    plt <- plt + ggplot2::facet_wrap(~gene, scales = facet_scales)
   }
 
   plt
@@ -3004,22 +3069,42 @@ get_expression_lineplot <- function(x,
 
 #' Violin plot of expression values
 #'
-#' Shows per-sample (or per-group) expression distributions as violins with
-#' optional faceting by group.
+#' Mirrors the main user-facing arguments of [get_expression_boxplot()] so the
+#' two geoms can be swapped with minimal code changes. Violin plots currently
+#' keep group-based semantics (`by = "group"`) because a violin requires
+#' replicate-level distributions within groups rather than one value per sample.
 #'
 #' @param x A `VISTA` object.
-#' @param genes Optional character vector of gene IDs to include; defaults to all.
+#' @param genes Optional character vector of gene IDs to include; defaults to
+#'   all genes selected by the plotting mode.
 #' @param sample_group Optional subset of groups (values of `group_column`) to keep.
 #' @param group_column Grouping column in `sample_info`; defaults to the stored grouping.
-#' @param by Plot unit. Violin plots currently support only `"group"`, because
-#'   a violin needs replicate-level distributions within groups rather than
-#'   single values per sample.
-#' @param value_transform One of `"log2"`, `"zscore"`, or `"none"`.
+#' @param log_transform Logical; log2-transform expression values before plotting.
+#' @param display_id Optional ID/column name to use for labels/facets. If
+#'   supplied and present in `rowData(x)`, those values are used.
+#' @param display_from Optional source ID type for mapping (reserved for
+#'   compatibility with [get_expression_boxplot()]).
+#' @param display_orgdb Optional `OrgDb` object used for ID mapping when
+#'   `display_id` is set but not found in `rowData` (reserved for compatibility
+#'   with [get_expression_boxplot()]).
+#' @param facet_scales Scaling option passed to `facet_wrap()`.
+#' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
+#' @param p.label Label format for `ggpubr::stat_compare_means()`.
+#' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
+#' @param pool_genes Logical; pool all selected genes into one violin per group.
+#' @param by Plot unit. Violin plots currently support only `"group"`.
+#' @param facet_by Faceting mode. Uses the same argument pattern as
+#'   [get_expression_boxplot()], but `pool_genes = TRUE` falls back to `"none"`
+#'   because pooled violins already aggregate across genes.
+#' @param fill_by Fill strategy. Uses the same values as
+#'   [get_expression_boxplot()].
+#' @param sample_order Ordering for sample-level display before values are
+#'   grouped into violins.
+#' @param value_transform Deprecated compatibility alias. `"log2"` maps to
+#'   `log_transform = TRUE`, `"none"` maps to `FALSE`, and `"zscore"` applies a
+#'   per-gene z-score transform.
 #' @param summarise Logical retained for compatibility. Violin plots always use
 #'   replicate-level values, so `summarise = TRUE` is ignored with a warning.
-#' @param facet_by Faceting mode: `"auto"` (default), `"gene"`, or `"none"`.
-#' @param sample_order Ordering for sample-level x-axis display: `"input"`,
-#'   `"group"`, or `"expression"` before values are grouped into violins.
 #'
 #' @return A `ggplot2` object.
 #' @export
@@ -3027,11 +3112,21 @@ get_expression_violinplot <- function(x,
                                       genes = NULL,
                                       sample_group = NULL,
                                       group_column = NULL,
+                                      log_transform = TRUE,
+                                      display_id = NULL,
+                                      display_from = NULL,
+                                      display_orgdb = NULL,
+                                      facet_scales = "free_y",
+                                      stats_group = FALSE,
+                                      p.label = "p.signif",
+                                      comparisons = NULL,
+                                      pool_genes = FALSE,
                                       by = "group",
-                                      value_transform = c("log2", "zscore", "none"),
-                                      summarise = FALSE,
                                       facet_by = c("auto", "gene", "none"),
-                                      sample_order = c("input", "group", "expression")) {
+                                      fill_by = NULL,
+                                      sample_order = c("input", "group", "expression"),
+                                      value_transform = NULL,
+                                      summarise = FALSE) {
   stopifnot(inherits(x, "VISTA"))
   if (!identical(by, "group")) {
     cli::cli_abort(
@@ -3039,19 +3134,115 @@ get_expression_violinplot <- function(x,
     )
   }
   sample_order <- match.arg(sample_order)
+  if (!is.null(value_transform)) {
+    value_transform <- match.arg(value_transform, c("log2", "zscore", "none"))
+    if (value_transform == "log2") {
+      log_transform <- TRUE
+    } else if (value_transform == "none") {
+      log_transform <- FALSE
+    }
+  }
   if (isTRUE(summarise)) {
     cli::cli_warn(
       "{.arg summarise = TRUE} is not meaningful for violin plots because each group becomes a single value. Using replicate-level values instead."
     )
     summarise <- FALSE
   }
-  prep <- .vista_expression_long(
-    x, genes, sample_group, group_column, value_transform, summarise,
-    sample_order = sample_order
-  )
-  df <- prep$df; group_col <- prep$group_col; ylab <- prep$ylab
-  cols <- .vista_group_colors(x, df[[group_col]])
-  facet_mode <- .resolve_expression_plot_facet(facet_by, n_genes = length(unique(df$gene)))
+  if (pool_genes && !identical(facet_by, "none") && !identical(facet_by, "auto")) {
+    cli::cli_warn(
+      "{.arg facet_by} is ignored when {.arg pool_genes = TRUE}; pooled violin plots use a single panel."
+    )
+  }
+
+  mat <- SummarizedExperiment::assay(x)
+  meta <- .prepare_sample_metadata(x, sample_group, group_column)
+  group_col <- attr(meta, "group_column")
+  mat <- mat[, meta$sample, drop = FALSE]
+
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
+
+  if (!is.null(genes)) {
+    gene_ids <- genes
+    if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
+      map <- rd[[display_id]]
+      names(map) <- rownames(x)
+      mapped <- names(map)[match(genes, map)]
+      mapped <- mapped[!is.na(mapped)]
+      if (length(mapped)) gene_ids <- mapped
+    }
+    missing_genes <- setdiff(gene_ids, rownames(mat))
+    if (length(missing_genes) == length(gene_ids)) {
+      cli::cli_abort("None of the specified {.arg genes} were found in the data.")
+    }
+    keep_genes <- intersect(gene_ids, rownames(mat))
+    mat <- mat[keep_genes, , drop = FALSE]
+  } else if (!pool_genes && identical(facet_by, "gene")) {
+    gene_vars <- matrixStats::rowVars(mat)
+    if (all(is.na(gene_vars)) || all(gene_vars == 0)) {
+      cli::cli_warn("All genes have zero variance; defaulting to the first 20 genes for faceting.")
+      genes <- head(rownames(mat), 20)
+    } else {
+      top_idx <- order(gene_vars, decreasing = TRUE)[seq_len(min(20, length(gene_vars)))]
+      genes <- rownames(mat)[top_idx]
+      cli::cli_warn("No {.arg genes} provided; faceting by top 20 variable genes.")
+    }
+    mat <- mat[rownames(mat) %in% genes, , drop = FALSE]
+  }
+
+  df <- mat |>
+    as.data.frame() |>
+    tibble::rownames_to_column("gene") |>
+    tibble::as_tibble() |>
+    tidyr::pivot_longer(-gene, names_to = "sample", values_to = "expression") |>
+    dplyr::left_join(meta, by = "sample")
+
+  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
+    map <- rd[[display_id]]
+    names(map) <- rownames(x)
+    mapped <- map[match(df$gene, names(map))]
+    df$gene <- ifelse(!is.na(mapped) & nzchar(mapped), mapped, df$gene)
+  }
+
+  if (!is.null(value_transform) && identical(value_transform, "zscore")) {
+    df <- df |>
+      dplyr::group_by(.data$gene) |>
+      dplyr::mutate(expression = as.numeric(scale(.data$expression))) |>
+      dplyr::ungroup()
+    ylab <- "Z-score"
+  } else if (log_transform) {
+    df$expression <- log2(df$expression + 1)
+    ylab <- "log2(Normalized Counts + 1)"
+  } else {
+    ylab <- "Normalized Counts"
+  }
+
+  if (pool_genes) {
+    df$gene <- "All genes"
+    facet_by <- "none"
+  }
+
+  cols_group <- .vista_group_colors(x, df[[group_col]])
+  fill_by <- if (pool_genes) {
+    match.arg(fill_by %||% "x", c("x", "group"))
+  } else {
+    match.arg(fill_by %||% "group", c("gene", "group"))
+  }
+  facet_mode <- if (pool_genes) {
+    "none"
+  } else {
+    .resolve_expression_plot_facet(facet_by, n_genes = length(unique(df$gene)))
+  }
+
+  fill_var <- if (fill_by == "gene" && !pool_genes) df$gene else df[[group_col]]
+  fill_lab <- if (fill_by == "gene" && !pool_genes) "gene" else group_col
+  fill_levels <- unique(fill_var)
+  palette_manual <- if (fill_by == "gene" && !pool_genes) {
+    pal <- colorspace::qualitative_hcl(length(fill_levels), palette = "Dark 3")
+    names(pal) <- fill_levels
+    pal
+  } else {
+    cols_group
+  }
 
   group_levels <- unique(as.character(df[[group_col]]))
   df[[group_col]] <- factor(as.character(df[[group_col]]), levels = group_levels)
@@ -3061,7 +3252,7 @@ get_expression_violinplot <- function(x,
     ggplot2::aes(
       x = .data[[group_col]],
       y = expression,
-      fill = .data[[group_col]]
+      fill = factor(fill_var, levels = fill_levels)
     )
   ) +
     ggplot2::geom_violin(trim = FALSE, alpha = 0.8, color = NA, scale = "width") +
@@ -3074,12 +3265,33 @@ get_expression_violinplot <- function(x,
       stroke = 0.2,
       color = "gray20"
     ) +
-    ggplot2::labs(x = group_col, y = ylab, fill = group_col) +
+    ggplot2::labs(x = group_col, y = ylab, fill = fill_lab) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 0, hjust = 0.5))
-  if (!is.null(cols)) plt <- plt + ggplot2::scale_fill_manual(values = cols)
+
+  if (!is.null(palette_manual)) {
+    plt <- plt + ggplot2::scale_fill_manual(values = palette_manual)
+  }
+
+  if (stats_group) {
+    if (!requireNamespace("ggpubr", quietly = TRUE)) {
+      cli::cli_abort("Package {.pkg ggpubr} must be installed for `stats_group = TRUE`.")
+    }
+    if (length(unique(df[[group_col]])) < 2) {
+      cli::cli_warn("At least two groups are needed for statistical testing.")
+    } else {
+      plt <- plt + ggpubr::stat_compare_means(
+        ggplot2::aes(group = .data[[group_col]]),
+        comparisons = comparisons,
+        method = "t.test",
+        label = p.label,
+        label.x.npc = "center"
+      )
+    }
+  }
+
   if (facet_mode != "none") {
-    plt <- plt + ggplot2::facet_wrap(~gene, scales = "free_y")
+    plt <- plt + ggplot2::facet_wrap(~gene, scales = facet_scales)
   }
   plt
 }

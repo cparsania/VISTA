@@ -125,12 +125,42 @@ test_that("get_expression_boxplot supports harmonized by alias and sample orderi
   expect_s3_class(p, "ggplot")
 })
 
+test_that("get_expression_violinplot includes the boxplot-style arguments", {
+  box_args <- names(formals(get_expression_boxplot))
+  violin_args <- names(formals(get_expression_violinplot))
+
+  expect_true(all(box_args %in% violin_args))
+})
+
 test_that("get_expression_violinplot validates gene input", {
   vista <- make_small_vista()
 
   expect_error(
     get_expression_violinplot(vista, genes = "NONEXISTENT_GENE")
   )
+})
+
+test_that("get_expression_violinplot supports boxplot-style display and stats arguments", {
+  vista <- make_small_vista()
+  rowData(vista)$SYMBOL <- paste0("SYM", seq_len(nrow(vista)))
+  genes_sym <- rowData(vista)$SYMBOL[1:3]
+
+  p <- get_expression_violinplot(
+    vista,
+    genes = genes_sym,
+    display_id = "SYMBOL",
+    facet_by = "none"
+  )
+  expect_s3_class(p, "ggplot")
+
+  skip_if_not_installed("ggpubr")
+  p_stats <- get_expression_violinplot(
+    vista,
+    genes = rownames(vista)[1:2],
+    stats_group = TRUE,
+    facet_by = "none"
+  )
+  expect_s3_class(p_stats, "ggplot")
 })
 
 test_that("get_expression_density works with facet_by parameter", {
@@ -155,6 +185,34 @@ test_that("get_expression_lineplot returns ggplot object", {
 
   p <- get_expression_lineplot(vista, genes = genes)
   expect_s3_class(p, "ggplot")
+})
+
+test_that("get_expression_lineplot includes the boxplot-style arguments", {
+  box_args <- names(formals(get_expression_boxplot))
+  line_args <- names(formals(get_expression_lineplot))
+
+  expect_true(all(box_args %in% line_args))
+})
+
+test_that("get_expression_lineplot supports boxplot-style display arguments", {
+  vista <- make_small_vista()
+  rowData(vista)$SYMBOL <- paste0("SYM", seq_len(nrow(vista)))
+  genes_sym <- rowData(vista)$SYMBOL[1:3]
+
+  p <- get_expression_lineplot(
+    vista,
+    genes = genes_sym,
+    display_id = "SYMBOL",
+    facet_by = "none"
+  )
+  expect_s3_class(p, "ggplot")
+
+  p_pool <- get_expression_lineplot(
+    vista,
+    genes = rownames(vista)[1:5],
+    pool_genes = TRUE
+  )
+  expect_s3_class(p_pool, "ggplot")
 })
 
 test_that("get_expression_lollipop returns ggplot object", {
