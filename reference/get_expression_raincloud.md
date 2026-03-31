@@ -43,7 +43,8 @@ get_expression_raincloud(
 
 - genes:
 
-  Optional character vector of gene IDs to include; defaults to all.
+  Optional character vector of gene IDs to include; defaults to all
+  genes selected by the plotting mode.
 
 - sample_group:
 
@@ -55,13 +56,13 @@ get_expression_raincloud(
 
 - by:
 
-  Plot unit. Violin plots currently support only `"group"`, because a
-  violin needs replicate-level distributions within groups rather than
-  single values per sample.
+  Plot unit. Violin plots currently support only `"group"`.
 
 - value_transform:
 
-  One of `"log2"`, `"zscore"`, or `"none"`.
+  Deprecated compatibility alias. `"log2"` maps to
+  `log_transform = TRUE`, `"none"` maps to `FALSE`, and `"zscore"`
+  applies a per-gene z-score transform.
 
 - summarise:
 
@@ -72,12 +73,15 @@ get_expression_raincloud(
 
 - facet_by:
 
-  Faceting mode: `"auto"` (default), `"gene"`, or `"none"`.
+  Faceting mode. Uses the same argument pattern as
+  [`get_expression_boxplot()`](get_expression_boxplot.md), but
+  `pool_genes = TRUE` falls back to `"none"` because pooled violins
+  already aggregate across genes.
 
 - sample_order:
 
-  Ordering for sample-level x-axis display: `"input"`, `"group"`, or
-  `"expression"` before values are grouped into violins.
+  Ordering for sample-level display before values are grouped into
+  violins.
 
 - rain_side:
 

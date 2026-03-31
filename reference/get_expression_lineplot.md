@@ -8,13 +8,23 @@ summarized groups with optional transformations and group faceting.
 ``` r
 get_expression_lineplot(
   x,
-  genes,
+  genes = NULL,
   sample_group = NULL,
   group_column = NULL,
+  log_transform = TRUE,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
+  facet_scales = "free_y",
+  stats_group = FALSE,
+  p.label = "p.signif",
+  comparisons = NULL,
+  pool_genes = FALSE,
   by = c("sample", "group"),
-  value_transform = c("log2", "zscore", "none"),
-  facet_by = c("none", "group", "gene"),
+  facet_by = c("auto", "group", "gene", "none"),
+  fill_by = NULL,
   sample_order = c("input", "group", "expression"),
+  value_transform = NULL,
   palette = NULL,
   colors = NULL,
   line_width = 1,
@@ -48,11 +58,6 @@ get_expression_lineplot(
   Plot unit: `"sample"` (default) or `"group"` to average replicates
   before plotting.
 
-- value_transform:
-
-  Transformation applied to expression values; one of `"log2"`,
-  `"zscore"`, or `"none"`.
-
 - facet_by:
 
   Faceting mode: `"none"` (default), `"group"`, or `"gene"`.
@@ -61,6 +66,11 @@ get_expression_lineplot(
 
   Ordering used for sample-level plots: `"input"`, `"group"`, or
   `"expression"`.
+
+- value_transform:
+
+  Transformation applied to expression values; one of `"log2"`,
+  `"zscore"`, or `"none"`.
 
 - palette:
 

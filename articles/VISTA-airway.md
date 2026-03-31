@@ -421,7 +421,7 @@ up_genes <- get_genes_by_regulation(
   vista,
   sample_comparisons = comp_names[1],
   regulation = "Up",
-  top_n = 50
+  #top_n = 50
 )
 
 # Extract downregulated genes
@@ -429,14 +429,14 @@ down_genes <- get_genes_by_regulation(
   vista,
   sample_comparisons = comp_names[1],
   regulation = "Down",
-  top_n = 50
+  #top_n = 50
 )
 
 # Summary
 cat("Upregulated genes:", length(up_genes[[1]]), "\n")
-#> Upregulated genes: 50
+#> Upregulated genes: 465
 cat("Downregulated genes:", length(down_genes[[1]]), "\n")
-#> Downregulated genes: 50
+#> Downregulated genes: 388
 ```
 
 ## Quality Control Visualizations
@@ -448,7 +448,7 @@ Check sample relationships and potential batch effects.
 #### Basic correlation heatmap
 
 ``` r
-get_corr_heatmap(vista)
+  get_corr_heatmap(vista, label_size = 18,base_size = 18, viridis_direction = -1)
 ```
 
 ![](VISTA-airway_files/figure-html/corr-heatmap-basic-1.png)
@@ -460,7 +460,9 @@ get_corr_heatmap(vista)
 get_corr_heatmap(
   vista,
   viridis_direction = -1,
-  viridis_option = "plasma"
+  viridis_option = "plasma",
+  label_size = 18,
+  base_size = 18
 )
 ```
 
@@ -472,9 +474,12 @@ get_corr_heatmap(
 # Display correlation coefficients
 get_corr_heatmap(
   vista,
+  viridis_direction = -1,
   show_corr_values = TRUE,
   col_corr_values = 'white',
-  viridis_option = "mako"
+  viridis_option = "mako",
+  label_size = 14,
+  base_size = 14
 ) 
 ```
 
@@ -489,8 +494,8 @@ Visualize sample clustering and variation.
 ``` r
 get_pca_plot(
   vista,
-  label = TRUE
-) + theme_minimal(base_size = 16)
+  label = TRUE,label_size = 5
+)
 ```
 
 ![](VISTA-airway_files/figure-html/pca-basic-1.png)
@@ -502,6 +507,7 @@ get_pca_plot(
 get_pca_plot(
   vista,
   label = TRUE,
+  label_size = 5,
   shape_by = "cell"
 )
 ```
@@ -529,7 +535,7 @@ get_pca_plot(
 get_pca_plot(
   vista,
   label = TRUE,
-  point_size = 15
+  point_size = 15,label_size = 5
 )
 ```
 
@@ -735,47 +741,47 @@ get_ma_plot(
 ``` r
 # Get top 50 DEGs by adjusted p-value
 de_table <- comparisons(vista)[[1]]
-top_degs <- de_table[order(de_table$padj), ][1:50, "gene_id"]
 
-# Select genes with known symbols
-de_with_symbols <- merge(
-  de_results,
-  as.data.frame(rowData(vista)),
-  by.x = "gene_id",
-  by.y = "row.names"
-)
+top_degs <- get_genes_by_regulation(vista, names(comparisons(vista))[1],regulation = "Both",top_n = 50)[[1]]  # top 50 by abs fold change 
 
-# Top upregulated genes
-top_up <- de_with_symbols[
-  de_with_symbols$regulation == "Up" & !is.na(de_with_symbols$SYMBOL),
-][1:6, c("gene_id", "SYMBOL", "log2fc", "padj")]
+top_up <- get_genes_by_regulation(vista, names(comparisons(vista))[1],regulation = "Up",top_n = 50)[[1]]  
 
-# Top downregulated genes
-top_down <- de_with_symbols[
-  de_with_symbols$regulation == "Down" & !is.na(de_with_symbols$SYMBOL),
-][1:6, c("gene_id", "SYMBOL", "log2fc", "padj")]
+top_down <- get_genes_by_regulation(vista, names(comparisons(vista))[1],regulation = "Down",top_n = 50)[[1]]  
+
 
 cat("Top upregulated genes:\n")
 #> Top upregulated genes:
 print(top_up)
-#>             gene_id SYMBOL   log2fc         padj
-#> 34  ENSG00000003402  CFLAR 1.182279 2.081928e-11
-#> 54  ENSG00000004799   PDK4 2.542782 3.307421e-02
-#> 131 ENSG00000006788  MYH13 3.169157 3.400185e-02
-#> 161 ENSG00000008256  CYTH3 1.203161 1.458563e-07
-#> 167 ENSG00000008311   AASS 1.106648 3.710859e-09
-#> 185 ENSG00000009413  REV3L 1.119119 1.458474e-09
+#>  [1] "ENSG00000179593" "ENSG00000109906" "ENSG00000250978" "ENSG00000132518"
+#>  [5] "ENSG00000171819" "ENSG00000127954" "ENSG00000249364" "ENSG00000137673"
+#>  [9] "ENSG00000100033" "ENSG00000168481" "ENSG00000168309" "ENSG00000264868"
+#> [13] "ENSG00000152583" "ENSG00000163884" "ENSG00000177575" "ENSG00000127324"
+#> [17] "ENSG00000101342" "ENSG00000270689" "ENSG00000268894" "ENSG00000152779"
+#> [21] "ENSG00000128045" "ENSG00000096060" "ENSG00000152463" "ENSG00000173838"
+#> [25] "ENSG00000273259" "ENSG00000101347" "ENSG00000187288" "ENSG00000219565"
+#> [29] "ENSG00000211445" "ENSG00000143127" "ENSG00000128917" "ENSG00000170214"
+#> [33] "ENSG00000163083" "ENSG00000178723" "ENSG00000248187" "ENSG00000157152"
+#> [37] "ENSG00000170323" "ENSG00000231246" "ENSG00000233117" "ENSG00000157514"
+#> [41] "ENSG00000189221" "ENSG00000165995" "ENSG00000182836" "ENSG00000112936"
+#> [45] "ENSG00000269289" "ENSG00000174697" "ENSG00000179094" "ENSG00000187193"
+#> [49] "ENSG00000006788" "ENSG00000102760"
 cat("\nTop downregulated genes:\n")
 #> 
 #> Top downregulated genes:
 print(top_down)
-#>             gene_id  SYMBOL    log2fc         padj
-#> 84  ENSG00000005471   ABCB4 -1.218970 4.197043e-02
-#> 246 ENSG00000012048   BRCA1 -1.210741 2.396455e-10
-#> 260 ENSG00000013293 SLC7A14 -2.837890 1.577296e-12
-#> 261 ENSG00000013297  CLDN11 -1.716719 5.813134e-09
-#> 291 ENSG00000015520  NPC1L1 -2.569003 6.300639e-03
-#> 295 ENSG00000016391    CHDH -2.043992 2.301473e-04
+#>  [1] "ENSG00000128285" "ENSG00000267339" "ENSG00000019186" "ENSG00000183454"
+#>  [5] "ENSG00000146006" "ENSG00000122679" "ENSG00000155897" "ENSG00000143494"
+#>  [9] "ENSG00000141469" "ENSG00000108700" "ENSG00000162692" "ENSG00000175489"
+#> [13] "ENSG00000183092" "ENSG00000250657" "ENSG00000136267" "ENSG00000214814"
+#> [17] "ENSG00000261121" "ENSG00000105989" "ENSG00000122877" "ENSG00000188176"
+#> [21] "ENSG00000131771" "ENSG00000165272" "ENSG00000184564" "ENSG00000079101"
+#> [25] "ENSG00000188501" "ENSG00000119714" "ENSG00000223811" "ENSG00000130487"
+#> [29] "ENSG00000166670" "ENSG00000165388" "ENSG00000013293" "ENSG00000123405"
+#> [33] "ENSG00000145777" "ENSG00000140600" "ENSG00000124134" "ENSG00000146250"
+#> [37] "ENSG00000116991" "ENSG00000126878" "ENSG00000197046" "ENSG00000128165"
+#> [41] "ENSG00000084710" "ENSG00000173110" "ENSG00000123689" "ENSG00000106003"
+#> [45] "ENSG00000181634" "ENSG00000154864" "ENSG00000182732" "ENSG00000136999"
+#> [49] "ENSG00000015520" "ENSG00000095585"
 ```
 
 ### Expression Heatmaps
@@ -795,7 +801,8 @@ get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
-  display_id = "SYMBOL"
+  display_id = "SYMBOL",
+  show_row_names = T
 )
 ```
 
@@ -810,7 +817,7 @@ get_expression_heatmap(
   genes = top_degs,
   display_id = "SYMBOL",
   kmeans_k = 3,
-  show_row_names = FALSE
+  show_row_names = T
 )
 ```
 
@@ -823,7 +830,7 @@ get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
-  show_row_names = FALSE,
+  show_row_names = T,
   display_id = "SYMBOL",
   kmeans_k = 3,
   cluster_row_slice = FALSE,
@@ -839,13 +846,7 @@ get_expression_heatmap(
 ``` r
 # Use multiple sample-level columns in top annotation.
 # By default, columns are split by the first annotation column.
-anno_cols <- list(
-  treatment = c(Untreated = "#1b9e77", Dexamethasone = "#d95f02"),
-  cell = stats::setNames(
-    colorspace::qualitative_hcl(length(unique(colData(vista)$cell)), palette = "Set 2"),
-    unique(as.character(colData(vista)$cell))
-  )
-)
+
 
 get_expression_heatmap(
   vista,
@@ -855,14 +856,13 @@ get_expression_heatmap(
   display_id = "SYMBOL",
   summarise_replicates = FALSE,
   annotate_columns = c("treatment", "cell"),
-  column_anno_colors = anno_cols,
   cluster_by = "cell"
 )
 ```
 
 ![](VISTA-airway_files/figure-html/heatmap-annotated-multi-1.png)
 
-#### Heatmap with summarized replicates
+#### Heatmap showing each replicate
 
 ``` r
 get_expression_heatmap(
@@ -870,29 +870,14 @@ get_expression_heatmap(
   sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL",
-  summarise_replicates = TRUE,
+  summarise_replicates = FALSE,
   show_row_names = FALSE,
+  annotate_columns = T,
   kmeans_k = 2
 )
 ```
 
 ![](VISTA-airway_files/figure-html/heatmap-summarized-1.png)
-
-#### Heatmap showing gene names
-
-``` r
-# Smaller gene set to show names
-get_expression_heatmap(
-  vista,
-  sample_group = levels(colData(vista)$treatment),
-  genes = top_degs[1:25],
-  display_id = "SYMBOL",
-  show_row_names = TRUE,
-  label_size = 8
-)
-```
-
-![](VISTA-airway_files/figure-html/heatmap-gene-names-1.png)
 
 ### Expression Barplots
 
@@ -901,9 +886,9 @@ get_expression_heatmap(
 ``` r
 get_expression_barplot(
   vista,
-  genes = top_up$gene_id[1:4],
-  display_id = "SYMBOL"
-)
+  genes = top_up[1:4],
+  display_id = "SYMBOL",
+)+theme_minimal(base_size = 16)
 ```
 
 ![](VISTA-airway_files/figure-html/barplot-basic-1.png)
@@ -914,11 +899,11 @@ get_expression_barplot(
 # Add statistical comparisons between groups
 get_expression_barplot(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE,
   stats_group = TRUE  # Enable statistical annotations
-)
+) + theme_minimal(base_size = 16)
 ```
 
 ![](VISTA-airway_files/figure-html/barplot-log-stats-1.png)
@@ -928,11 +913,11 @@ get_expression_barplot(
 ``` r
 get_expression_barplot(
   vista,
-  genes = top_up$gene_id[1:2],
+  genes = top_up[1:2],
   display_id = "SYMBOL",
   by = "sample",
   sample_order = "group"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/barplot-per-sample-1.png)
@@ -941,14 +926,14 @@ get_expression_barplot(
 
 ``` r
 # Compare expression of both up- and down-regulated genes
-selected_genes <- c(top_up$gene_id[1:3], top_down$gene_id[1:3])
+selected_genes <- c(top_up[1:3], top_down[1:3])
 get_expression_barplot(
   vista,
   genes = selected_genes,
   display_id = "SYMBOL",
   log_transform = TRUE,
   stats_group = TRUE
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/barplot-comparison-1.png)
@@ -960,9 +945,9 @@ get_expression_barplot(
 ``` r
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/boxplot-basic-1.png)
@@ -973,10 +958,10 @@ get_expression_boxplot(
 # All genes overlaid on same plot
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   display_id = "SYMBOL",
   facet_by = "none"
-)
+) + theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/boxplot-no-facet-1.png)
@@ -987,11 +972,11 @@ get_expression_boxplot(
 # Each gene in separate panel - must specify facet_by = "gene"
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   display_id = "SYMBOL",
   facet_by = "gene",
   facet_scales = "free_y"
-)
+) + theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/boxplot-facets-1.png)
@@ -1002,14 +987,14 @@ get_expression_boxplot(
 # Each gene in separate panel WITH statistical comparisons
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE,
   facet_by = "gene",
   facet_scales = "free_y",
   stats_group = TRUE,  # Add statistics to each gene panel
   p.label = "p.signif"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/boxplot-facets-stats-1.png)
@@ -1020,13 +1005,14 @@ get_expression_boxplot(
 # Pool all genes together for group comparison with statistical test
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:5],
+  genes = top_up[1:5],
   display_id = "SYMBOL",
   log_transform = TRUE,
   pool_genes = TRUE,
+  facet_by = "none",
   stats_group = TRUE,  # Required for statistical annotations
   p.label = "p.signif"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/boxplot-pooled-1.png)
@@ -1037,12 +1023,12 @@ get_expression_boxplot(
 # Show statistical comparisons between treatment groups
 get_expression_boxplot(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE,
   stats_group = TRUE,  # Enable statistical annotations
   p.label = "p.signif"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/boxplot-pvalues-1.png)
@@ -1054,8 +1040,9 @@ get_expression_boxplot(
 ``` r
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id
-)
+  genes = top_up[1:4],
+  display_id = "SYMBOL"
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/violin-basic-1.png)
@@ -1065,9 +1052,10 @@ get_expression_violinplot(
 ``` r
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id,
-  value_transform = "log2"
-)
+  genes = top_up[1:4],,
+  display_id = "SYMBOL",
+  value_transform = "none"
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/violin-log-1.png)
@@ -1077,9 +1065,9 @@ get_expression_violinplot(
 ``` r
 get_expression_violinplot(
   vista,
-  genes = top_up$gene_id,
+  genes = top_up[1:4],
   value_transform = "zscore"
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/violin-zscore-1.png)
@@ -1091,9 +1079,9 @@ get_expression_violinplot(
 ``` r
 get_expression_density(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:50],
   log_transform = TRUE
-)
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/density-plot-1.png)
@@ -1108,8 +1096,8 @@ get_expression_scatter(
   sample_x = samples[1],
   sample_y = samples[2],
   log_transform = TRUE,
-  label_n = 10
-)
+  label_n = 50,display_id = "SYMBOL",label_size = 4
+)+ theme(text = element_text(size = 16))
 ```
 
 ![](VISTA-airway_files/figure-html/scatter-plot-1.png)
@@ -1119,8 +1107,10 @@ get_expression_scatter(
 ``` r
 get_expression_lineplot(
   vista,
-  genes = top_up$gene_id[1:3],
-  value_transform = "log2"
+  genes = top_up[1:3],
+  log_transform = T,display_id = "SYMBOL",
+  by = "sample",facet_by = "none",
+  group_column = "treatment",sample_group = c("Untreated","Dexamethasone")
 )
 ```
 
@@ -1131,7 +1121,7 @@ get_expression_lineplot(
 ``` r
 get_expression_lollipop(
   vista,
-  genes = top_up$gene_id[1:4],
+  genes = top_up[1:4],
   display_id = "SYMBOL",
   log_transform = TRUE
 )
@@ -1144,7 +1134,7 @@ get_expression_lollipop(
 ``` r
 get_expression_lollipop(
   vista,
-  genes = top_up$gene_id[1:2],
+  genes = top_up[1:2],
   display_id = "SYMBOL",
   by = "sample",
   sample_order = "expression"
@@ -1159,7 +1149,7 @@ get_expression_lollipop(
 # Ridges by treatment group - shows distribution for each group
 get_expression_joyplot(
   vista,
-  genes = top_up$gene_id[1:5],
+  genes = top_up[1:5],
   log_transform = TRUE,
   y_by = "group",      # Each treatment group gets a ridge
   color_by = "group"   # Color by treatment group
@@ -1174,7 +1164,7 @@ get_expression_joyplot(
 # Ridges by individual sample - shows distribution for each sample
 get_expression_joyplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   log_transform = TRUE,
   y_by = "sample",     # Each sample gets a ridge
   color_by = "group"   # Color by treatment group
@@ -1188,7 +1178,7 @@ get_expression_joyplot(
 ``` r
 get_expression_raincloud(
   vista,
-  genes = top_up$gene_id,
+  genes = top_up,
   value_transform = "log2",
   summarise = TRUE,
   facet_by = "none",
@@ -1273,7 +1263,7 @@ if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
 ``` r
 # VISTA's wrapper function
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
-  get_enrichment_plot(msig_up$enrich, top_n = 15)
+  get_enrichment_plot(msig_up$enrich, top_n = 10)
 }
 ```
 
@@ -1284,7 +1274,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ``` r
 # Use generic barplot with enrichResult method
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
-  barplot(msig_up$enrich, showCategory = 15)
+  barplot(msig_up$enrich, showCategory = 10)
 }
 ```
 
@@ -1295,7 +1285,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ``` r
 # Customized dotplot with more categories
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
-  enrichplot::dotplot(msig_up$enrich, showCategory = 20, font.size = 10)
+  enrichplot::dotplot(msig_up$enrich, showCategory = 20, font.size = 12)
 }
 ```
 
@@ -1503,28 +1493,18 @@ gsea_results <- get_gsea(
 if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
   head(gsea_results$enrich@result[, c("Description", "NES", "pvalue", "p.adjust")], n = 10)
 }
-#>                                                                           Description
-#> HALLMARK_ADIPOGENESIS                                           HALLMARK_ADIPOGENESIS
-#> HALLMARK_ANDROGEN_RESPONSE                                 HALLMARK_ANDROGEN_RESPONSE
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB                     HALLMARK_TNFA_SIGNALING_VIA_NFKB
-#> HALLMARK_XENOBIOTIC_METABOLISM                         HALLMARK_XENOBIOTIC_METABOLISM
-#> HALLMARK_OXIDATIVE_PHOSPHORYLATION                 HALLMARK_OXIDATIVE_PHOSPHORYLATION
-#> HALLMARK_APICAL_JUNCTION                                     HALLMARK_APICAL_JUNCTION
-#> HALLMARK_IL2_STAT5_SIGNALING                             HALLMARK_IL2_STAT5_SIGNALING
-#> HALLMARK_UV_RESPONSE_UP                                       HALLMARK_UV_RESPONSE_UP
-#> HALLMARK_HYPOXIA                                                     HALLMARK_HYPOXIA
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION
-#>                                                 NES       pvalue     p.adjust
-#> HALLMARK_ADIPOGENESIS                      2.002363 8.537312e-08 4.268656e-06
-#> HALLMARK_ANDROGEN_RESPONSE                 1.661800 1.139063e-03 1.898438e-02
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB           1.615600 8.456139e-04 1.898438e-02
-#> HALLMARK_XENOBIOTIC_METABOLISM             1.529090 2.960020e-03 3.018492e-02
-#> HALLMARK_OXIDATIVE_PHOSPHORYLATION         1.509394 3.018492e-03 3.018492e-02
-#> HALLMARK_APICAL_JUNCTION                   1.493441 6.779446e-03 4.662247e-02
-#> HALLMARK_IL2_STAT5_SIGNALING               1.479488 5.833243e-03 4.662247e-02
-#> HALLMARK_UV_RESPONSE_UP                    1.460889 7.734695e-03 4.662247e-02
-#> HALLMARK_HYPOXIA                           1.437550 9.206213e-03 4.662247e-02
-#> HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION 1.434726 9.324494e-03 4.662247e-02
+#>                                                           Description      NES
+#> HALLMARK_ADIPOGENESIS                           HALLMARK_ADIPOGENESIS 1.998365
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB     HALLMARK_TNFA_SIGNALING_VIA_NFKB 1.614221
+#> HALLMARK_ANDROGEN_RESPONSE                 HALLMARK_ANDROGEN_RESPONSE 1.641697
+#> HALLMARK_XENOBIOTIC_METABOLISM         HALLMARK_XENOBIOTIC_METABOLISM 1.524633
+#> HALLMARK_OXIDATIVE_PHOSPHORYLATION HALLMARK_OXIDATIVE_PHOSPHORYLATION 1.511488
+#>                                          pvalue     p.adjust
+#> HALLMARK_ADIPOGENESIS              3.106429e-08 1.553214e-06
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB   6.454953e-04 1.613738e-02
+#> HALLMARK_ANDROGEN_RESPONSE         2.151621e-03 3.064754e-02
+#> HALLMARK_XENOBIOTIC_METABOLISM     3.064754e-03 3.064754e-02
+#> HALLMARK_OXIDATIVE_PHOSPHORYLATION 2.575969e-03 3.064754e-02
 ```
 
 #### GSEA with GO Biological Process
@@ -1546,27 +1526,27 @@ if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
   head(gsea_go$enrich@result[, c("Description", "NES", "pvalue", "p.adjust")], n = 10)
 }
 #>                                                  Description       NES
-#> GO:0071294                     cellular response to zinc ion  2.086734
-#> GO:0032869             cellular response to insulin stimulus  1.857924
-#> GO:0051962 positive regulation of nervous system development -1.847635
-#> GO:0032868                               response to insulin  1.810732
-#> GO:0071375     cellular response to peptide hormone stimulus  1.808067
-#> GO:0031589                           cell-substrate adhesion  1.717682
-#> GO:0097501                      stress response to metal ion  2.025923
-#> GO:0010810             regulation of cell-substrate adhesion  1.794390
-#> GO:0003012                             muscle system process  1.682586
-#> GO:0006006                         glucose metabolic process  1.828210
+#> GO:0071375     cellular response to peptide hormone stimulus  1.808024
+#> GO:0051962 positive regulation of nervous system development -1.804617
+#> GO:0071294                     cellular response to zinc ion  2.041243
+#> GO:0032869             cellular response to insulin stimulus  1.860517
+#> GO:0006006                         glucose metabolic process  1.821010
+#> GO:0032868                               response to insulin  1.807115
+#> GO:0031589                           cell-substrate adhesion  1.711791
+#> GO:0003012                             muscle system process  1.683786
+#> GO:0097501                      stress response to metal ion  1.994020
+#> GO:0010810             regulation of cell-substrate adhesion  1.797353
 #>                  pvalue    p.adjust
-#> GO:0071294 2.496581e-06 0.003490999
-#> GO:0032869 2.666598e-06 0.003490999
-#> GO:0051962 2.048136e-06 0.003490999
-#> GO:0032868 3.836966e-06 0.003490999
-#> GO:0071375 1.466755e-06 0.003490999
-#> GO:0031589 3.765677e-06 0.003490999
-#> GO:0097501 8.810905e-06 0.006544955
-#> GO:0010810 1.079036e-05 0.006544955
-#> GO:0003012 1.078129e-05 0.006544955
-#> GO:0006006 1.309708e-05 0.007149696
+#> GO:0071375 1.065356e-06 0.004144288
+#> GO:0051962 1.518332e-06 0.004144288
+#> GO:0071294 6.069393e-06 0.005262651
+#> GO:0032869 4.035762e-06 0.005262651
+#> GO:0006006 7.439886e-06 0.005262651
+#> GO:0032868 7.712257e-06 0.005262651
+#> GO:0031589 7.193516e-06 0.005262651
+#> GO:0003012 5.540660e-06 0.005262651
+#> GO:0097501 1.429395e-05 0.008670075
+#> GO:0010810 1.786971e-05 0.009755073
 ```
 
 #### GSEA enrichment overview
@@ -1695,7 +1675,7 @@ head(fc_matrix, n = 10)
 ``` r
 get_foldchange_barplot(
   vista,
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   sample_comparisons = comp_names,
   display_id = "SYMBOL",
   facet_by = "gene"
@@ -1710,7 +1690,7 @@ get_foldchange_barplot(
 get_foldchange_lollipop(
   vista,
   sample_comparison = comp_names[1],
-  genes = top_up$gene_id[1:3],
+  genes = top_up[1:3],
   display_id = "SYMBOL",
   facet_by = "gene"
 )
@@ -1779,7 +1759,7 @@ get_foldchange_heatmap(
 get_foldchange_heatmap(
   vista,
   sample_comparisons = comp_names,
-  genes = top_up$gene_id,
+  genes = top_up,
   show_row_names = TRUE,
   display_id = "SYMBOL"
 )
