@@ -53,6 +53,47 @@ get_expression_lineplot(
   Optional column name in `sample_info` defining the grouping/faceting
   variable.
 
+- log_transform:
+
+  Logical; log2-transform expression values before plotting.
+
+- display_id:
+
+  Optional ID/column name to use for gene labels. If supplied and
+  present in `rowData(x)`, those values are used.
+
+- display_from:
+
+  Optional source ID type for mapping (reserved for compatibility with
+  other expression plotting APIs).
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for ID mapping when `display_id` is set
+  but not found in `rowData`.
+
+- facet_scales:
+
+  Scaling option passed to `facet_wrap()`.
+
+- stats_group:
+
+  Logical retained for API consistency. Statistical overlays are not
+  currently added by `get_expression_lineplot()`.
+
+- p.label:
+
+  Label format retained for API consistency with other expression plots.
+
+- comparisons:
+
+  Optional list of comparisons retained for API consistency.
+
+- pool_genes:
+
+  Logical; when `TRUE`, average the selected genes into a single
+  trajectory.
+
 - by:
 
   Plot unit: `"sample"` (default) or `"group"` to average replicates
@@ -60,7 +101,12 @@ get_expression_lineplot(
 
 - facet_by:
 
-  Faceting mode: `"none"` (default), `"group"`, or `"gene"`.
+  Faceting mode: `"auto"` (default), `"none"`, `"group"`, or `"gene"`.
+
+- fill_by:
+
+  Argument retained for API consistency; ignored because line plots use
+  colour rather than fill.
 
 - sample_order:
 
@@ -69,8 +115,8 @@ get_expression_lineplot(
 
 - value_transform:
 
-  Transformation applied to expression values; one of `"log2"`,
-  `"zscore"`, or `"none"`.
+  Deprecated compatibility alias for transformation choice; one of
+  `"log2"`, `"zscore"`, or `"none"`.
 
 - palette:
 

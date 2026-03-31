@@ -97,13 +97,60 @@ summarized groups with optional transformations and group faceting.</p>
 <dd><p>Optional column name in <code>sample_info</code> defining the grouping/faceting variable.</p></dd>
 
 
+<dt id="arg-log-transform">log_transform<a class="anchor" aria-label="anchor" href="#arg-log-transform"></a></dt>
+<dd><p>Logical; log2-transform expression values before plotting.</p></dd>
+
+
+<dt id="arg-display-id">display_id<a class="anchor" aria-label="anchor" href="#arg-display-id"></a></dt>
+<dd><p>Optional ID/column name to use for gene labels. If supplied
+and present in <code>rowData(x)</code>, those values are used.</p></dd>
+
+
+<dt id="arg-display-from">display_from<a class="anchor" aria-label="anchor" href="#arg-display-from"></a></dt>
+<dd><p>Optional source ID type for mapping (reserved for
+compatibility with other expression plotting APIs).</p></dd>
+
+
+<dt id="arg-display-orgdb">display_orgdb<a class="anchor" aria-label="anchor" href="#arg-display-orgdb"></a></dt>
+<dd><p>Optional <code>OrgDb</code> object used for ID mapping when
+<code>display_id</code> is set but not found in <code>rowData</code>.</p></dd>
+
+
+<dt id="arg-facet-scales">facet_scales<a class="anchor" aria-label="anchor" href="#arg-facet-scales"></a></dt>
+<dd><p>Scaling option passed to <code>facet_wrap()</code>.</p></dd>
+
+
+<dt id="arg-stats-group">stats_group<a class="anchor" aria-label="anchor" href="#arg-stats-group"></a></dt>
+<dd><p>Logical retained for API consistency. Statistical overlays
+are not currently added by <code>get_expression_lineplot()</code>.</p></dd>
+
+
+<dt id="arg-p-label">p.label<a class="anchor" aria-label="anchor" href="#arg-p-label"></a></dt>
+<dd><p>Label format retained for API consistency with other
+expression plots.</p></dd>
+
+
+<dt id="arg-comparisons">comparisons<a class="anchor" aria-label="anchor" href="#arg-comparisons"></a></dt>
+<dd><p>Optional list of comparisons retained for API consistency.</p></dd>
+
+
+<dt id="arg-pool-genes">pool_genes<a class="anchor" aria-label="anchor" href="#arg-pool-genes"></a></dt>
+<dd><p>Logical; when <code>TRUE</code>, average the selected genes into a
+single trajectory.</p></dd>
+
+
 <dt id="arg-by">by<a class="anchor" aria-label="anchor" href="#arg-by"></a></dt>
 <dd><p>Plot unit: <code>"sample"</code> (default) or <code>"group"</code> to average
 replicates before plotting.</p></dd>
 
 
 <dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>
-<dd><p>Faceting mode: <code>"none"</code> (default), <code>"group"</code>, or <code>"gene"</code>.</p></dd>
+<dd><p>Faceting mode: <code>"auto"</code> (default), <code>"none"</code>, <code>"group"</code>, or <code>"gene"</code>.</p></dd>
+
+
+<dt id="arg-fill-by">fill_by<a class="anchor" aria-label="anchor" href="#arg-fill-by"></a></dt>
+<dd><p>Argument retained for API consistency; ignored because line
+plots use colour rather than fill.</p></dd>
 
 
 <dt id="arg-sample-order">sample_order<a class="anchor" aria-label="anchor" href="#arg-sample-order"></a></dt>
@@ -112,7 +159,8 @@ replicates before plotting.</p></dd>
 
 
 <dt id="arg-value-transform">value_transform<a class="anchor" aria-label="anchor" href="#arg-value-transform"></a></dt>
-<dd><p>Transformation applied to expression values; one of <code>"log2"</code>, <code>"zscore"</code>, or <code>"none"</code>.</p></dd>
+<dd><p>Deprecated compatibility alias for transformation
+choice; one of <code>"log2"</code>, <code>"zscore"</code>, or <code>"none"</code>.</p></dd>
 
 
 <dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
