@@ -70,6 +70,25 @@ preprocessing, contrast definitions, and DEG thresholds, then compare the
 resulting tables, DEG calls, normalized matrices, and critical plot inputs.
 }
 \examples{
+v <- example_vista()
+si <- as.data.frame(sample_info(v))
+data("count_data", package = "VISTA")
+count_subset <- count_data[seq_len(500), c("gene_id", si$sample_names), drop = FALSE]
+
+bm <- benchmark_vista_equivalence(
+  counts = count_subset,
+  sample_info = si,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  methods = "limma",
+  min_counts = 5,
+  min_replicates = 1
+)
+
+bm$comparison_summary
+
 \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")

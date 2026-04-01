@@ -28,6 +28,25 @@
 #'   backend results, structural validation output, self-consistency checks, and
 #'   optional plot objects.
 #' @examples
+#' v <- example_vista()
+#' si <- as.data.frame(sample_info(v))
+#' data("count_data", package = "VISTA")
+#' count_subset <- count_data[seq_len(500), c("gene_id", si$sample_names), drop = FALSE]
+#'
+#' bm <- benchmark_vista_equivalence(
+#'   counts = count_subset,
+#'   sample_info = si,
+#'   column_geneid = "gene_id",
+#'   group_column = "cond_long",
+#'   group_numerator = "treatment1",
+#'   group_denominator = "control",
+#'   methods = "limma",
+#'   min_counts = 5,
+#'   min_replicates = 1
+#' )
+#'
+#' bm$comparison_summary
+#'
 #' \donttest{
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
@@ -1110,9 +1129,8 @@ validate_vista_deep <- function(counts,
 
 #' @keywords internal
 .deg_count_payload_from_vista <- function(x) {
-  .collect_deg_count_data(x) |>
-    as.data.frame(stringsAsFactors = FALSE) |>
-    dplyr::arrange(.data$sample_comparisons, .data$regulation)
+  df <- suppressWarnings(.collect_deg_count_data(x))
+  .standardize_deg_count_payload(df)
 }
 
 #' @keywords internal
@@ -1127,8 +1145,36 @@ validate_vista_deep <- function(counts,
       )
   })
 
+  .standardize_deg_count_payload(df)
+}
+
+#' @keywords internal
+.standardize_deg_count_payload <- function(df) {
+  template <- tibble::tibble(
+    sample_comparisons = character(),
+    regulation = character(),
+    n = numeric()
+  )
+
+  if (is.null(df) || !nrow(df)) {
+    return(template)
+  }
+
+  df <- as.data.frame(df, stringsAsFactors = FALSE)
+  required <- c("sample_comparisons", "regulation", "n")
+  if (!all(required %in% names(df))) {
+    return(template)
+  }
+
+  df <- df |>
+    dplyr::transmute(
+      sample_comparisons = as.character(.data$sample_comparisons),
+      regulation = as.character(.data$regulation),
+      n = as.numeric(.data$n)
+    )
+
   if (!nrow(df)) {
-    return(df)
+    return(template)
   }
 
   df$sample_comparisons <- factor(df$sample_comparisons, levels = unique(df$sample_comparisons))
