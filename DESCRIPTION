@@ -1,7 +1,7 @@
 Package: VISTA
 Type: Package
 Title: Visualization and Integrated System for Transcriptomic Analysis
-Version: 0.99.3
+Version: 0.99.4
 Authors@R: c(
     person(given = "Chirag", family = "Parsania", email = "chirag.parsania@gmail.com", role = c("aut", "cre"))
   )
