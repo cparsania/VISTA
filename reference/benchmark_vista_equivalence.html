@@ -153,7 +153,37 @@ optional plot objects.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_vista.html">example_vista</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">si</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="VISTA-accessors.html">sample_info</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"count_data"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">count_subset</span> <span class="op">&lt;-</span> <span class="va">count_data</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="va">si</span><span class="op">$</span><span class="va">sample_names</span><span class="op">)</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu">benchmark_vista_equivalence</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  counts <span class="op">=</span> <span class="va">count_subset</span>,</span></span>
+<span class="r-in"><span>  sample_info <span class="op">=</span> <span class="va">si</span>,</span></span>
+<span class="r-in"><span>  column_geneid <span class="op">=</span> <span class="st">"gene_id"</span>,</span></span>
+<span class="r-in"><span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span></span>
+<span class="r-in"><span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span></span>
+<span class="r-in"><span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span></span>
+<span class="r-in"><span>  methods <span class="op">=</span> <span class="st">"limma"</span>,</span></span>
+<span class="r-in"><span>  min_counts <span class="op">=</span> <span class="fl">5</span>,</span></span>
+<span class="r-in"><span>  min_replicates <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">bm</span><span class="op">$</span><span class="va">comparison_summary</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 20</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   method comparison            n_genes up_genes_identical down_genes_identical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> limma  treatment1_VS_control     442 TRUE               TRUE                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 15 more variables: deg_sets_identical &lt;lgl&gt;, regulation_identical &lt;lgl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   norm_counts_identical &lt;lgl&gt;, baseMean_within_tolerance &lt;lgl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   log2fc_within_tolerance &lt;lgl&gt;, pvalue_within_tolerance &lt;lgl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   padj_within_tolerance &lt;lgl&gt;, max_abs_norm_counts_diff &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   max_abs_baseMean_diff &lt;dbl&gt;, max_abs_log2fc_diff &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   max_abs_pvalue_diff &lt;dbl&gt;, max_abs_padj_diff &lt;dbl&gt;, all_checks_pass &lt;lgl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   structural_valid &lt;lgl&gt;, self_consistency_valid &lt;lgl&gt;</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"count_data"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sample_metadata"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

@@ -744,7 +744,7 @@ sessionInfo()
 #>  [53] systemfonts_1.3.2           tools_4.5.3                
 #>  [55] ggnewscale_0.5.2            treeio_1.34.0              
 #>  [57] ragg_1.5.2                  Rcpp_1.1.1                 
-#>  [59] glue_1.8.0                  SparseArray_1.10.9         
+#>  [59] glue_1.8.0                  SparseArray_1.10.10        
 #>  [61] xfun_0.57                   DESeq2_1.50.2              
 #>  [63] qvalue_2.42.0               MatrixGenerics_1.22.0      
 #>  [65] withr_3.0.2                 BiocManager_1.30.27        

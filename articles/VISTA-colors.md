@@ -397,7 +397,7 @@ sessionInfo()
 #>  [13] rstatix_0.7.3               htmltools_0.5.9            
 #>  [15] S4Arrays_1.10.1             curl_7.0.0                 
 #>  [17] broom_1.0.12                Formula_1.2-5              
-#>  [19] SparseArray_1.10.9          gridGraphics_0.5-1         
+#>  [19] SparseArray_1.10.10         gridGraphics_0.5-1         
 #>  [21] sass_0.4.10                 bslib_0.10.0               
 #>  [23] htmlwidgets_1.6.4           desc_1.4.3                 
 #>  [25] plyr_1.8.9                  cachem_1.1.0               

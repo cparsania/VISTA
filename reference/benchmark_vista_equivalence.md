@@ -107,6 +107,36 @@ and optional plot objects.
 ## Examples
 
 ``` r
+v <- example_vista()
+si <- as.data.frame(sample_info(v))
+data("count_data", package = "VISTA")
+count_subset <- count_data[seq_len(500), c("gene_id", si$sample_names), drop = FALSE]
+
+bm <- benchmark_vista_equivalence(
+  counts = count_subset,
+  sample_info = si,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  methods = "limma",
+  min_counts = 5,
+  min_replicates = 1
+)
+
+bm$comparison_summary
+#> # A tibble: 1 × 20
+#>   method comparison            n_genes up_genes_identical down_genes_identical
+#>   <chr>  <chr>                   <int> <lgl>              <lgl>               
+#> 1 limma  treatment1_VS_control     442 TRUE               TRUE                
+#> # ℹ 15 more variables: deg_sets_identical <lgl>, regulation_identical <lgl>,
+#> #   norm_counts_identical <lgl>, baseMean_within_tolerance <lgl>,
+#> #   log2fc_within_tolerance <lgl>, pvalue_within_tolerance <lgl>,
+#> #   padj_within_tolerance <lgl>, max_abs_norm_counts_diff <dbl>,
+#> #   max_abs_baseMean_diff <dbl>, max_abs_log2fc_diff <dbl>,
+#> #   max_abs_pvalue_diff <dbl>, max_abs_padj_diff <dbl>, all_checks_pass <lgl>,
+#> #   structural_valid <lgl>, self_consistency_valid <lgl>
+
 # \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
