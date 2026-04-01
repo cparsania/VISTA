@@ -7,11 +7,11 @@
 ## Citation
 
 Parsania C (2026). *VISTA: Visualization and Integrated System for
-Transcriptomic Analysis*. R package version 0.99.3.
+Transcriptomic Analysis*. R package version 0.99.4.
 
     @Manual{,
       title = {VISTA: Visualization and Integrated System for Transcriptomic Analysis},
       author = {Chirag Parsania},
       year = {2026},
-      note = {R package version 0.99.3},
+      note = {R package version 0.99.4},
     }
