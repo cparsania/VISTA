@@ -126,7 +126,7 @@ create_vista(
 - group_palette:
 
   Qualitative palette name for
-  [`colorspace::qualitative_hcl()`](https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html).
+  [`colorspace::qualitative_hcl()`](https://rdrr.io/pkg/colorspace/man/hcl_palettes.html).
   One of
   `c("Pastel 1","Dark 2","Dark 3","Set 2","Set 3","Warm","Cold","Harmonic","Dynamic")`.
   Default: `"Dark 2"`.
@@ -167,7 +167,7 @@ have rownames identical to the final `norm_counts` rownames. When
 ## See also
 
 [as_vista](as_vista.md), [VISTA-class](VISTA-class.md),
-[qualitative_hcl](https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html)
+[qualitative_hcl](https://rdrr.io/pkg/colorspace/man/hcl_palettes.html)
 
 ## Examples
 

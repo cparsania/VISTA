@@ -35,7 +35,7 @@ get_deg_venn_diagram(
 - palette:
 
   Qualitative palette name passed to
-  [`colorspace::qualitative_hcl()`](https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html)
+  [`colorspace::qualitative_hcl()`](https://rdrr.io/pkg/colorspace/man/hcl_palettes.html)
   for fill colors.
 
 - auto_scale:
