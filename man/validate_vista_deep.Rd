@@ -69,6 +69,26 @@ This validator combines \code{validate_vista()} with backend-to-backend numerica
 equivalence checks against standalone DESeq2, edgeR, and limma runs.
 }
 \examples{
+v <- example_vista()
+si <- as.data.frame(sample_info(v))
+data("count_data", package = "VISTA")
+count_subset <- count_data[seq_len(500), c("gene_id", si$sample_names), drop = FALSE]
+
+report <- validate_vista_deep(
+  counts = count_subset,
+  sample_info = si,
+  column_geneid = "gene_id",
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  methods = "limma",
+  min_counts = 5,
+  min_replicates = 1,
+  error = FALSE
+)
+
+report$valid
+
 \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")

@@ -116,6 +116,16 @@ This complements \code{\link[=get_enrichment_plot]{get_enrichment_plot()}} (whic
 \code{\link[=get_pathway_heatmap]{get_pathway_heatmap()}} (which shows expression patterns).
 }
 \examples{
+v <- example_vista()
+msig <- get_msigdb_enrichment(
+  v,
+  sample_comparison = names(comparisons(v))[1],
+  regulation = "Both",
+  msigdb_category = "H",
+  from_type = "ENSEMBL"
+)
+get_enrichment_chord(msig, top_n = 5)
+
 \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")

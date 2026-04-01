@@ -39,41 +39,6 @@ Invisibly, the normalized output file path.
 Exports selected data components from a \code{VISTA} object to CSV/TSV/RDS/XLSX.
 }
 \examples{
-\donttest{
-set.seed(1)
-mat <- matrix(rpois(60, lambda = 20), nrow = 10)
-rownames(mat) <- paste0("gene", seq_len(nrow(mat)))
-colnames(mat) <- paste0("sample", seq_len(ncol(mat)))
-se <- SummarizedExperiment::SummarizedExperiment(
-  assays = list(norm_counts = mat),
-  colData = S4Vectors::DataFrame(
-    group = rep(c("ctrl", "trt"), each = 3),
-    row.names = colnames(mat)
-  ),
-  rowData = S4Vectors::DataFrame(
-    gene_id = rownames(mat),
-    row.names = rownames(mat)
-  )
-)
-de <- data.frame(
-  gene_id = rownames(mat),
-  log2fc = rnorm(nrow(mat)),
-  pvalue = runif(nrow(mat)),
-  padj = runif(nrow(mat)),
-  regulation = "Other",
-  row.names = rownames(mat)
-)
-v <- as_vista(se, group_column = "group")
-md <- S4Vectors::metadata(v)
-md$de_results <- S4Vectors::SimpleList(trt_vs_ctrl = de)
-md$de_summary <- S4Vectors::SimpleList(trt_vs_ctrl = as.data.frame(table(de$regulation)))
-S4Vectors::metadata(v) <- md
+v <- example_vista()
 save_vista_data(v, what = "comparison", file = tempfile(fileext = ".csv"), format = "csv")
-save_vista_data(
-  v,
-  what = c("comparison", "norm_counts"),
-  file = tempfile(fileext = ".rds"),
-  format = "rds"
-)
-}
 }

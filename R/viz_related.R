@@ -843,6 +843,10 @@ get_umap_plot <- function(x,
 #' @return A `ggplot2` object.
 #'
 #' @examples
+#' vista <- example_vista()
+#' comps <- names(comparisons(vista))
+#' get_volcano_plot(vista, sample_comparison = comps[1])
+#'
 #' \donttest{
 #' # Create VISTA object
 #' data("count_data", package = "VISTA")

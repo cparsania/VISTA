@@ -47,6 +47,19 @@ Parses pathway-level gene members from an enrichment result and returns
 either a long table, pathway-indexed list, or a unique vector of genes.
 }
 \examples{
+if (requireNamespace("msigdbr", quietly = TRUE)) {
+  vista <- example_vista()
+  msig <- get_msigdb_enrichment(
+    vista,
+    sample_comparison = names(comparisons(vista))[1],
+    regulation = "Both",
+    msigdb_category = "H",
+    from_type = "ENSEMBL"
+  )
+  pathway_tbl <- get_pathway_genes(msig, top_n = 5, return_type = "long")
+  head(pathway_tbl)
+}
+
 \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")

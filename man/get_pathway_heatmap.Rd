@@ -68,6 +68,25 @@ genes from selected pathways (via \code{\link[=get_pathway_genes]{get_pathway_ge
 \code{VISTA} feature IDs, and forwards to \code{\link[=get_expression_heatmap]{get_expression_heatmap()}}.
 }
 \examples{
+if (requireNamespace("msigdbr", quietly = TRUE)) {
+  vista <- example_vista()
+  msig <- get_msigdb_enrichment(
+    vista,
+    sample_comparison = names(comparisons(vista))[1],
+    regulation = "Both",
+    msigdb_category = "H",
+    from_type = "ENSEMBL"
+  )
+  genes <- get_pathway_heatmap(
+    vista,
+    enrichment = msig,
+    sample_group = c("control", "treatment1"),
+    top_n = 3,
+    return_type = "genes"
+  )
+  head(genes)
+}
+
 \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")

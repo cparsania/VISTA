@@ -60,6 +60,10 @@ Wraps EnhancedVolcano to visualize log2FC vs p-values for a selected
 comparison.
 }
 \examples{
+vista <- example_vista()
+comps <- names(comparisons(vista))
+get_volcano_plot(vista, sample_comparison = comps[1])
+
 \donttest{
 # Create VISTA object
 data("count_data", package = "VISTA")

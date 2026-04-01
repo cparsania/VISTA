@@ -62,27 +62,21 @@
 #' @seealso \link{create_vista}, \link[DESeq2]{DESeq}, \link[edgeR]{glmLRT}, \link[limma]{voom}
 #'
 #' @examples
-#' \donttest{
-#'   data("count_data", package = "VISTA")
-#'   data("sample_metadata", package = "VISTA")
-#'
-#'   counts_small <- count_data[1:200, ]
-#'   subset_samples <- sample_metadata[
-#'     sample_metadata$sample_names %in% colnames(counts_small)[-1],
-#'   ]
-#'
-#'   deseq_results <- run_deseq_analysis(
-#'     counts = counts_small,
-#'     sample_info = subset_samples,
-#'     column_geneid = "gene_id",
-#'     group_column = "cond_long",
-#'     group_numerator = "treatment1",
-#'     group_denominator = "control",
-#'     min_counts = 5,
-#'     min_replicates = 1
-#'   )
-#'   names(deseq_results$comparisons)
-#' }
+#' v <- example_vista()
+#' si <- as.data.frame(sample_info(v))
+#' data("count_data", package = "VISTA")
+#' counts_small <- count_data[seq_len(200), c("gene_id", si$sample_names), drop = FALSE]
+#' limma_results <- run_limma_analysis(
+#'   counts = counts_small,
+#'   sample_info = si,
+#'   column_geneid = "gene_id",
+#'   group_column = "cond_long",
+#'   group_numerator = "treatment1",
+#'   group_denominator = "control",
+#'   min_counts = 5,
+#'   min_replicates = 1
+#' )
+#' names(limma_results$comparisons)
 #'
 #' @importFrom DESeq2 DESeq DESeqDataSetFromMatrix results counts estimateSizeFactors
 #' @importFrom edgeR DGEList calcNormFactors estimateDisp glmQLFit glmQLFTest topTags
@@ -1826,6 +1820,14 @@ run_limma_analysis <- function(
 #' @return The updated `VISTA` object with `rowData` populated/appended.
 #'
 #' @examples
+#' vista <- example_vista()
+#' custom_annot <- data.frame(
+#'   gene_id = rownames(vista)[1:10],
+#'   custom_info = paste0("Info_", seq_len(10))
+#' )
+#' vista2 <- set_rowdata(vista, annotations = custom_annot, key_col = "gene_id")
+#' head(SummarizedExperiment::rowData(vista2)$custom_info)
+#'
 #' \donttest{
 #' # Load example VISTA object
 #' data("count_data", package = "VISTA")

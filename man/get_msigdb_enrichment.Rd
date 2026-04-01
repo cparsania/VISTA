@@ -56,6 +56,19 @@ Convenience wrapper that pulls regulated genes from a stored differential
 expression comparison in a \code{VISTA} object and runs \code{\link[=enrichMsigDB]{enrichMsigDB()}} on them.
 }
 \examples{
+if (requireNamespace("msigdbr", quietly = TRUE)) {
+  vista <- example_vista()
+  comp <- names(comparisons(vista))[1]
+  msig <- get_msigdb_enrichment(
+    vista,
+    sample_comparison = comp,
+    regulation = "Both",
+    msigdb_category = "H",
+    from_type = "ENSEMBL"
+  )
+  class(msig$enrich)
+}
+
 \donttest{
 # Create VISTA object
 data("count_data", package = "VISTA")

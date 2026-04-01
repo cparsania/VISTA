@@ -65,6 +65,14 @@ fetching from an \code{OrgDb}, only columns available in that database will be
 filled.
 }
 \examples{
+vista <- example_vista()
+custom_annot <- data.frame(
+  gene_id = rownames(vista)[1:10],
+  custom_info = paste0("Info_", seq_len(10))
+)
+vista2 <- set_rowdata(vista, annotations = custom_annot, key_col = "gene_id")
+head(SummarizedExperiment::rowData(vista2)$custom_info)
+
 \donttest{
 # Load example VISTA object
 data("count_data", package = "VISTA")

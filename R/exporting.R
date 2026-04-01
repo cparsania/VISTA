@@ -20,39 +20,10 @@
 #'
 #' @return Invisibly, the normalized output file path.
 #' @examples
-#' \donttest{
-#' set.seed(1)
-#' mat <- matrix(rpois(60, lambda = 20), nrow = 10)
-#' rownames(mat) <- paste0("gene", seq_len(nrow(mat)))
-#' colnames(mat) <- paste0("sample", seq_len(ncol(mat)))
-#' se <- SummarizedExperiment::SummarizedExperiment(
-#'   assays = list(norm_counts = mat),
-#'   colData = S4Vectors::DataFrame(
-#'     group = rep(c("ctrl", "trt"), each = 3),
-#'     row.names = colnames(mat)
-#'   ),
-#'   rowData = S4Vectors::DataFrame(
-#'     gene_id = rownames(mat),
-#'     row.names = rownames(mat)
-#'   )
-#' )
-#' de <- data.frame(
-#'   gene_id = rownames(mat),
-#'   log2fc = rnorm(nrow(mat)),
-#'   pvalue = runif(nrow(mat)),
-#'   padj = runif(nrow(mat)),
-#'   regulation = "Other",
-#'   row.names = rownames(mat)
-#' )
-#' v <- as_vista(se, group_column = "group")
-#' md <- S4Vectors::metadata(v)
-#' md$de_results <- S4Vectors::SimpleList(trt_vs_ctrl = de)
-#' md$de_summary <- S4Vectors::SimpleList(trt_vs_ctrl = as.data.frame(table(de$regulation)))
-#' S4Vectors::metadata(v) <- md
+#' v <- example_vista()
 #' p <- get_pca_plot(v)
 #' out_file <- tempfile(fileext = ".pdf")
 #' save_vista_plot(p, file = out_file, width = 7, height = 5, units = "in")
-#' }
 #' @export
 save_vista_plot <- function(plot,
                             file,
@@ -164,43 +135,8 @@ save_vista_plot <- function(plot,
 #'
 #' @return Invisibly, the normalized output file path.
 #' @examples
-#' \donttest{
-#' set.seed(1)
-#' mat <- matrix(rpois(60, lambda = 20), nrow = 10)
-#' rownames(mat) <- paste0("gene", seq_len(nrow(mat)))
-#' colnames(mat) <- paste0("sample", seq_len(ncol(mat)))
-#' se <- SummarizedExperiment::SummarizedExperiment(
-#'   assays = list(norm_counts = mat),
-#'   colData = S4Vectors::DataFrame(
-#'     group = rep(c("ctrl", "trt"), each = 3),
-#'     row.names = colnames(mat)
-#'   ),
-#'   rowData = S4Vectors::DataFrame(
-#'     gene_id = rownames(mat),
-#'     row.names = rownames(mat)
-#'   )
-#' )
-#' de <- data.frame(
-#'   gene_id = rownames(mat),
-#'   log2fc = rnorm(nrow(mat)),
-#'   pvalue = runif(nrow(mat)),
-#'   padj = runif(nrow(mat)),
-#'   regulation = "Other",
-#'   row.names = rownames(mat)
-#' )
-#' v <- as_vista(se, group_column = "group")
-#' md <- S4Vectors::metadata(v)
-#' md$de_results <- S4Vectors::SimpleList(trt_vs_ctrl = de)
-#' md$de_summary <- S4Vectors::SimpleList(trt_vs_ctrl = as.data.frame(table(de$regulation)))
-#' S4Vectors::metadata(v) <- md
+#' v <- example_vista()
 #' save_vista_data(v, what = "comparison", file = tempfile(fileext = ".csv"), format = "csv")
-#' save_vista_data(
-#'   v,
-#'   what = c("comparison", "norm_counts"),
-#'   file = tempfile(fileext = ".rds"),
-#'   format = "rds"
-#' )
-#' }
 #' @export
 save_vista_data <- function(x,
                             what = c(
@@ -431,43 +367,15 @@ save_vista_data <- function(x,
 #' @return Invisibly, a list with `out_dir`, `sample_comparison`, `manifest`,
 #'   `plot_files`, and `data_files`.
 #' @examples
-#' \donttest{
-#' set.seed(1)
-#' mat <- matrix(rpois(60, lambda = 20), nrow = 10)
-#' rownames(mat) <- paste0("gene", seq_len(nrow(mat)))
-#' colnames(mat) <- paste0("sample", seq_len(ncol(mat)))
-#' se <- SummarizedExperiment::SummarizedExperiment(
-#'   assays = list(norm_counts = mat),
-#'   colData = S4Vectors::DataFrame(
-#'     group = rep(c("ctrl", "trt"), each = 3),
-#'     row.names = colnames(mat)
-#'   ),
-#'   rowData = S4Vectors::DataFrame(
-#'     gene_id = rownames(mat),
-#'     row.names = rownames(mat)
-#'   )
-#' )
-#' de <- data.frame(
-#'   gene_id = rownames(mat),
-#'   log2fc = rnorm(nrow(mat)),
-#'   pvalue = runif(nrow(mat)),
-#'   padj = runif(nrow(mat)),
-#'   regulation = "Other",
-#'   row.names = rownames(mat)
-#' )
-#' v <- as_vista(se, group_column = "group")
-#' md <- S4Vectors::metadata(v)
-#' md$de_results <- S4Vectors::SimpleList(trt_vs_ctrl = de)
-#' md$de_summary <- S4Vectors::SimpleList(trt_vs_ctrl = as.data.frame(table(de$regulation)))
-#' S4Vectors::metadata(v) <- md
-#' out_dir <- tempfile("vista_assets_")
-#' export_vista_assets(
+#' v <- example_vista()
+#' out_dir <- file.path(tempdir(), "vista_assets_example")
+#' res <- export_vista_assets(
 #'   v,
 #'   out_dir = out_dir,
 #'   include_plots = "pca",
-#'   include_data = c("comparison", "norm_counts")
+#'   include_data = "comparison"
 #' )
-#' }
+#' names(res)
 #' @export
 export_vista_assets <- function(x,
                                 out_dir = "vista_assets",

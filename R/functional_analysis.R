@@ -306,6 +306,19 @@ get_enrichment_plot <- function(x, top_n = 10, title = NULL) {
 #' }
 #'
 #' @examples
+#' if (requireNamespace("msigdbr", quietly = TRUE)) {
+#'   vista <- example_vista()
+#'   msig <- get_msigdb_enrichment(
+#'     vista,
+#'     sample_comparison = names(comparisons(vista))[1],
+#'     regulation = "Both",
+#'     msigdb_category = "H",
+#'     from_type = "ENSEMBL"
+#'   )
+#'   pathway_tbl <- get_pathway_genes(msig, top_n = 5, return_type = "long")
+#'   head(pathway_tbl)
+#' }
+#'
 #' \donttest{
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
@@ -497,6 +510,25 @@ get_pathway_genes <- function(x,
 #' }
 #'
 #' @examples
+#' if (requireNamespace("msigdbr", quietly = TRUE)) {
+#'   vista <- example_vista()
+#'   msig <- get_msigdb_enrichment(
+#'     vista,
+#'     sample_comparison = names(comparisons(vista))[1],
+#'     regulation = "Both",
+#'     msigdb_category = "H",
+#'     from_type = "ENSEMBL"
+#'   )
+#'   genes <- get_pathway_heatmap(
+#'     vista,
+#'     enrichment = msig,
+#'     sample_group = c("control", "treatment1"),
+#'     top_n = 3,
+#'     return_type = "genes"
+#'   )
+#'   head(genes)
+#' }
+#'
 #' \donttest{
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
@@ -662,6 +694,19 @@ get_pathway_heatmap <- function(x,
 #' @return A list with `enrich` containing an `enrichResult`.
 #'
 #' @examples
+#' if (requireNamespace("msigdbr", quietly = TRUE)) {
+#'   vista <- example_vista()
+#'   comp <- names(comparisons(vista))[1]
+#'   msig <- get_msigdb_enrichment(
+#'     vista,
+#'     sample_comparison = comp,
+#'     regulation = "Both",
+#'     msigdb_category = "H",
+#'     from_type = "ENSEMBL"
+#'   )
+#'   class(msig$enrich)
+#' }
+#'
 #' \donttest{
 #' # Create VISTA object
 #' data("count_data", package = "VISTA")
@@ -997,6 +1042,16 @@ get_gsea <- function(x,
 #'   The chord diagram is drawn as a side effect.
 #'
 #' @examples
+#' v <- example_vista()
+#' msig <- get_msigdb_enrichment(
+#'   v,
+#'   sample_comparison = names(comparisons(v))[1],
+#'   regulation = "Both",
+#'   msigdb_category = "H",
+#'   from_type = "ENSEMBL"
+#' )
+#' get_enrichment_chord(msig, top_n = 5)
+#'
 #' \donttest{
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
