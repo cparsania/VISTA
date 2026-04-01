@@ -91,6 +91,19 @@ A `ggplot2` object.
 ## Examples
 
 ``` r
+vista <- example_vista()
+comps <- names(comparisons(vista))
+get_volcano_plot(vista, sample_comparison = comps[1])
+#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+#> ℹ Please use `linewidth` instead.
+#> ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+#>   Please report the issue to the authors.
+#> Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
+#> ℹ Please use the `linewidth` argument instead.
+#> ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+#>   Please report the issue to the authors.
+
+
 # \donttest{
 # Create VISTA object
 data("count_data", package = "VISTA")
@@ -114,14 +127,6 @@ vista <- create_vista(
 # Basic volcano plot
 comps <- names(comparisons(vista))
 get_volcano_plot(vista, sample_comparison = comps[1])
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> ℹ The deprecated feature was likely used in the EnhancedVolcano package.
-#>   Please report the issue to the authors.
-#> Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
-#> ℹ Please use the `linewidth` argument instead.
-#> ℹ The deprecated feature was likely used in the EnhancedVolcano package.
-#>   Please report the issue to the authors.
 
 
 # With custom thresholds

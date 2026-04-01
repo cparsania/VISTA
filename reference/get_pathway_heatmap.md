@@ -102,6 +102,26 @@ Depending on `return_type`:
 ## Examples
 
 ``` r
+if (requireNamespace("msigdbr", quietly = TRUE)) {
+  vista <- example_vista()
+  msig <- get_msigdb_enrichment(
+    vista,
+    sample_comparison = names(comparisons(vista))[1],
+    regulation = "Both",
+    msigdb_category = "H",
+    from_type = "ENSEMBL"
+  )
+  genes <- get_pathway_heatmap(
+    vista,
+    enrichment = msig,
+    sample_group = c("control", "treatment1"),
+    top_n = 3,
+    return_type = "genes"
+  )
+  head(genes)
+}
+#> [1] "ENSG00000003402" "ENSG00000004799"
+
 # \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")

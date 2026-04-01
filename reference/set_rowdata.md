@@ -86,6 +86,16 @@ available in that database will be filled.
 ## Examples
 
 ``` r
+vista <- example_vista()
+custom_annot <- data.frame(
+  gene_id = rownames(vista)[1:10],
+  custom_info = paste0("Info_", seq_len(10))
+)
+vista2 <- set_rowdata(vista, annotations = custom_annot, key_col = "gene_id")
+#> Warning: Missing annotations for 113 genes; filling those rows with NA.
+head(SummarizedExperiment::rowData(vista2)$custom_info)
+#> [1] "Info_1" "Info_2" "Info_3" "Info_4" "Info_5" "Info_6"
+
 # \donttest{
 # Load example VISTA object
 data("count_data", package = "VISTA")

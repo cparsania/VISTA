@@ -802,7 +802,7 @@ get_expression_heatmap(
   sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
   display_id = "SYMBOL",
-  show_row_names = T
+  show_row_names = TRUE
 )
 ```
 
@@ -817,7 +817,7 @@ get_expression_heatmap(
   genes = top_degs,
   display_id = "SYMBOL",
   kmeans_k = 3,
-  show_row_names = T
+  show_row_names = TRUE
 )
 ```
 
@@ -830,7 +830,7 @@ get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
   genes = top_degs,
-  show_row_names = T,
+  show_row_names = TRUE,
   display_id = "SYMBOL",
   kmeans_k = 3,
   cluster_row_slice = FALSE,
@@ -872,7 +872,7 @@ get_expression_heatmap(
   display_id = "SYMBOL",
   summarise_replicates = FALSE,
   show_row_names = FALSE,
-  annotate_columns = T,
+  annotate_columns = TRUE,
   kmeans_k = 2
 )
 ```
@@ -1108,7 +1108,7 @@ get_expression_scatter(
 get_expression_lineplot(
   vista,
   genes = top_up[1:3],
-  log_transform = T,display_id = "SYMBOL",
+  log_transform = TRUE,display_id = "SYMBOL",
   by = "sample",facet_by = "none",
   group_column = "treatment",sample_group = c("Untreated","Dexamethasone")
 )

@@ -66,6 +66,22 @@ Depending on `return_type`:
 ## Examples
 
 ``` r
+if (requireNamespace("msigdbr", quietly = TRUE)) {
+  vista <- example_vista()
+  msig <- get_msigdb_enrichment(
+    vista,
+    sample_comparison = names(comparisons(vista))[1],
+    regulation = "Both",
+    msigdb_category = "H",
+    from_type = "ENSEMBL"
+  )
+  pathway_tbl <- get_pathway_genes(msig, top_n = 5, return_type = "long")
+  head(pathway_tbl)
+}
+#>     pathway_id      pathway            gene
+#> 1 UN_ANNOTATED UN_ANNOTATED ENSG00000003402
+#> 2 UN_ANNOTATED UN_ANNOTATED ENSG00000004799
+
 # \donttest{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
