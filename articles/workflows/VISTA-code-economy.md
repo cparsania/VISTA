@@ -616,7 +616,7 @@ sessionInfo()
 #> [8] methods   base     
 #> 
 #> other attached packages:
-#>  [1] VISTA_0.99.4                circlize_0.4.18            
+#>  [1] VISTA_0.99.5                circlize_0.4.18            
 #>  [3] ComplexHeatmap_2.26.1       msigdbr_26.1.0             
 #>  [5] clusterProfiler_4.18.4      tibble_3.3.1               
 #>  [7] dplyr_1.2.1                 ggrepel_0.9.8              

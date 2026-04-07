@@ -65,7 +65,7 @@ get_expression_barplot(
 - p.label:
 
   Label format for
-  [`ggpubr::stat_compare_means()`](https://rdrr.io/pkg/ggpubr/man/stat_compare_means.html).
+  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
 
 - comparisons:
 

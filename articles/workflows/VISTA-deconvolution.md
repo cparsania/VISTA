@@ -175,19 +175,19 @@ dim(cell_fractions)
 #> [1]  8 43
 cell_fractions[1:min(4, nrow(cell_fractions)), 1:min(6, ncol(cell_fractions))]
 #>              neutrophil     monocyte megakaryocyte-erythroid progenitor cell
-#> SRR1039508 2.719007e-22 0.000000e+00                            3.335301e-25
-#> SRR1039509 4.146663e-23 0.000000e+00                            1.157681e-05
+#> SRR1039508 2.746005e-22 0.000000e+00                            0.000000e+00
+#> SRR1039509 4.648547e-23 0.000000e+00                            1.157681e-05
 #> SRR1039512 0.000000e+00 1.220985e-20                            5.108035e-05
-#> SRR1039513 5.131493e-22 0.000000e+00                            1.347784e-05
+#> SRR1039513 4.611114e-22 0.000000e+00                            1.347784e-05
 #>            CD4-positive, alpha-beta T cell regulatory T cell
-#> SRR1039508                    2.783925e-05      0.000000e+00
+#> SRR1039508                    2.783925e-05      1.816553e-24
 #> SRR1039509                    3.985213e-05      0.000000e+00
-#> SRR1039512                    1.816519e-05      1.726097e-24
+#> SRR1039512                    1.816519e-05      0.000000e+00
 #> SRR1039513                    2.921939e-05      0.000000e+00
 #>            central memory CD4-positive, alpha-beta T cell
-#> SRR1039508                                   3.112472e-23
-#> SRR1039509                                   0.000000e+00
-#> SRR1039512                                   5.907540e-23
+#> SRR1039508                                   0.000000e+00
+#> SRR1039509                                   6.472498e-31
+#> SRR1039512                                   2.746680e-23
 #> SRR1039513                                   0.000000e+00
 ```
 
@@ -290,7 +290,7 @@ sessionInfo()
 #> [11] Seqinfo_1.0.0               IRanges_2.44.0             
 #> [13] S4Vectors_0.48.1            BiocGenerics_0.56.0        
 #> [15] generics_0.1.4              MatrixGenerics_1.22.0      
-#> [17] matrixStats_1.5.0           VISTA_0.99.4               
+#> [17] matrixStats_1.5.0           VISTA_0.99.5               
 #> [19] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
