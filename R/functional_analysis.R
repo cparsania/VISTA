@@ -1,6 +1,7 @@
 #' @importFrom clusterProfiler enricher GSEA gseGO gseKEGG enrichGO enrichKEGG
 #' @importFrom msigdbr msigdbr
 #' @importFrom AnnotationDbi mapIds keys
+#' @importFrom methods setGeneric setMethod
 #' @importFrom SummarizedExperiment rowData
 #' @importFrom cli cli_abort cli_warn
 NULL
@@ -57,9 +58,6 @@ NULL
 #' @param ... Additional arguments to pass to `clusterProfiler::enricher()`.
 #'
 #' @return A list containing a single `enrichResult` object named `"enrich"`.
-#' @importFrom clusterProfiler enricher
-#' @import msigdbr
-#' @import SummarizedExperiment
 #' @aliases enrichMsigDB enrichMsigDB,VISTA-method
 #' @export
 setGeneric("enrichMsigDB", function(x,
@@ -73,7 +71,7 @@ setGeneric("enrichMsigDB", function(x,
                                     col_genetype = "GENETYPE",
                                     feature_type = "protein-coding",
                                     ...) {
-  standardGeneric("enrichMsigDB")
+  methods::standardGeneric("enrichMsigDB")
 })
 
 setMethod(
@@ -127,9 +125,9 @@ setMethod(
       if (!any(grepl(":", ids, fixed = TRUE))) return(ids)
       split <- strsplit(ids, ":", fixed = TRUE)
       if (toupper(type) == "SYMBOL") {
-        sapply(split, function(p) if (length(p) > 1) p[2] else p[1], USE.NAMES = FALSE)
+        vapply(split, function(p) if (length(p) > 1) p[2] else p[1], character(1), USE.NAMES = FALSE)
       } else {
-        sapply(split, `[[`, 1L, USE.NAMES = FALSE)
+        vapply(split, `[[`, character(1), 1L, USE.NAMES = FALSE)
       }
     }
 
@@ -713,8 +711,8 @@ get_pathway_heatmap <- function(x,
 #' data("sample_metadata", package = "VISTA")
 #'
 #' vista <- create_vista(
-#'   counts = count_data[1:200, ],
-#'   sample_info = sample_metadata[1:6, ],
+#'   counts = count_data[seq_len(200), ],
+#'   sample_info = sample_metadata[seq_len(6), ],
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
 #'   group_numerator = "treatment1",
@@ -1057,8 +1055,8 @@ get_gsea <- function(x,
 #' data("sample_metadata", package = "VISTA")
 #'
 #' vista <- create_vista(
-#'   counts = count_data[1:200, ],
-#'   sample_info = sample_metadata[1:6, ],
+#'   counts = count_data[seq_len(200), ],
+#'   sample_info = sample_metadata[seq_len(6), ],
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
 #'   group_numerator = "treatment1",

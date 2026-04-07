@@ -67,7 +67,7 @@ filled.
 \examples{
 vista <- example_vista()
 custom_annot <- data.frame(
-  gene_id = rownames(vista)[1:10],
+  gene_id = rownames(vista)[seq_len(10)],
   custom_info = paste0("Info_", seq_len(10))
 )
 vista2 <- set_rowdata(vista, annotations = custom_annot, key_col = "gene_id")
@@ -79,8 +79,8 @@ data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
 vista <- create_vista(
-  counts = count_data[1:100, ],
-  sample_info = sample_metadata[1:6, ],
+  counts = count_data[seq_len(100), ],
+  sample_info = sample_metadata[seq_len(6), ],
   column_geneid = "gene_id",
   group_column = "cond_long",
   group_numerator = "treatment1",
@@ -101,8 +101,8 @@ if (requireNamespace("org.Hs.eg.db", quietly = TRUE)) {
 
 # Or provide custom annotations
 custom_annot <- data.frame(
-  gene_id = rownames(vista)[1:10],
-  custom_info = paste0("Info_", 1:10)
+  gene_id = rownames(vista)[seq_len(10)],
+  custom_info = paste0("Info_", seq_len(10))
 )
 vista <- set_rowdata(vista, annotations = custom_annot, key_col = "gene_id")
 }

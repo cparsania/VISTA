@@ -308,11 +308,21 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     table_paths$norm_counts <- write_table(nc, "norm_counts.csv")
   }
 
-  download_manifest <- data.frame(type = character(), label = character(), path = character(), stringsAsFactors = FALSE)
+  state <- new.env(parent = emptyenv())
+  state$download_manifest <- data.frame(type = character(), label = character(), path = character(), stringsAsFactors = FALSE)
+  state$plot_messages <- list()
+  state$enrichment <- list(
+    msigdb = list(plot = NULL, table = NULL, message = NULL),
+    go = list(plot = NULL, table = NULL, message = NULL),
+    kegg = list(plot = NULL, table = NULL, message = NULL)
+  )
+  state$enrichment_tables <- list(msigdb = NULL, go = NULL, kegg = NULL, pathway_genes = NULL)
+  state$zip_msg <- NULL
+
   register_download <- function(type, label, path) {
     if (!is.null(path) && is.character(path) && length(path) == 1L && nzchar(path)) {
-      download_manifest <<- rbind(
-        download_manifest,
+      state$download_manifest <- rbind(
+        state$download_manifest,
         data.frame(type = type, label = label, path = path, stringsAsFactors = FALSE)
       )
     }
@@ -322,15 +332,14 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     register_download("table", paste("Table:", nm), table_paths[[nm]])
   }
 
-  plot_messages <- list()
   safe_plot <- function(slot, filename, plot_fun, width = 8, height = 6) {
     obj <- tryCatch(plot_fun(), error = function(e) {
-      plot_messages[[slot]] <<- e$message
+      state$plot_messages[[slot]] <- e$message
       NULL
     })
     if (is.null(obj)) return(NULL)
     tryCatch(save_plot(obj, filename, width = width, height = height), error = function(e) {
-      plot_messages[[slot]] <<- e$message
+      state$plot_messages[[slot]] <- e$message
       NULL
     })
   }
@@ -394,7 +403,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
         display_id = cfg$display_id
       ),
       error = function(e) {
-        plot_messages$expression_heatmap <<- e$message
+        state$plot_messages$expression_heatmap <- e$message
         NULL
       }
     )
@@ -407,7 +416,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
       plot_paths$expression_heatmap <- tryCatch(
         save_plot(hm_obj, paste0("expr_heatmap_", comp_tag, ".png"), width = 8, height = 10),
         error = function(e) {
-          plot_messages$expression_heatmap <<- e$message
+          state$plot_messages$expression_heatmap <- e$message
           NULL
         }
       )
@@ -422,41 +431,34 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     register_download("plot", paste("Plot:", nm), plot_paths[[nm]])
   }
 
-  enrichment <- list(
-    msigdb = list(plot = NULL, table = NULL, message = NULL),
-    go = list(plot = NULL, table = NULL, message = NULL),
-    kegg = list(plot = NULL, table = NULL, message = NULL)
-  )
-  enrichment_tables <- list(msigdb = NULL, go = NULL, kegg = NULL, pathway_genes = NULL)
-
   enrich_from <- cfg$from_type %||% cfg$display_id %||% if (any(grepl("^ENS", de_tbl$gene_id))) "ENSEMBL" else "SYMBOL"
 
   collect_enrichment <- function(kind, enrich_fun, file_stub) {
     out <- tryCatch(enrich_fun(), error = function(e) {
-      enrichment[[kind]]$message <<- e$message
+      state$enrichment[[kind]]$message <- e$message
       NULL
     })
     if (is.null(out) || is.null(out$enrich)) {
-      if (is.null(enrichment[[kind]]$message)) enrichment[[kind]]$message <<- "No enrichment output returned."
+      if (is.null(state$enrichment[[kind]]$message)) state$enrichment[[kind]]$message <- "No enrichment output returned."
       return(NULL)
     }
     enr <- out$enrich
     if (!inherits(enr, c("enrichResult", "gseaResult")) || is.null(enr@result) || nrow(enr@result) == 0) {
-      enrichment[[kind]]$message <<- "No significant enrichment terms."
+      state$enrichment[[kind]]$message <- "No significant enrichment terms."
       return(NULL)
     }
     tbl <- as.data.frame(enr@result, stringsAsFactors = FALSE)
-    enrichment_tables[[kind]] <<- tbl
-    enrichment[[kind]]$table <<- write_table(tbl, paste0(file_stub, "_", comp_tag, ".csv"))
-    enrichment[[kind]]$plot <<- safe_plot(
+    state$enrichment_tables[[kind]] <- tbl
+    state$enrichment[[kind]]$table <- write_table(tbl, paste0(file_stub, "_", comp_tag, ".csv"))
+    state$enrichment[[kind]]$plot <- safe_plot(
       paste0("enrichment_", kind),
       paste0(file_stub, "_", comp_tag, ".png"),
       function() get_enrichment_plot(enr, top_n = cfg$top_n_enrich, title = paste(toupper(kind), "-", primary_comp)),
       width = 10,
       height = 7
     )
-    register_download("table", paste("Table: enrichment", kind), enrichment[[kind]]$table)
-    register_download("plot", paste("Plot: enrichment", kind), enrichment[[kind]]$plot)
+    register_download("table", paste("Table: enrichment", kind), state$enrichment[[kind]]$table)
+    register_download("plot", paste("Plot: enrichment", kind), state$enrichment[[kind]]$plot)
     enr
   }
 
@@ -504,12 +506,12 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     pathway_tbl <- tryCatch(
       get_pathway_genes(msig_enr, top_n = cfg$pathway_top_n, return_type = "long"),
       error = function(e) {
-        enrichment$msigdb$message <- paste(c(enrichment$msigdb$message, paste("Pathway extraction:", e$message)), collapse = " | ")
+        state$enrichment$msigdb$message <- paste(c(state$enrichment$msigdb$message, paste("Pathway extraction:", e$message)), collapse = " | ")
         NULL
       }
     )
     if (!is.null(pathway_tbl) && nrow(pathway_tbl) > 0) {
-      enrichment_tables$pathway_genes <- pathway_tbl
+      state$enrichment_tables$pathway_genes <- pathway_tbl
       table_paths$pathway_genes <- write_table(pathway_tbl, paste0("pathway_genes_", comp_tag, ".csv"))
       register_download("table", "Table: pathway genes", table_paths$pathway_genes)
     }
@@ -533,7 +535,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
         show_row_names = FALSE
       ),
       error = function(e) {
-        plot_messages$pathway_heatmap <- e$message
+        state$plot_messages$pathway_heatmap <- e$message
         NULL
       }
     )
@@ -541,7 +543,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
       plot_paths$pathway_heatmap <- tryCatch(
         save_plot(pathway_hm, paste0("expr_pathway_heatmap_", comp_tag, ".png"), width = 9, height = 10),
         error = function(e) {
-          plot_messages$pathway_heatmap <- e$message
+          state$plot_messages$pathway_heatmap <- e$message
           NULL
         }
       )
@@ -550,8 +552,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
   }
 
   zip_rel <- NULL
-  zip_msg <- NULL
-  rel_files <- unique(download_manifest$path)
+  rel_files <- unique(state$download_manifest$path)
   if (length(rel_files) > 0) {
     zip_rel <- file.path(assets_rel, paste0("download_bundle_", comp_tag, ".zip"))
     old_wd <- getwd()
@@ -560,7 +561,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     tryCatch(
       utils::zip(zipfile = zip_rel, files = rel_files),
       error = function(e) {
-        zip_msg <<- e$message
+        state$zip_msg <- e$message
       }
     )
     if (!file.exists(file.path(out_dir, zip_rel))) {
@@ -589,15 +590,15 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
       de_up = head(up_tbl, cfg$top_table_n),
       de_down = head(down_tbl, cfg$top_table_n),
       clusters = cluster_tbl,
-      enrichment_msigdb = enrichment_tables$msigdb,
-      enrichment_go = enrichment_tables$go,
-      enrichment_kegg = enrichment_tables$kegg,
-      pathway_genes = enrichment_tables$pathway_genes
+      enrichment_msigdb = state$enrichment_tables$msigdb,
+      enrichment_go = state$enrichment_tables$go,
+      enrichment_kegg = state$enrichment_tables$kegg,
+      pathway_genes = state$enrichment_tables$pathway_genes
     ),
     table_paths = table_paths,
-    enrichment = enrichment,
-    messages = list(plot = plot_messages, zip = zip_msg),
-    downloads = download_manifest,
+    enrichment = state$enrichment,
+    messages = list(plot = state$plot_messages, zip = state$zip_msg),
+    downloads = state$download_manifest,
     zip_bundle = zip_rel
   )
 

@@ -20,6 +20,7 @@
 #' \code{SummarizedExperiment} with \code{as_vista()}.
 #' @name VISTA-class
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom methods setClass setValidity
 #' @exportClass VISTA
 #' @seealso \code{\link{create_vista}}, \code{\link{as_vista}}, \code{\link{validate_vista}}
 NULL
@@ -151,7 +152,6 @@ setValidity("VISTA", .vista_validity_messages)
 #' )
 #' v <- as_vista(se, group_column = "cond")
 #' v
-#' @import methods
 #' @export
 as_vista <- function(se,
                      assay_name = "norm_counts",

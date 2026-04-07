@@ -7,6 +7,19 @@ navbar:
     left: [intro, reference, articles]
     right: [search, github]
 
+articles:
+  - title: Workflows
+    navbar: Articles
+    contents:
+      - VISTA-airway
+      - workflows/VISTA-comparison
+      - workflows/VISTA-code-economy
+      - workflows/VISTA-deconvolution
+  - title: Visualization Guides
+    contents:
+      - guides/VISTA-chord
+      - guides/VISTA-raincloud
+      - guides/VISTA-colors
 reference:
   - title: "VISTA Class & Constructors"
     desc: >

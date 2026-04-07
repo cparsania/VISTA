@@ -88,6 +88,6 @@ p <- get_foldchange_lollipop(v, sample_comparison = comp, genes = genes)
 print(p)
 vista <- example_vista()
 comp_name <- names(comparisons(vista))[1]
-genes <- rownames(vista)[1:3]
+genes <- rownames(vista)[seq_len(3)]
 get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes)
 }

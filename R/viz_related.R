@@ -320,8 +320,8 @@ NULL
 #' data("sample_metadata", package = "VISTA")
 #'
 #' vista <- create_vista(
-#'   counts = count_data[1:200, ],
-#'   sample_info = sample_metadata[1:6, ],
+#'   counts = count_data[seq_len(200), ],
+#'   sample_info = sample_metadata[seq_len(6), ],
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
 #'   group_numerator = "treatment1",
@@ -550,7 +550,7 @@ get_mds_plot <- function(x,
   eig_vals <- mds$eig
   var_expl <- if (!is.null(eig_vals)) {
     prop <- eig_vals / sum(abs(eig_vals))
-    prop[1:2] * 100
+    prop[seq_len(2)] * 100
   } else {
     c(NA_real_, NA_real_)
   }
@@ -874,7 +874,7 @@ get_umap_plot <- function(x,
 #' )
 #'
 #' # Highlight specific genes
-#' genes_of_interest <- rownames(vista)[1:5]
+#' genes_of_interest <- rownames(vista)[seq_len(5)]
 #' get_volcano_plot(
 #'   vista,
 #'   sample_comparison = comps[1],
@@ -2672,17 +2672,17 @@ get_expression_scatter <- function(x,
 #' data("sample_metadata", package = "VISTA")
 #'
 #' vista <- create_vista(
-#'   counts = count_data[1:200, ],
-#'   sample_info = sample_metadata[1:6, ],
+#'   counts = count_data[seq_len(200), ],
+#'   sample_info = sample_metadata[seq_len(6), ],
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
 #'   group_numerator = "treatment1",
 #'   group_denominator = "control"
 #' )
 #'
-#' genes <- rownames(vista)[1:3]
+#' genes <- rownames(vista)[seq_len(3)]
 #' get_expression_lollipop(vista, genes = genes)
-#' get_expression_lollipop(vista, genes = genes[1:2], by = "sample")
+#' get_expression_lollipop(vista, genes = genes[seq_len(2)], by = "sample")
 #'
 #' @export
 get_expression_lollipop <- function(x,
@@ -4052,8 +4052,8 @@ get_foldchange_scatter <- function(x,
 #' data("sample_metadata", package = "VISTA")
 #'
 #' vista <- create_vista(
-#'   counts = count_data[1:200, ],
-#'   sample_info = sample_metadata[1:6, ],
+#'   counts = count_data[seq_len(200), ],
+#'   sample_info = sample_metadata[seq_len(6), ],
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
 #'   group_numerator = "treatment1",
@@ -4061,7 +4061,7 @@ get_foldchange_scatter <- function(x,
 #' )
 #'
 #' # Plot expression for select genes
-#' genes <- rownames(vista)[1:3]
+#' genes <- rownames(vista)[seq_len(3)]
 #' get_expression_barplot(vista, genes = genes)
 #'
 #' # With statistics
@@ -4264,7 +4264,7 @@ get_expression_barplot <- function(x,
 #' @examples
 #' vista <- example_vista()
 #' comp_name <- names(comparisons(vista))[1]
-#' genes <- rownames(vista)[1:3]
+#' genes <- rownames(vista)[seq_len(3)]
 #' get_foldchange_lollipop(vista, sample_comparison = comp_name, genes = genes)
 #' @export
 get_foldchange_lollipop <- function(x,
@@ -5925,15 +5925,22 @@ get_expression_heatmap <- function(x,
         ux[1]
       }
 
-      col_df <- lapply(annotate_cols, function(col_nm) {
-        vapply(colnames(mat), function(grp) {
+      col_df <- vector("list", length(annotate_cols))
+      names(col_df) <- annotate_cols
+      for (col_nm in annotate_cols) {
+        per_group_vals <- vapply(colnames(mat), function(grp) {
           vals <- groups[[col_nm]][groups[[group_col]] == grp]
-          if (length(unique(as.character(stats::na.omit(vals)))) > 1) {
-            inconsistent_labels <<- unique(c(inconsistent_labels, col_nm))
-          }
           summarise_one(vals)
         }, character(1))
-      })
+        has_inconsistency <- any(vapply(colnames(mat), function(grp) {
+          vals <- groups[[col_nm]][groups[[group_col]] == grp]
+          length(unique(as.character(stats::na.omit(vals)))) > 1
+        }, logical(1)))
+        if (isTRUE(has_inconsistency)) {
+          inconsistent_labels <- unique(c(inconsistent_labels, col_nm))
+        }
+        col_df[[col_nm]] <- per_group_vals
+      }
       if (length(inconsistent_labels) > 0) {
         cli::cli_warn(
           c(
@@ -5942,7 +5949,6 @@ get_expression_heatmap <- function(x,
           )
         )
       }
-      names(col_df) <- annotate_cols
       col_df <- as.data.frame(col_df, stringsAsFactors = FALSE)
       rownames(col_df) <- colnames(mat)
     } else {
@@ -6056,15 +6062,15 @@ get_expression_heatmap <- function(x,
 #' data("sample_metadata", package = "VISTA")
 #'
 #' vista <- create_vista(
-#'   counts = count_data[1:200, ],
-#'   sample_info = sample_metadata[1:6, ],
+#'   counts = count_data[seq_len(200), ],
+#'   sample_info = sample_metadata[seq_len(6), ],
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
 #'   group_numerator = "treatment1",
 #'   group_denominator = "control"
 #' )
 #'
-#' genes <- rownames(vista)[1:3]
+#' genes <- rownames(vista)[seq_len(3)]
 #' get_foldchange_barplot(vista, genes = genes)
 #' get_foldchange_barplot(vista, genes = genes, facet_by = "gene")
 #'

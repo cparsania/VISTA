@@ -10,10 +10,6 @@ output:
     number_sections: true
     fig_width: 9
     fig_height: 6
-vignette: >
-  %\VignetteIndexEntry{Cell-Type Deconvolution with VISTA (airway)}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}

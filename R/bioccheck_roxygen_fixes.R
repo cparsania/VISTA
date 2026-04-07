@@ -62,7 +62,7 @@ NULL
 #' v <- example_vista()
 #' comps <- names(comparisons(v))
 #' if (length(comps) >= 2) {
-#'   p <- get_deg_venn_diagram(v, sample_comparisons = comps[1:2])
+#'   p <- get_deg_venn_diagram(v, sample_comparisons = comps[seq_len(2)])
 #'   print(p)
 #' }
 NULL
@@ -215,7 +215,7 @@ NULL
 #' @examples
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
-#' genes <- unique(stats::na.omit(as.character(comparisons(v)[[comp]]$gene_id)))[1:20]
+#' genes <- unique(stats::na.omit(as.character(comparisons(v)[[comp]]$gene_id)))[seq_len(20)]
 #' if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
 #'     requireNamespace('circlize', quietly = TRUE)) {
 #'   hm <- get_foldchange_heatmap(
@@ -271,10 +271,10 @@ NULL
 #' data('sample_metadata', package = 'VISTA')
 #' cell_levels <- unique(sample_metadata$cell)
 #' if (length(cell_levels) >= 3) {
-#'   v <- create_vista(count_data[1:150, ], sample_metadata, column_geneid = 'gene_id', group_column = 'cell',
+#'   v <- create_vista(count_data[seq_len(150), ], sample_metadata, column_geneid = 'gene_id', group_column = 'cell',
 #'                     group_numerator = cell_levels[2:3], group_denominator = rep(cell_levels[1], 2),
 #'                     min_counts = 5, min_replicates = 1)
-#'   comp_names <- names(comparisons(v))[1:2]
+#'   comp_names <- names(comparisons(v))[seq_len(2)]
 #'   p <- get_foldchange_scatter(v, sample_comparisons = comp_names)
 #'   print(p)
 #' }
@@ -353,12 +353,12 @@ NULL
 #' @examples
 #' data("count_data", package = "VISTA")
 #' data("sample_metadata", package = "VISTA")
-#' si <- as.data.frame(sample_metadata[1:8, ], stringsAsFactors = FALSE)
+#' si <- as.data.frame(sample_metadata[seq_len(8), ], stringsAsFactors = FALSE)
 #' trt_idx <- which(si$cond_long == "treatment1")
 #' si$cond_long[trt_idx] <- rep(c("treatment1", "treatment2"), length.out = length(trt_idx))
 #' si$groups <- si$cond_long
 #' v <- create_vista(
-#'   counts = count_data[1:120, c("gene_id", si$sample_names)],
+#'   counts = count_data[seq_len(120), c("gene_id", si$sample_names)],
 #'   sample_info = si,
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
@@ -396,8 +396,8 @@ NULL
 #' data('count_data', package = 'VISTA')
 #' data('sample_metadata', package = 'VISTA')
 #' cfg <- list(
-#'   counts = count_data[1:100, ],
-#'   sample_info = sample_metadata[1:6, ],
+#'   counts = count_data[seq_len(100), ],
+#'   sample_info = sample_metadata[seq_len(6), ],
 #'   column_geneid = 'gene_id',
 #'   group_column = 'cond_long',
 #'   group_numerator = 'treatment1',

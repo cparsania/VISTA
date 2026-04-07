@@ -39,7 +39,7 @@ Visualizes overlaps between DEG sets for two to four comparisons.
 v <- example_vista()
 comps <- names(comparisons(v))
 if (length(comps) >= 2) {
-  p <- get_deg_venn_diagram(v, sample_comparisons = comps[1:2])
+  p <- get_deg_venn_diagram(v, sample_comparisons = comps[seq_len(2)])
   print(p)
 }
 }

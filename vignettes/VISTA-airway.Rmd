@@ -63,6 +63,15 @@ The **airway** dataset (Himes et al. 2014) includes:
 
 # Installation and Setup
 
+```{r install-packages, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+
+BiocManager::install(c("VISTA", "airway", "org.Hs.eg.db"))
+install.packages("ggplot2")
+```
+
 ```{r load-packages}
 # Load required packages
 library(VISTA)

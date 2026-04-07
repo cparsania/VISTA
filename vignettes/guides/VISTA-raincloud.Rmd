@@ -11,10 +11,6 @@ output:
     fig_width: 8
     fig_height: 6
     code_folding: show
-vignette: >
-  %\VignetteIndexEntry{Raincloud Plots in VISTA}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}

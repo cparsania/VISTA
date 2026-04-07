@@ -22,12 +22,12 @@ Plot alluvial diagram showing gene regulation transitions across comparisons
 \examples{
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
-si <- as.data.frame(sample_metadata[1:8, ], stringsAsFactors = FALSE)
+si <- as.data.frame(sample_metadata[seq_len(8), ], stringsAsFactors = FALSE)
 trt_idx <- which(si$cond_long == "treatment1")
 si$cond_long[trt_idx] <- rep(c("treatment1", "treatment2"), length.out = length(trt_idx))
 si$groups <- si$cond_long
 v <- create_vista(
-  counts = count_data[1:120, c("gene_id", si$sample_names)],
+  counts = count_data[seq_len(120), c("gene_id", si$sample_names)],
   sample_info = si,
   column_geneid = "gene_id",
   group_column = "cond_long",

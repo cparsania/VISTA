@@ -304,19 +304,20 @@ save_vista_data <- function(x,
     substr(out, 1, 31)
   }
 
-  sheet_names <- character()
-  sheet_tables <- list()
+  sheet_state <- new.env(parent = emptyenv())
+  sheet_state$names <- character()
+  sheet_state$tables <- list()
   append_sheet <- function(name, tbl) {
     base <- sanitize_sheet(name)
     nm <- base
     idx <- 1L
-    while (nm %in% sheet_names) {
+    while (nm %in% sheet_state$names) {
       suffix <- paste0("_", idx)
       nm <- paste0(substr(base, 1, max(1L, 31L - nchar(suffix))), suffix)
       idx <- idx + 1L
     }
-    sheet_names <<- c(sheet_names, nm)
-    sheet_tables[[nm]] <<- tbl
+    sheet_state$names <- c(sheet_state$names, nm)
+    sheet_state$tables[[nm]] <- tbl
   }
 
   for (key in what) {
@@ -330,7 +331,7 @@ save_vista_data <- function(x,
     }
   }
 
-  writexl::write_xlsx(sheet_tables, path = file)
+  writexl::write_xlsx(sheet_state$tables, path = file)
   invisible(normalizePath(file, mustWork = FALSE))
 }
 
@@ -444,7 +445,8 @@ export_vista_assets <- function(x,
   dir.create(plots_dir, recursive = TRUE, showWarnings = FALSE)
   dir.create(tables_dir, recursive = TRUE, showWarnings = FALSE)
 
-  manifest <- data.frame(
+  state <- new.env(parent = emptyenv())
+  state$manifest <- data.frame(
     type = character(),
     key = character(),
     path = character(),
@@ -452,12 +454,12 @@ export_vista_assets <- function(x,
     message = character(),
     stringsAsFactors = FALSE
   )
-  plot_files <- character()
-  data_files <- character()
+  state$plot_files <- character()
+  state$data_files <- character()
 
   add_manifest <- function(type, key, path = NA_character_, status = "ok", message = NA_character_) {
-    manifest <<- rbind(
-      manifest,
+    state$manifest <- rbind(
+      state$manifest,
       data.frame(
         type = type,
         key = key,
@@ -495,7 +497,7 @@ export_vista_assets <- function(x,
       add_manifest("plot", key, status = "failed", message = path$message)
       return(invisible(NULL))
     }
-    plot_files <<- c(plot_files, path)
+    state$plot_files <- c(state$plot_files, path)
     add_manifest("plot", key, path = path, status = "ok")
     invisible(path)
   }
@@ -629,7 +631,7 @@ export_vista_assets <- function(x,
       msg <- if (inherits(res, "error")) res$message else "Output file was not created."
       add_manifest("data", key, status = "failed", message = msg)
     } else {
-      data_files <<- c(data_files, res)
+      state$data_files <- c(state$data_files, res)
       add_manifest("data", key, path = res, status = "ok")
     }
   }
@@ -650,7 +652,7 @@ export_vista_assets <- function(x,
     if (inherits(xlsx_res, "error")) {
       add_manifest("data", "xlsx_bundle", status = "failed", message = xlsx_res$message)
     } else {
-      data_files <<- c(data_files, xlsx_res)
+      state$data_files <- c(state$data_files, xlsx_res)
       add_manifest("data", "xlsx_bundle", path = xlsx_res, status = "ok")
     }
   } else if (isTRUE(write_excel) && length(include_data) == 0) {
@@ -658,14 +660,14 @@ export_vista_assets <- function(x,
   }
 
   manifest_file <- file.path(out_dir, "manifest.csv")
-  utils::write.csv(manifest, manifest_file, row.names = FALSE)
+  utils::write.csv(state$manifest, manifest_file, row.names = FALSE)
 
   result <- list(
     out_dir = normalizePath(out_dir, mustWork = FALSE),
     sample_comparison = comp_name,
-    manifest = manifest,
-    plot_files = unique(plot_files),
-    data_files = unique(data_files)
+    manifest = state$manifest,
+    plot_files = unique(state$plot_files),
+    data_files = unique(state$data_files)
   )
   invisible(result)
 }

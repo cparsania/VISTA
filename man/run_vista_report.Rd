@@ -37,8 +37,8 @@ includes:
 data('count_data', package = 'VISTA')
 data('sample_metadata', package = 'VISTA')
 cfg <- list(
-  counts = count_data[1:100, ],
-  sample_info = sample_metadata[1:6, ],
+  counts = count_data[seq_len(100), ],
+  sample_info = sample_metadata[seq_len(6), ],
   column_geneid = 'gene_id',
   group_column = 'cond_long',
   group_numerator = 'treatment1',

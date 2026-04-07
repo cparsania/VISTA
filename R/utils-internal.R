@@ -904,7 +904,7 @@ run_limma_analysis <- function(
 
   if (!is.null(top_n_genes)) {
     vars <- matrixStats::rowVars(mat)
-    top_genes <- order(vars, decreasing = TRUE)[1:min(top_n_genes, nrow(mat))]
+    top_genes <- order(vars, decreasing = TRUE)[seq_len(min(top_n_genes, nrow(mat)))]
     mat <- mat[top_genes, , drop = FALSE]
   }
 
@@ -922,7 +922,7 @@ run_limma_analysis <- function(
 #' @return A data frame containing PCA components and sample metadata.
 #' @keywords internal
 .prepare_pca_dataframe <- function(pca, meta) {
-  as.data.frame(pca$x[, 1:2]) %>%
+  as.data.frame(pca$x[, seq_len(2), drop = FALSE]) %>%
     tibble::rownames_to_column("sample") %>%
     dplyr::left_join(meta, by = "sample")
 }
@@ -962,7 +962,7 @@ run_limma_analysis <- function(
     plt <- plt + stat_ellipse(aes_string(group = group_col, color = group_col), type = "norm")
   }
 
-  pvar <- summary(pca)$importance["Proportion of Variance", 1:2] * 100
+  pvar <- summary(pca)$importance["Proportion of Variance", seq_len(2), drop = TRUE] * 100
   xlab <- sprintf("PC1 (%.1f%%)", pvar[1])
   ylab <- sprintf("PC2 (%.1f%%)", pvar[2])
 
@@ -1822,7 +1822,7 @@ run_limma_analysis <- function(
 #' @examples
 #' vista <- example_vista()
 #' custom_annot <- data.frame(
-#'   gene_id = rownames(vista)[1:10],
+#'   gene_id = rownames(vista)[seq_len(10)],
 #'   custom_info = paste0("Info_", seq_len(10))
 #' )
 #' vista2 <- set_rowdata(vista, annotations = custom_annot, key_col = "gene_id")
@@ -1834,8 +1834,8 @@ run_limma_analysis <- function(
 #' data("sample_metadata", package = "VISTA")
 #'
 #' vista <- create_vista(
-#'   counts = count_data[1:100, ],
-#'   sample_info = sample_metadata[1:6, ],
+#'   counts = count_data[seq_len(100), ],
+#'   sample_info = sample_metadata[seq_len(6), ],
 #'   column_geneid = "gene_id",
 #'   group_column = "cond_long",
 #'   group_numerator = "treatment1",
@@ -1856,8 +1856,8 @@ run_limma_analysis <- function(
 #'
 #' # Or provide custom annotations
 #' custom_annot <- data.frame(
-#'   gene_id = rownames(vista)[1:10],
-#'   custom_info = paste0("Info_", 1:10)
+#'   gene_id = rownames(vista)[seq_len(10)],
+#'   custom_info = paste0("Info_", seq_len(10))
 #' )
 #' vista <- set_rowdata(vista, annotations = custom_annot, key_col = "gene_id")
 #' }

@@ -50,9 +50,7 @@ Suggests:
     DT,
     EnhancedVolcano,
     ggpointdensity,
-    ggplot2,
     ggridges,
-    dplyr,
     ggalluvial,
     ggcorrplot,
     ggrain,
@@ -70,6 +68,9 @@ Suggests:
     testthat (>= 3.0.0),
     uwot,
     xCell2
+URL: https://github.com/cparsania/VISTA,
+    https://cparsania.github.io/VISTA/
+BugReports: https://github.com/cparsania/VISTA/issues
 biocViews: RNASeq, DifferentialExpression, GeneExpression, Transcriptomics, Visualization
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
