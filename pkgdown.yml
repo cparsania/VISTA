@@ -3,11 +3,10 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   VISTA-airway: VISTA-airway.html
-  VISTA-chord: VISTA-chord.html
-  VISTA-code-economy: VISTA-code-economy.html
-  VISTA-colors: VISTA-colors.html
-  VISTA-comparison: VISTA-comparison.html
-  VISTA-deconvolution: VISTA-deconvolution.html
-  VISTA-raincloud: VISTA-raincloud.html
-  VISTA-reference: VISTA-reference.html
-last_built: 2026-04-01T06:46Z
+  guides/VISTA-chord: guides/VISTA-chord.html
+  workflows/VISTA-code-economy: workflows/VISTA-code-economy.html
+  guides/VISTA-colors: guides/VISTA-colors.html
+  workflows/VISTA-comparison: workflows/VISTA-comparison.html
+  workflows/VISTA-deconvolution: workflows/VISTA-deconvolution.html
+  guides/VISTA-raincloud: guides/VISTA-raincloud.html
+last_built: 2026-04-07T05:19Z

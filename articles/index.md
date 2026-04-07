@@ -1,12 +1,17 @@
 # Articles
 
-### All vignettes
+### Workflows
 
 - [Complete RNA-seq Analysis Workflow with VISTA](VISTA-airway.md):
-- [Enrichment Chord Diagrams with VISTA](VISTA-chord.md):
-- [Code Economy: VISTA vs. Standard R Workflows](VISTA-code-economy.md):
-- [Color and Palette Design with VISTA](VISTA-colors.md):
-- [Comparing DESeq2 and edgeR with VISTA](VISTA-comparison.md):
-- [Cell-Type Deconvolution with VISTA (airway)](VISTA-deconvolution.md):
-- [Raincloud Plots in VISTA](VISTA-raincloud.md):
-- [VISTA Function Reference](VISTA-reference.md):
+- [Comparing DESeq2 and edgeR with
+  VISTA](workflows/VISTA-comparison.md):
+- [Code Economy: VISTA vs. Standard R
+  Workflows](workflows/VISTA-code-economy.md):
+- [Cell-Type Deconvolution with VISTA
+  (airway)](workflows/VISTA-deconvolution.md):
+
+### Visualization Guides
+
+- [Enrichment Chord Diagrams with VISTA](guides/VISTA-chord.md):
+- [Raincloud Plots in VISTA](guides/VISTA-raincloud.md):
+- [Color and Palette Design with VISTA](guides/VISTA-colors.md):

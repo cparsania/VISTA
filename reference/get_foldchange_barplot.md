@@ -78,8 +78,8 @@ data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
 vista <- create_vista(
-  counts = count_data[1:200, ],
-  sample_info = sample_metadata[1:6, ],
+  counts = count_data[seq_len(200), ],
+  sample_info = sample_metadata[seq_len(6), ],
   column_geneid = "gene_id",
   group_column = "cond_long",
   group_numerator = "treatment1",
@@ -92,7 +92,7 @@ vista <- create_vista(
 #> final dispersion estimates
 #> fitting model and testing
 
-genes <- rownames(vista)[1:3]
+genes <- rownames(vista)[seq_len(3)]
 get_foldchange_barplot(vista, genes = genes)
 
 get_foldchange_barplot(vista, genes = genes, facet_by = "gene")

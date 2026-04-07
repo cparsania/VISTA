@@ -188,8 +188,8 @@ data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
 vista <- create_vista(
-  counts = count_data[1:200, ],
-  sample_info = sample_metadata[1:6, ],
+  counts = count_data[seq_len(200), ],
+  sample_info = sample_metadata[seq_len(6), ],
   column_geneid = "gene_id",
   group_column = "cond_long",
   group_numerator = "treatment1",

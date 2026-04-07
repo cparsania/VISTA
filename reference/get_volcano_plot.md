@@ -139,7 +139,7 @@ get_volcano_plot(
 
 
 # Highlight specific genes
-genes_of_interest <- rownames(vista)[1:5]
+genes_of_interest <- rownames(vista)[seq_len(5)]
 get_volcano_plot(
   vista,
   sample_comparison = comps[1],

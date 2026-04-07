@@ -71,7 +71,7 @@ get_foldchange_raincloud(
 - p.label:
 
   Label type passed to
-  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
+  [`ggpubr::stat_compare_means()`](https://rdrr.io/pkg/ggpubr/man/stat_compare_means.html).
 
 - stats_group:
 
@@ -80,7 +80,7 @@ get_foldchange_raincloud(
 - stats_method:
 
   Statistical method passed to
-  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
+  [`ggpubr::stat_compare_means()`](https://rdrr.io/pkg/ggpubr/man/stat_compare_means.html).
 
 - label:
 

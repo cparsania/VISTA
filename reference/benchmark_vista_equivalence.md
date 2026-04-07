@@ -143,7 +143,7 @@ data("sample_metadata", package = "VISTA")
 
 target_groups <- c("control", "treatment1")
 sample_subset <- sample_metadata[sample_metadata$cond_long %in% target_groups, ]
-count_subset <- count_data[1:150, c("gene_id", sample_subset$sample_names)]
+count_subset <- count_data[seq_len(150), c("gene_id", sample_subset$sample_names)]
 
 bm <- benchmark_vista_equivalence(
   counts = count_subset,

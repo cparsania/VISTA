@@ -161,7 +161,7 @@ both depending on `return_type`.
 ``` r
 v <- example_vista()
 comp <- names(comparisons(v))[1]
-genes <- unique(stats::na.omit(as.character(comparisons(v)[[comp]]$gene_id)))[1:20]
+genes <- unique(stats::na.omit(as.character(comparisons(v)[[comp]]$gene_id)))[seq_len(20)]
 if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
     requireNamespace('circlize', quietly = TRUE)) {
   hm <- get_foldchange_heatmap(

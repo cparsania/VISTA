@@ -65,7 +65,7 @@ get_expression_barplot(
 - p.label:
 
   Label format for
-  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
+  [`ggpubr::stat_compare_means()`](https://rdrr.io/pkg/ggpubr/man/stat_compare_means.html).
 
 - comparisons:
 
@@ -118,8 +118,8 @@ data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
 vista <- create_vista(
-  counts = count_data[1:200, ],
-  sample_info = sample_metadata[1:6, ],
+  counts = count_data[seq_len(200), ],
+  sample_info = sample_metadata[seq_len(6), ],
   column_geneid = "gene_id",
   group_column = "cond_long",
   group_numerator = "treatment1",
@@ -133,7 +133,7 @@ vista <- create_vista(
 #> fitting model and testing
 
 # Plot expression for select genes
-genes <- rownames(vista)[1:3]
+genes <- rownames(vista)[seq_len(3)]
 get_expression_barplot(vista, genes = genes)
 
 

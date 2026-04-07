@@ -37,6 +37,15 @@ e99625.
 ## Installation and Setup
 
 ``` r
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+
+BiocManager::install(c("VISTA", "airway", "org.Hs.eg.db"))
+install.packages("ggplot2")
+```
+
+``` r
 # Load required packages
 library(VISTA)
 library(ggplot2)         # For plotting functions
@@ -1938,11 +1947,11 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] magrittr_2.0.4              org.Hs.eg.db_3.22.0        
+#>  [1] magrittr_2.0.5              org.Hs.eg.db_3.22.0        
 #>  [3] AnnotationDbi_1.72.0        airway_1.30.0              
 #>  [5] SummarizedExperiment_1.40.0 Biobase_2.70.0             
 #>  [7] GenomicRanges_1.62.1        Seqinfo_1.0.0              
-#>  [9] IRanges_2.44.0              S4Vectors_0.48.0           
+#>  [9] IRanges_2.44.0              S4Vectors_0.48.1           
 #> [11] BiocGenerics_0.56.0         generics_0.1.4             
 #> [13] MatrixGenerics_1.22.0       matrixStats_1.5.0          
 #> [15] ggplot2_4.0.2               VISTA_0.99.4               
@@ -1953,16 +1962,16 @@ sessionInfo()
 #>   [4] R.oo_1.27.1             ggpp_0.6.0              polyclip_1.10-7        
 #>   [7] lifecycle_1.0.5         rstatix_0.7.3           edgeR_4.8.2            
 #>  [10] doParallel_1.0.17       lattice_0.22-9          MASS_7.3-65            
-#>  [13] backports_1.5.0         limma_3.66.0            sass_0.4.10            
+#>  [13] backports_1.5.1         limma_3.66.0            sass_0.4.10            
 #>  [16] rmarkdown_2.31          jquerylib_0.1.4         yaml_2.3.12            
 #>  [19] otel_0.2.0              ggtangle_0.1.1          EnhancedVolcano_1.28.2 
 #>  [22] cowplot_1.2.0           DBI_1.3.0               RColorBrewer_1.1-3     
 #>  [25] abind_1.4-8             purrr_1.2.1             R.utils_2.13.0         
 #>  [28] msigdbr_26.1.0          yulab.utils_0.2.4       tweenr_2.0.3           
-#>  [31] rappdirs_0.3.4          gdtools_0.5.0           circlize_0.4.17        
+#>  [31] rappdirs_0.3.4          gdtools_0.5.0           circlize_0.4.18        
 #>  [34] enrichplot_1.30.5       ggrepel_0.9.8           tidytree_0.4.7         
 #>  [37] RSpectra_0.16-2         pkgdown_2.2.0           codetools_0.2-20       
-#>  [40] DelayedArray_0.36.0     DOSE_4.4.0              ggforce_0.5.0          
+#>  [40] DelayedArray_0.36.1     DOSE_4.4.0              ggforce_0.5.0          
 #>  [43] tidyselect_1.2.1        shape_1.4.6.1           aplot_0.2.9            
 #>  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.0       
 #>  [49] Formula_1.2-5           ggridges_0.5.7          iterators_1.0.14       
@@ -1970,7 +1979,7 @@ sessionInfo()
 #>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.2             
 #>  [58] Rcpp_1.1.1              glue_1.8.0              gridExtra_2.3          
 #>  [61] SparseArray_1.10.10     xfun_0.57               DESeq2_1.50.2          
-#>  [64] qvalue_2.42.0           dplyr_1.2.0             withr_3.0.2            
+#>  [64] qvalue_2.42.0           dplyr_1.2.1             withr_3.0.2            
 #>  [67] BiocManager_1.30.27     fastmap_1.2.0           GGally_2.4.0           
 #>  [70] ggpointdensity_0.2.1    digest_0.6.39           R6_2.6.1               
 #>  [73] gridGraphics_0.5-1      textshaping_1.0.5       colorspace_2.1-2       
@@ -1996,7 +2005,7 @@ sessionInfo()
 #> [133] plyr_1.8.9              fs_2.0.1                ggiraph_0.9.6          
 #> [136] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    
 #> [139] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
-#> [142] lazyeval_0.2.2          GOSemSim_2.36.0         fontquiver_0.2.1       
+#> [142] lazyeval_0.2.3          GOSemSim_2.36.0         fontquiver_0.2.1       
 #> [145] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          
 #> [148] KEGGREST_1.50.0         statmod_1.5.1           broom_1.0.12           
 #> [151] igraph_2.2.2            memoise_2.0.1           bslib_0.10.0           
