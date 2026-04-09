@@ -357,7 +357,7 @@ sessionInfo()
 #> [121] cluster_2.1.8.2             singscore_1.30.0           
 #> [123] evaluate_1.0.5              readr_2.2.0                
 #> [125] cli_3.6.5                   locfit_1.5-9.12            
-#> [127] compiler_4.5.3              rlang_1.1.7                
+#> [127] compiler_4.5.3              rlang_1.2.0                
 #> [129] crayon_1.5.3                ggsignif_0.6.4             
 #> [131] labeling_0.4.3              plyr_1.8.9                 
 #> [133] fs_2.0.1                    ggiraph_0.9.6              
@@ -369,7 +369,7 @@ sessionInfo()
 #> [145] hms_1.1.4                   patchwork_1.3.2            
 #> [147] bit64_4.6.0-1               KEGGREST_1.50.0            
 #> [149] statmod_1.5.1               AnnotationHub_4.0.0        
-#> [151] Rfast_2.1.5.2               igraph_2.2.2               
+#> [151] Rfast_2.1.5.2               igraph_2.2.3               
 #> [153] broom_1.0.12                memoise_2.0.1              
 #> [155] RcppParallel_5.1.11-2       bslib_0.10.0               
 #> [157] ggtree_4.0.5                fastmatch_1.1-8            

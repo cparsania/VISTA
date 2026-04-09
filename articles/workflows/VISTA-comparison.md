@@ -775,7 +775,7 @@ sessionInfo()
 #> [115] car_3.1-5                   tidydr_0.0.6               
 #> [117] cluster_2.1.8.2             evaluate_1.0.5             
 #> [119] cli_3.6.5                   locfit_1.5-9.12            
-#> [121] compiler_4.5.3              rlang_1.1.7                
+#> [121] compiler_4.5.3              rlang_1.2.0                
 #> [123] crayon_1.5.3                ggsignif_0.6.4             
 #> [125] labeling_0.4.3              plyr_1.8.9                 
 #> [127] fs_2.0.1                    ggiraph_0.9.6              
@@ -786,7 +786,7 @@ sessionInfo()
 #> [137] fontquiver_0.2.1            Matrix_1.7-4               
 #> [139] bit64_4.6.0-1               KEGGREST_1.50.0            
 #> [141] statmod_1.5.1               SummarizedExperiment_1.40.0
-#> [143] igraph_2.2.2                broom_1.0.12               
+#> [143] igraph_2.2.3                broom_1.0.12               
 #> [145] memoise_2.0.1               bslib_0.10.0               
 #> [147] ggtree_4.0.5                fastmatch_1.1-8            
 #> [149] bit_4.6.0                   ape_5.8-1                  

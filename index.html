@@ -143,10 +143,18 @@
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"count_data"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sample_metadata"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="va">prepared_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_counts.html">read_vista_counts</a></span><span class="op">(</span></span>
+<span>  <span class="va">count_data</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"matrix"</span>,</span>
+<span>  gene_id_column <span class="op">=</span> <span class="st">"gene_id"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">prepared_samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_metadata.html">read_vista_metadata</a></span><span class="op">(</span><span class="va">sample_metadata</span><span class="op">)</span></span>
+<span><span class="va">matched_inputs</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/match_vista_inputs.html">match_vista_inputs</a></span><span class="op">(</span><span class="va">prepared_counts</span>, <span class="va">prepared_samples</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">count_data</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">sample_metadata</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
+<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
+<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
+<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
 <span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
@@ -196,24 +204,44 @@
 <h2 id="core-workflow">Core Workflow<a class="anchor" aria-label="anchor" href="#core-workflow"></a>
 </h2>
 <div class="section level3">
-<h3 id="id_1-build-the-analysis-object">1. Build the analysis object<a class="anchor" aria-label="anchor" href="#id_1-build-the-analysis-object"></a>
+<h3 id="id_1-prepare-counts-and-metadata">1. Prepare counts and metadata<a class="anchor" aria-label="anchor" href="#id_1-prepare-counts-and-metadata"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prepared_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_counts.html">read_vista_counts</a></span><span class="op">(</span></span>
+<span>  <span class="va">count_data</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"matrix"</span>,</span>
+<span>  gene_id_column <span class="op">=</span> <span class="st">"gene_id"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">prepared_samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_metadata.html">read_vista_metadata</a></span><span class="op">(</span><span class="va">sample_metadata</span><span class="op">)</span></span>
+<span><span class="va">matched_inputs</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/match_vista_inputs.html">match_vista_inputs</a></span><span class="op">(</span><span class="va">prepared_counts</span>, <span class="va">prepared_samples</span><span class="op">)</span></span></code></pre></div>
+<p>These helpers preserve the existing <code><a href="reference/create_vista.html">create_vista()</a></code> API while making it easier to import common count formats such as plain matrices/data frames, featureCounts, STAR gene counts, HTSeq-count, tximport-like inputs, and RSEM gene result files.</p>
+<p>If you do not yet have a metadata sheet, you can bootstrap one from the count sample names:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">starter_metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/derive_vista_metadata.html">derive_vista_metadata</a></span><span class="op">(</span></span>
+<span>  <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
+<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
+<span>  parser <span class="op">=</span> <span class="st">"auto"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_2-build-the-analysis-object">2. Build the analysis object<a class="anchor" aria-label="anchor" href="#id_2-build-the-analysis-object"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">count_data</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">sample_metadata</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
+<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
+<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
+<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
 <span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"limma"</span>  <span class="co"># or "deseq2", "edger", "both"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Use <code>method = "both"</code> when you want a DESeq2/edgeR consensus workflow:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vista_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">count_data</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">sample_metadata</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
+<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
+<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
+<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
 <span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
@@ -225,14 +253,14 @@
 <span><span class="va">vista_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_de_source.html">set_de_source</a></span><span class="op">(</span><span class="va">vista_consensus</span>, <span class="st">"edger"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="id_2-add-covariates-or-an-explicit-design">2. Add covariates or an explicit design<a class="anchor" aria-label="anchor" href="#id_2-add-covariates-or-an-explicit-design"></a>
+<h3 id="id_3-add-covariates-or-an-explicit-design">3. Add covariates or an explicit design<a class="anchor" aria-label="anchor" href="#id_3-add-covariates-or-an-explicit-design"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add sample-level covariates to adjust the DE model</span></span>
 <span><span class="va">vista_cov</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">count_data</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">sample_metadata</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
+<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
+<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
+<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
 <span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
@@ -241,9 +269,9 @@
 <span></span>
 <span><span class="co"># Or provide a full design formula</span></span>
 <span><span class="va">vista_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">count_data</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">sample_metadata</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
+<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
+<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
+<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
 <span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
@@ -251,9 +279,9 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="id_3-add-feature-annotations">3. Add feature annotations<a class="anchor" aria-label="anchor" href="#id_3-add-feature-annotations"></a>
+<h3 id="id_4-add-feature-annotations">4. Add feature annotations<a class="anchor" aria-label="anchor" href="#id_4-add-feature-annotations"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example for human data</span></span>
 <span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_rowdata.html">set_rowdata</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -262,9 +290,9 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="id_4-explore-export-and-report">4. Explore, export, and report<a class="anchor" aria-label="anchor" href="#id_4-explore-export-and-report"></a>
+<h3 id="id_5-explore-export-and-report">5. Explore, export, and report<a class="anchor" aria-label="anchor" href="#id_5-explore-export-and-report"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Export selected tables / matrices / plots</span></span>
 <span><span class="fu"><a href="reference/export_vista_assets.html">export_vista_assets</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -391,7 +419,7 @@
 <div class="section level3">
 <h3 id="enrichment-from-a-vista-comparison">Enrichment from a VISTA comparison<a class="anchor" aria-label="anchor" href="#enrichment-from-a-vista-comparison"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Human example: requires org.Hs.eg.db</span></span>
 <span><span class="va">msig</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_msigdb_enrichment.html">get_msigdb_enrichment</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -424,7 +452,7 @@
 <div class="section level3">
 <h3 id="multi-comparison-overlap">Multi-comparison overlap<a class="anchor" aria-label="anchor" href="#multi-comparison-overlap"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example only when your VISTA object contains multiple contrasts</span></span>
 <span><span class="fu"><a href="reference/get_deg_venn_diagram.html">get_deg_venn_diagram</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista_consensus</span>,</span>
@@ -435,7 +463,7 @@
 <div class="section level3">
 <h3 id="consistent-color-control">Consistent color control<a class="anchor" aria-label="anchor" href="#consistent-color-control"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/VISTA-accessors.html">group_colors</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_vista_group_colors.html">set_vista_group_colors</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
@@ -453,7 +481,7 @@
 <h2 id="bioconductor-compatible-object-design">Bioconductor-Compatible Object Design<a class="anchor" aria-label="anchor" href="#bioconductor-compatible-object-design"></a>
 </h2>
 <p>VISTA extends <code>SummarizedExperiment</code>, so standard Bioconductor workflows remain available.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Standard access</span></span>
 <span><span class="fu">assay</span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
 <span><span class="fu">rowData</span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
@@ -469,7 +497,7 @@
 <span><span class="co"># Validation helpers</span></span>
 <span><span class="fu"><a href="reference/validate_vista.html">validate_vista</a></span><span class="op">(</span><span class="va">vista</span>, level <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span></span></code></pre></div>
 <p>Advanced users can also coerce an existing <code>SummarizedExperiment</code>:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># se &lt;- your existing SummarizedExperiment</span></span>
 <span><span class="co"># vista_from_se &lt;- as_vista(se, group_column = "cond_long")</span></span>
 <span><span class="co"># validate_vista(vista_from_se)</span></span></code></pre></div>
@@ -492,7 +520,7 @@
 </li>
 </ul>
 <p>Local help remains available through standard R documentation, for example:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">?</span><span class="va">create_vista</span></span>
 <span><span class="op">?</span><span class="va">get_expression_heatmap</span></span>
 <span><span class="op">?</span><span class="va">get_go_enrichment</span></span>

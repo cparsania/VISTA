@@ -37,6 +37,20 @@ Extract components from a VISTA object.
 - [`set_vista_comparison_colors()`](set_vista_comparison_colors.md) :
   Set manual comparison colors in a VISTA object
 
+## Input Preparation
+
+Standardize count matrices and sample metadata before constructing a
+VISTA object.
+
+- [`read_vista_counts()`](read_vista_counts.md) : Read and standardize
+  count inputs for VISTA
+- [`derive_vista_metadata()`](derive_vista_metadata.md) : Derive starter
+  sample metadata from count sample names
+- [`read_vista_metadata()`](read_vista_metadata.md) : Read and
+  standardize sample metadata for VISTA
+- [`match_vista_inputs()`](match_vista_inputs.md) : Match count and
+  metadata inputs for VISTA
+
 ## Quality Control Plots
 
 Sample-level quality control and exploratory visualizations.

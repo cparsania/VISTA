@@ -3,6 +3,7 @@
 <url><loc>/articles/VISTA-airway.html</loc></url>
 <url><loc>/articles/guides/VISTA-chord.html</loc></url>
 <url><loc>/articles/guides/VISTA-colors.html</loc></url>
+<url><loc>/articles/guides/VISTA-input-preparation.html</loc></url>
 <url><loc>/articles/guides/VISTA-raincloud.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
 <url><loc>/articles/workflows/VISTA-code-economy.html</loc></url>
@@ -17,6 +18,7 @@
 <url><loc>/reference/benchmark_vista_equivalence.html</loc></url>
 <url><loc>/reference/count_data.html</loc></url>
 <url><loc>/reference/create_vista.html</loc></url>
+<url><loc>/reference/derive_vista_metadata.html</loc></url>
 <url><loc>/reference/dot-EnhancedVolcano2.html</loc></url>
 <url><loc>/reference/dot-align_de_to_counts.html</loc></url>
 <url><loc>/reference/dot-categorize_deg_results.html</loc></url>
@@ -82,7 +84,10 @@
 <url><loc>/reference/get_umap_plot.html</loc></url>
 <url><loc>/reference/get_volcano_plot.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/match_vista_inputs.html</loc></url>
 <url><loc>/reference/print.VISTA.html</loc></url>
+<url><loc>/reference/read_vista_counts.html</loc></url>
+<url><loc>/reference/read_vista_metadata.html</loc></url>
 <url><loc>/reference/run_cell_deconvolution.html</loc></url>
 <url><loc>/reference/run_deseq_analysis.html</loc></url>
 <url><loc>/reference/run_vista_report.html</loc></url>

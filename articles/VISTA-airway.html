@@ -217,46 +217,47 @@ vignette.</p>
 <div class="section level3">
 <h3 id="prepare-data-for-vista">Prepare data for VISTA<a class="anchor" aria-label="anchor" href="#prepare-data-for-vista"></a>
 </h3>
-<p>VISTA requires a count data.frame with a gene ID column:</p>
+<p>VISTA includes helper functions that standardize counts and sample
+metadata before calling <code><a href="../reference/create_vista.html">create_vista()</a></code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create count data.frame with gene_id column</span></span>
-<span><span class="va">count_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">counts_matrix</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">count_data</span><span class="op">$</span><span class="va">gene_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts_matrix</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">prepared_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vista_counts.html">read_vista_counts</a></span><span class="op">(</span></span>
+<span>  <span class="va">counts_matrix</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"matrix"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Reorder columns: gene_id first, then samples</span></span>
-<span><span class="va">count_data</span> <span class="op">&lt;-</span> <span class="va">count_data</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts_matrix</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">prepared_samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vista_metadata.html">read_vista_metadata</a></span><span class="op">(</span></span>
+<span>  <span class="va">sample_metadata</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="st">"sample_names"</span> <span class="op">=</span> <span class="st">"Run"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Preview</span></span>
-<span><span class="va">count_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 5</span></span></span>
-<span><span class="co">#&gt;   gene_id         SRR1039508 SRR1039509 SRR1039512 SRR1039513</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ENSG00000000003        679        448        873        408</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ENSG00000000005          0          0          0          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ENSG00000000419        467        515        621        365</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ENSG00000000457        260        211        263        164</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ENSG00000000460         60         55         40         35</span></span></code></pre></div>
-<p>Prepare sample info with proper rownames:</p>
+<span><span class="va">matched_inputs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/match_vista_inputs.html">match_vista_inputs</a></span><span class="op">(</span><span class="va">prepared_counts</span>, <span class="va">prepared_samples</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Preview the create_vista-ready count table</span></span>
+<span><span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
+<span><span class="co">#&gt;                         gene_id SRR1039508 SRR1039509 SRR1039512 SRR1039513</span></span>
+<span><span class="co">#&gt; ENSG00000000003 ENSG00000000003        679        448        873        408</span></span>
+<span><span class="co">#&gt; ENSG00000000005 ENSG00000000005          0          0          0          0</span></span>
+<span><span class="co">#&gt; ENSG00000000419 ENSG00000000419        467        515        621        365</span></span>
+<span><span class="co">#&gt; ENSG00000000457 ENSG00000000457        260        211        263        164</span></span>
+<span><span class="co">#&gt; ENSG00000000460 ENSG00000000460         60         55         40         35</span></span></code></pre></div>
+<p>For a more complete guide covering file-derived sample-name repair
+and starter metadata generation with
+<code><a href="../reference/derive_vista_metadata.html">derive_vista_metadata()</a></code>, see the pkgdown article
+<code>Preparing Counts and Metadata for VISTA</code>.</p>
+<p>The matched sample sheet now has stable <code>sample_names</code>
+aligned to the count columns:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Sample info must have rownames matching count column names</span></span>
-<span><span class="va">sample_info</span> <span class="op">&lt;-</span> <span class="va">sample_metadata</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span><span class="st">"sample_names"</span> <span class="op">=</span> <span class="st">"Run"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sample_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">sample_names</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Key columns for VISTA</span></span>
-<span><span class="va">sample_info</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample_names"</span>, <span class="st">"cell"</span>, <span class="st">"treatment"</span>, <span class="st">"dex"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 4</span></span></span>
-<span><span class="co">#&gt;   sample_names cell    treatment     dex  </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> SRR1039508   N61311  Untreated     untrt</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> SRR1039509   N61311  Dexamethasone trt  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> SRR1039512   N052611 Untreated     untrt</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> SRR1039513   N052611 Dexamethasone trt  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> SRR1039516   N080611 Untreated     untrt</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> SRR1039517   N080611 Dexamethasone trt  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> SRR1039520   N061011 Untreated     untrt</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> SRR1039521   N061011 Dexamethasone trt</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample_names"</span>, <span class="st">"cell"</span>, <span class="st">"treatment"</span>, <span class="st">"dex"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;            sample_names    cell     treatment   dex</span></span>
+<span><span class="co">#&gt; SRR1039508   SRR1039508  N61311     Untreated untrt</span></span>
+<span><span class="co">#&gt; SRR1039509   SRR1039509  N61311 Dexamethasone   trt</span></span>
+<span><span class="co">#&gt; SRR1039512   SRR1039512 N052611     Untreated untrt</span></span>
+<span><span class="co">#&gt; SRR1039513   SRR1039513 N052611 Dexamethasone   trt</span></span>
+<span><span class="co">#&gt; SRR1039516   SRR1039516 N080611     Untreated untrt</span></span>
+<span><span class="co">#&gt; SRR1039517   SRR1039517 N080611 Dexamethasone   trt</span></span>
+<span><span class="co">#&gt; SRR1039520   SRR1039520 N061011     Untreated untrt</span></span>
+<span><span class="co">#&gt; SRR1039521   SRR1039521 N061011 Dexamethasone   trt</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -269,9 +270,9 @@ vignette.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create VISTA object with DESeq2 backend</span></span>
 <span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">count_data</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">sample_info</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="st">"gene_id"</span>,</span>
+<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
+<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
+<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
 <span>  group_column <span class="op">=</span> <span class="st">"treatment"</span>,</span>
 <span>  group_numerator <span class="op">=</span> <span class="st">"Dexamethasone"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"Untreated"</span>,</span>
@@ -2085,7 +2086,7 @@ relationships</li>
 <span><span class="co">#&gt;  [37] RSpectra_0.16-2         pkgdown_2.2.0           codetools_0.2-20       </span></span>
 <span><span class="co">#&gt;  [40] DelayedArray_0.36.1     DOSE_4.4.0              ggforce_0.5.0          </span></span>
 <span><span class="co">#&gt;  [43] tidyselect_1.2.1        shape_1.4.6.1           aplot_0.2.9            </span></span>
-<span><span class="co">#&gt;  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.0       </span></span>
+<span><span class="co">#&gt;  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.1       </span></span>
 <span><span class="co">#&gt;  [49] Formula_1.2-5           ggridges_0.5.7          iterators_1.0.14       </span></span>
 <span><span class="co">#&gt;  [52] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            </span></span>
 <span><span class="co">#&gt;  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.2             </span></span>
@@ -2096,33 +2097,33 @@ relationships</li>
 <span><span class="co">#&gt;  [70] ggpointdensity_0.2.1    digest_0.6.39           R6_2.6.1               </span></span>
 <span><span class="co">#&gt;  [73] gridGraphics_0.5-1      textshaping_1.0.5       colorspace_2.1-2       </span></span>
 <span><span class="co">#&gt;  [76] GO.db_3.22.0            RSQLite_2.4.6           ggrain_0.1.2           </span></span>
-<span><span class="co">#&gt;  [79] R.methodsS3_1.8.2       utf8_1.2.6              tidyr_1.3.2            </span></span>
-<span><span class="co">#&gt;  [82] fontLiberation_0.1.0    data.table_1.18.2.1     FNN_1.1.4.1            </span></span>
-<span><span class="co">#&gt;  [85] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.10.1        </span></span>
-<span><span class="co">#&gt;  [88] scatterpie_0.2.6        ggstats_0.13.0          uwot_0.2.4             </span></span>
-<span><span class="co">#&gt;  [91] pkgconfig_2.0.3         gtable_0.3.6            blob_1.3.0             </span></span>
-<span><span class="co">#&gt;  [94] ComplexHeatmap_2.26.1   S7_0.2.1                XVector_0.50.0         </span></span>
-<span><span class="co">#&gt;  [97] clusterProfiler_4.18.4  htmltools_0.5.9         carData_3.0-6          </span></span>
-<span><span class="co">#&gt; [100] fontBitstreamVera_0.1.1 bookdown_0.46           fgsea_1.36.2           </span></span>
-<span><span class="co">#&gt; [103] clue_0.3-68             scales_1.4.0            png_0.1-9              </span></span>
-<span><span class="co">#&gt; [106] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         </span></span>
-<span><span class="co">#&gt; [109] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             </span></span>
-<span><span class="co">#&gt; [112] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          </span></span>
-<span><span class="co">#&gt; [115] parallel_4.5.3          desc_1.4.3              pillar_1.11.1          </span></span>
-<span><span class="co">#&gt; [118] grid_4.5.3              vctrs_0.7.2             ggpubr_0.6.3           </span></span>
-<span><span class="co">#&gt; [121] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.2        </span></span>
-<span><span class="co">#&gt; [124] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        </span></span>
-<span><span class="co">#&gt; [127] compiler_4.5.3          rlang_1.1.7             crayon_1.5.3           </span></span>
-<span><span class="co">#&gt; [130] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          </span></span>
-<span><span class="co">#&gt; [133] plyr_1.8.9              fs_2.0.1                ggiraph_0.9.6          </span></span>
-<span><span class="co">#&gt; [136] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    </span></span>
-<span><span class="co">#&gt; [139] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      </span></span>
-<span><span class="co">#&gt; [142] lazyeval_0.2.3          GOSemSim_2.36.0         fontquiver_0.2.1       </span></span>
-<span><span class="co">#&gt; [145] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          </span></span>
-<span><span class="co">#&gt; [148] KEGGREST_1.50.0         statmod_1.5.1           broom_1.0.12           </span></span>
-<span><span class="co">#&gt; [151] igraph_2.2.2            memoise_2.0.1           bslib_0.10.0           </span></span>
-<span><span class="co">#&gt; [154] ggtree_4.0.5            fastmatch_1.1-8         bit_4.6.0              </span></span>
-<span><span class="co">#&gt; [157] ape_5.8-1               gson_0.1.0              polynom_1.4-1</span></span></code></pre></div>
+<span><span class="co">#&gt;  [79] R.methodsS3_1.8.2       tidyr_1.3.2             fontLiberation_0.1.0   </span></span>
+<span><span class="co">#&gt;  [82] data.table_1.18.2.1     FNN_1.1.4.1             httr_1.4.8             </span></span>
+<span><span class="co">#&gt;  [85] htmlwidgets_1.6.4       S4Arrays_1.10.1         scatterpie_0.2.6       </span></span>
+<span><span class="co">#&gt;  [88] ggstats_0.13.0          uwot_0.2.4              pkgconfig_2.0.3        </span></span>
+<span><span class="co">#&gt;  [91] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  </span></span>
+<span><span class="co">#&gt;  [94] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 </span></span>
+<span><span class="co">#&gt;  [97] htmltools_0.5.9         carData_3.0-6           fontBitstreamVera_0.1.1</span></span>
+<span><span class="co">#&gt; [100] bookdown_0.46           fgsea_1.36.2            clue_0.3-68            </span></span>
+<span><span class="co">#&gt; [103] scales_1.4.0            png_0.1-9               ggfun_0.2.0            </span></span>
+<span><span class="co">#&gt; [106] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           </span></span>
+<span><span class="co">#&gt; [109] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           </span></span>
+<span><span class="co">#&gt; [112] GlobalOptions_0.1.4     stringr_1.6.0           parallel_4.5.3         </span></span>
+<span><span class="co">#&gt; [115] desc_1.4.3              pillar_1.11.1           grid_4.5.3             </span></span>
+<span><span class="co">#&gt; [118] vctrs_0.7.2             ggpubr_0.6.3            car_3.1-5              </span></span>
+<span><span class="co">#&gt; [121] tidydr_0.0.6            cluster_2.1.8.2         evaluate_1.0.5         </span></span>
+<span><span class="co">#&gt; [124] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.3         </span></span>
+<span><span class="co">#&gt; [127] rlang_1.2.0             crayon_1.5.3            ggsignif_0.6.4         </span></span>
+<span><span class="co">#&gt; [130] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             </span></span>
+<span><span class="co">#&gt; [133] fs_2.0.1                ggiraph_0.9.6           stringi_1.8.7          </span></span>
+<span><span class="co">#&gt; [136] viridisLite_0.4.3       BiocParallel_1.44.0     assertthat_0.2.1       </span></span>
+<span><span class="co">#&gt; [139] babelgene_22.9          Biostrings_2.78.0       lazyeval_0.2.3         </span></span>
+<span><span class="co">#&gt; [142] GOSemSim_2.36.0         fontquiver_0.2.1        Matrix_1.7-4           </span></span>
+<span><span class="co">#&gt; [145] patchwork_1.3.2         bit64_4.6.0-1           KEGGREST_1.50.0        </span></span>
+<span><span class="co">#&gt; [148] statmod_1.5.1           broom_1.0.12            igraph_2.2.3           </span></span>
+<span><span class="co">#&gt; [151] memoise_2.0.1           bslib_0.10.0            ggtree_4.0.5           </span></span>
+<span><span class="co">#&gt; [154] fastmatch_1.1-8         bit_4.6.0               ape_5.8-1              </span></span>
+<span><span class="co">#&gt; [157] gson_0.1.0              polynom_1.4-1</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

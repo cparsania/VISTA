@@ -401,7 +401,7 @@ sessionInfo()
 #>  [21] sass_0.4.10                 bslib_0.10.0               
 #>  [23] htmlwidgets_1.6.4           desc_1.4.3                 
 #>  [25] plyr_1.8.9                  cachem_1.1.0               
-#>  [27] igraph_2.2.2                lifecycle_1.0.5            
+#>  [27] igraph_2.2.3                lifecycle_1.0.5            
 #>  [29] pkgconfig_2.0.3             gson_0.1.0                 
 #>  [31] Matrix_1.7-4                R6_2.6.1                   
 #>  [33] fastmap_1.2.0               MatrixGenerics_1.22.0      
@@ -459,6 +459,6 @@ sessionInfo()
 #> [137] DOSE_4.4.0                  tidytree_0.4.7             
 #> [139] ggiraph_0.9.6               scales_1.4.0               
 #> [141] purrr_1.2.1                 crayon_1.5.3               
-#> [143] rlang_1.1.7                 cowplot_1.2.0              
+#> [143] rlang_1.2.0                 cowplot_1.2.0              
 #> [145] fastmatch_1.1-8             KEGGREST_1.50.0
 ```

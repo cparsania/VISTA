@@ -2,6 +2,19 @@
 
 ## VISTA 0.99.5
 
+- Added [`read_vista_counts()`](../reference/read_vista_counts.md),
+  [`read_vista_metadata()`](../reference/read_vista_metadata.md), and
+  [`match_vista_inputs()`](../reference/match_vista_inputs.md) to
+  standardize common RNA-seq input formats without changing the existing
+  [`create_vista()`](../reference/create_vista.md) API.
+- Added
+  [`derive_vista_metadata()`](../reference/derive_vista_metadata.md) to
+  bootstrap starter sample metadata from count-derived sample names
+  using split- or regex-based parsing.
+- Added lightweight import support for plain count tables,
+  featureCounts, STAR gene counts, HTSeq-count, tximport-like inputs,
+  and RSEM gene result files.
+
 ## VISTA 0.99.4
 
 ## VISTA 0.99.3

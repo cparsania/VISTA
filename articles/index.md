@@ -12,6 +12,8 @@
 
 ### Visualization Guides
 
+- [Preparing Counts and Metadata for
+  VISTA](guides/VISTA-input-preparation.md):
 - [Enrichment Chord Diagrams with VISTA](guides/VISTA-chord.md):
 - [Raincloud Plots in VISTA](guides/VISTA-raincloud.md):
 - [Color and Palette Design with VISTA](guides/VISTA-colors.md):

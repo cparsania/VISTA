@@ -125,50 +125,53 @@ sample_metadata$treatment <- ifelse(
 
 ### Prepare data for VISTA
 
-VISTA requires a count data.frame with a gene ID column:
+VISTA includes helper functions that standardize counts and sample
+metadata before calling
+[`create_vista()`](../reference/create_vista.md):
 
 ``` r
-# Create count data.frame with gene_id column
-count_data <- as.data.frame(counts_matrix) %>% tibble::as_tibble()
-count_data$gene_id <- rownames(counts_matrix)
+prepared_counts <- read_vista_counts(
+  counts_matrix,
+  format = "matrix"
+)
 
-# Reorder columns: gene_id first, then samples
-count_data <- count_data[, c("gene_id", colnames(counts_matrix))]
+prepared_samples <- read_vista_metadata(
+  sample_metadata %>%
+    tibble::as_tibble() %>%
+    dplyr::rename("sample_names" = "Run")
+)
 
-# Preview
-count_data[1:5, 1:5]
-#> # A tibble: 5 × 5
-#>   gene_id         SRR1039508 SRR1039509 SRR1039512 SRR1039513
-#>   <chr>                <int>      <int>      <int>      <int>
-#> 1 ENSG00000000003        679        448        873        408
-#> 2 ENSG00000000005          0          0          0          0
-#> 3 ENSG00000000419        467        515        621        365
-#> 4 ENSG00000000457        260        211        263        164
-#> 5 ENSG00000000460         60         55         40         35
+matched_inputs <- match_vista_inputs(prepared_counts, prepared_samples)
+
+# Preview the create_vista-ready count table
+matched_inputs$counts[1:5, 1:5]
+#>                         gene_id SRR1039508 SRR1039509 SRR1039512 SRR1039513
+#> ENSG00000000003 ENSG00000000003        679        448        873        408
+#> ENSG00000000005 ENSG00000000005          0          0          0          0
+#> ENSG00000000419 ENSG00000000419        467        515        621        365
+#> ENSG00000000457 ENSG00000000457        260        211        263        164
+#> ENSG00000000460 ENSG00000000460         60         55         40         35
 ```
 
-Prepare sample info with proper rownames:
+For a more complete guide covering file-derived sample-name repair and
+starter metadata generation with
+[`derive_vista_metadata()`](../reference/derive_vista_metadata.md), see
+the pkgdown article `Preparing Counts and Metadata for VISTA`.
+
+The matched sample sheet now has stable `sample_names` aligned to the
+count columns:
 
 ``` r
-# Sample info must have rownames matching count column names
-sample_info <- sample_metadata %>%
-  tibble::as_tibble() %>%
-  dplyr::rename("sample_names" = "Run") %>%
-  dplyr::mutate(sample_names = as.character(sample_names))
-
-# Key columns for VISTA
-sample_info[, c("sample_names", "cell", "treatment", "dex")]
-#> # A tibble: 8 × 4
-#>   sample_names cell    treatment     dex  
-#>   <chr>        <fct>   <chr>         <fct>
-#> 1 SRR1039508   N61311  Untreated     untrt
-#> 2 SRR1039509   N61311  Dexamethasone trt  
-#> 3 SRR1039512   N052611 Untreated     untrt
-#> 4 SRR1039513   N052611 Dexamethasone trt  
-#> 5 SRR1039516   N080611 Untreated     untrt
-#> 6 SRR1039517   N080611 Dexamethasone trt  
-#> 7 SRR1039520   N061011 Untreated     untrt
-#> 8 SRR1039521   N061011 Dexamethasone trt
+matched_inputs$sample_info[, c("sample_names", "cell", "treatment", "dex")]
+#>            sample_names    cell     treatment   dex
+#> SRR1039508   SRR1039508  N61311     Untreated untrt
+#> SRR1039509   SRR1039509  N61311 Dexamethasone   trt
+#> SRR1039512   SRR1039512 N052611     Untreated untrt
+#> SRR1039513   SRR1039513 N052611 Dexamethasone   trt
+#> SRR1039516   SRR1039516 N080611     Untreated untrt
+#> SRR1039517   SRR1039517 N080611 Dexamethasone   trt
+#> SRR1039520   SRR1039520 N061011     Untreated untrt
+#> SRR1039521   SRR1039521 N061011 Dexamethasone   trt
 ```
 
 ## Create VISTA Object
@@ -180,9 +183,9 @@ The primary method for creating a VISTA object:
 ``` r
 # Create VISTA object with DESeq2 backend
 vista <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -1973,7 +1976,7 @@ sessionInfo()
 #>  [37] RSpectra_0.16-2         pkgdown_2.2.0           codetools_0.2-20       
 #>  [40] DelayedArray_0.36.1     DOSE_4.4.0              ggforce_0.5.0          
 #>  [43] tidyselect_1.2.1        shape_1.4.6.1           aplot_0.2.9            
-#>  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.0       
+#>  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.1       
 #>  [49] Formula_1.2-5           ggridges_0.5.7          iterators_1.0.14       
 #>  [52] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
 #>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.2             
@@ -1984,33 +1987,33 @@ sessionInfo()
 #>  [70] ggpointdensity_0.2.1    digest_0.6.39           R6_2.6.1               
 #>  [73] gridGraphics_0.5-1      textshaping_1.0.5       colorspace_2.1-2       
 #>  [76] GO.db_3.22.0            RSQLite_2.4.6           ggrain_0.1.2           
-#>  [79] R.methodsS3_1.8.2       utf8_1.2.6              tidyr_1.3.2            
-#>  [82] fontLiberation_0.1.0    data.table_1.18.2.1     FNN_1.1.4.1            
-#>  [85] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.10.1        
-#>  [88] scatterpie_0.2.6        ggstats_0.13.0          uwot_0.2.4             
-#>  [91] pkgconfig_2.0.3         gtable_0.3.6            blob_1.3.0             
-#>  [94] ComplexHeatmap_2.26.1   S7_0.2.1                XVector_0.50.0         
-#>  [97] clusterProfiler_4.18.4  htmltools_0.5.9         carData_3.0-6          
-#> [100] fontBitstreamVera_0.1.1 bookdown_0.46           fgsea_1.36.2           
-#> [103] clue_0.3-68             scales_1.4.0            png_0.1-9              
-#> [106] ggfun_0.2.0             knitr_1.51              reshape2_1.4.5         
-#> [109] rjson_0.2.23            nlme_3.1-168            curl_7.0.0             
-#> [112] cachem_1.1.0            GlobalOptions_0.1.3     stringr_1.6.0          
-#> [115] parallel_4.5.3          desc_1.4.3              pillar_1.11.1          
-#> [118] grid_4.5.3              vctrs_0.7.2             ggpubr_0.6.3           
-#> [121] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.2        
-#> [124] evaluate_1.0.5          cli_3.6.5               locfit_1.5-9.12        
-#> [127] compiler_4.5.3          rlang_1.1.7             crayon_1.5.3           
-#> [130] ggsignif_0.6.4          labeling_0.4.3          forcats_1.0.1          
-#> [133] plyr_1.8.9              fs_2.0.1                ggiraph_0.9.6          
-#> [136] stringi_1.8.7           viridisLite_0.4.3       BiocParallel_1.44.0    
-#> [139] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
-#> [142] lazyeval_0.2.3          GOSemSim_2.36.0         fontquiver_0.2.1       
-#> [145] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          
-#> [148] KEGGREST_1.50.0         statmod_1.5.1           broom_1.0.12           
-#> [151] igraph_2.2.2            memoise_2.0.1           bslib_0.10.0           
-#> [154] ggtree_4.0.5            fastmatch_1.1-8         bit_4.6.0              
-#> [157] ape_5.8-1               gson_0.1.0              polynom_1.4-1
+#>  [79] R.methodsS3_1.8.2       tidyr_1.3.2             fontLiberation_0.1.0   
+#>  [82] data.table_1.18.2.1     FNN_1.1.4.1             httr_1.4.8             
+#>  [85] htmlwidgets_1.6.4       S4Arrays_1.10.1         scatterpie_0.2.6       
+#>  [88] ggstats_0.13.0          uwot_0.2.4              pkgconfig_2.0.3        
+#>  [91] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
+#>  [94] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
+#>  [97] htmltools_0.5.9         carData_3.0-6           fontBitstreamVera_0.1.1
+#> [100] bookdown_0.46           fgsea_1.36.2            clue_0.3-68            
+#> [103] scales_1.4.0            png_0.1-9               ggfun_0.2.0            
+#> [106] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
+#> [109] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
+#> [112] GlobalOptions_0.1.4     stringr_1.6.0           parallel_4.5.3         
+#> [115] desc_1.4.3              pillar_1.11.1           grid_4.5.3             
+#> [118] vctrs_0.7.2             ggpubr_0.6.3            car_3.1-5              
+#> [121] tidydr_0.0.6            cluster_2.1.8.2         evaluate_1.0.5         
+#> [124] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.3         
+#> [127] rlang_1.2.0             crayon_1.5.3            ggsignif_0.6.4         
+#> [130] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
+#> [133] fs_2.0.1                ggiraph_0.9.6           stringi_1.8.7          
+#> [136] viridisLite_0.4.3       BiocParallel_1.44.0     assertthat_0.2.1       
+#> [139] babelgene_22.9          Biostrings_2.78.0       lazyeval_0.2.3         
+#> [142] GOSemSim_2.36.0         fontquiver_0.2.1        Matrix_1.7-4           
+#> [145] patchwork_1.3.2         bit64_4.6.0-1           KEGGREST_1.50.0        
+#> [148] statmod_1.5.1           broom_1.0.12            igraph_2.2.3           
+#> [151] memoise_2.0.1           bslib_0.10.0            ggtree_4.0.5           
+#> [154] fastmatch_1.1-8         bit_4.6.0               ape_5.8-1              
+#> [157] gson_0.1.0              polynom_1.4-1
 ```
 
 ## References
