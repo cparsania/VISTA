@@ -68,10 +68,18 @@ library(VISTA)
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
+prepared_counts <- read_vista_counts(
+  count_data,
+  format = "matrix",
+  gene_id_column = "gene_id"
+)
+prepared_samples <- read_vista_metadata(sample_metadata)
+matched_inputs <- match_vista_inputs(prepared_counts, prepared_samples)
+
 vista <- create_vista(
-  counts = count_data,
-  sample_info = sample_metadata,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "cond_long",
   group_numerator = "treatment1",
   group_denominator = "control",
@@ -120,13 +128,41 @@ get_foldchange_lollipop(vista, sample_comparison = comp, genes = up_genes[1:6], 
 
 ## Core Workflow
 
-### 1. Build the analysis object
+### 1. Prepare counts and metadata
+
+``` r
+prepared_counts <- read_vista_counts(
+  count_data,
+  format = "matrix",
+  gene_id_column = "gene_id"
+)
+prepared_samples <- read_vista_metadata(sample_metadata)
+matched_inputs <- match_vista_inputs(prepared_counts, prepared_samples)
+```
+
+These helpers preserve the existing `create_vista()` API while making it
+easier to import common count formats such as plain matrices/data frames,
+featureCounts, STAR gene counts, HTSeq-count, tximport-like inputs, and RSEM
+gene result files.
+
+If you do not yet have a metadata sheet, you can bootstrap one from the count
+sample names:
+
+``` r
+starter_metadata <- derive_vista_metadata(
+  matched_inputs$counts,
+  column_geneid = matched_inputs$column_geneid,
+  parser = "auto"
+)
+```
+
+### 2. Build the analysis object
 
 ``` r
 vista <- create_vista(
-  counts = count_data,
-  sample_info = sample_metadata,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "cond_long",
   group_numerator = "treatment1",
   group_denominator = "control",
@@ -138,9 +174,9 @@ Use `method = "both"` when you want a DESeq2/edgeR consensus workflow:
 
 ``` r
 vista_consensus <- create_vista(
-  counts = count_data,
-  sample_info = sample_metadata,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "cond_long",
   group_numerator = "treatment1",
   group_denominator = "control",
@@ -152,14 +188,14 @@ vista_consensus <- create_vista(
 vista_consensus <- set_de_source(vista_consensus, "edger")
 ```
 
-### 2. Add covariates or an explicit design
+### 3. Add covariates or an explicit design
 
 ``` r
 # Add sample-level covariates to adjust the DE model
 vista_cov <- create_vista(
-  counts = count_data,
-  sample_info = sample_metadata,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "cond_long",
   group_numerator = "treatment1",
   group_denominator = "control",
@@ -168,9 +204,9 @@ vista_cov <- create_vista(
 
 # Or provide a full design formula
 vista_design <- create_vista(
-  counts = count_data,
-  sample_info = sample_metadata,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "cond_long",
   group_numerator = "treatment1",
   group_denominator = "control",
@@ -178,7 +214,7 @@ vista_design <- create_vista(
 )
 ```
 
-### 3. Add feature annotations
+### 4. Add feature annotations
 
 ``` r
 # Example for human data
@@ -189,7 +225,7 @@ vista <- set_rowdata(
 )
 ```
 
-### 4. Explore, export, and report
+### 5. Explore, export, and report
 
 ``` r
 # Export selected tables / matrices / plots

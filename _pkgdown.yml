@@ -17,6 +17,7 @@ articles:
       - workflows/VISTA-deconvolution
   - title: Visualization Guides
     contents:
+      - guides/VISTA-input-preparation
       - guides/VISTA-chord
       - guides/VISTA-raincloud
       - guides/VISTA-colors
@@ -49,6 +50,15 @@ reference:
       - set_de_source
       - set_vista_group_colors
       - set_vista_comparison_colors
+
+  - title: "Input Preparation"
+    desc: >
+      Standardize count matrices and sample metadata before constructing a VISTA object.
+    contents:
+      - read_vista_counts
+      - derive_vista_metadata
+      - read_vista_metadata
+      - match_vista_inputs
 
   - title: "Quality Control Plots"
     desc: >

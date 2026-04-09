@@ -1,0 +1,259 @@
+---
+title: "Preparing Counts and Metadata for VISTA"
+author: "VISTA Development Team"
+package: VISTA
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    number_sections: true
+    fig_width: 8
+    fig_height: 6
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+
+ensure_pkgs_available <- function(pkgs) {
+  missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+  if (length(missing)) {
+    stop("Missing required packages: ", paste(missing, collapse = ", "))
+  }
+}
+
+ensure_pkgs_available(c("VISTA", "dplyr", "tibble"))
+```
+
+# Overview
+
+VISTA expects two main inputs for `create_vista()`:
+
+1. A count table with one gene identifier column plus one column per sample.
+2. A sample metadata table (`sample_info`) containing `sample_names` and the
+   grouping variables used in the analysis.
+
+In practice, users often start from count tables whose column names are file
+paths, alignment outputs, or sequencing-derived sample identifiers. Metadata can
+also be incomplete or missing entirely. VISTA's input preparation helpers are
+designed to standardize these objects before differential analysis starts:
+
+- `read_vista_counts()`
+- `derive_vista_metadata()`
+- `read_vista_metadata()`
+- `match_vista_inputs()`
+
+# Load Example Data
+
+```{r load-data}
+library(VISTA)
+library(dplyr)
+library(tibble)
+
+data("count_data", package = "VISTA")
+data("sample_metadata", package = "VISTA")
+
+dim(count_data)
+head(sample_metadata[, c("sample_names", "cond_long")])
+```
+
+# 1. Standardize Counts
+
+For an ordinary in-memory count table, `read_vista_counts()` keeps the existing
+API contract and returns a `create_vista()`-ready structure.
+
+```{r counts-basic}
+prepared_counts <- read_vista_counts(
+  count_data[seq_len(50), ],
+  format = "matrix",
+  gene_id_column = "gene_id"
+)
+
+names(prepared_counts)
+head(prepared_counts$counts[, seq_len(4)])
+head(prepared_counts$row_data)
+```
+
+The returned object includes:
+
+- `counts`: standardized count table with `gene_id`
+- `row_data`: feature metadata aligned to the counts
+- `sample_names`: standardized sample columns
+- `sample_name_map`: mapping from original to repaired sample names
+
+# 2. Repair File-Derived Sample Names
+
+RNA-seq count tables often inherit sample columns from alignment or quantification
+files. VISTA can repair these names conservatively when they are clearly
+file-derived and the repaired names remain unique.
+
+```{r sample-name-repair}
+counts_paths <- count_data[seq_len(20), c("gene_id", sample_metadata$sample_names[seq_len(4)]), drop = FALSE]
+
+colnames(counts_paths)[2:5] <- c(
+  "/proj/run/03_alignment/HET_1_U/HET_1_U_star_alignAligned.sortedByCoord.out.bam",
+  "/proj/run/03_alignment/HET_1_ovary/HET_1_ovary_star_alignAligned.sortedByCoord.out.bam",
+  "/proj/run/03_alignment/WT_1_U/WT_1_U_star_alignAligned.sortedByCoord.out.bam",
+  "/proj/run/03_alignment/WT_1_ovary/WT_1_ovary_star_alignAligned.sortedByCoord.out.bam"
+)
+
+prepared_paths <- read_vista_counts(
+  counts_paths,
+  format = "matrix",
+  gene_id_column = "gene_id",
+  repair_sample_names = "auto"
+)
+
+prepared_paths$sample_name_map
+```
+
+Automatic repair currently handles patterns such as:
+
+- full file paths
+- STAR outputs (`Aligned.sortedByCoord.out.bam`, `ReadsPerGene.out.tab`)
+- RSEM outputs (`.genes.results`, `.isoforms.results`)
+- generic quantification files such as `quant.sf`
+- lane/read suffixes like `_S1_L001_R1_001`
+
+# 3. Derive Starter Metadata from Sample Names
+
+If you do not yet have a metadata sheet, `derive_vista_metadata()` can create a
+starter `sample_info` table from the count sample names.
+
+## Split-based parsing
+
+```{r derive-split}
+derived_split <- derive_vista_metadata(
+  prepared_paths,
+  parser = "split",
+  split = "_",
+  fields = c("genotype", "replicate", "tissue")
+)
+
+derived_split
+```
+
+## Regex-based parsing
+
+For sequencing accessions or other structured labels, regex parsing gives more
+control:
+
+```{r derive-regex}
+derived_regex <- derive_vista_metadata(
+  counts = NULL,
+  sample_names = c("SRR1039508", "SRR1039509", "SRR1039512"),
+  parser = "regex",
+  pattern = "SRR(\\d+)",
+  fields = "run_id"
+)
+
+derived_regex
+```
+
+## Template mode
+
+Template mode adds empty placeholders for columns users commonly fill in next,
+such as `group` and `batch`.
+
+```{r derive-template}
+derive_vista_metadata(
+  counts = NULL,
+  sample_names = c("sampleA", "sampleB"),
+  parser = "none",
+  return_type = "template"
+)
+```
+
+# 4. Standardize Existing Metadata
+
+If a metadata table already exists, `read_vista_metadata()` standardizes it into
+the form expected by `create_vista()`.
+
+```{r metadata-basic}
+prepared_samples <- read_vista_metadata(sample_metadata)
+
+head(prepared_samples[, c("sample_names", "cond_long")])
+```
+
+VISTA will infer `sample_names` from:
+
+- an existing `sample_names` column
+- non-default rownames
+- common aliases such as `sample`, `sample_id`, or `Run`
+
+# 5. Match Counts and Metadata
+
+`match_vista_inputs()` aligns count columns and metadata rows so they can be
+passed directly into `create_vista()`.
+
+```{r matching}
+matched_inputs <- match_vista_inputs(prepared_counts, prepared_samples)
+
+matched_inputs$column_geneid
+identical(matched_inputs$sample_info$sample_names, colnames(matched_inputs$counts)[-1])
+```
+
+When appropriate, you can drop unmatched samples instead of erroring:
+
+```{r matching-drop}
+sample_extra <- prepared_samples[seq_len(4), , drop = FALSE]
+extra_row <- sample_extra[1, , drop = FALSE]
+extra_row$sample_names <- "extra_sample"
+if ("cond_long" %in% colnames(extra_row)) extra_row$cond_long <- "control"
+if ("dex" %in% colnames(extra_row)) extra_row$dex <- "untrt"
+if ("cell" %in% colnames(extra_row)) extra_row$cell <- "N999"
+rownames(extra_row) <- "extra_sample"
+sample_extra <- rbind(sample_extra, extra_row)
+
+matched_drop <- match_vista_inputs(
+  prepared_counts,
+  sample_extra,
+  drop_unmatched = TRUE
+)
+
+matched_drop$report
+```
+
+# 6. Create a VISTA Object
+
+Once inputs are standardized, `create_vista()` is unchanged.
+
+```{r create-vista}
+vista <- create_vista(
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
+  group_column = "cond_long",
+  group_numerator = "treatment1",
+  group_denominator = "control",
+  method = "deseq2",
+  min_counts = 5,
+  min_replicates = 1
+)
+
+vista
+```
+
+# Practical Guidance
+
+- Use `read_vista_counts()` first whenever count columns come from external
+  tools or file names.
+- Use `derive_vista_metadata()` when you only have sample names and need a
+  reviewable starter metadata sheet.
+- Use `read_vista_metadata()` when you already have a metadata table and want
+  VISTA to standardize it.
+- Use `match_vista_inputs()` before `create_vista()` to catch alignment issues
+  early.
+
+# Session Info
+
+```{r session-info}
+sessionInfo()
+```

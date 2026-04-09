@@ -118,31 +118,32 @@ sample_metadata$treatment <- ifelse(
 
 ## Prepare data for VISTA
 
-VISTA requires a count data.frame with a gene ID column:
+VISTA includes helper functions that standardize counts and sample metadata before calling `create_vista()`:
 
-```{r prepare-counts}
-# Create count data.frame with gene_id column
-count_data <- as.data.frame(counts_matrix) %>% tibble::as_tibble()
-count_data$gene_id <- rownames(counts_matrix)
+```{r prepare-inputs}
+prepared_counts <- read_vista_counts(
+  counts_matrix,
+  format = "matrix"
+)
 
-# Reorder columns: gene_id first, then samples
-count_data <- count_data[, c("gene_id", colnames(counts_matrix))]
+prepared_samples <- read_vista_metadata(
+  sample_metadata %>%
+    tibble::as_tibble() %>%
+    dplyr::rename("sample_names" = "Run")
+)
 
-# Preview
-count_data[1:5, 1:5]
+matched_inputs <- match_vista_inputs(prepared_counts, prepared_samples)
+
+# Preview the create_vista-ready count table
+matched_inputs$counts[1:5, 1:5]
 ```
 
-Prepare sample info with proper rownames:
+For a more complete guide covering file-derived sample-name repair and starter metadata generation with `derive_vista_metadata()`, see the pkgdown article `Preparing Counts and Metadata for VISTA`.
+
+The matched sample sheet now has stable `sample_names` aligned to the count columns:
 
 ```{r prepare-samples}
-# Sample info must have rownames matching count column names
-sample_info <- sample_metadata %>%
-  tibble::as_tibble() %>%
-  dplyr::rename("sample_names" = "Run") %>%
-  dplyr::mutate(sample_names = as.character(sample_names))
-
-# Key columns for VISTA
-sample_info[, c("sample_names", "cell", "treatment", "dex")]
+matched_inputs$sample_info[, c("sample_names", "cell", "treatment", "dex")]
 ```
 
 # Create VISTA Object
@@ -154,9 +155,9 @@ The primary method for creating a VISTA object:
 ```{r create-vista}
 # Create VISTA object with DESeq2 backend
 vista <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -704,7 +705,6 @@ get_expression_heatmap(
   kmeans_k = 2
 )
 ```
-
 
 ## Expression Barplots
 
