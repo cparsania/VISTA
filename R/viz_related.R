@@ -170,6 +170,107 @@ NULL
   )
 }
 
+.validate_facet_layout_value <- function(value, arg) {
+  if (is.null(value)) {
+    return(NULL)
+  }
+  if (!is.numeric(value) || length(value) != 1L || is.na(value) || value < 1 || value != as.integer(value)) {
+    cli::cli_abort("{.arg {arg}} must be NULL or a positive integer.")
+  }
+  as.integer(value)
+}
+
+.add_expression_facet_wrap <- function(plot,
+                                       facet_formula,
+                                       scales = "fixed",
+                                       facet_nrow = NULL,
+                                       facet_ncol = NULL) {
+  facet_nrow <- .validate_facet_layout_value(facet_nrow, "facet_nrow")
+  facet_ncol <- .validate_facet_layout_value(facet_ncol, "facet_ncol")
+
+  plot + ggplot2::facet_wrap(
+    facet_formula,
+    scales = scales,
+    nrow = facet_nrow,
+    ncol = facet_ncol
+  )
+}
+
+.resolve_expression_fill <- function(x,
+                                     df,
+                                     group_col,
+                                     fill_by = NULL,
+                                     default_fill = "group",
+                                     allowed_special = c("group", "gene"),
+                                     x_var = NULL,
+                                     x_label = NULL) {
+  fill_key <- fill_by %||% default_fill
+  if (!is.character(fill_key) || length(fill_key) != 1L || is.na(fill_key)) {
+    cli::cli_abort("{.arg fill_by} must be NULL or a single character value.")
+  }
+
+  if (identical(fill_key, "group")) {
+    vals <- as.character(df[[group_col]])
+    return(list(
+      values = vals,
+      levels = unique(vals),
+      label = group_col,
+      palette = .vista_group_colors(x, groups_present = vals)
+    ))
+  }
+
+  if (identical(fill_key, "gene")) {
+    if (!"gene" %in% colnames(df)) {
+      cli::cli_abort("{.arg fill_by = 'gene'} requires a {.field gene} column in the plotting data.")
+    }
+    vals <- as.character(df$gene)
+    return(list(
+      values = vals,
+      levels = unique(vals),
+      label = "gene",
+      palette = .resolve_palette_values(vals, default = "Dark 3")
+    ))
+  }
+
+  if (identical(fill_key, "x")) {
+    if (is.null(x_var) || !x_var %in% colnames(df)) {
+      cli::cli_abort("{.arg fill_by = 'x'} is not available in this plotting configuration.")
+    }
+    vals <- as.character(df[[x_var]])
+    palette <- if (identical(x_var, group_col)) {
+      .vista_group_colors(x, groups_present = vals)
+    } else {
+      .resolve_palette_values(vals, default = "Dark 3")
+    }
+    return(list(
+      values = vals,
+      levels = unique(vals),
+      label = x_label %||% x_var,
+      palette = palette
+    ))
+  }
+
+  if (!fill_key %in% colnames(df)) {
+    allowed <- unique(c(allowed_special, colnames(df)))
+    cli::cli_abort(
+      "{.arg fill_by} must be one of {.val {allowed}}. Received: {.val {fill_key}}."
+    )
+  }
+
+  vals <- as.character(df[[fill_key]])
+  palette <- if (identical(fill_key, group_col)) {
+    .vista_group_colors(x, groups_present = vals)
+  } else {
+    .resolve_palette_values(vals, default = "Dark 3")
+  }
+  list(
+    values = vals,
+    levels = unique(vals),
+    label = fill_key,
+    palette = palette
+  )
+}
+
 .resolve_group_color_preference <- function(use_group_colors = TRUE,
                                             use_vista_colors = NULL) {
   if (!is.null(use_vista_colors)) {
@@ -1187,6 +1288,7 @@ get_corr_heatmap <- function(x,
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #'   `display_id` is set but not found in `rowData`.
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` (default `"free_y"`).
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param stats_group Logical; add statistical comparisons between groups when
 #'   `TRUE`. Only supported when `by = "group"`.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
@@ -1198,8 +1300,10 @@ get_corr_heatmap <- function(x,
 #'   `"gene"` (x-axis for per-gene distributions).
 #' @param facet_by Faceting control: for pooled genes, `"group"` or `"none"`; for per-gene,
 #'   `"none"` (default) or `"gene"`. `"auto"` selects the most readable layout.
-#' @param fill_by When `pool_genes = TRUE`, either `"x"` (default) or `"group"` to force group colors
-#'   even if `by = "sample"`. When `pool_genes = FALSE`, either `"gene"` or `"group"`.
+#' @param fill_by Fill mapping. Special values are `"group"`, `"gene"`, and
+#'   `"x"` (the plotted x-axis variable, when available). You may also supply a
+#'   discrete column from the joined plotting data, such as a sample metadata
+#'   column or `"sample"`.
 #' @param sample_order Ordering used when sample names are shown on the x-axis:
 #'   `"input"`, `"group"`, or `"expression"`.
 #'
@@ -1213,6 +1317,8 @@ get_expression_boxplot <- function(x,
                                    display_from = NULL,
                                    display_orgdb = NULL,
                                    facet_scales = "free_y",
+                                   facet_nrow = NULL,
+                                   facet_ncol = NULL,
                                    stats_group = FALSE,
                                    p.label = "p.signif",
                                    comparisons = NULL,
@@ -1244,7 +1350,6 @@ get_expression_boxplot <- function(x,
   if (identical(facet_by, "auto")) {
     facet_by <- if (pool_genes) "group" else if (!is.null(genes) && length(genes) > 1) "gene" else "none"
   }
-  fill_by <- if (pool_genes) match.arg(fill_by %||% "x", c("x", "group")) else match.arg(fill_by %||% "group", c("gene", "group"))
 
   mat <- SummarizedExperiment::assay(x)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
@@ -1312,58 +1417,40 @@ get_expression_boxplot <- function(x,
     "gene"
   }
   x_label <- if (by == "group") group_col else if (pool_genes) "sample" else "gene"
-  cols_group <- .vista_group_colors(x, df[[group_col]])
 
   if (pool_genes && identical(x_var, "sample")) {
     df <- .order_expression_plot_samples(df, meta, group_col, sample_order = sample_order)
   }
-
-  if (pool_genes) {
-    if (fill_by == "group") {
-      fill_var <- df[[group_col]]
-      fill_lab <- group_col
-      fill_levels <- unique(meta[[group_col]])
-      palette_manual <- cols_group
-    } else { # fill_by = "x"
-      fill_var <- df[[x_var]]
-      fill_lab <- x_label
-      fill_levels <- unique(df[[x_var]])
-      palette_manual <- if (by == "group") cols_group else NULL
-    }
-  } else {
-    if (fill_by == "group") {
-      fill_var <- df[[group_col]]
-      fill_lab <- group_col
-      fill_levels <- unique(meta[[group_col]])
-      palette_manual <- cols_group
-    } else { # fill_by = "gene"
-      fill_var <- df$gene
-      fill_lab <- "gene"
-      fill_levels <- unique(df$gene)
-      palette_manual <- colorspace::qualitative_hcl(length(fill_levels), palette = "Dark 3")
-      names(palette_manual) <- fill_levels
-    }
-  }
+  fill_spec <- .resolve_expression_fill(
+    x = x,
+    df = df,
+    group_col = group_col,
+    fill_by = fill_by,
+    default_fill = if (pool_genes) "x" else "group",
+    allowed_special = if (pool_genes) c("x", "group", "gene") else c("group", "gene"),
+    x_var = x_var,
+    x_label = x_label
+  )
 
   plt <- ggplot2::ggplot(
     df,
     ggplot2::aes(
       x = .data[[x_var]],
       y = expression,
-      fill = factor(fill_var, levels = fill_levels)
+      fill = factor(fill_spec$values, levels = fill_spec$levels)
     )
   ) +
     ggplot2::geom_boxplot(outlier.shape = NA, alpha = 0.8) +
     ggplot2::labs(
       x = x_label,
       y = if (log_transform) "log2(Normalized Counts + 1)" else "Normalized Counts",
-      fill = fill_lab
+      fill = fill_spec$label
     ) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
-  if (!is.null(palette_manual)) {
-    plt <- plt + ggplot2::scale_fill_manual(values = palette_manual)
+  if (!is.null(fill_spec$palette)) {
+    plt <- plt + ggplot2::scale_fill_manual(values = fill_spec$palette)
   }
 
   if (stats_group) {
@@ -1390,7 +1477,13 @@ get_expression_boxplot <- function(x,
                         sample = "sample",
                         "none")
     if (facet_var != "none") {
-      plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste0("~", facet_var)), scales = facet_scales)
+      plt <- .add_expression_facet_wrap(
+        plot = plt,
+        facet_formula = stats::as.formula(paste0("~", facet_var)),
+        scales = facet_scales,
+        facet_nrow = facet_nrow,
+        facet_ncol = facet_ncol
+      )
     }
   }
 
@@ -2287,6 +2380,7 @@ get_foldchange_chromosome_plot <- function(x,
 #' @param group_column Optional column name in `sample_info` used as the grouping variable.
 #' @param log_transform Logical; apply log2(x + 1) transform before plotting.
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` (default `"free"`).
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param alpha Numeric transparency for density fill.
 #' @param adjust Bandwidth adjustment factor passed to `geom_density()`.
 #' @param color_by Either `"group"` (default) or `"sample"` to choose fill/color variable.
@@ -2305,6 +2399,8 @@ get_expression_density <- function(x,
                                    group_column = NULL,
                                    log_transform = TRUE,
                                    facet_scales = "free",
+                                   facet_nrow = NULL,
+                                   facet_ncol = NULL,
                                    alpha = 0.4,
                                    adjust = 1,
                                    color_by = c("group", "sample"),
@@ -2369,7 +2465,13 @@ get_expression_density <- function(x,
 
   if (facet_by != "none") {
     facet_var <- if (facet_by == "group") group_col else "sample"
-    plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste0("~", facet_var)), scales = facet_scales)
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = stats::as.formula(paste0("~", facet_var)),
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   }
 
   plt
@@ -2654,6 +2756,7 @@ get_expression_scatter <- function(x,
 #'   `"none"` falls back to `"gene"` to avoid unreadable combined panels.
 #' @param log_transform Logical; log2-transform expression before plotting.
 #' @param facet_scale Scaling option passed to `facet_wrap()` when plotting multiple genes.
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param point_size Numeric size of the dots.
 #' @param line_size Numeric size of the stems.
 #' @param label Logical; draw numeric labels above the dots.
@@ -2694,6 +2797,8 @@ get_expression_lollipop <- function(x,
                                     facet_by = c("auto", "gene", "none"),
                                     log_transform = TRUE,
                                     facet_scale = "free_y",
+                                    facet_nrow = NULL,
+                                    facet_ncol = NULL,
                                     point_size = 6,
                                     line_size = 1.2,
                                     label = TRUE,
@@ -2798,7 +2903,13 @@ get_expression_lollipop <- function(x,
   }
 
   if (facet_mode == "gene") {
-    plt <- plt + ggplot2::facet_wrap(~gene, scales = facet_scale)
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = ~gene,
+      scales = facet_scale,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   }
 
   plt
@@ -2820,6 +2931,7 @@ get_expression_lollipop <- function(x,
 #' @param display_orgdb Optional `OrgDb` object used for ID mapping when
 #'   `display_id` is set but not found in `rowData`.
 #' @param facet_scales Scaling option passed to `facet_wrap()`.
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param stats_group Logical retained for API consistency. Statistical overlays
 #'   are not currently added by `get_expression_lineplot()`.
 #' @param p.label Label format retained for API consistency with other
@@ -2852,6 +2964,8 @@ get_expression_lineplot <- function(x,
                                     display_from = NULL,
                                     display_orgdb = NULL,
                                     facet_scales = "free_y",
+                                    facet_nrow = NULL,
+                                    facet_ncol = NULL,
                                     stats_group = FALSE,
                                     p.label = "p.signif",
                                     comparisons = NULL,
@@ -2972,9 +3086,21 @@ get_expression_lineplot <- function(x,
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
   if (facet_mode == "group" && !summarise && group_col %in% colnames(df)) {
-    plt <- plt + ggplot2::facet_wrap(stats::as.formula(paste("~", group_col)), scales = facet_scales)
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = stats::as.formula(paste("~", group_col)),
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   } else if (facet_mode == "gene") {
-    plt <- plt + ggplot2::facet_wrap(~gene, scales = facet_scales)
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = ~gene,
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   }
 
   plt
@@ -3110,6 +3236,7 @@ get_expression_lineplot <- function(x,
 #'   `display_id` is set but not found in `rowData` (reserved for compatibility
 #'   with [get_expression_boxplot()]).
 #' @param facet_scales Scaling option passed to `facet_wrap()`.
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
 #' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
@@ -3118,8 +3245,8 @@ get_expression_lineplot <- function(x,
 #' @param facet_by Faceting mode. Uses the same argument pattern as
 #'   [get_expression_boxplot()], but `pool_genes = TRUE` falls back to `"none"`
 #'   because pooled violins already aggregate across genes.
-#' @param fill_by Fill strategy. Uses the same values as
-#'   [get_expression_boxplot()].
+#' @param fill_by Fill mapping. Uses the same values as
+#'   [get_expression_boxplot()], including discrete sample metadata columns.
 #' @param sample_order Ordering for sample-level display before values are
 #'   grouped into violins.
 #' @param value_transform Deprecated compatibility alias. `"log2"` maps to
@@ -3139,6 +3266,8 @@ get_expression_violinplot <- function(x,
                                       display_from = NULL,
                                       display_orgdb = NULL,
                                       facet_scales = "free_y",
+                                      facet_nrow = NULL,
+                                      facet_ncol = NULL,
                                       stats_group = FALSE,
                                       p.label = "p.signif",
                                       comparisons = NULL,
@@ -3243,28 +3372,21 @@ get_expression_violinplot <- function(x,
     facet_by <- "none"
   }
 
-  cols_group <- .vista_group_colors(x, df[[group_col]])
-  fill_by <- if (pool_genes) {
-    match.arg(fill_by %||% "x", c("x", "group"))
-  } else {
-    match.arg(fill_by %||% "group", c("gene", "group"))
-  }
   facet_mode <- if (pool_genes) {
     "none"
   } else {
     .resolve_expression_plot_facet(facet_by, n_genes = length(unique(df$gene)))
   }
-
-  fill_var <- if (fill_by == "gene" && !pool_genes) df$gene else df[[group_col]]
-  fill_lab <- if (fill_by == "gene" && !pool_genes) "gene" else group_col
-  fill_levels <- unique(fill_var)
-  palette_manual <- if (fill_by == "gene" && !pool_genes) {
-    pal <- colorspace::qualitative_hcl(length(fill_levels), palette = "Dark 3")
-    names(pal) <- fill_levels
-    pal
-  } else {
-    cols_group
-  }
+  fill_spec <- .resolve_expression_fill(
+    x = x,
+    df = df,
+    group_col = group_col,
+    fill_by = fill_by,
+    default_fill = if (pool_genes) "x" else "group",
+    allowed_special = if (pool_genes) c("x", "group", "gene") else c("group", "gene"),
+    x_var = group_col,
+    x_label = group_col
+  )
 
   group_levels <- unique(as.character(df[[group_col]]))
   df[[group_col]] <- factor(as.character(df[[group_col]]), levels = group_levels)
@@ -3274,7 +3396,7 @@ get_expression_violinplot <- function(x,
     ggplot2::aes(
       x = .data[[group_col]],
       y = expression,
-      fill = factor(fill_var, levels = fill_levels)
+      fill = factor(fill_spec$values, levels = fill_spec$levels)
     )
   ) +
     ggplot2::geom_violin(trim = FALSE, alpha = 0.8, color = NA, scale = "width") +
@@ -3287,12 +3409,12 @@ get_expression_violinplot <- function(x,
       stroke = 0.2,
       color = "gray20"
     ) +
-    ggplot2::labs(x = group_col, y = ylab, fill = fill_lab) +
+    ggplot2::labs(x = group_col, y = ylab, fill = fill_spec$label) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 0, hjust = 0.5))
 
-  if (!is.null(palette_manual)) {
-    plt <- plt + ggplot2::scale_fill_manual(values = palette_manual)
+  if (!is.null(fill_spec$palette)) {
+    plt <- plt + ggplot2::scale_fill_manual(values = fill_spec$palette)
   }
 
   if (stats_group) {
@@ -3313,7 +3435,13 @@ get_expression_violinplot <- function(x,
   }
 
   if (facet_mode != "none") {
-    plt <- plt + ggplot2::facet_wrap(~gene, scales = facet_scales)
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = ~gene,
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   }
   plt
 }
@@ -3380,6 +3508,9 @@ get_expression_raincloud <- function(x,
                                      value_transform = c("log2", "zscore", "none"),
                                      summarise = FALSE,
                                      facet_by = c("auto", "gene", "none"),
+                                     fill_by = NULL,
+                                     facet_nrow = NULL,
+                                     facet_ncol = NULL,
                                      sample_order = c("input", "group", "expression"),
                                      rain_side = c("r", "l", "f", "f1x1", "f2x2"),
                                      id.long.var = NULL,
@@ -3475,7 +3606,16 @@ get_expression_raincloud <- function(x,
   if (!label_column_effective %in% colnames(df)) {
     cli::cli_abort("{.arg label_column} must be a column in the plotting data. Available columns: {.val {colnames(df)}}.")
   }
-  cols <- .vista_group_colors(x, df[[group_col]])
+  fill_spec <- .resolve_expression_fill(
+    x = x,
+    df = df,
+    group_col = group_col,
+    fill_by = fill_by,
+    default_fill = "group",
+    allowed_special = c("group", "gene", "x"),
+    x_var = group_col,
+    x_label = group_col
+  )
 
   rain_args <- list(
     rain.side = rain_side,
@@ -3492,16 +3632,24 @@ get_expression_raincloud <- function(x,
     ggplot2::aes(
       x = .data[[group_col]],
       y = expression,
-      fill = .data[[group_col]]
+      fill = factor(fill_spec$values, levels = fill_spec$levels)
     )
   ) +
     do.call(ggrain::geom_rain, rain_args) +
-    ggplot2::labs(x = group_col, y = ylab, fill = group_col) +
+    ggplot2::labs(x = group_col, y = ylab, fill = fill_spec$label) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 0, hjust = 0.5))
-  if (!is.null(cols)) plt <- plt + ggplot2::scale_fill_manual(values = cols)
+  if (!is.null(fill_spec$palette)) {
+    plt <- plt + ggplot2::scale_fill_manual(values = fill_spec$palette)
+  }
   if (facet_mode != "none") {
-    plt <- plt + ggplot2::facet_wrap(~gene, scales = "free_y")
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = ~gene,
+      scales = "free_y",
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   }
 
   if (label) {
@@ -4025,6 +4173,7 @@ get_foldchange_scatter <- function(x,
 #' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
 #' @param facet_scale Scaling option passed to `facet_wrap()` (deprecated; use `facet_scales`).
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` when faceting by gene.
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
 #' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
 #' @param group_column Optional column name in `sample_info` to use for grouping samples.
@@ -4079,6 +4228,8 @@ get_expression_barplot <- function(x,
                                    stats_group = FALSE,
                                    facet_scale = "free_y",
                                    facet_scales = facet_scale,
+                                   facet_nrow = NULL,
+                                   facet_ncol = NULL,
                                    p.label = "p.signif",
                                    comparisons = NULL,
                                    display_id = NULL,
@@ -4205,7 +4356,13 @@ get_expression_barplot <- function(x,
   }
 
   if (facet_mode == "gene") {
-    plt <- plt + ggplot2::facet_wrap(~gene, scales = facet_scales)
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = ~gene,
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   }
 
   plt

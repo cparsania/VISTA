@@ -14,6 +14,8 @@ get_expression_lineplot(
   display_from = NULL,
   display_orgdb = NULL,
   facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
   comparisons = NULL,
@@ -51,6 +53,8 @@ compatibility with other expression plotting APIs).}
 \code{display_id} is set but not found in \code{rowData}.}
 
 \item{facet_scales}{Scaling option passed to \code{facet_wrap()}.}
+
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
 \item{stats_group}{Logical retained for API consistency. Statistical overlays
 are not currently added by \code{get_expression_lineplot()}.}

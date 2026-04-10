@@ -13,6 +13,8 @@ get_expression_barplot(
   stats_group = FALSE,
   facet_scale = "free_y",
   facet_scales = facet_scale,
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   p.label = "p.signif",
   comparisons = NULL,
   display_id = NULL,
@@ -39,6 +41,8 @@ get_expression_barplot(
 \item{facet_scale}{Scaling option passed to \code{facet_wrap()} (deprecated; use \code{facet_scales}).}
 
 \item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} when faceting by gene.}
+
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
 \item{p.label}{Label format for \code{ggpubr::stat_compare_means()}.}
 

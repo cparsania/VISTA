@@ -79,6 +79,21 @@ test_that("get_expression_barplot supports per-sample mode", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("get_expression_barplot supports facet layout controls", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  p <- get_expression_barplot(
+    vista,
+    genes = genes,
+    facet_by = "gene",
+    facet_ncol = 2
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_identical(p$facet$params$ncol, 2L)
+})
+
 test_that("get_expression_barplot rejects stats_group in per-sample mode", {
   vista <- make_small_vista()
   genes <- rownames(vista)[1]
@@ -125,6 +140,23 @@ test_that("get_expression_boxplot supports harmonized by alias and sample orderi
   expect_s3_class(p, "ggplot")
 })
 
+test_that("get_expression_boxplot supports metadata fill and facet layout controls", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  p <- get_expression_boxplot(
+    vista,
+    genes = genes,
+    fill_by = "cell",
+    facet_by = "gene",
+    facet_ncol = 2
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_identical(p$labels$fill, "cell")
+  expect_identical(p$facet$params$ncol, 2L)
+})
+
 test_that("get_expression_violinplot includes the boxplot-style arguments", {
   box_args <- names(formals(get_expression_boxplot))
   violin_args <- names(formals(get_expression_violinplot))
@@ -161,6 +193,23 @@ test_that("get_expression_violinplot supports boxplot-style display and stats ar
     facet_by = "none"
   )
   expect_s3_class(p_stats, "ggplot")
+})
+
+test_that("get_expression_violinplot supports metadata fill and facet layout controls", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  p <- get_expression_violinplot(
+    vista,
+    genes = genes,
+    fill_by = "cell",
+    facet_by = "gene",
+    facet_nrow = 2
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_identical(p$labels$fill, "cell")
+  expect_identical(p$facet$params$nrow, 2L)
 })
 
 test_that("get_expression_density works with facet_by parameter", {
@@ -215,6 +264,21 @@ test_that("get_expression_lineplot supports boxplot-style display arguments", {
   expect_s3_class(p_pool, "ggplot")
 })
 
+test_that("get_expression_lineplot supports facet layout controls", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  p <- get_expression_lineplot(
+    vista,
+    genes = genes,
+    facet_by = "gene",
+    facet_ncol = 2
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_identical(p$facet$params$ncol, 2L)
+})
+
 test_that("get_expression_lollipop returns ggplot object", {
   vista <- make_small_vista()
   genes <- rownames(vista)[1:5]
@@ -234,6 +298,21 @@ test_that("get_expression_lollipop supports per-sample mode", {
     sample_order = "expression"
   )
   expect_s3_class(p, "ggplot")
+})
+
+test_that("get_expression_lollipop supports facet layout controls", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  p <- get_expression_lollipop(
+    vista,
+    genes = genes,
+    facet_by = "gene",
+    facet_ncol = 2
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_identical(p$facet$params$ncol, 2L)
 })
 
 test_that("get_expression_joyplot returns ggplot object", {
@@ -298,6 +377,25 @@ test_that("get_expression_raincloud handles parameters correctly", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("get_expression_raincloud supports metadata fill and facet layout controls", {
+  skip_if_not_installed("ggrain")
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:4]
+
+  p <- get_expression_raincloud(
+    vista,
+    genes = genes,
+    fill_by = "cell",
+    facet_by = "gene",
+    facet_ncol = 2,
+    label = FALSE
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_identical(p$labels$fill, "cell")
+  expect_identical(p$facet$params$ncol, 2L)
+})
+
 test_that("get_expression_raincloud supports gene-level group summaries", {
   skip_if_not_installed("ggrain")
   vista <- make_small_vista()
@@ -341,6 +439,14 @@ test_that("distribution plots support sample ordering and palette overrides", {
     palette = "Set 2"
   )
   expect_s3_class(p_density, "ggplot")
+  p_density_faceted <- get_expression_density(
+    vista,
+    genes = genes,
+    facet_by = "sample",
+    facet_ncol = 2
+  )
+  expect_s3_class(p_density_faceted, "ggplot")
+  expect_identical(p_density_faceted$facet$params$ncol, 2L)
 
   skip_if_not_installed("ggridges")
   p_joy <- get_expression_joyplot(
@@ -374,4 +480,14 @@ test_that("expression plots work with normalized counts", {
   # These should use normalized counts from the VISTA object
   p <- get_expression_boxplot(vista, genes = genes)
   expect_s3_class(p, "ggplot")
+})
+
+test_that("faceted expression plots validate facet layout inputs", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:3]
+
+  expect_error(
+    get_expression_boxplot(vista, genes = genes, facet_by = "gene", facet_ncol = 0),
+    "positive integer"
+  )
 })

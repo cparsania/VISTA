@@ -14,6 +14,8 @@ get_expression_lollipop(
   facet_by = c("auto", "gene", "none"),
   log_transform = TRUE,
   facet_scale = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   point_size = 6,
   line_size = 1.2,
   label = TRUE,
@@ -47,6 +49,8 @@ than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes
 \item{log_transform}{Logical; log2-transform expression before plotting.}
 
 \item{facet_scale}{Scaling option passed to \code{facet_wrap()} when plotting multiple genes.}
+
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
 \item{point_size}{Numeric size of the dots.}
 

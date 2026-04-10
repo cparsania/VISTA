@@ -14,6 +14,8 @@ get_expression_boxplot(
   display_from = NULL,
   display_orgdb = NULL,
   facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
   comparisons = NULL,
@@ -45,6 +47,8 @@ is not found in \code{rowData}).}
 
 \item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} (default \code{"free_y"}).}
 
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
+
 \item{stats_group}{Logical; add statistical comparisons between groups when
 \code{TRUE}. Only supported when \code{by = "group"}.}
 
@@ -62,8 +66,10 @@ and optional fill). When \code{pool_genes = FALSE}, either \code{"group"} or
 \item{facet_by}{Faceting control: for pooled genes, \code{"group"} or \code{"none"}; for per-gene,
 \code{"none"} (default) or \code{"gene"}. \code{"auto"} selects the most readable layout.}
 
-\item{fill_by}{When \code{pool_genes = TRUE}, either \code{"x"} (default) or \code{"group"} to force group colors
-even if \code{by = "sample"}. When \code{pool_genes = FALSE}, either \code{"gene"} or \code{"group"}.}
+\item{fill_by}{Fill mapping. Special values are \code{"group"}, \code{"gene"}, and
+\code{"x"} (the plotted x-axis variable, when available). You may also supply a
+discrete column from the joined plotting data, such as a sample metadata
+column or \code{"sample"}.}
 
 \item{sample_order}{Ordering used when sample names are shown on the x-axis:
 \code{"input"}, \code{"group"}, or \code{"expression"}.}

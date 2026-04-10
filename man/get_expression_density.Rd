@@ -11,6 +11,8 @@ get_expression_density(
   group_column = NULL,
   log_transform = TRUE,
   facet_scales = "free",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   alpha = 0.4,
   adjust = 1,
   color_by = c("group", "sample"),
@@ -32,6 +34,8 @@ get_expression_density(
 \item{log_transform}{Logical; apply log2(x + 1) transform before plotting.}
 
 \item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} (default \code{"free"}).}
+
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
 \item{alpha}{Numeric transparency for density fill.}
 

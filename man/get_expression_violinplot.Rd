@@ -14,6 +14,8 @@ get_expression_violinplot(
   display_from = NULL,
   display_orgdb = NULL,
   facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
   comparisons = NULL,
@@ -50,6 +52,8 @@ with \code{\link[=get_expression_boxplot]{get_expression_boxplot()}}).}
 
 \item{facet_scales}{Scaling option passed to \code{facet_wrap()}.}
 
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
+
 \item{stats_group}{Logical; add statistical comparisons between groups when \code{TRUE}.}
 
 \item{p.label}{Label format for \code{ggpubr::stat_compare_means()}.}
@@ -64,8 +68,8 @@ with \code{\link[=get_expression_boxplot]{get_expression_boxplot()}}).}
 \code{\link[=get_expression_boxplot]{get_expression_boxplot()}}, but \code{pool_genes = TRUE} falls back to \code{"none"}
 because pooled violins already aggregate across genes.}
 
-\item{fill_by}{Fill strategy. Uses the same values as
-\code{\link[=get_expression_boxplot]{get_expression_boxplot()}}.}
+\item{fill_by}{Fill mapping. Uses the same values as
+\code{\link[=get_expression_boxplot]{get_expression_boxplot()}}, including discrete sample metadata columns.}
 
 \item{sample_order}{Ordering for sample-level display before values are
 grouped into violins.}
