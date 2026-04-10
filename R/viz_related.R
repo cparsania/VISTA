@@ -4190,6 +4190,11 @@ get_foldchange_scatter <- function(x,
 #'   `"input"` preserves the current sample order, `"group"` groups samples by
 #'   `group_column`, and `"expression"` ranks samples by mean expression across
 #'   the selected genes.
+#' @param fill_by Fill mapping for `by = "sample"` barplots. Use `"group"`
+#'   (default) or any discrete column from the joined plotting data, such as a
+#'   sample metadata column or `"sample"`. Group-summary barplots
+#'   (`by = "group"`) only support group-based fill because each bar already
+#'   represents an aggregated group mean.
 #' @param facet_by Faceting mode: `"auto"` (default; facet by gene when more
 #'   than one gene is requested), `"gene"`, or `"none"`. For multiple genes,
 #'   `"none"` falls back to `"gene"` to preserve readability.
@@ -4237,6 +4242,7 @@ get_expression_barplot <- function(x,
                                    display_orgdb = NULL,
                                    by = c("group", "sample"),
                                    sample_order = c("input", "group", "expression"),
+                                   fill_by = NULL,
                                    facet_by = c("auto", "gene", "none")) {
   stopifnot(inherits(x, "VISTA"))
   if (length(genes) > 10) cli::cli_abort("Maximum 10 genes can be plotted at once.")
@@ -4309,6 +4315,11 @@ get_expression_barplot <- function(x,
   cols <- .vista_group_colors(x, df[[group_col]])
 
   if (by == "group") {
+    if (!is.null(fill_by) && !identical(fill_by, "group") && !identical(fill_by, group_col)) {
+      cli::cli_abort(
+        "{.arg fill_by} is only supported for {.code by = 'sample'} in {.fun get_expression_barplot}. Group-summary bars must use the grouping variable."
+      )
+    }
     dodge <- ggplot2::position_dodge(width = 0.8)
     mean_sd_summary <- function(y) {
       m <- mean(y, na.rm = TRUE)
@@ -4328,14 +4339,29 @@ get_expression_barplot <- function(x,
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
   } else {
     df <- .order_expression_plot_samples(df, meta, group_col, sample_order = sample_order)
+    fill_spec <- .resolve_expression_fill(
+      x = x,
+      df = df,
+      group_col = group_col,
+      fill_by = fill_by,
+      default_fill = "group",
+      allowed_special = c("group", "sample", "x"),
+      x_var = "sample",
+      x_label = "Sample"
+    )
     plt <- ggplot2::ggplot(
       df,
-      ggplot2::aes(x = .data$sample, y = expression, fill = .data[[group_col]])
+      ggplot2::aes(
+        x = .data$sample,
+        y = expression,
+        fill = factor(fill_spec$values, levels = fill_spec$levels)
+      )
     ) +
       ggplot2::geom_col(alpha = 0.85, width = 0.7) +
-      ggplot2::labs(x = "Sample", y = ylab, fill = group_col) +
+      ggplot2::labs(x = "Sample", y = ylab, fill = fill_spec$label) +
       ggplot2::theme_minimal() +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+    cols <- fill_spec$palette
   }
 
   if (stats_group) {

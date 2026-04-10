@@ -79,6 +79,21 @@ test_that("get_expression_barplot supports per-sample mode", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("get_expression_barplot supports metadata fill in per-sample mode", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:2]
+
+  p <- get_expression_barplot(
+    vista,
+    genes = genes,
+    by = "sample",
+    fill_by = "cell"
+  )
+
+  expect_s3_class(p, "ggplot")
+  expect_identical(p$labels$fill, "cell")
+})
+
 test_that("get_expression_barplot supports facet layout controls", {
   vista <- make_small_vista()
   genes <- rownames(vista)[1:4]
@@ -92,6 +107,21 @@ test_that("get_expression_barplot supports facet layout controls", {
 
   expect_s3_class(p, "ggplot")
   expect_identical(p$facet$params$ncol, 2L)
+})
+
+test_that("get_expression_barplot rejects non-group fill for grouped summaries", {
+  vista <- make_small_vista()
+  genes <- rownames(vista)[1:2]
+
+  expect_error(
+    get_expression_barplot(
+      vista,
+      genes = genes,
+      by = "group",
+      fill_by = "cell"
+    ),
+    "only supported for"
+  )
 })
 
 test_that("get_expression_barplot rejects stats_group in per-sample mode", {

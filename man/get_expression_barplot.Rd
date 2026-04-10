@@ -22,6 +22,7 @@ get_expression_barplot(
   display_orgdb = NULL,
   by = c("group", "sample"),
   sample_order = c("input", "group", "expression"),
+  fill_by = NULL,
   facet_by = c("auto", "gene", "none")
 )
 }
@@ -65,6 +66,12 @@ is not found in \code{rowData}).}
 \code{"input"} preserves the current sample order, \code{"group"} groups samples by
 \code{group_column}, and \code{"expression"} ranks samples by mean expression across
 the selected genes.}
+
+\item{fill_by}{Fill mapping for \code{by = "sample"} barplots. Use \code{"group"}
+(default) or any discrete column from the joined plotting data, such as a
+sample metadata column or \code{"sample"}. Group-summary barplots
+(\code{by = "group"}) only support group-based fill because each bar already
+represents an aggregated group mean.}
 
 \item{facet_by}{Faceting mode: \code{"auto"} (default; facet by gene when more
 than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes,
