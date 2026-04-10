@@ -1,5 +1,7 @@
 # Changelog
 
+## VISTA 0.99.6
+
 ## VISTA 0.99.5
 
 - Added [`read_vista_counts()`](../reference/read_vista_counts.md),

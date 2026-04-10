@@ -10,13 +10,13 @@ Source:
 [`DESCRIPTION`](https://github.com/cparsania/VISTA/blob/main/DESCRIPTION)
 
 Parsania C (2026). *VISTA: Visualization and Integrated System for
-Transcriptomic Analysis*. R package version 0.99.5,
+Transcriptomic Analysis*. R package version 0.99.6,
 <https://github.com/cparsania/VISTA>.
 
     @Manual{,
       title = {VISTA: Visualization and Integrated System for Transcriptomic Analysis},
       author = {Chirag Parsania},
       year = {2026},
-      note = {R package version 0.99.5},
+      note = {R package version 0.99.6},
       url = {https://github.com/cparsania/VISTA},
     }
