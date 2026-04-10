@@ -1,3 +1,5 @@
+# VISTA 0.99.6
+
 # VISTA 0.99.5
 
 - Added `read_vista_counts()`, `read_vista_metadata()`, and
