@@ -14,6 +14,8 @@ get_foldchange_chromosome_plot(
   value_column = NULL,
   label_n = 20,
   display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   line_length = 0.02,
   line_width = 0.6,
   filter_chrom = NULL

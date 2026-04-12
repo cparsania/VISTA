@@ -8,6 +8,12 @@ get_foldchange_boxplot(
   x,
   genes = NULL,
   sample_comparisons = NULL,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
+  facet_scales = "free_x",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   facet_by = c("auto", "comparison", "none"),
   p.label = "p.signif",
   stats_group = FALSE,
@@ -20,6 +26,20 @@ get_foldchange_boxplot(
 \item{genes}{Optional character vector of gene IDs to include.}
 
 \item{sample_comparisons}{Optional character vector of comparison names to plot.}
+
+\item{display_id}{Optional ID/column name used to interpret \code{genes} and,
+when possible, map fold-change gene identifiers to display-friendly labels.}
+
+\item{display_from}{Optional source ID type for mapping when \code{display_id} is
+not present in \code{rowData(x)}.}
+
+\item{display_orgdb}{Optional \code{OrgDb} object used for identifier mapping when
+\code{display_id} is not present in \code{rowData(x)}.}
+
+\item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} when
+\code{facet_by != "none"} (default \code{"free_x"}).}
+
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
 \item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"comparison"}, or \code{"none"}.}
 

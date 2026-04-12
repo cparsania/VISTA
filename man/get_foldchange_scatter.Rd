@@ -7,6 +7,10 @@
 get_foldchange_scatter(
   x,
   sample_comparisons,
+  genes = NULL,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   label_n = 0,
   alpha = 0.5,
   geometry = c("point", "hex"),
@@ -22,6 +26,18 @@ get_foldchange_scatter(
 \item{x}{A \code{VISTA} object containing DE results.}
 
 \item{sample_comparisons}{Character vector of length 2 naming the comparisons.}
+
+\item{genes}{Optional character vector of gene identifiers used to subset the
+comparison overlap before plotting.}
+
+\item{display_id}{Optional ID/column name used to interpret \code{genes} and to
+label highlighted points.}
+
+\item{display_from}{Optional source ID type for mapping when \code{display_id} is
+not present in \code{rowData(x)}.}
+
+\item{display_orgdb}{Optional \code{OrgDb} object used for identifier mapping when
+\code{display_id} is not present in \code{rowData(x)}.}
 
 \item{label_n}{Integer; number of most extreme points to label (by |log2FC1| + |log2FC2|).}
 

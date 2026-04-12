@@ -10,8 +10,12 @@ get_foldchange_barplot(
   sample_comparisons = NULL,
   coord_flip = FALSE,
   display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   sort_by = c("input", "log2fc", "abs_log2fc"),
   facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   facet_by = c("auto", "gene", "comparison", "none")
 )
 }
@@ -27,12 +31,20 @@ get_foldchange_barplot(
 \item{display_id}{Optional column in \code{rowData(x)} to use for gene labels. Input
 gene matching still uses \code{gene_id}.}
 
+\item{display_from}{Optional source ID type for mapping when \code{display_id} is
+not present in \code{rowData(x)}.}
+
+\item{display_orgdb}{Optional \code{OrgDb} object used for identifier mapping when
+\code{display_id} is not present in \code{rowData(x)}.}
+
 \item{sort_by}{How to order genes when faceting: \code{"input"} (use supplied order),
 \code{"log2fc"} (descending log2FC of the first comparison), or \code{"abs_log2fc"}
 (descending max absolute log2FC across comparisons).}
 
 \item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} when faceting
 (default \code{"free_y"}).}
+
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
 \item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"gene"},
 \code{"comparison"}, or \code{"none"}.}

@@ -15,7 +15,12 @@ get_foldchange_lollipop(
   label = TRUE,
   label_digits = 2,
   display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   dodge_width = 0.5,
+  facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   facet_by = c("auto", "gene", "comparison", "none")
 )
 }
@@ -46,11 +51,22 @@ entry per comparison (defaults to a qualitative palette).}
 
 \item{label_digits}{Integer; digits to show in labels when \code{label = TRUE}.}
 
-\item{display_id}{Optional column in \code{rowData(x)} to use for gene labels.
-Input gene matching still uses \code{gene_id}.}
+\item{display_id}{Optional column in \code{rowData(x)} used to interpret \code{genes}
+and to label plotted genes.}
+
+\item{display_from}{Optional source ID type for mapping when \code{display_id} is
+not present in \code{rowData(x)}.}
+
+\item{display_orgdb}{Optional \code{OrgDb} object used for identifier mapping when
+\code{display_id} is not present in \code{rowData(x)}.}
 
 \item{dodge_width}{Horizontal separation between comparisons when plotting
 two comparisons on the same axis.}
+
+\item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} when
+\code{facet_by != "none"} (default \code{"free_y"}).}
+
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
 \item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"gene"},
 \code{"comparison"}, or \code{"none"}.}

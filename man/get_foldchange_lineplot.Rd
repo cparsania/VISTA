@@ -8,13 +8,21 @@ get_foldchange_lineplot(
   x,
   sample_comparisons,
   genes = NULL,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   km = NULL,
   facet_by = c("none", "cluster"),
+  facet_scales = "fixed",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   alpha = 0.5,
+  palette = NULL,
   show_summary = TRUE,
   summary_color = NULL,
   summary_linewidth = 1,
-  summary_fun = c("median", "mean")
+  summary_fun = c("median", "mean"),
+  base_size = 14
 )
 }
 \arguments{
@@ -24,12 +32,28 @@ get_foldchange_lineplot(
 
 \item{genes}{Optional character vector of gene identifiers to plot. Defaults to all genes.}
 
+\item{display_id}{Optional ID/column name used to interpret \code{genes} and map
+the returned cluster table to display-friendly labels.}
+
+\item{display_from}{Optional source ID type for mapping when \code{display_id} is
+not present in \code{rowData(x)}.}
+
+\item{display_orgdb}{Optional \code{OrgDb} object used for identifier mapping when
+\code{display_id} is not present in \code{rowData(x)}.}
+
 \item{km}{Optional integer specifying the number of k-means clusters to compute; \code{NULL} disables clustering.}
 
 \item{facet_by}{Faceting mode: \code{"none"} (default) or \code{"cluster"} when
 k-means clustering is requested.}
 
+\item{facet_scales}{Facet scales argument passed to \code{facet_wrap()} when
+\code{facet_by = "cluster"} (default \code{"fixed"}).}
+
+\item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
+
 \item{alpha}{Numeric alpha applied to individual gene lines.}
+
+\item{palette}{Optional named or unnamed color vector used for cluster lines.}
 
 \item{show_summary}{Logical; overlay a summary line per cluster when \code{TRUE}.}
 
@@ -39,9 +63,14 @@ the first comparison color (if stored) for consistency across plots.}
 \item{summary_linewidth}{Numeric line width for the summary line.}
 
 \item{summary_fun}{Character string selecting \code{"median"} or \code{"mean"} for the summary statistic.}
+
+\item{base_size}{Numeric base theme size.}
 }
 \value{
 An object returned by this function.
+
+A list with \code{plot} (the \code{ggplot2} object) and \code{clustered_data}
+(gene-to-cluster assignments).
 }
 \description{
 Plots log2 fold-change trajectories for selected genes across multiple comparisons,

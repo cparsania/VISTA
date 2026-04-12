@@ -2343,6 +2343,8 @@ get_foldchange_chromosome_plot <- function(x,
                                            value_column = NULL,
                                            label_n = 20,
                                            display_id = NULL,
+                                           display_from = NULL,
+                                           display_orgdb = NULL,
                                            line_length = 0.02,
                                            line_width = 0.6,
                                            filter_chrom = NULL) {
@@ -2357,6 +2359,8 @@ get_foldchange_chromosome_plot <- function(x,
     group_value = NULL,
     label_top_n = label_n,
     display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb,
     line_length = line_length,
     line_width = line_width,
     filter_chrom = filter_chrom,
@@ -3215,6 +3219,64 @@ get_expression_lineplot <- function(x,
   facet_by
 }
 
+.resolve_foldchange_gene_ids <- function(x,
+                                         genes = NULL,
+                                         display_id = NULL,
+                                         display_from = NULL,
+                                         display_orgdb = NULL) {
+  if (is.null(genes)) {
+    return(NULL)
+  }
+
+  genes <- unique(stats::na.omit(as.character(genes)))
+  genes <- genes[nzchar(genes)]
+  if (!length(genes)) {
+    return(character())
+  }
+
+  rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
+
+  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
+    map <- as.character(rd[[display_id]])
+    names(map) <- rownames(x)
+    mapped <- names(map)[match(genes, map)]
+    mapped <- mapped[!is.na(mapped) & nzchar(mapped)]
+    if (length(mapped)) {
+      return(unique(mapped))
+    }
+  } else if (!is.null(display_id) && !is.null(display_from) && !is.null(display_orgdb)) {
+    mapped <- .map_gene_ids(
+      ids = genes,
+      from_type = display_id,
+      to_type = display_from,
+      orgdb = display_orgdb
+    )
+    mapped <- unique(stats::na.omit(as.character(mapped)))
+    mapped <- mapped[nzchar(mapped)]
+    if (length(mapped)) {
+      return(mapped)
+    }
+  }
+
+  genes
+}
+
+.resolve_foldchange_gene_labels <- function(x,
+                                            gene_ids,
+                                            display_id = NULL,
+                                            display_from = NULL,
+                                            display_orgdb = NULL) {
+  .resolve_heatmap_row_labels(
+    x = x,
+    gene_ids = gene_ids,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb,
+    repair_genes = FALSE,
+    prefer_symbol = FALSE
+  )
+}
+
 #' Violin plot of expression values
 #'
 #' Mirrors the main user-facing arguments of [get_expression_boxplot()] so the
@@ -3697,6 +3759,15 @@ get_expression_raincloud <- function(x,
 #' @param x A `VISTA` object containing differential expression results.
 #' @param genes Optional character vector of gene IDs to include.
 #' @param sample_comparisons Optional character vector of comparison names to plot.
+#' @param display_id Optional ID/column name used to interpret `genes` and,
+#'   when possible, map fold-change gene identifiers to display-friendly labels.
+#' @param display_from Optional source ID type for mapping when `display_id` is
+#'   not present in `rowData(x)`.
+#' @param display_orgdb Optional `OrgDb` object used for identifier mapping when
+#'   `display_id` is not present in `rowData(x)`.
+#' @param facet_scales Facet scales argument passed to `facet_wrap()` when
+#'   `facet_by != "none"` (default `"free_x"`).
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param facet_by Faceting mode: `"auto"` (default), `"comparison"`, or `"none"`.
 #' @param p.label Label type passed to `ggpubr::stat_compare_means()`.
 #' @param stats_group Logical; add pairwise statistical tests when `TRUE`.
@@ -3707,6 +3778,12 @@ get_expression_raincloud <- function(x,
 get_foldchange_boxplot <- function(x,
                                    genes = NULL,
                                    sample_comparisons = NULL,
+                                   display_id = NULL,
+                                   display_from = NULL,
+                                   display_orgdb = NULL,
+                                   facet_scales = "free_x",
+                                   facet_nrow = NULL,
+                                   facet_ncol = NULL,
                                    facet_by = c("auto", "comparison", "none"),
                                    p.label = "p.signif",
                                    stats_group = FALSE,
@@ -3730,7 +3807,14 @@ get_foldchange_boxplot <- function(x,
 
   # wide matrix gene_id x comparisons
   all_genes <- unique(unlist(lapply(comps[sample_comparisons], \(d) d$gene_id)))
-  if (!is.null(genes)) all_genes <- intersect(all_genes, genes)
+  genes_use <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
+  if (!is.null(genes_use)) all_genes <- intersect(all_genes, genes_use)
   if (!length(all_genes)) cli::cli_abort("No genes found for the requested comparisons.")
 
   fc_mat <- vapply(sample_comparisons, function(nm) {
@@ -3744,6 +3828,13 @@ get_foldchange_boxplot <- function(x,
     tidyr::pivot_longer(-gene_id, names_to = "comparison", values_to = "log2FoldChange") |>
     dplyr::filter(!is.na(log2FoldChange))
 
+  df$gene_label <- .resolve_foldchange_gene_labels(
+    x = x,
+    gene_ids = df$gene_id,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
   df$comparison <- factor(df$comparison, levels = sample_comparisons)
 
   pal <- .vista_comparison_colors(x, sample_comparisons)
@@ -3760,7 +3851,13 @@ get_foldchange_boxplot <- function(x,
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
   if (facet_mode == "comparison") {
-    plt <- plt + ggplot2::facet_wrap(~comparison, scales = "free_x")
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = ~comparison,
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   }
 
   if (stats_group) {
@@ -3788,6 +3885,9 @@ get_foldchange_boxplot <- function(x,
 #' @param x A `VISTA` object containing differential expression results.
 #' @param genes Optional character vector of gene IDs to include.
 #' @param sample_comparisons Optional character vector of comparison names to plot.
+#' @param facet_scales Facet scales argument passed to `facet_wrap()` when
+#'   `facet_by != "none"` (default `"free_x"`).
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param facet_by Faceting mode: `"auto"` (default), `"comparison"`, or `"none"`.
 #' @param rain_side Side specification passed to `ggrain::geom_rain()`; one of
 #'   `"r"`, `"l"`, `"f"`, `"f1x1"`, or `"f2x2"`.
@@ -3836,6 +3936,9 @@ get_foldchange_boxplot <- function(x,
 get_foldchange_raincloud <- function(x,
                                      genes = NULL,
                                      sample_comparisons = NULL,
+                                     facet_scales = "free_x",
+                                     facet_nrow = NULL,
+                                     facet_ncol = NULL,
                                      facet_by = c("auto", "comparison", "none"),
                                      rain_side = c("r", "l", "f", "f1x1", "f2x2"),
                                      id.long.var = NULL,
@@ -3959,7 +4062,13 @@ get_foldchange_raincloud <- function(x,
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
   if (facet_mode == "comparison") {
-    plt <- plt + ggplot2::facet_wrap(~comparison, scales = "free_x")
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = ~comparison,
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   }
 
   if (label) {
@@ -4009,6 +4118,14 @@ get_foldchange_raincloud <- function(x,
 #'
 #' @param x A `VISTA` object containing DE results.
 #' @param sample_comparisons Character vector of length 2 naming the comparisons.
+#' @param genes Optional character vector of gene identifiers used to subset the
+#'   comparison overlap before plotting.
+#' @param display_id Optional ID/column name used to interpret `genes` and to
+#'   label highlighted points.
+#' @param display_from Optional source ID type for mapping when `display_id` is
+#'   not present in `rowData(x)`.
+#' @param display_orgdb Optional `OrgDb` object used for identifier mapping when
+#'   `display_id` is not present in `rowData(x)`.
 #' @param label_n Integer; number of most extreme points to label (by |log2FC1| + |log2FC2|).
 #' @param alpha Point transparency.
 #' @param geometry Geometry used for the data layer: `"point"` or `"hex"`.
@@ -4033,6 +4150,10 @@ get_foldchange_raincloud <- function(x,
 #' @export
 get_foldchange_scatter <- function(x,
                                    sample_comparisons,
+                                   genes = NULL,
+                                   display_id = NULL,
+                                   display_from = NULL,
+                                   display_orgdb = NULL,
                                    label_n = 0,
                                    alpha = 0.5,
                                    geometry = c("point", "hex"),
@@ -4098,7 +4219,24 @@ get_foldchange_scatter <- function(x,
   d1 <- clean_de(comps[[sample_comparisons[1]]])
   d2 <- clean_de(comps[[sample_comparisons[2]]])
   merged <- dplyr::inner_join(d1, d2, by = "gene_id", suffix = c("1", "2"))
+  genes_use <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
+  if (!is.null(genes_use)) {
+    merged <- dplyr::filter(merged, .data$gene_id %in% genes_use)
+  }
   if (!nrow(merged)) cli::cli_abort("No overlapping genes between the two comparisons.")
+  merged$display_gene <- .resolve_foldchange_gene_labels(
+    x = x,
+    gene_ids = merged$gene_id,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
 
   merged <- merged |>
     dplyr::mutate(
@@ -4147,7 +4285,7 @@ get_foldchange_scatter <- function(x,
     to_lab <- merged[idx[seq_len(min(label_n, length(idx)))], ]
     plt <- plt + ggrepel::geom_text_repel(
       data = to_lab,
-      ggplot2::aes(label = gene_id),
+      ggplot2::aes(label = display_gene),
       size = label_size,
       max.overlaps = Inf
     )
@@ -4167,7 +4305,7 @@ get_foldchange_scatter <- function(x,
 #' With `by = "sample"`, each sample is drawn separately.
 #'
 #' @param x A `VISTA` object.
-#' @param genes Character vector (<=10 genes) to plot.
+#' @param genes Character vector (<=25 genes) to plot.
 #' @param sample_group Optional character vector of groups (from `group_column`) to include.
 #' @param log_transform Logical; log2-transform expression before plotting.
 #' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
@@ -4245,7 +4383,7 @@ get_expression_barplot <- function(x,
                                    fill_by = NULL,
                                    facet_by = c("auto", "gene", "none")) {
   stopifnot(inherits(x, "VISTA"))
-  if (length(genes) > 10) cli::cli_abort("Maximum 10 genes can be plotted at once.")
+  if (length(genes) > 25) cli::cli_abort("Maximum 25 genes can be plotted at once.")
   by <- match.arg(by)
   sample_order <- match.arg(sample_order)
 
@@ -4435,10 +4573,17 @@ get_expression_barplot <- function(x,
 #' @param line_size Numeric size of stems (linewidth).
 #' @param label Logical; draw numeric labels next to the dots.
 #' @param label_digits Integer; digits to show in labels when `label = TRUE`.
-#' @param display_id Optional column in `rowData(x)` to use for gene labels.
-#'   Input gene matching still uses `gene_id`.
+#' @param display_id Optional column in `rowData(x)` used to interpret `genes`
+#'   and to label plotted genes.
+#' @param display_from Optional source ID type for mapping when `display_id` is
+#'   not present in `rowData(x)`.
+#' @param display_orgdb Optional `OrgDb` object used for identifier mapping when
+#'   `display_id` is not present in `rowData(x)`.
 #' @param dodge_width Horizontal separation between comparisons when plotting
 #'   two comparisons on the same axis.
+#' @param facet_scales Facet scales argument passed to `facet_wrap()` when
+#'   `facet_by != "none"` (default `"free_y"`).
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param facet_by Faceting mode: `"auto"` (default), `"gene"`,
 #'   `"comparison"`, or `"none"`.
 #'
@@ -4460,7 +4605,12 @@ get_foldchange_lollipop <- function(x,
                                     label = TRUE,
                                     label_digits = 2,
                                     display_id = NULL,
+                                    display_from = NULL,
+                                    display_orgdb = NULL,
                                     dodge_width = 0.5,
+                                    facet_scales = "free_y",
+                                    facet_nrow = NULL,
+                                    facet_ncol = NULL,
                                     facet_by = c("auto", "gene", "comparison", "none")) {
   stopifnot(inherits(x, "VISTA"))
   sort_by <- match.arg(sort_by)
@@ -4493,16 +4643,15 @@ get_foldchange_lollipop <- function(x,
   # build long table
   comp_tbls <- lapply(sample_comparison, function(nm) {
     tbl <- get_comp(nm)
-    if (!is.null(genes)) {
-      genes <- as.character(genes)
-      # allow gene input via display_id mapping
-      if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-        map <- rd[[display_id]]
-        names(map) <- rownames(rd)
-        mapped <- names(map)[match(genes, map)]
-        genes <- ifelse(!is.na(mapped), mapped, genes)
-      }
-      tbl <- dplyr::filter(tbl, .data$gene_id %in% genes)
+    genes_use <- .resolve_foldchange_gene_ids(
+      x = x,
+      genes = genes,
+      display_id = display_id,
+      display_from = display_from,
+      display_orgdb = display_orgdb
+    )
+    if (!is.null(genes_use)) {
+      tbl <- dplyr::filter(tbl, .data$gene_id %in% genes_use)
     }
     if (!nrow(tbl)) cli::cli_abort("No genes to plot for comparison {.val {nm}} after filtering.")
     dplyr::transmute(tbl, gene_id = .data$gene_id, log2fc = .data$log2fc, comparison = nm)
@@ -4511,14 +4660,13 @@ get_foldchange_lollipop <- function(x,
   if (!nrow(df)) cli::cli_abort("No genes to plot after filtering and merging comparisons.")
 
   # optional display labels
-  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-    lab_map <- rd[[display_id]]
-    names(lab_map) <- rownames(rd)
-    lbl <- lab_map[match(df$gene_id, names(lab_map))]
-    df$gene_label <- ifelse(!is.na(lbl) & nzchar(lbl), lbl, df$gene_id)
-  } else {
-    df$gene_label <- df$gene_id
-  }
+  df$gene_label <- .resolve_foldchange_gene_labels(
+    x = x,
+    gene_ids = df$gene_id,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
 
   # sort genes
   if (sort_by == "input" && !is.null(genes)) {
@@ -4569,13 +4717,17 @@ get_foldchange_lollipop <- function(x,
           y = "log2 fold change",
           color = NULL
         ) +
-        ggplot2::facet_wrap(
-          ~gene_id,
-          scales = "free_y",
-          labeller = ggplot2::as_labeller(x_labeller)
-        ) +
         ggplot2::theme_minimal(base_size = 14) +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+      plt <- .add_expression_facet_wrap(
+        plot = plt,
+        facet_formula = ~gene_id,
+        scales = facet_scales,
+        facet_nrow = facet_nrow,
+        facet_ncol = facet_ncol
+      )
+      plt$facet$params$labeller <- ggplot2::as_labeller(x_labeller)
 
       if (label) {
         plt <- plt + ggplot2::geom_text(
@@ -4607,13 +4759,17 @@ get_foldchange_lollipop <- function(x,
           y = "log2 fold change",
           color = "comparison"
         ) +
-        ggplot2::facet_wrap(
-          ~gene_id,
-          scales = "free_y",
-          labeller = ggplot2::as_labeller(x_labeller)
-        ) +
         ggplot2::theme_minimal(base_size = 14) +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+      plt <- .add_expression_facet_wrap(
+        plot = plt,
+        facet_formula = ~gene_id,
+        scales = facet_scales,
+        facet_nrow = facet_nrow,
+        facet_ncol = facet_ncol
+      )
+      plt$facet$params$labeller <- ggplot2::as_labeller(x_labeller)
 
       if (label) {
         plt <- plt + ggplot2::geom_text(
@@ -4719,9 +4875,16 @@ get_foldchange_lollipop <- function(x,
         ) +
         ggplot2::coord_flip() +
         ggplot2::scale_x_discrete(labels = x_labeller) +
-        ggplot2::facet_wrap(~comparison, ncol = 2, scales = "free_y") +
         ggplot2::theme_minimal(base_size = 14) +
         ggplot2::theme(panel.grid.minor.y = ggplot2::element_line(color = "grey40"))
+
+      plt <- .add_expression_facet_wrap(
+        plot = plt,
+        facet_formula = ~comparison,
+        scales = facet_scales,
+        facet_nrow = facet_nrow,
+        facet_ncol = facet_ncol
+      )
 
       if (label) {
         plt <- plt + ggplot2::geom_text(
@@ -5432,28 +5595,49 @@ get_ma_plot <- function(x,
 #' @param x A `VISTA` object containing differential expression results.
 #' @param sample_comparisons Character vector of comparison names to include.
 #' @param genes Optional character vector of gene identifiers to plot. Defaults to all genes.
+#' @param display_id Optional ID/column name used to interpret `genes` and map
+#'   the returned cluster table to display-friendly labels.
+#' @param display_from Optional source ID type for mapping when `display_id` is
+#'   not present in `rowData(x)`.
+#' @param display_orgdb Optional `OrgDb` object used for identifier mapping when
+#'   `display_id` is not present in `rowData(x)`.
 #' @param km Optional integer specifying the number of k-means clusters to compute; `NULL` disables clustering.
 #' @param facet_by Faceting mode: `"none"` (default) or `"cluster"` when
 #'   k-means clustering is requested.
+#' @param facet_scales Facet scales argument passed to `facet_wrap()` when
+#'   `facet_by = "cluster"` (default `"fixed"`).
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param alpha Numeric alpha applied to individual gene lines.
+#' @param palette Optional named or unnamed color vector used for cluster lines.
 #' @param show_summary Logical; overlay a summary line per cluster when `TRUE`.
 #' @param summary_color Color used for the summary line. When `NULL`, uses
 #'   the first comparison color (if stored) for consistency across plots.
 #' @param summary_linewidth Numeric line width for the summary line.
 #' @param summary_fun Character string selecting `"median"` or `"mean"` for the summary statistic.
+#' @param base_size Numeric base theme size.
+#' @return A list with `plot` (the `ggplot2` object) and `clustered_data`
+#'   (gene-to-cluster assignments).
 # ──────────────────────────────────────────────────────────────────────────────
 
 #' @export
 get_foldchange_lineplot <- function(x,
                                     sample_comparisons,
                                     genes = NULL,
+                                    display_id = NULL,
+                                    display_from = NULL,
+                                    display_orgdb = NULL,
                                     km = NULL,
                                     facet_by = c("none", "cluster"),
+                                    facet_scales = "fixed",
+                                    facet_nrow = NULL,
+                                    facet_ncol = NULL,
                                     alpha = 0.5,
+                                    palette = NULL,
                                     show_summary = TRUE,
                                     summary_color = NULL,
                                     summary_linewidth = 1,
-                                    summary_fun = c("median", "mean")) {
+                                    summary_fun = c("median", "mean"),
+                                    base_size = 14) {
 
   stopifnot(inherits(x, "VISTA"))
   stopifnot(is.character(sample_comparisons))
@@ -5474,27 +5658,53 @@ get_foldchange_lineplot <- function(x,
   res <- dplyr::bind_rows(comps_df, .id = "comparison")
   gene_id_col <- "gene_id"
 
-  if (is.null(genes)) genes <- unique(res[[gene_id_col]])
-  res <- dplyr::filter(res, .data[[gene_id_col]] %in% genes)
-  res$display_gene <- res[[gene_id_col]]
+  genes_use <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
+  if (is.null(genes_use)) {
+    genes_use <- unique(res[[gene_id_col]])
+  }
+  res <- dplyr::filter(res, .data[[gene_id_col]] %in% genes_use)
+  if (!nrow(res)) {
+    cli::cli_abort("No genes remain after filtering the requested comparisons.")
+  }
+  res$display_gene <- .resolve_foldchange_gene_labels(
+    x = x,
+    gene_ids = res[[gene_id_col]],
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
+  res$comparison <- factor(res$comparison, levels = sample_comparisons)
 
   if (!is.null(km)) {
     # wide matrix genes x comparisons of log2fc then kmeans
-    wide <- tidyr::pivot_wider(res[, c("display_gene", "comparison", "log2fc")],
+    wide <- tidyr::pivot_wider(res[, c(gene_id_col, "comparison", "log2fc")],
                                names_from = comparison, values_from = log2fc)
     mat <- as.matrix(wide[,-1])
     km_fit <- stats::kmeans(scale(mat), centers = km, nstart = 10)
-    cluster_df <- tibble::tibble(display_gene = wide$display_gene, cluster = factor(km_fit$cluster))
-    res <- dplyr::left_join(res, cluster_df, by = "display_gene")
+    cluster_df <- tibble::tibble(gene_id = wide[[gene_id_col]], cluster = factor(km_fit$cluster))
+    res <- dplyr::left_join(res, cluster_df, by = gene_id_col)
   } else {
     res$cluster <- factor("All")
   }
 
-  p <- ggplot2::ggplot(res, ggplot2::aes(x = comparison, y = log2fc, group = display_gene, color = cluster)) +
+  p <- ggplot2::ggplot(res, ggplot2::aes(x = comparison, y = log2fc, group = .data[[gene_id_col]], color = cluster)) +
     ggplot2::geom_line(alpha = alpha) +
     ggplot2::labs(x = "Comparisons", y = "Log2FC", color = "Cluster") +
-    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme_minimal(base_size = base_size) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+  if (!is.null(palette)) {
+    if (is.null(names(palette))) {
+      names(palette) <- levels(res$cluster)[seq_len(min(length(palette), nlevels(res$cluster)))]
+    }
+    p <- p + ggplot2::scale_color_manual(values = palette)
+  }
 
   if (show_summary) {
     summary_fn <- switch(summary_fun,
@@ -5518,13 +5728,20 @@ get_foldchange_lineplot <- function(x,
       dplyr::select(cluster, label) |>
       tibble::deframe()
 
-    p <- p + ggplot2::facet_wrap(~cluster, labeller = ggplot2::labeller(cluster = cluster_counts))
+    p <- .add_expression_facet_wrap(
+      plot = p,
+      facet_formula = ~cluster,
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
+    p$facet$params$labeller <- ggplot2::labeller(cluster = cluster_counts)
   }
 
   list(
     plot = p,
     clustered_data = res |>
-      dplyr::select(dplyr::all_of(gene_id_col), cluster) |>
+      dplyr::select(dplyr::all_of(gene_id_col), display_gene, cluster) |>
       dplyr::distinct()
   )
 }
@@ -6231,11 +6448,16 @@ get_expression_heatmap <- function(x,
 #' @param coord_flip Logical; flip axes when `TRUE`.
 #' @param display_id Optional column in `rowData(x)` to use for gene labels. Input
 #'   gene matching still uses `gene_id`.
+#' @param display_from Optional source ID type for mapping when `display_id` is
+#'   not present in `rowData(x)`.
+#' @param display_orgdb Optional `OrgDb` object used for identifier mapping when
+#'   `display_id` is not present in `rowData(x)`.
 #' @param sort_by How to order genes when faceting: `"input"` (use supplied order),
 #'   `"log2fc"` (descending log2FC of the first comparison), or `"abs_log2fc"`
 #'   (descending max absolute log2FC across comparisons).
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` when faceting
 #'   (default `"free_y"`).
+#' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param facet_by Faceting mode: `"auto"` (default), `"gene"`,
 #'   `"comparison"`, or `"none"`.
 #' @return A `ggplot2` object.
@@ -6263,8 +6485,12 @@ get_foldchange_barplot <- function(x,
                                    sample_comparisons = NULL,
                                    coord_flip = FALSE,
                                    display_id = NULL,
+                                   display_from = NULL,
+                                   display_orgdb = NULL,
                                    sort_by = c("input", "log2fc", "abs_log2fc"),
                                    facet_scales = "free_y",
+                                   facet_nrow = NULL,
+                                   facet_ncol = NULL,
                                    facet_by = c("auto", "gene", "comparison", "none")) {
   stopifnot(inherits(x, "VISTA"))
   stopifnot(length(genes) > 0)
@@ -6276,14 +6502,13 @@ get_foldchange_barplot <- function(x,
   stopifnot(all(sample_comparisons %in% names(comps)))
 
   # map input genes via display_id if present
-  input_genes <- genes
-  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-    map <- rd[[display_id]]
-    names(map) <- rownames(rd)
-    mapped <- names(map)[match(genes, map)]
-    mapped <- mapped[!is.na(mapped)]
-    if (length(mapped)) input_genes <- mapped
-  }
+  input_genes <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
 
   fc_list <- purrr::map(sample_comparisons, \(nm) {
     df <- comps[[nm]]
@@ -6295,14 +6520,13 @@ get_foldchange_barplot <- function(x,
   if (!nrow(df)) cli::cli_abort("No genes found after filtering.")
 
   # gene labels
-  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-    lab_map <- rd[[display_id]]
-    names(lab_map) <- rownames(rd)
-    lbl <- lab_map[match(df$gene_id, names(lab_map))]
-    df$gene_label <- ifelse(!is.na(lbl) & nzchar(lbl), lbl, df$gene_id)
-  } else {
-    df$gene_label <- df$gene_id
-  }
+  df$gene_label <- .resolve_foldchange_gene_labels(
+    x = x,
+    gene_ids = df$gene_id,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
 
   # ordering
   if (sort_by == "input" && !is.null(genes)) {
@@ -6353,10 +6577,16 @@ get_foldchange_barplot <- function(x,
       ggplot2::geom_col(alpha = 0.85, width = 0.7, position = ggplot2::position_dodge(width = 0.7)) +
       ggplot2::scale_fill_manual(values = pal) +
       ggplot2::labs(x = "Gene", y = "Log2 Fold Change", fill = "Comparison") +
-      ggplot2::facet_wrap(~comparison, ncol = 2, scales = facet_scales) +
       ggplot2::theme_minimal() +
       ggplot2::scale_x_discrete(labels = stats::setNames(df$gene_label, df$gene_id)) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+    plt <- .add_expression_facet_wrap(
+      plot = plt,
+      facet_formula = ~comparison,
+      scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol
+    )
   } else {
     plt <- ggplot2::ggplot(df, ggplot2::aes(x = comparison, y = log2fc, fill = comparison)) +
       ggplot2::geom_col(alpha = 0.85, width = 0.7, position = ggplot2::position_dodge(width = 0.7)) +
@@ -6366,8 +6596,16 @@ get_foldchange_barplot <- function(x,
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 
     if (length(levels(df$gene_id)) > 1) {
-      plt <- plt + ggplot2::facet_wrap(~gene_id, scales = facet_scales) +
-        ggplot2::scale_x_discrete(labels = stats::setNames(df$gene_label, df$gene_id))
+      plt <- .add_expression_facet_wrap(
+        plot = plt,
+        facet_formula = ~gene_id,
+        scales = facet_scales,
+        facet_nrow = facet_nrow,
+        facet_ncol = facet_ncol
+      )
+      plt$facet$params$labeller <- ggplot2::as_labeller(
+        stats::setNames(df$gene_label, as.character(df$gene_id))
+      )
     }
   }
 
