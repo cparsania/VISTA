@@ -9,7 +9,7 @@ points per sample/group to show distribution, summary, and individual values."><
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +60,9 @@ points per sample/group to show distribution, summary, and individual values.</p
 <span>  value_transform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log2"</span>, <span class="st">"zscore"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  summarise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"gene"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  fill_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sample_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"input"</span>, <span class="st">"group"</span>, <span class="st">"expression"</span><span class="op">)</span>,</span>
 <span>  rain_side <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r"</span>, <span class="st">"l"</span>, <span class="st">"f"</span>, <span class="st">"f1x1"</span>, <span class="st">"f2x2"</span><span class="op">)</span>,</span>
 <span>  id.long.var <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -120,6 +123,15 @@ summary in a group.</p></dd>
 <dd><p>Faceting mode. Uses the same argument pattern as
 <code><a href="get_expression_boxplot.html">get_expression_boxplot()</a></code>, but <code>pool_genes = TRUE</code> falls back to <code>"none"</code>
 because pooled violins already aggregate across genes.</p></dd>
+
+
+<dt id="arg-fill-by">fill_by<a class="anchor" aria-label="anchor" href="#arg-fill-by"></a></dt>
+<dd><p>Fill mapping. Uses the same values as
+<code><a href="get_expression_boxplot.html">get_expression_boxplot()</a></code>, including discrete sample metadata columns.</p></dd>
+
+
+<dt id="arg-facet-nrow-facet-ncol">facet_nrow, facet_ncol<a class="anchor" aria-label="anchor" href="#arg-facet-nrow-facet-ncol"></a></dt>
+<dd><p>Optional layout passed to <code>facet_wrap()</code> when faceting.</p></dd>
 
 
 <dt id="arg-sample-order">sample_order<a class="anchor" aria-label="anchor" href="#arg-sample-order"></a></dt>

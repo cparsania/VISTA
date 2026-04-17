@@ -11,7 +11,7 @@ by = "sample", the plot shows individual samples.'><meta property="og:image" con
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,6 +64,8 @@ expression is summarized per group (mean across replicates). With
 <span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"gene"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  facet_scale <span class="op">=</span> <span class="st">"free_y"</span>,</span>
+<span>  facet_nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  point_size <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  line_size <span class="op">=</span> <span class="fl">1.2</span>,</span>
 <span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -118,6 +120,10 @@ than one gene is requested), <code>"gene"</code>, or <code>"none"</code>. For mu
 
 <dt id="arg-facet-scale">facet_scale<a class="anchor" aria-label="anchor" href="#arg-facet-scale"></a></dt>
 <dd><p>Scaling option passed to <code>facet_wrap()</code> when plotting multiple genes.</p></dd>
+
+
+<dt id="arg-facet-nrow-facet-ncol">facet_nrow, facet_ncol<a class="anchor" aria-label="anchor" href="#arg-facet-nrow-facet-ncol"></a></dt>
+<dd><p>Optional layout passed to <code>facet_wrap()</code> when faceting.</p></dd>
 
 
 <dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>

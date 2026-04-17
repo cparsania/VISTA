@@ -711,7 +711,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] patchwork_1.3.2  dplyr_1.2.1      ggplot2_4.0.2    VISTA_0.99.6    
+#> [1] patchwork_1.3.2  dplyr_1.2.1      ggplot2_4.0.2    VISTA_0.99.7    
 #> [5] BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
@@ -728,11 +728,11 @@ sessionInfo()
 #>  [21] ggvenn_0.1.19               cowplot_1.2.0              
 #>  [23] DBI_1.3.0                   RColorBrewer_1.1-3         
 #>  [25] abind_1.4-8                 GenomicRanges_1.62.1       
-#>  [27] purrr_1.2.1                 R.utils_2.13.0             
+#>  [27] purrr_1.2.2                 R.utils_2.13.0             
 #>  [29] BiocGenerics_0.56.0         msigdbr_26.1.0             
 #>  [31] yulab.utils_0.2.4           tweenr_2.0.3               
 #>  [33] rappdirs_0.3.4              gdtools_0.5.0              
-#>  [35] IRanges_2.44.0              S4Vectors_0.48.1           
+#>  [35] IRanges_2.44.0              S4Vectors_0.49.1-1         
 #>  [37] enrichplot_1.30.5           ggrepel_0.9.8              
 #>  [39] tidytree_0.4.7              pkgdown_2.2.0              
 #>  [41] codetools_0.2-20            DelayedArray_0.36.1        
@@ -771,10 +771,10 @@ sessionInfo()
 #> [107] stringr_1.6.0               parallel_4.5.3             
 #> [109] AnnotationDbi_1.72.0        desc_1.4.3                 
 #> [111] pillar_1.11.1               grid_4.5.3                 
-#> [113] vctrs_0.7.2                 ggpubr_0.6.3               
+#> [113] vctrs_0.7.3                 ggpubr_0.6.3               
 #> [115] car_3.1-5                   tidydr_0.0.6               
 #> [117] cluster_2.1.8.2             evaluate_1.0.5             
-#> [119] cli_3.6.5                   locfit_1.5-9.12            
+#> [119] cli_3.6.6                   locfit_1.5-9.12            
 #> [121] compiler_4.5.3              rlang_1.2.0                
 #> [123] crayon_1.5.3                ggsignif_0.6.4             
 #> [125] labeling_0.4.3              plyr_1.8.9                 

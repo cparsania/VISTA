@@ -16,6 +16,8 @@ get_expression_barplot(
   stats_group = FALSE,
   facet_scale = "free_y",
   facet_scales = facet_scale,
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   p.label = "p.signif",
   comparisons = NULL,
   display_id = NULL,
@@ -23,6 +25,7 @@ get_expression_barplot(
   display_orgdb = NULL,
   by = c("group", "sample"),
   sample_order = c("input", "group", "expression"),
+  fill_by = NULL,
   facet_by = c("auto", "gene", "none")
 )
 ```
@@ -35,7 +38,7 @@ get_expression_barplot(
 
 - genes:
 
-  Character vector (\<=10 genes) to plot.
+  Character vector (\<=25 genes) to plot.
 
 - sample_group:
 
@@ -61,6 +64,10 @@ get_expression_barplot(
 - facet_scales:
 
   Facet scales argument passed to `facet_wrap()` when faceting by gene.
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - p.label:
 
@@ -99,6 +106,14 @@ get_expression_barplot(
   sample order, `"group"` groups samples by `group_column`, and
   `"expression"` ranks samples by mean expression across the selected
   genes.
+
+- fill_by:
+
+  Fill mapping for `by = "sample"` barplots. Use `"group"` (default) or
+  any discrete column from the joined plotting data, such as a sample
+  metadata column or `"sample"`. Group-summary barplots (`by = "group"`)
+  only support group-based fill because each bar already represents an
+  aggregated group mean.
 
 - facet_by:
 

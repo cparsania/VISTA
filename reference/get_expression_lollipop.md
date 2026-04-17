@@ -17,6 +17,8 @@ get_expression_lollipop(
   facet_by = c("auto", "gene", "none"),
   log_transform = TRUE,
   facet_scale = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   point_size = 6,
   line_size = 1.2,
   label = TRUE,
@@ -70,6 +72,10 @@ get_expression_lollipop(
 - facet_scale:
 
   Scaling option passed to `facet_wrap()` when plotting multiple genes.
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - point_size:
 

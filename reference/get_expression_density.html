@@ -9,7 +9,7 @@ group (or sample), with optional faceting by group or sample."><meta property="o
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,6 +58,8 @@ group (or sample), with optional faceting by group or sample.</p>
 <span>  group_column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log_transform <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  facet_scales <span class="op">=</span> <span class="st">"free"</span>,</span>
+<span>  facet_nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.4</span>,</span>
 <span>  adjust <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  color_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
@@ -94,6 +96,10 @@ group (or sample), with optional faceting by group or sample.</p>
 
 <dt id="arg-facet-scales">facet_scales<a class="anchor" aria-label="anchor" href="#arg-facet-scales"></a></dt>
 <dd><p>Facet scales argument passed to <code>facet_wrap()</code> (default <code>"free"</code>).</p></dd>
+
+
+<dt id="arg-facet-nrow-facet-ncol">facet_nrow, facet_ncol<a class="anchor" aria-label="anchor" href="#arg-facet-nrow-facet-ncol"></a></dt>
+<dd><p>Optional layout passed to <code>facet_wrap()</code> when faceting.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>

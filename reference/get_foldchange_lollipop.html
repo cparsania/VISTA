@@ -19,7 +19,7 @@ get_foldchange_lineplot(): log2FC trajectories across comparisons (optional clus
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,12 @@ get_foldchange_lineplot(): log2FC trajectories across comparisons (optional clus
 <span>  label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  label_digits <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_from <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_orgdb <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dodge_width <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  facet_scales <span class="op">=</span> <span class="st">"free_y"</span>,</span>
+<span>  facet_nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"gene"</span>, <span class="st">"comparison"</span>, <span class="st">"none"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -128,13 +133,32 @@ entry per comparison (defaults to a qualitative palette).</p></dd>
 
 
 <dt id="arg-display-id">display_id<a class="anchor" aria-label="anchor" href="#arg-display-id"></a></dt>
-<dd><p>Optional column in <code>rowData(x)</code> to use for gene labels.
-Input gene matching still uses <code>gene_id</code>.</p></dd>
+<dd><p>Optional column in <code>rowData(x)</code> used to interpret <code>genes</code>
+and to label plotted genes.</p></dd>
+
+
+<dt id="arg-display-from">display_from<a class="anchor" aria-label="anchor" href="#arg-display-from"></a></dt>
+<dd><p>Optional source ID type for mapping when <code>display_id</code> is
+not present in <code>rowData(x)</code>.</p></dd>
+
+
+<dt id="arg-display-orgdb">display_orgdb<a class="anchor" aria-label="anchor" href="#arg-display-orgdb"></a></dt>
+<dd><p>Optional <code>OrgDb</code> object used for identifier mapping when
+<code>display_id</code> is not present in <code>rowData(x)</code>.</p></dd>
 
 
 <dt id="arg-dodge-width">dodge_width<a class="anchor" aria-label="anchor" href="#arg-dodge-width"></a></dt>
 <dd><p>Horizontal separation between comparisons when plotting
 two comparisons on the same axis.</p></dd>
+
+
+<dt id="arg-facet-scales">facet_scales<a class="anchor" aria-label="anchor" href="#arg-facet-scales"></a></dt>
+<dd><p>Facet scales argument passed to <code>facet_wrap()</code> when
+<code>facet_by != "none"</code> (default <code>"free_y"</code>).</p></dd>
+
+
+<dt id="arg-facet-nrow-facet-ncol">facet_nrow, facet_ncol<a class="anchor" aria-label="anchor" href="#arg-facet-nrow-facet-ncol"></a></dt>
+<dd><p>Optional layout passed to <code>facet_wrap()</code> when faceting.</p></dd>
 
 
 <dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>

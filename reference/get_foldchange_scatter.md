@@ -10,6 +10,10 @@ cutoffs saved in the `VISTA` object.
 get_foldchange_scatter(
   x,
   sample_comparisons,
+  genes = NULL,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   label_n = 0,
   alpha = 0.5,
   geometry = c("point", "hex"),
@@ -31,6 +35,26 @@ get_foldchange_scatter(
 - sample_comparisons:
 
   Character vector of length 2 naming the comparisons.
+
+- genes:
+
+  Optional character vector of gene identifiers used to subset the
+  comparison overlap before plotting.
+
+- display_id:
+
+  Optional ID/column name used to interpret `genes` and to label
+  highlighted points.
+
+- display_from:
+
+  Optional source ID type for mapping when `display_id` is not present
+  in `rowData(x)`.
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for identifier mapping when `display_id`
+  is not present in `rowData(x)`.
 
 - label_n:
 

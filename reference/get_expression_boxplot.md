@@ -17,6 +17,8 @@ get_expression_boxplot(
   display_from = NULL,
   display_orgdb = NULL,
   facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
   comparisons = NULL,
@@ -70,6 +72,10 @@ get_expression_boxplot(
 
   Facet scales argument passed to `facet_wrap()` (default `"free_y"`).
 
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
+
 - stats_group:
 
   Logical; add statistical comparisons between groups when `TRUE`. Only
@@ -104,9 +110,10 @@ get_expression_boxplot(
 
 - fill_by:
 
-  When `pool_genes = TRUE`, either `"x"` (default) or `"group"` to force
-  group colors even if `by = "sample"`. When `pool_genes = FALSE`,
-  either `"gene"` or `"group"`.
+  Fill mapping. Special values are `"group"`, `"gene"`, and `"x"` (the
+  plotted x-axis variable, when available). You may also supply a
+  discrete column from the joined plotting data, such as a sample
+  metadata column or `"sample"`.
 
 - sample_order:
 

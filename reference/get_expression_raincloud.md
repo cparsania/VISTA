@@ -17,6 +17,9 @@ get_expression_raincloud(
   value_transform = c("log2", "zscore", "none"),
   summarise = FALSE,
   facet_by = c("auto", "gene", "none"),
+  fill_by = NULL,
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   sample_order = c("input", "group", "expression"),
   rain_side = c("r", "l", "f", "f1x1", "f2x2"),
   id.long.var = NULL,
@@ -77,6 +80,16 @@ get_expression_raincloud(
   [`get_expression_boxplot()`](get_expression_boxplot.md), but
   `pool_genes = TRUE` falls back to `"none"` because pooled violins
   already aggregate across genes.
+
+- fill_by:
+
+  Fill mapping. Uses the same values as
+  [`get_expression_boxplot()`](get_expression_boxplot.md), including
+  discrete sample metadata columns.
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - sample_order:
 

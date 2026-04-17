@@ -319,7 +319,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.2    VISTA_0.99.6     BiocStyle_2.38.0
+#> [1] ggplot2_4.0.2    VISTA_0.99.7     BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          ggrain_0.1.2               
@@ -327,7 +327,7 @@ sessionInfo()
 #>   [5] magrittr_2.0.5              ggtangle_0.1.1             
 #>   [7] farver_2.1.2                rmarkdown_2.31             
 #>   [9] fs_2.0.1                    ragg_1.5.2                 
-#>  [11] vctrs_0.7.2                 memoise_2.0.1              
+#>  [11] vctrs_0.7.3                 memoise_2.0.1              
 #>  [13] ggtree_4.0.5                rstatix_0.7.3              
 #>  [15] htmltools_0.5.9             S4Arrays_1.10.1            
 #>  [17] polynom_1.4-1               curl_7.0.0                 
@@ -344,7 +344,7 @@ sessionInfo()
 #>  [39] enrichplot_1.30.5           colorspace_2.1-2           
 #>  [41] ggnewscale_0.5.2            GGally_2.4.0               
 #>  [43] patchwork_1.3.2             AnnotationDbi_1.72.0       
-#>  [45] S4Vectors_0.48.1            DESeq2_1.50.2              
+#>  [45] S4Vectors_0.49.1-1          DESeq2_1.50.2              
 #>  [47] textshaping_1.0.5           GenomicRanges_1.62.1       
 #>  [49] RSQLite_2.4.6               ggpubr_0.6.3               
 #>  [51] labeling_0.4.3              polyclip_1.10-7            
@@ -388,14 +388,14 @@ sessionInfo()
 #> [127] codetools_0.2-20            gdtools_0.5.0              
 #> [129] tibble_3.3.1                qvalue_2.42.0              
 #> [131] BiocManager_1.30.27         ggplotify_0.1.3            
-#> [133] cli_3.6.5                   systemfonts_1.3.2          
+#> [133] cli_3.6.6                   systemfonts_1.3.2          
 #> [135] jquerylib_0.1.4             Rcpp_1.1.1                 
 #> [137] png_0.1-9                   parallel_4.5.3             
 #> [139] assertthat_0.2.1            pkgdown_2.2.0              
 #> [141] blob_1.3.0                  clusterProfiler_4.18.4     
 #> [143] DOSE_4.4.0                  tidytree_0.4.7             
 #> [145] ggiraph_0.9.6               scales_1.4.0               
-#> [147] purrr_1.2.1                 crayon_1.5.3               
+#> [147] purrr_1.2.2                 crayon_1.5.3               
 #> [149] rlang_1.2.0                 cowplot_1.2.0              
 #> [151] fastmatch_1.1-8             KEGGREST_1.50.0
 ```

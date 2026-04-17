@@ -11,7 +11,7 @@ With by = "sample", each sample is drawn separately.'><meta property="og:image" 
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,6 +63,8 @@ With <code>by = "sample"</code>, each sample is drawn separately.</p>
 <span>  stats_group <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  facet_scale <span class="op">=</span> <span class="st">"free_y"</span>,</span>
 <span>  facet_scales <span class="op">=</span> <span class="va">facet_scale</span>,</span>
+<span>  facet_nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  p.label <span class="op">=</span> <span class="st">"p.signif"</span>,</span>
 <span>  comparisons <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -70,6 +72,7 @@ With <code>by = "sample"</code>, each sample is drawn separately.</p>
 <span>  display_orgdb <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
 <span>  sample_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"input"</span>, <span class="st">"group"</span>, <span class="st">"expression"</span><span class="op">)</span>,</span>
+<span>  fill_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"gene"</span>, <span class="st">"none"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -83,7 +86,7 @@ With <code>by = "sample"</code>, each sample is drawn separately.</p>
 
 
 <dt id="arg-genes">genes<a class="anchor" aria-label="anchor" href="#arg-genes"></a></dt>
-<dd><p>Character vector (&lt;=10 genes) to plot.</p></dd>
+<dd><p>Character vector (&lt;=25 genes) to plot.</p></dd>
 
 
 <dt id="arg-sample-group">sample_group<a class="anchor" aria-label="anchor" href="#arg-sample-group"></a></dt>
@@ -108,6 +111,10 @@ With <code>by = "sample"</code>, each sample is drawn separately.</p>
 
 <dt id="arg-facet-scales">facet_scales<a class="anchor" aria-label="anchor" href="#arg-facet-scales"></a></dt>
 <dd><p>Facet scales argument passed to <code>facet_wrap()</code> when faceting by gene.</p></dd>
+
+
+<dt id="arg-facet-nrow-facet-ncol">facet_nrow, facet_ncol<a class="anchor" aria-label="anchor" href="#arg-facet-nrow-facet-ncol"></a></dt>
+<dd><p>Optional layout passed to <code>facet_wrap()</code> when faceting.</p></dd>
 
 
 <dt id="arg-p-label">p.label<a class="anchor" aria-label="anchor" href="#arg-p-label"></a></dt>
@@ -144,6 +151,14 @@ is not found in <code>rowData</code>).</p></dd>
 <code>"input"</code> preserves the current sample order, <code>"group"</code> groups samples by
 <code>group_column</code>, and <code>"expression"</code> ranks samples by mean expression across
 the selected genes.</p></dd>
+
+
+<dt id="arg-fill-by">fill_by<a class="anchor" aria-label="anchor" href="#arg-fill-by"></a></dt>
+<dd><p>Fill mapping for <code>by = "sample"</code> barplots. Use <code>"group"</code>
+(default) or any discrete column from the joined plotting data, such as a
+sample metadata column or <code>"sample"</code>. Group-summary barplots
+(<code>by = "group"</code>) only support group-based fill because each bar already
+represents an aggregated group mean.</p></dd>
 
 
 <dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>

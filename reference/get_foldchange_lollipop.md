@@ -28,7 +28,12 @@ get_foldchange_lollipop(
   label = TRUE,
   label_digits = 2,
   display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   dodge_width = 0.5,
+  facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   facet_by = c("auto", "gene", "comparison", "none")
 )
 ```
@@ -81,13 +86,32 @@ get_foldchange_lollipop(
 
 - display_id:
 
-  Optional column in `rowData(x)` to use for gene labels. Input gene
-  matching still uses `gene_id`.
+  Optional column in `rowData(x)` used to interpret `genes` and to label
+  plotted genes.
+
+- display_from:
+
+  Optional source ID type for mapping when `display_id` is not present
+  in `rowData(x)`.
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for identifier mapping when `display_id`
+  is not present in `rowData(x)`.
 
 - dodge_width:
 
   Horizontal separation between comparisons when plotting two
   comparisons on the same axis.
+
+- facet_scales:
+
+  Facet scales argument passed to `facet_wrap()` when
+  `facet_by != "none"` (default `"free_y"`).
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - facet_by:
 

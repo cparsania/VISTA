@@ -9,7 +9,7 @@ selected comparisons, with optional statistical testing across comparisons."><me
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,9 @@ selected comparisons, with optional statistical testing across comparisons.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sample_comparisons <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_scales <span class="op">=</span> <span class="st">"free_x"</span>,</span>
+<span>  facet_nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"comparison"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  rain_side <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r"</span>, <span class="st">"l"</span>, <span class="st">"f"</span>, <span class="st">"f1x1"</span>, <span class="st">"f2x2"</span><span class="op">)</span>,</span>
 <span>  id.long.var <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -87,6 +90,15 @@ selected comparisons, with optional statistical testing across comparisons.</p>
 
 <dt id="arg-sample-comparisons">sample_comparisons<a class="anchor" aria-label="anchor" href="#arg-sample-comparisons"></a></dt>
 <dd><p>Optional character vector of comparison names to plot.</p></dd>
+
+
+<dt id="arg-facet-scales">facet_scales<a class="anchor" aria-label="anchor" href="#arg-facet-scales"></a></dt>
+<dd><p>Facet scales argument passed to <code>facet_wrap()</code> when
+<code>facet_by != "none"</code> (default <code>"free_x"</code>).</p></dd>
+
+
+<dt id="arg-facet-nrow-facet-ncol">facet_nrow, facet_ncol<a class="anchor" aria-label="anchor" href="#arg-facet-nrow-facet-ncol"></a></dt>
+<dd><p>Optional layout passed to <code>facet_wrap()</code> when faceting.</p></dd>
 
 
 <dt id="arg-facet-by">facet_by<a class="anchor" aria-label="anchor" href="#arg-facet-by"></a></dt>

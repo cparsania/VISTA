@@ -12,6 +12,9 @@ get_foldchange_raincloud(
   x,
   genes = NULL,
   sample_comparisons = NULL,
+  facet_scales = "free_x",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   facet_by = c("auto", "comparison", "none"),
   rain_side = c("r", "l", "f", "f1x1", "f2x2"),
   id.long.var = NULL,
@@ -43,6 +46,15 @@ get_foldchange_raincloud(
 - sample_comparisons:
 
   Optional character vector of comparison names to plot.
+
+- facet_scales:
+
+  Facet scales argument passed to `facet_wrap()` when
+  `facet_by != "none"` (default `"free_x"`).
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - facet_by:
 

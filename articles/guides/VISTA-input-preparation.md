@@ -336,14 +336,14 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] tibble_3.3.1     dplyr_1.2.1      VISTA_0.99.6     BiocStyle_2.38.0
+#> [1] tibble_3.3.1     dplyr_1.2.1      VISTA_0.99.7     BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             
 #>   [3] tidydr_0.0.6                magrittr_2.0.5             
 #>   [5] ggtangle_0.1.1              farver_2.1.2               
 #>   [7] rmarkdown_2.31              fs_2.0.1                   
-#>   [9] ragg_1.5.2                  vctrs_0.7.2                
+#>   [9] ragg_1.5.2                  vctrs_0.7.3                
 #>  [11] memoise_2.0.1               ggtree_4.0.5               
 #>  [13] rstatix_0.7.3               htmltools_0.5.9            
 #>  [15] S4Arrays_1.10.1             curl_7.0.0                 
@@ -360,7 +360,7 @@ sessionInfo()
 #>  [37] enrichplot_1.30.5           colorspace_2.1-2           
 #>  [39] ggnewscale_0.5.2            GGally_2.4.0               
 #>  [41] patchwork_1.3.2             AnnotationDbi_1.72.0       
-#>  [43] S4Vectors_0.48.1            DESeq2_1.50.2              
+#>  [43] S4Vectors_0.49.1-1          DESeq2_1.50.2              
 #>  [45] textshaping_1.0.5           GenomicRanges_1.62.1       
 #>  [47] RSQLite_2.4.6               ggpubr_0.6.3               
 #>  [49] polyclip_1.10-7             httr_1.4.8                 
@@ -402,7 +402,7 @@ sessionInfo()
 #> [121] yaml_2.3.12                 evaluate_1.0.5             
 #> [123] codetools_0.2-20            gdtools_0.5.0              
 #> [125] qvalue_2.42.0               BiocManager_1.30.27        
-#> [127] ggplotify_0.1.3             cli_3.6.5                  
+#> [127] ggplotify_0.1.3             cli_3.6.6                  
 #> [129] systemfonts_1.3.2           jquerylib_0.1.4            
 #> [131] Rcpp_1.1.1                  png_0.1-9                  
 #> [133] parallel_4.5.3              assertthat_0.2.1           
@@ -410,7 +410,7 @@ sessionInfo()
 #> [137] blob_1.3.0                  clusterProfiler_4.18.4     
 #> [139] DOSE_4.4.0                  tidytree_0.4.7             
 #> [141] ggiraph_0.9.6               scales_1.4.0               
-#> [143] purrr_1.2.1                 crayon_1.5.3               
+#> [143] purrr_1.2.2                 crayon_1.5.3               
 #> [145] rlang_1.2.0                 cowplot_1.2.0              
 #> [147] fastmatch_1.1-8             KEGGREST_1.50.0
 ```

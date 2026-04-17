@@ -598,10 +598,10 @@ sessionInfo()
 #>  [3] airway_1.30.0               SummarizedExperiment_1.40.0
 #>  [5] Biobase_2.70.0              GenomicRanges_1.62.1       
 #>  [7] Seqinfo_1.0.0               IRanges_2.44.0             
-#>  [9] S4Vectors_0.48.1            BiocGenerics_0.56.0        
+#>  [9] S4Vectors_0.49.1-1          BiocGenerics_0.56.0        
 #> [11] generics_0.1.4              MatrixGenerics_1.22.0      
 #> [13] matrixStats_1.5.0           dplyr_1.2.1                
-#> [15] ggplot2_4.0.2               VISTA_0.99.6               
+#> [15] ggplot2_4.0.2               VISTA_0.99.7               
 #> [17] BiocStyle_2.38.0           
 #> 
 #> loaded via a namespace (and not attached):
@@ -613,7 +613,7 @@ sessionInfo()
 #>  [16] rmarkdown_2.31          jquerylib_0.1.4         yaml_2.3.12            
 #>  [19] otel_0.2.0              ggtangle_0.1.1          cowplot_1.2.0          
 #>  [22] DBI_1.3.0               RColorBrewer_1.1-3      abind_1.4-8            
-#>  [25] purrr_1.2.1             R.utils_2.13.0          msigdbr_26.1.0         
+#>  [25] purrr_1.2.2             R.utils_2.13.0          msigdbr_26.1.0         
 #>  [28] yulab.utils_0.2.4       tweenr_2.0.3            rappdirs_0.3.4         
 #>  [31] gdtools_0.5.0           circlize_0.4.18         enrichplot_1.30.5      
 #>  [34] ggrepel_0.9.8           tidytree_0.4.7          pkgdown_2.2.0          
@@ -641,9 +641,9 @@ sessionInfo()
 #> [100] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
 #> [103] GlobalOptions_0.1.4     stringr_1.6.0           parallel_4.5.3         
 #> [106] desc_1.4.3              pillar_1.11.1           grid_4.5.3             
-#> [109] vctrs_0.7.2             ggpubr_0.6.3            car_3.1-5              
+#> [109] vctrs_0.7.3             ggpubr_0.6.3            car_3.1-5              
 #> [112] tidydr_0.0.6            cluster_2.1.8.2         evaluate_1.0.5         
-#> [115] cli_3.6.5               locfit_1.5-9.12         compiler_4.5.3         
+#> [115] cli_3.6.6               locfit_1.5-9.12         compiler_4.5.3         
 #> [118] rlang_1.2.0             crayon_1.5.3            ggsignif_0.6.4         
 #> [121] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
 #> [124] fs_2.0.1                ggiraph_0.9.6           stringi_1.8.7          

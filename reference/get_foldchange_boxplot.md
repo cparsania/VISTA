@@ -10,6 +10,12 @@ get_foldchange_boxplot(
   x,
   genes = NULL,
   sample_comparisons = NULL,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
+  facet_scales = "free_x",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   facet_by = c("auto", "comparison", "none"),
   p.label = "p.signif",
   stats_group = FALSE,
@@ -30,6 +36,30 @@ get_foldchange_boxplot(
 - sample_comparisons:
 
   Optional character vector of comparison names to plot.
+
+- display_id:
+
+  Optional ID/column name used to interpret `genes` and, when possible,
+  map fold-change gene identifiers to display-friendly labels.
+
+- display_from:
+
+  Optional source ID type for mapping when `display_id` is not present
+  in `rowData(x)`.
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for identifier mapping when `display_id`
+  is not present in `rowData(x)`.
+
+- facet_scales:
+
+  Facet scales argument passed to `facet_wrap()` when
+  `facet_by != "none"` (default `"free_x"`).
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - facet_by:
 

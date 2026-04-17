@@ -14,6 +14,8 @@ get_expression_density(
   group_column = NULL,
   log_transform = TRUE,
   facet_scales = "free",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   alpha = 0.4,
   adjust = 1,
   color_by = c("group", "sample"),
@@ -50,6 +52,10 @@ get_expression_density(
 - facet_scales:
 
   Facet scales argument passed to `facet_wrap()` (default `"free"`).
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - alpha:
 

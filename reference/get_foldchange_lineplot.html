@@ -9,7 +9,7 @@ optionally clustering genes."><meta property="og:image" content="/logo.png"></he
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,13 +55,21 @@ optionally clustering genes.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">sample_comparisons</span>,</span>
 <span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_from <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_orgdb <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  km <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"cluster"</span><span class="op">)</span>,</span>
+<span>  facet_scales <span class="op">=</span> <span class="st">"fixed"</span>,</span>
+<span>  facet_nrow <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  facet_ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  palette <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  show_summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  summary_color <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  summary_linewidth <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  summary_fun <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"mean"</span><span class="op">)</span></span>
+<span>  summary_fun <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"mean"</span><span class="op">)</span>,</span>
+<span>  base_size <span class="op">=</span> <span class="fl">14</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -81,6 +89,21 @@ optionally clustering genes.</p>
 <dd><p>Optional character vector of gene identifiers to plot. Defaults to all genes.</p></dd>
 
 
+<dt id="arg-display-id">display_id<a class="anchor" aria-label="anchor" href="#arg-display-id"></a></dt>
+<dd><p>Optional ID/column name used to interpret <code>genes</code> and map
+the returned cluster table to display-friendly labels.</p></dd>
+
+
+<dt id="arg-display-from">display_from<a class="anchor" aria-label="anchor" href="#arg-display-from"></a></dt>
+<dd><p>Optional source ID type for mapping when <code>display_id</code> is
+not present in <code>rowData(x)</code>.</p></dd>
+
+
+<dt id="arg-display-orgdb">display_orgdb<a class="anchor" aria-label="anchor" href="#arg-display-orgdb"></a></dt>
+<dd><p>Optional <code>OrgDb</code> object used for identifier mapping when
+<code>display_id</code> is not present in <code>rowData(x)</code>.</p></dd>
+
+
 <dt id="arg-km">km<a class="anchor" aria-label="anchor" href="#arg-km"></a></dt>
 <dd><p>Optional integer specifying the number of k-means clusters to compute; <code>NULL</code> disables clustering.</p></dd>
 
@@ -90,8 +113,21 @@ optionally clustering genes.</p>
 k-means clustering is requested.</p></dd>
 
 
+<dt id="arg-facet-scales">facet_scales<a class="anchor" aria-label="anchor" href="#arg-facet-scales"></a></dt>
+<dd><p>Facet scales argument passed to <code>facet_wrap()</code> when
+<code>facet_by = "cluster"</code> (default <code>"fixed"</code>).</p></dd>
+
+
+<dt id="arg-facet-nrow-facet-ncol">facet_nrow, facet_ncol<a class="anchor" aria-label="anchor" href="#arg-facet-nrow-facet-ncol"></a></dt>
+<dd><p>Optional layout passed to <code>facet_wrap()</code> when faceting.</p></dd>
+
+
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>Numeric alpha applied to individual gene lines.</p></dd>
+
+
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>Optional named or unnamed color vector used for cluster lines.</p></dd>
 
 
 <dt id="arg-show-summary">show_summary<a class="anchor" aria-label="anchor" href="#arg-show-summary"></a></dt>
@@ -110,10 +146,16 @@ the first comparison color (if stored) for consistency across plots.</p></dd>
 <dt id="arg-summary-fun">summary_fun<a class="anchor" aria-label="anchor" href="#arg-summary-fun"></a></dt>
 <dd><p>Character string selecting <code>"median"</code> or <code>"mean"</code> for the summary statistic.</p></dd>
 
+
+<dt id="arg-base-size">base_size<a class="anchor" aria-label="anchor" href="#arg-base-size"></a></dt>
+<dd><p>Numeric base theme size.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object returned by this function.</p>
+<p>A list with <code>plot</code> (the <code>ggplot2</code> object) and <code>clustered_data</code>
+(gene-to-cluster assignments).</p>
     </div>
 
     <div class="section level2">
@@ -131,12 +173,12 @@ the first comparison color (if stored) for consistency across plots.</p></dd>
 <span class="r-plt img"><img src="get_foldchange_lineplot-1.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $clustered_data</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                         gene_id cluster</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000003 ENSG00000000003     All</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000419 ENSG00000000419     All</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000457 ENSG00000000457     All</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000460 ENSG00000000460     All</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000971 ENSG00000000971     All</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         gene_id    display_gene cluster</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000003 ENSG00000000003 ENSG00000000003     All</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000419 ENSG00000000419 ENSG00000000419     All</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000457 ENSG00000000457 ENSG00000000457     All</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000460 ENSG00000000460 ENSG00000000460     All</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ENSG00000000971 ENSG00000000971 ENSG00000000971     All</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

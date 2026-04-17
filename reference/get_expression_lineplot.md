@@ -16,6 +16,8 @@ get_expression_lineplot(
   display_from = NULL,
   display_orgdb = NULL,
   facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
   comparisons = NULL,
@@ -75,6 +77,10 @@ get_expression_lineplot(
 - facet_scales:
 
   Scaling option passed to `facet_wrap()`.
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - stats_group:
 

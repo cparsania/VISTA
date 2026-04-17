@@ -20,6 +20,8 @@ get_expression_violinplot(
   display_from = NULL,
   display_orgdb = NULL,
   facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
   comparisons = NULL,
@@ -76,6 +78,10 @@ get_expression_violinplot(
 
   Scaling option passed to `facet_wrap()`.
 
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
+
 - stats_group:
 
   Logical; add statistical comparisons between groups when `TRUE`.
@@ -107,8 +113,9 @@ get_expression_violinplot(
 
 - fill_by:
 
-  Fill strategy. Uses the same values as
-  [`get_expression_boxplot()`](get_expression_boxplot.md).
+  Fill mapping. Uses the same values as
+  [`get_expression_boxplot()`](get_expression_boxplot.md), including
+  discrete sample metadata columns.
 
 - sample_order:
 

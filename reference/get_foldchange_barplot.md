@@ -13,8 +13,12 @@ get_foldchange_barplot(
   sample_comparisons = NULL,
   coord_flip = FALSE,
   display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   sort_by = c("input", "log2fc", "abs_log2fc"),
   facet_scales = "free_y",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
   facet_by = c("auto", "gene", "comparison", "none")
 )
 ```
@@ -43,6 +47,16 @@ get_foldchange_barplot(
   Optional column in `rowData(x)` to use for gene labels. Input gene
   matching still uses `gene_id`.
 
+- display_from:
+
+  Optional source ID type for mapping when `display_id` is not present
+  in `rowData(x)`.
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for identifier mapping when `display_id`
+  is not present in `rowData(x)`.
+
 - sort_by:
 
   How to order genes when faceting: `"input"` (use supplied order),
@@ -53,6 +67,10 @@ get_foldchange_barplot(
 
   Facet scales argument passed to `facet_wrap()` when faceting (default
   `"free_y"`).
+
+- facet_nrow, facet_ncol:
+
+  Optional layout passed to `facet_wrap()` when faceting.
 
 - facet_by:
 

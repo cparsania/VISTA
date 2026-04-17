@@ -1,5 +1,7 @@
 # Changelog
 
+## VISTA 0.99.7
+
 ## VISTA 0.99.6
 
 ## VISTA 0.99.5
