@@ -70,6 +70,16 @@ get_foldchange_chromosome_plot(
   Optional column in `rowData(x)` to use for point labels (fallback to
   gene_id/rownames).
 
+- display_from:
+
+  Optional source ID type for mapping when `display_id` is not present
+  in `rowData(x)`.
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for identifier mapping when `display_id`
+  is not present in `rowData(x)`.
+
 - line_length:
 
   Horizontal half-length (in megabases) of the tick used to mark each

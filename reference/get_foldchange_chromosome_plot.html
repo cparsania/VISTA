@@ -11,7 +11,7 @@ with log2FC clipped to +/-2."><meta property="og:image" content="/logo.png"></he
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,6 +116,16 @@ to label when <code>genes</code> is not supplied. Set to 0 to disable labels.</p
 <dt id="arg-display-id">display_id<a class="anchor" aria-label="anchor" href="#arg-display-id"></a></dt>
 <dd><p>Optional column in <code>rowData(x)</code> to use for point labels
 (fallback to gene_id/rownames).</p></dd>
+
+
+<dt id="arg-display-from">display_from<a class="anchor" aria-label="anchor" href="#arg-display-from"></a></dt>
+<dd><p>Optional source ID type for mapping when <code>display_id</code> is
+not present in <code>rowData(x)</code>.</p></dd>
+
+
+<dt id="arg-display-orgdb">display_orgdb<a class="anchor" aria-label="anchor" href="#arg-display-orgdb"></a></dt>
+<dd><p>Optional <code>OrgDb</code> object used for identifier mapping when
+<code>display_id</code> is not present in <code>rowData(x)</code>.</p></dd>
 
 
 <dt id="arg-line-length">line_length<a class="anchor" aria-label="anchor" href="#arg-line-length"></a></dt>

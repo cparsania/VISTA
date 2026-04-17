@@ -11,7 +11,7 @@ labeling the most variable genes."><meta property="og:image" content="/logo.png"
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,6 +65,8 @@ labeling the most variable genes.</p>
 <span>  group_value <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  label_top_n <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_from <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_orgdb <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  line_length <span class="op">=</span> <span class="fl">0.02</span>,</span>
 <span>  line_width <span class="op">=</span> <span class="fl">0.6</span>,</span>
 <span>  filter_chrom <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -130,6 +132,16 @@ no value) to label. Ignored when <code>genes</code> is provided. Set to 0 to dis
 <dt id="arg-display-id">display_id<a class="anchor" aria-label="anchor" href="#arg-display-id"></a></dt>
 <dd><p>Optional column in <code>rowData(x)</code> to use for point labels
 (fallback to gene_id/rownames).</p></dd>
+
+
+<dt id="arg-display-from">display_from<a class="anchor" aria-label="anchor" href="#arg-display-from"></a></dt>
+<dd><p>Optional source ID type for mapping when <code>display_id</code> is
+not present in <code>rowData(x)</code>.</p></dd>
+
+
+<dt id="arg-display-orgdb">display_orgdb<a class="anchor" aria-label="anchor" href="#arg-display-orgdb"></a></dt>
+<dd><p>Optional <code>OrgDb</code> object used for identifier mapping when
+<code>display_id</code> is not present in <code>rowData(x)</code>.</p></dd>
 
 
 <dt id="arg-line-length">line_length<a class="anchor" aria-label="anchor" href="#arg-line-length"></a></dt>

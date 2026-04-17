@@ -18,6 +18,8 @@ get_chromosome_plot(
   group_value = NULL,
   label_top_n = 20,
   display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   line_length = 0.02,
   line_width = 0.6,
   filter_chrom = NULL,
@@ -83,6 +85,16 @@ get_chromosome_plot(
 
   Optional column in `rowData(x)` to use for point labels (fallback to
   gene_id/rownames).
+
+- display_from:
+
+  Optional source ID type for mapping when `display_id` is not present
+  in `rowData(x)`.
+
+- display_orgdb:
+
+  Optional `OrgDb` object used for identifier mapping when `display_id`
+  is not present in `rowData(x)`.
 
 - line_length:
 

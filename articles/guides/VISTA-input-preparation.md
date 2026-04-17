@@ -336,7 +336,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] tibble_3.3.1     dplyr_1.2.1      VISTA_0.99.7     BiocStyle_2.38.0
+#> [1] tibble_3.3.1     dplyr_1.2.1      VISTA_0.99.8     BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             
