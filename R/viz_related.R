@@ -1519,6 +1519,10 @@ get_expression_boxplot <- function(x,
 #'   no value) to label. Ignored when \code{genes} is provided. Set to 0 to disable labels.
 #' @param display_id Optional column in `rowData(x)` to use for point labels
 #'   (fallback to gene_id/rownames).
+#' @param display_from Optional source ID type for mapping when `display_id` is
+#'   not present in `rowData(x)`.
+#' @param display_orgdb Optional `OrgDb` object used for identifier mapping when
+#'   `display_id` is not present in `rowData(x)`.
 #' @param line_length Horizontal half-length (in megabases) of the tick used to
 #'   mark each gene position. Default `0.02`. Increase for longer ticks.
 #' @param line_width Line width of the tick marks. Default `0.6`.
@@ -1554,6 +1558,8 @@ get_chromosome_plot <- function(x,
                                 group_value = NULL,
                                 label_top_n = 20,
                                 display_id = NULL,
+                                display_from = NULL,
+                                display_orgdb = NULL,
                                 line_length = 0.02,
                                 line_width = 0.6,
                                 filter_chrom = NULL,
@@ -1637,6 +1643,14 @@ get_chromosome_plot <- function(x,
     lab_map <- rd[[display_id]]
     names(lab_map) <- rownames(rd)
     lbl <- lab_map[match(df_base$gene_id, names(lab_map))]
+    df_base$gene_label <- ifelse(!is.na(lbl) & nzchar(lbl), lbl, df_base$gene_label)
+  } else if (!is.null(display_id) && !is.null(display_from) && !is.null(display_orgdb)) {
+    lbl <- .map_gene_ids(
+      ids = df_base$gene_id,
+      from_type = display_from,
+      to_type = display_id,
+      orgdb = display_orgdb
+    )
     df_base$gene_label <- ifelse(!is.na(lbl) & nzchar(lbl), lbl, df_base$gene_label)
   }
 

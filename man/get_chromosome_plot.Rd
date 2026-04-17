@@ -15,6 +15,8 @@ get_chromosome_plot(
   group_value = NULL,
   label_top_n = 20,
   display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL,
   line_length = 0.02,
   line_width = 0.6,
   filter_chrom = NULL,
@@ -57,6 +59,12 @@ no value) to label. Ignored when \code{genes} is provided. Set to 0 to disable l
 
 \item{display_id}{Optional column in \code{rowData(x)} to use for point labels
 (fallback to gene_id/rownames).}
+
+\item{display_from}{Optional source ID type for mapping when \code{display_id} is
+not present in \code{rowData(x)}.}
+
+\item{display_orgdb}{Optional \code{OrgDb} object used for identifier mapping when
+\code{display_id} is not present in \code{rowData(x)}.}
 
 \item{line_length}{Horizontal half-length (in megabases) of the tick used to
 mark each gene position. Default \code{0.02}. Increase for longer ticks.}
