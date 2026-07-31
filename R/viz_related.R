@@ -469,7 +469,7 @@ get_pca_plot <- function(x,
     use_vista_colors = use_vista_colors
   )
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   color_col <- .resolve_plot_color_column(meta, group_col, color_by)
@@ -634,7 +634,7 @@ get_mds_plot <- function(x,
     use_vista_colors = use_vista_colors
   )
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   color_col <- .resolve_plot_color_column(meta, group_col, color_by)
@@ -805,7 +805,7 @@ get_umap_plot <- function(x,
     use_vista_colors = use_vista_colors
   )
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   color_col <- .resolve_plot_color_column(meta, group_col, color_by)
@@ -1167,7 +1167,7 @@ get_pairwise_corr_plot <- function(x,
   sample_order <- match.arg(sample_order)
   value_transform <- match.arg(value_transform)
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   if (sample_order == "group" && group_col %in% colnames(meta)) {
@@ -1256,7 +1256,7 @@ get_corr_heatmap <- function(x,
     label_color <- col_corr_values
   }
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -1413,7 +1413,7 @@ get_expression_boxplot <- function(x,
     facet_by <- if (pool_genes) "group" else if (!is.null(genes) && length(genes) > 1) "gene" else "none"
   }
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -2492,7 +2492,7 @@ get_expression_density <- function(x,
   color_by <- match.arg(color_by)
   facet_by <- match.arg(facet_by)
   sample_order <- match.arg(sample_order)
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -2605,7 +2605,7 @@ get_expression_joyplot <- function(x,
   color_by <- match.arg(color_by)
   sample_order <- match.arg(sample_order)
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -2707,7 +2707,7 @@ get_expression_scatter <- function(x,
   by <- match.arg(by)
   method <- match.arg(method)
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group = NULL, group_column = group_column)
   group_col <- attr(meta, "group_column")
 
@@ -2898,7 +2898,7 @@ get_expression_lollipop <- function(x,
   }
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
-  mat <- SummarizedExperiment::assay(x)[, meta$sample, drop = FALSE]
+  mat <- SummarizedExperiment::assay(x, "norm_counts")[, meta$sample, drop = FALSE]
   if (ncol(mat) == 0) {
     cli::cli_abort("No expression columns available after subsetting samples.")
   }
@@ -3092,7 +3092,7 @@ get_expression_lineplot <- function(x,
   }
 
   summarise <- identical(by, "group")
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
   genes_use <- genes
   if (!is.null(genes_use) && !is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
@@ -3201,7 +3201,7 @@ get_expression_lineplot <- function(x,
   value_transform <- match.arg(value_transform)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
-  mat <- SummarizedExperiment::assay(x)[, meta$sample, drop = FALSE]
+  mat <- SummarizedExperiment::assay(x, "norm_counts")[, meta$sample, drop = FALSE]
   if (!is.null(genes)) {
     missing_genes <- setdiff(genes, rownames(mat))
     if (length(missing_genes) == length(genes)) {
@@ -3446,7 +3446,7 @@ get_expression_violinplot <- function(x,
     )
   }
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -4477,7 +4477,7 @@ get_expression_barplot <- function(x,
   }
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
-  mat <- SummarizedExperiment::assay(x)[, meta$sample, drop = FALSE]
+  mat <- SummarizedExperiment::assay(x, "norm_counts")[, meta$sample, drop = FALSE]
 
   # Map input genes to underlying IDs if possible
   underlying_ids <- rownames(mat)
@@ -5600,7 +5600,7 @@ get_ma_plot <- function(x,
     bm_df <- rd_df[, c("gene_id","baseMean"), drop = FALSE]
     bm_df$baseMean <- to_num(bm_df$baseMean)
   } else {
-    a <- SummarizedExperiment::assay(x)
+    a <- SummarizedExperiment::assay(x, "norm_counts")
     bm_df <- data.frame(gene_id = rownames(a), baseMean = rowMeans(a, na.rm = TRUE), stringsAsFactors = FALSE)
   }
 
@@ -5990,7 +5990,7 @@ get_deg_alluvial <- function(x,
     cli::cli_abort("{.arg top_n} must be a positive integer when {.arg genes} is omitted.")
   }
 
-  mat <- SummarizedExperiment::assay(x)[, sample_ids, drop = FALSE]
+  mat <- SummarizedExperiment::assay(x, "norm_counts")[, sample_ids, drop = FALSE]
   vars <- matrixStats::rowVars(as.matrix(mat), na.rm = TRUE)
   means <- rowMeans(mat, na.rm = TRUE)
   ord <- order(vars, means, decreasing = TRUE, na.last = NA)
@@ -6218,7 +6218,7 @@ get_expression_heatmap <- function(x,
 
   group_col <- group_column %||% .vista_group_col(x)
 
-  expr <- SummarizedExperiment::assay(x) |>
+  expr <- SummarizedExperiment::assay(x, "norm_counts") |>
     as.data.frame() |>
     tibble::rownames_to_column("gene_id")
 
