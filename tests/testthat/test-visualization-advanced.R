@@ -218,3 +218,45 @@ test_that("get_expression_heatmap handles kmeans clustering", {
   hm <- get_expression_heatmap(vista, genes = genes, sample_group = groups, kmeans_k = 3)
   expect_true(!is.null(hm))
 })
+
+test_that(".vista_comparison_colors falls back to a palette when nothing matches (B5)", {
+  v <- make_small_vista()
+
+  # An empty intersection used to yield character(0), which walked straight past
+  # the internal `is.null(cols)` fallback and past every caller's guard. It must
+  # now produce a usable palette covering what was asked for -- the same
+  # behaviour .vista_group_colors() has always had.
+  cols <- VISTA:::.vista_comparison_colors(v, comparisons_present = "NOT_A_COMPARISON")
+  expect_length(cols, 1L)
+  expect_named(cols, "NOT_A_COMPARISON")
+  expect_false(is.na(cols[["NOT_A_COMPARISON"]]))
+
+  # The two sibling helpers must stay in step.
+  gcols <- VISTA:::.vista_group_colors(v, groups_present = "NOT_A_GROUP")
+  expect_length(gcols, 1L)
+  expect_named(gcols, "NOT_A_GROUP")
+
+  # A real comparison still resolves to the stored colour.
+  comp <- names(comparisons(v))[[1]]
+  stored <- VISTA:::.vista_comparison_colors(v, comparisons_present = comp)
+  expect_true(comp %in% names(stored))
+  expect_identical(
+    unname(stored[[comp]]),
+    unname(S4Vectors::metadata(v)$comparison$colors[[comp]])
+  )
+})
+
+test_that("plots fall back to a default palette when stored comparison colors drift", {
+  v <- make_small_vista()
+
+  # Simulate an object whose stored colour map no longer names its comparisons
+  # (hand-edited metadata, or comparisons added after construction).
+  md <- S4Vectors::metadata(v)
+  md$comparison$colors <- c(SOME_STALE_COMPARISON = "#123456")
+  S4Vectors::metadata(v) <- md
+
+  # This previously died with "subscript out of bounds" at pal[[1]].
+  expect_no_error(
+    get_foldchange_lineplot(v, sample_comparisons = names(comparisons(v)))
+  )
+})

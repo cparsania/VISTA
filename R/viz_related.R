@@ -67,6 +67,9 @@ NULL
   if (!is.null(cols) && !is.null(comparisons_present)) {
     comps <- unique(as.character(comparisons_present))
     cols <- cols[intersect(comps, names(cols))]
+    # Callers test `is.null(cols)` to decide whether to generate a palette, so an
+    # empty intersection has to collapse to NULL rather than character(0).
+    if (!length(cols)) cols <- NULL
   }
   if (is.null(cols) && !is.null(comparisons_present)) {
     pal_name <- info$palette %||% "Dark 3"
