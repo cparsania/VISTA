@@ -795,6 +795,123 @@ get_msigdb_enrichment <- function(x,
   }
 }
 
+#' Map identifiers preserving length and position
+#'
+#' Unlike [.vista_convert_ids()], which de-duplicates and drops unmapped
+#' identifiers because its callers want a gene *set*, this returns a vector the
+#' same length as `ids` with `NA` where no mapping exists. That property is
+#' essential anywhere identifiers are used as keys against a parallel vector of
+#' values.
+#'
+#' It also differs from [.map_gene_ids()], which falls back to the *input*
+#' identifier when a mapping is missing. That is right for display labels and
+#' wrong for keys -- handing an unmapped SYMBOL to a function expecting ENTREZ
+#' IDs trades a visible gap for a silent mismatch.
+#'
+#' @param ids Character vector of identifiers.
+#' @param from_type,to_type Key types understood by the supplied `orgdb`.
+#' @param orgdb An `OrgDb` object.
+#' @param id_map Optional named character vector used instead of `orgdb`,
+#'   primarily so the behaviour can be unit-tested without an annotation package.
+#'
+#' @return A character vector the same length as `ids`, with `NA` for unmapped
+#'   entries.
+#' @keywords internal
+#' @noRd
+.vista_map_ids_strict <- function(ids, from_type, to_type, orgdb = NULL, id_map = NULL) {
+  ids <- as.character(ids)
+  if (identical(toupper(from_type), toupper(to_type))) {
+    return(ids)
+  }
+  if (toupper(from_type) == "ENSEMBL") ids <- sub("\\..*$", "", ids)
+
+  if (!is.null(id_map)) {
+    return(unname(id_map[ids]))
+  }
+  if (is.null(orgdb)) {
+    cli::cli_abort("An {.arg orgdb} is required to map {.val {from_type}} to {.val {to_type}}.")
+  }
+
+  keytype <- toupper(from_type)
+  target <- toupper(to_type)
+  res <- tryCatch(
+    suppressMessages(
+      AnnotationDbi::select(orgdb, keys = unique(ids), keytype = keytype, columns = target)
+    ),
+    error = function(e) NULL
+  )
+  if (is.null(res) || !nrow(res)) {
+    return(rep(NA_character_, length(ids)))
+  }
+  res <- res[!duplicated(res[[keytype]]), , drop = FALSE]
+  map <- stats::setNames(as.character(res[[target]]), res[[keytype]])
+  out <- unname(map[ids])
+  out[!nzchar(out) | is.na(out)] <- NA_character_
+  out
+}
+
+#' Build a GSEA ranked vector with names that stay attached to their scores
+#'
+#' Maps `ids`, drops entries that fail to map (removing name and score
+#' together), resolves many-to-one collisions by keeping the largest absolute
+#' score, and returns a decreasing-sorted named numeric vector.
+#'
+#' @param scores Numeric vector of ranking statistics (typically log2FC).
+#' @param ids Character vector of identifiers, parallel to `scores`.
+#' @inheritParams .vista_map_ids_strict
+#' @param verbose Logical; report dropped and collapsed counts.
+#'
+#' @return A named numeric vector sorted in decreasing order.
+#' @keywords internal
+#' @noRd
+.vista_build_rank_vector <- function(scores, ids, from_type, to_type,
+                                     orgdb = NULL, id_map = NULL, verbose = TRUE) {
+  stopifnot(length(scores) == length(ids))
+
+  keep <- is.finite(scores)
+  scores <- scores[keep]
+  ids <- as.character(ids)[keep]
+
+  mapped <- .vista_map_ids_strict(
+    ids, from_type = from_type, to_type = to_type, orgdb = orgdb, id_map = id_map
+  )
+
+  # Drop name and score together. Assigning a shorter vector to names() would
+  # pad with NA and slide every remaining score onto the wrong identifier.
+  ok <- !is.na(mapped) & nzchar(mapped)
+  n_dropped <- sum(!ok)
+  mapped <- mapped[ok]
+  scores <- scores[ok]
+
+  if (!length(mapped)) {
+    cli::cli_abort(
+      "No gene identifiers could be mapped from {.val {from_type}} to {.val {to_type}}."
+    )
+  }
+
+  # Many-to-one mappings: keep the most extreme score for each target ID.
+  n_collapsed <- 0L
+  if (anyDuplicated(mapped)) {
+    ord <- order(abs(scores), decreasing = TRUE)
+    mapped_ord <- mapped[ord]
+    scores_ord <- scores[ord]
+    first <- !duplicated(mapped_ord)
+    n_collapsed <- sum(!first)
+    mapped <- mapped_ord[first]
+    scores <- scores_ord[first]
+  }
+
+  if (isTRUE(verbose) && (n_dropped > 0L || n_collapsed > 0L)) {
+    cli::cli_inform(c(
+      "Prepared {length(scores)} ranked gene{?s} for GSEA.",
+      if (n_dropped > 0L) "i" = "Dropped {n_dropped} gene{?s} with no {.val {to_type}} mapping.",
+      if (n_collapsed > 0L) "i" = "Collapsed {n_collapsed} duplicate {.val {to_type}} mapping{?s}, keeping the largest absolute score."
+    ))
+  }
+
+  sort(stats::setNames(scores, mapped), decreasing = TRUE)
+}
+
 .vista_convert_ids <- function(ids, from_type, to_type, orgdb) {
   ids <- as.character(ids)
   if (identical(from_type, to_type) || is.null(to_type) || to_type %in% c("", "none")) return(unique(ids))
@@ -932,9 +1049,7 @@ get_gsea <- function(x,
   rn <- tbl$gene_id %||% rownames(tbl)
   if (is.null(rn)) cli::cli_abort("DE table needs gene IDs for GSEA.")
 
-  rank_vec <- stats::setNames(fc, rn)
-  rank_vec <- rank_vec[!is.na(rank_vec)]
-  rank_vec <- sort(rank_vec, decreasing = TRUE)
+  fc <- suppressWarnings(as.numeric(fc))
 
   if (set_type == "msigdb") {
     msig_df <- .vista_msigdbr(
@@ -949,21 +1064,29 @@ get_gsea <- function(x,
                          "gene_symbol")
     msig_t2g <- msig_df[, c("gs_name", gene_field)]
     colnames(msig_t2g) <- c("term", "gene")
-    gene_ids <- .vista_convert_ids(names(rank_vec), from_type = from_type, to_type = toupper(from_type), orgdb = orgdb)
-    names(rank_vec) <- gene_ids
+    rank_vec <- .vista_build_rank_vector(
+      scores = fc, ids = rn,
+      from_type = from_type, to_type = toupper(from_type), orgdb = orgdb
+    )
     res <- clusterProfiler::GSEA(geneList = rank_vec,
                                  TERM2GENE = msig_t2g,
                                  ...)
   } else if (set_type == "go") {
     keytype <- toupper(from_type)
+    rank_vec <- .vista_build_rank_vector(
+      scores = fc, ids = rn,
+      from_type = from_type, to_type = keytype, orgdb = orgdb
+    )
     res <- clusterProfiler::gseGO(geneList = rank_vec,
                                   OrgDb = orgdb,
                                   keyType = keytype,
                                   ...)
   } else {
     org_code <- if (species %in% c("Homo sapiens", "human", "homo sapiens")) "hsa" else "mmu"
-    entrez_ids <- .vista_convert_ids(names(rank_vec), from_type = from_type, to_type = "ENTREZID", orgdb = orgdb)
-    names(rank_vec) <- entrez_ids
+    rank_vec <- .vista_build_rank_vector(
+      scores = fc, ids = rn,
+      from_type = from_type, to_type = "ENTREZID", orgdb = orgdb
+    )
     res <- clusterProfiler::gseKEGG(geneList = rank_vec,
                                     organism = org_code,
                                     ...)
