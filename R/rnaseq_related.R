@@ -464,6 +464,10 @@ get_expression_matrix <- function(x,
   if (!is.null(genes)) {
     mat <- mat[intersect(rownames(mat), genes), , drop = FALSE]
   }
+  # Row identity after this point is whatever the assay order produced, NOT the
+  # order `genes` was supplied in. Keep it so the summarise branch below cannot
+  # relabel rows with someone else's identifiers.
+  gene_ids <- rownames(mat)
 
   # subset samples or summarise by group
   meta <- as.data.frame(SummarizedExperiment::colData(x))
@@ -481,7 +485,7 @@ get_expression_matrix <- function(x,
     mat <- vapply(group_map, function(samps) rowMeans(mat[, samps, drop = FALSE]),
                   FUN.VALUE = numeric(nrow(mat)))
     mat <- as.matrix(mat)
-    rownames(mat) <- if (!is.null(genes)) genes[genes %in% rownames(mat)] else rownames(mat)
+    rownames(mat) <- gene_ids
   } else {
     if (!is.null(sample_names)) {
       keep <- intersect(colnames(mat), sample_names)
