@@ -29,6 +29,7 @@
     c("get_mds_plot", "use_vista_colors", "use_group_colors", "1.2.0", "1.4.0", "1.6.0", ""),
     c("get_umap_plot", "use_vista_colors", "use_group_colors", "1.2.0", "1.4.0", "1.6.0", ""),
     c("get_expression_barplot", "facet_scale", "facet_scales", "1.2.0", "1.4.0", "1.6.0", ""),
+    c("get_expression_lollipop", "facet_scale", "facet_scales", "1.2.0", "1.4.0", "1.6.0", ""),
     c("get_expression_violinplot", "value_transform", "log_transform", "1.2.0", "1.4.0", "1.6.0", ""),
     c("get_expression_lineplot", "value_transform", "log_transform", "1.2.0", "1.4.0", "1.6.0", "")
   )

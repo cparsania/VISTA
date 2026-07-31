@@ -203,3 +203,76 @@ test_that(".vista_sanitize_name strips path-significant characters", {
   expect_identical(VISTA:::.vista_sanitize_name("///", fallback = "comparison"), "comparison")
   expect_false(any(grepl("[\\\\/]", VISTA:::.vista_sanitize_name(c("a\\b", "c/d")))))
 })
+
+test_that("the previously-silent aliases now warn (3a)", {
+  v <- make_small_vista()
+  comp <- names(comparisons(v))[[1]]
+
+  expect_warning(
+    get_corr_heatmap(v, show_corr_values = FALSE),
+    class = "vista_deprecated_arg"
+  )
+  expect_warning(
+    get_corr_heatmap(v, col_corr_values = "navy"),
+    class = "vista_deprecated_arg"
+  )
+  expect_warning(
+    get_volcano_plot(v, sample_comparison = comp, col_up = "red"),
+    class = "vista_deprecated_arg"
+  )
+  expect_warning(
+    get_pca_plot(v, sample.seed = 42),
+    class = "vista_deprecated_arg"
+  )
+  expect_warning(
+    get_expression_barplot(v, genes = rownames(v)[1:2], facet_scale = "fixed"),
+    class = "vista_deprecated_arg"
+  )
+  expect_warning(
+    get_expression_lollipop(v, genes = rownames(v)[1:2], facet_scale = "fixed"),
+    class = "vista_deprecated_arg"
+  )
+  expect_warning(
+    get_expression_violinplot(v, genes = rownames(v)[1:2], value_transform = "none"),
+    class = "vista_deprecated_arg"
+  )
+  expect_warning(
+    get_expression_lineplot(v, genes = rownames(v)[1:2], value_transform = "none"),
+    class = "vista_deprecated_arg"
+  )
+})
+
+test_that("deprecated aliases still produce the same result as before", {
+  v <- make_small_vista()
+
+  # legacy wins, and the outcome matches passing the new argument directly
+  legacy <- suppressWarnings(get_corr_heatmap(v, label = TRUE, show_corr_values = FALSE))
+  modern <- get_corr_heatmap(v, label = FALSE)
+  expect_identical(length(legacy$layers), length(modern$layers))
+
+  genes <- rownames(v)[1:2]
+  a <- suppressWarnings(get_expression_barplot(v, genes = genes, facet_scale = "fixed"))
+  b <- get_expression_barplot(v, genes = genes, facet_scales = "fixed")
+  expect_equal(ggplot2::ggplot_build(a)$data, ggplot2::ggplot_build(b)$data)
+})
+
+test_that("gene caps are documented arguments rather than hard limits (3e)", {
+  v <- make_small_vista()
+  genes <- rownames(v)
+
+  expect_error(
+    get_expression_lollipop(v, genes = genes[seq_len(16)]),
+    "At most 15"
+  )
+  expect_no_error(
+    get_expression_lollipop(v, genes = genes[seq_len(16)], max_genes = 20)
+  )
+
+  expect_error(
+    get_expression_barplot(v, genes = genes[seq_len(26)]),
+    "At most 25"
+  )
+  expect_no_error(
+    get_expression_barplot(v, genes = genes[seq_len(26)], max_genes = 30)
+  )
+})

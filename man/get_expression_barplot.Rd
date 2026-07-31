@@ -23,7 +23,8 @@ get_expression_barplot(
   by = c("group", "sample"),
   sample_order = c("input", "group", "expression"),
   fill_by = NULL,
-  facet_by = c("auto", "gene", "none")
+  facet_by = c("auto", "gene", "none"),
+  max_genes = 25
 )
 }
 \arguments{
@@ -76,6 +77,9 @@ represents an aggregated group mean.}
 \item{facet_by}{Faceting mode: \code{"auto"} (default; facet by gene when more
 than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes,
 \code{"none"} falls back to \code{"gene"} to preserve readability.}
+
+\item{max_genes}{Maximum number of genes accepted in one call (default 25).
+Previously an undocumented hard cap.}
 }
 \value{
 A \code{ggplot2} object.

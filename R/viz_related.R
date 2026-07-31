@@ -83,21 +83,31 @@ NULL
   deg_summary(x)
 }
 
-.resolve_plot_label_flag <- function(label = NULL,
-                                     legacy = FALSE,
-                                     legacy_arg = "label_replicates") {
-  if (is.null(label)) {
-    return(isTRUE(legacy))
+# Resolve a logical `label` argument against a deprecated alias.
+#
+# Precedence is "legacy wins, always warn", matching what the call sites that
+# hand-rolled this already did. (Until 1.2.0 this helper had no callers and used
+# the opposite rule -- new wins, warn only on disagreement -- so adopting it
+# as-written would have silently flipped behaviour for anyone passing both.)
+.resolve_plot_label_flag <- function(label = TRUE,
+                                     legacy = NULL,
+                                     legacy_arg = "show_corr_values",
+                                     fun = NULL) {
+  check_flag <- function(value, arg) {
+    if (!is.logical(value) || length(value) != 1L || is.na(value)) {
+      cli::cli_abort("{.arg {arg}} must be TRUE or FALSE.")
+    }
+    isTRUE(value)
   }
-  if (!is.logical(label) || length(label) != 1L || is.na(label)) {
-    cli::cli_abort("{.arg label} must be TRUE or FALSE.")
+
+  if (!is.null(legacy)) {
+    legacy <- check_flag(legacy, legacy_arg)
+    return(.vista_deprecate_arg(
+      old = legacy_arg, new = "label", value = legacy, fun = fun %||% "this function"
+    ))
   }
-  if (!identical(isTRUE(label), isTRUE(legacy))) {
-    cli::cli_warn(
-      "{.arg label} overrides the legacy {.arg {legacy_arg}} argument."
-    )
-  }
-  isTRUE(label)
+
+  check_flag(label, "label")
 }
 
 .resolve_plot_color_column <- function(meta,
@@ -468,6 +478,9 @@ get_pca_plot <- function(x,
     use_group_colors = use_group_colors,
     use_vista_colors = use_vista_colors
   )
+  if (!missing(sample.seed)) {
+    .vista_deprecate_arg(old = "sample.seed", value = sample.seed, fun = "get_pca_plot")
+  }
 
   mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
@@ -1044,22 +1057,24 @@ get_volcano_plot <- function(x,
     cli::cli_abort("{.arg colors} must be a named vector with entries for {.val Up}, {.val Down}, and {.val Other}.")
   }
 
-  # Backward-compatible color aliases passed through `...`
-  if ("col_up" %in% names(dots)) {
-    colors[["Up"]] <- as.character(dots$col_up)[1]
-    dots$col_up <- NULL
+  # Backward-compatible color aliases passed through `...`. These used to be
+  # applied silently; they now warn on the standard deprecation timeline.
+  for (alias in c("col_up", "col_down", "col_other", "col_others")) {
+    if (alias %in% names(dots)) {
+      slot <- switch(alias, col_up = "Up", col_down = "Down", "Other")
+      colors[[slot]] <- .vista_deprecate_arg(
+        old = alias, new = "colors", value = as.character(dots[[alias]])[1],
+        fun = "get_volcano_plot"
+      )
+      dots[[alias]] <- NULL
+    }
   }
-  if ("col_down" %in% names(dots)) {
-    colors[["Down"]] <- as.character(dots$col_down)[1]
-    dots$col_down <- NULL
-  }
-  if ("col_other" %in% names(dots)) {
-    colors[["Other"]] <- as.character(dots$col_other)[1]
-    dots$col_other <- NULL
-  }
-  if ("col_others" %in% names(dots)) {
-    colors[["Other"]] <- as.character(dots$col_others)[1]
-    dots$col_others <- NULL
+  if ("lab_size" %in% names(dots)) {
+    label_size <- .vista_deprecate_arg(
+      old = "lab_size", new = "label_size", value = dots$lab_size,
+      fun = "get_volcano_plot"
+    )
+    dots$lab_size <- NULL
   }
 
   volcano_data <- comps[[sample_comparison]]
@@ -1249,11 +1264,15 @@ get_corr_heatmap <- function(x,
   stopifnot(inherits(x, "VISTA"))
   triangle <- match.arg(triangle)
   cluster_by <- match.arg(cluster_by)
-  if (!is.null(show_corr_values)) {
-    label <- isTRUE(show_corr_values)
-  }
+  label <- .resolve_plot_label_flag(
+    label = label, legacy = show_corr_values,
+    legacy_arg = "show_corr_values", fun = "get_corr_heatmap"
+  )
   if (!is.null(col_corr_values)) {
-    label_color <- col_corr_values
+    label_color <- .vista_deprecate_arg(
+      old = "col_corr_values", new = "label_color",
+      value = col_corr_values, fun = "get_corr_heatmap"
+    )
   }
 
   mat <- SummarizedExperiment::assay(x, "norm_counts")
@@ -2835,7 +2854,10 @@ get_expression_scatter <- function(x,
 #'   than one gene is requested), `"gene"`, or `"none"`. For multiple genes,
 #'   `"none"` falls back to `"gene"` to avoid unreadable combined panels.
 #' @param log_transform Logical; log2-transform expression before plotting.
-#' @param facet_scale Scaling option passed to `facet_wrap()` when plotting multiple genes.
+#' @param facet_scale Deprecated; use `facet_scales`.
+#' @param facet_scales Scaling option passed to `facet_wrap()` when plotting multiple genes.
+#' @param max_genes Maximum number of genes accepted in one call (default 15).
+#'   Previously an undocumented hard cap.
 #' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param point_size Numeric size of the dots.
 #' @param line_size Numeric size of the stems.
@@ -2885,9 +2907,21 @@ get_expression_lollipop <- function(x,
                                     label_digits = 1,
                                     display_id = NULL,
                                     display_from = NULL,
-                                    display_orgdb = NULL) {
+                                    display_orgdb = NULL,
+                                    facet_scales = facet_scale,
+                                    max_genes = 15) {
   stopifnot(inherits(x, "VISTA"))
-  if (length(genes) > 15) cli::cli_abort("Maximum 15 genes can be plotted at once.")
+  if (length(genes) > max_genes) {
+    cli::cli_abort(
+      "At most {max_genes} gene{?s} can be plotted at once; {length(genes)} were supplied. Raise {.arg max_genes} to override."
+    )
+  }
+  if (!missing(facet_scale)) {
+    facet_scales <- .vista_deprecate_arg(
+      old = "facet_scale", new = "facet_scales", value = facet_scale,
+      fun = "get_expression_lollipop"
+    )
+  }
   by <- match.arg(by)
   sample_order <- match.arg(sample_order)
 
@@ -2989,7 +3023,7 @@ get_expression_lollipop <- function(x,
     plt <- .add_expression_facet_wrap(
       plot = plt,
       facet_formula = ~gene,
-      scales = facet_scale,
+      scales = facet_scales,
       facet_nrow = facet_nrow,
       facet_ncol = facet_ncol
     )
@@ -3069,7 +3103,11 @@ get_expression_lineplot <- function(x,
   sample_order <- match.arg(sample_order)
 
   if (!is.null(value_transform)) {
-    value_transform <- match.arg(value_transform, c("log2", "zscore", "none"))
+    value_transform <- .vista_deprecate_arg(
+      old = "value_transform", new = "log_transform",
+      value = match.arg(value_transform, c("log2", "zscore", "none")),
+      fun = "get_expression_lineplot"
+    )
     if (value_transform == "log2") {
       log_transform <- TRUE
     } else if (value_transform == "none") {
@@ -3427,7 +3465,11 @@ get_expression_violinplot <- function(x,
   }
   sample_order <- match.arg(sample_order)
   if (!is.null(value_transform)) {
-    value_transform <- match.arg(value_transform, c("log2", "zscore", "none"))
+    value_transform <- .vista_deprecate_arg(
+      old = "value_transform", new = "log_transform",
+      value = match.arg(value_transform, c("log2", "zscore", "none")),
+      fun = "get_expression_violinplot"
+    )
     if (value_transform == "log2") {
       log_transform <- TRUE
     } else if (value_transform == "none") {
@@ -4389,6 +4431,8 @@ get_foldchange_scatter <- function(x,
 #' @param log_transform Logical; log2-transform expression before plotting.
 #' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
 #' @param facet_scale Scaling option passed to `facet_wrap()` (deprecated; use `facet_scales`).
+#' @param max_genes Maximum number of genes accepted in one call (default 25).
+#'   Previously an undocumented hard cap.
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` when faceting by gene.
 #' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
@@ -4460,11 +4504,22 @@ get_expression_barplot <- function(x,
                                    by = c("group", "sample"),
                                    sample_order = c("input", "group", "expression"),
                                    fill_by = NULL,
-                                   facet_by = c("auto", "gene", "none")) {
+                                   facet_by = c("auto", "gene", "none"),
+                                   max_genes = 25) {
   stopifnot(inherits(x, "VISTA"))
-  if (length(genes) > 25) cli::cli_abort("Maximum 25 genes can be plotted at once.")
+  if (length(genes) > max_genes) {
+    cli::cli_abort(
+      "At most {max_genes} gene{?s} can be plotted at once; {length(genes)} were supplied. Raise {.arg max_genes} to override."
+    )
+  }
   by <- match.arg(by)
   sample_order <- match.arg(sample_order)
+  if (!missing(facet_scale)) {
+    facet_scales <- .vista_deprecate_arg(
+      old = "facet_scale", new = "facet_scales", value = facet_scale,
+      fun = "get_expression_barplot"
+    )
+  }
 
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")

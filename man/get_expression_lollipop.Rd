@@ -22,7 +22,9 @@ get_expression_lollipop(
   label_digits = 1,
   display_id = NULL,
   display_from = NULL,
-  display_orgdb = NULL
+  display_orgdb = NULL,
+  facet_scales = facet_scale,
+  max_genes = 15
 )
 }
 \arguments{
@@ -48,7 +50,7 @@ than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes
 
 \item{log_transform}{Logical; log2-transform expression before plotting.}
 
-\item{facet_scale}{Scaling option passed to \code{facet_wrap()} when plotting multiple genes.}
+\item{facet_scale}{Deprecated; use \code{facet_scales}.}
 
 \item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
@@ -69,6 +71,11 @@ is not found in \code{rowData}).}
 
 \item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when
 \code{display_id} is set but not found in \code{rowData}.}
+
+\item{facet_scales}{Scaling option passed to \code{facet_wrap()} when plotting multiple genes.}
+
+\item{max_genes}{Maximum number of genes accepted in one call (default 15).
+Previously an undocumented hard cap.}
 }
 \value{
 A \code{ggplot2} object drawing expression as lollipops.
