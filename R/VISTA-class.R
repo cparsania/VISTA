@@ -27,7 +27,7 @@ NULL
 
 #' @keywords internal
 #' @noRd
-.VISTA_SCHEMA_VERSION <- "1.0.0"
+.VISTA_SCHEMA_VERSION <- "1.1.0"
 
 .vista_validity_messages <- function(object) {
   msgs <- character()
@@ -132,6 +132,9 @@ setValidity("VISTA", .vista_validity_messages)
 #' @param deg_summary Optional named list of DEG summary tables.
 #' @param cutoffs Optional named list of threshold metadata.
 #' @param group_palette Palette name for group colors.
+#' @param raw_counts Optional matrix of raw (unnormalized) counts covering the
+#'   same genes and samples as `assay_name`. Stored as a second assay named
+#'   `"counts"` and reachable with `counts()`.
 #' @param validate Logical; run object validation before returning.
 #'
 #' @return A `VISTA` object.
@@ -160,6 +163,7 @@ as_vista <- function(se,
                      deg_summary = list(),
                      cutoffs = list(),
                      group_palette = "Dark 3",
+                     raw_counts = NULL,
                      validate = TRUE) {
   if (!inherits(se, "SummarizedExperiment")) {
     cli::cli_abort("{.arg se} must inherit from {.cls SummarizedExperiment}.")
@@ -218,6 +222,7 @@ as_vista <- function(se,
     cutoffs = cutoffs,
     group_column = group_column,
     group_palette = group_palette,
+    raw_counts = raw_counts,
     validate = validate
   )
 }
@@ -232,6 +237,7 @@ as_vista <- function(se,
                    cutoffs = list(),
                    group_column = character(1),
                    group_palette = "Dark 3",
+                   raw_counts = NULL,
                    validate = TRUE) {
   # ---- Basic structure checks ----
   if (is.null(rownames(norm_counts)))
@@ -273,8 +279,24 @@ as_vista <- function(se,
   names(group_colors) <- groups
 
   # ---- build SE core ----
+  # norm_counts stays FIRST so an unqualified assay(x) is unchanged.
+  assay_list <- list(norm_counts = as.matrix(norm_counts))
+  if (!is.null(raw_counts)) {
+    raw_counts <- as.matrix(raw_counts)
+    if (!identical(dimnames(raw_counts), dimnames(assay_list$norm_counts))) {
+      common_rows <- intersect(rownames(assay_list$norm_counts), rownames(raw_counts))
+      common_cols <- intersect(colnames(assay_list$norm_counts), colnames(raw_counts))
+      if (!identical(length(common_rows), nrow(assay_list$norm_counts)) ||
+          !identical(length(common_cols), ncol(assay_list$norm_counts))) {
+        cli::cli_abort("{.arg raw_counts} must cover the same genes and samples as {.arg norm_counts}.")
+      }
+      raw_counts <- raw_counts[rownames(assay_list$norm_counts), colnames(assay_list$norm_counts), drop = FALSE]
+    }
+    assay_list$counts <- raw_counts
+  }
+
   se <- SummarizedExperiment::SummarizedExperiment(
-    assays = list(norm_counts = as.matrix(norm_counts)),
+    assays = assay_list,
     colData = S4Vectors::DataFrame(sample_info),
     rowData = S4Vectors::DataFrame(row_data)
   )

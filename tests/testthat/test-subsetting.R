@@ -17,9 +17,10 @@ test_that("row subsetting reindexes every stored DE table", {
   }
 
   # Every by-method table follows too, not just the active one.
+  # (as.list(): a SimpleList is not a valid for() loop sequence.)
   md <- S4Vectors::metadata(vs)
   for (src in names(md$de_results_by_method)) {
-    for (tbl in md$de_results_by_method[[src]]) {
+    for (tbl in as.list(md$de_results_by_method[[src]])) {
       expect_identical(rownames(as.data.frame(tbl)), keep, info = src)
     }
   }

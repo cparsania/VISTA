@@ -45,6 +45,10 @@
 #'   Default: \code{"Dark 2"}.
 #' @param comparison_palette Qualitative palette name used to assign colors per
 #'   comparison (stored in \code{metadata(v)$comparison$colors}). Defaults to \code{"Dark 3"}.
+#' @param keep_raw_counts Logical; if \code{TRUE} (default), the filtered raw
+#'   count matrix is retained as a second assay named \code{"counts"}, reachable
+#'   with \code{counts(v)} and required by \code{as_deseq_dataset()}. This
+#'   roughly doubles the assay footprint; set \code{FALSE} to omit it.
 #' @param validate Logical; if \code{TRUE} (default), run full \code{validate_vista()}
 #'   checks before returning the object.
 #'
@@ -144,6 +148,7 @@ create_vista <- function(counts,
                          result_source = NULL,
                          group_palette = "Dark 2",
                          comparison_palette = "Dark 3",
+                         keep_raw_counts = TRUE,
                          validate = TRUE) {
 
   method <- match.arg(method)
@@ -385,6 +390,7 @@ create_vista <- function(counts,
     ),
     group_column  = group_column,
     group_palette = group_palette,
+    raw_counts    = if (isTRUE(keep_raw_counts)) de_results_base$raw_counts else NULL,
     validate      = FALSE
   )
 

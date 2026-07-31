@@ -427,6 +427,7 @@ run_deseq_analysis <- function(
   # put all deseq related stuff required for vista in a list
 
   deseq_results <- list(norm_counts = norm_counts,
+                        raw_counts = DESeq2::counts(dds, normalized = FALSE),
                         sample_info = sample_annot,
                         row_data = row_data,
                         comparisons = deseq_comps$comparisons,
@@ -570,6 +571,7 @@ run_edger_analysis <- function(
 
   list(
     norm_counts = norm_counts,
+    raw_counts = as.matrix(dge$counts),
     sample_info = sample_annot,
     row_data = row_data,
     comparisons = comps,
@@ -700,6 +702,7 @@ run_limma_analysis <- function(
 
   list(
     norm_counts = norm_counts,
+    raw_counts = as.matrix(dge$counts),
     sample_info = col_data,
     row_data = S4Vectors::DataFrame(
       baseMean = rowMeans(norm_counts),
