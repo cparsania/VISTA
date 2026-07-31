@@ -28,8 +28,12 @@
 #' @param design_formula Optional model formula (or formula string). When provided,
 #'   it overrides automatic design construction from \code{group_column} +
 #'   \code{covariates}. Must include \code{group_column}.
-#' @param min_counts Minimum total read count across all samples to retain a gene. Default: \code{10}.
-#' @param min_replicates Minimum number of replicates within each group that must exceed \code{min_counts}. Default: \code{1}.
+#' @param min_counts Minimum per-sample read count a gene must reach to count as
+#'   detected in that sample. Also applied as a minimum row total across all
+#'   samples in an initial pre-filter. Default: \code{10}.
+#' @param min_replicates Minimum number of samples in which a gene must reach
+#'   \code{min_counts} for that gene to enter the model. Counted across the whole
+#'   experiment, not within each group. Default: \code{1}.
 #' @param log2fc_cutoff Absolute log2 fold-change threshold to define DEGs. Default: \code{1}.
 #' @param pval_cutoff P-value or adjusted p-value cutoff for significance. Default: \code{0.05}.
 #' @param p_value_type For DESeq2: one of \code{"padj"} or \code{"pvalue"}.
@@ -53,7 +57,11 @@
 #'   \item For limma, normalization uses \link[edgeR]{calcNormFactors} + \link[limma]{voom},
 #'     and testing uses \link[limma]{eBayes}.
 #' }
-#' Low-abundance filtering is applied before model fitting.
+#' Low-abundance filtering is applied before model fitting, and for the
+#' edgeR/limma backends before \link[edgeR]{calcNormFactors} so that
+#' normalization factors are not estimated from genes that will be discarded.
+#' All three backends use the same filtering predicate: a gene is retained when
+#' at least \code{min_replicates} samples reach \code{min_counts}.
 #' Gene regulation status is determined via \code{.categorize_deg_results()} based on user thresholds.
 #'
 #' All output comparison results are internally standardized via \code{.tidy_de_results()} to ensure
@@ -502,11 +510,14 @@ run_edger_analysis <- function(
   }
 
   dge <- edgeR::DGEList(counts = count_data, group = col_data[[group_column]])
-  dge <- edgeR::calcNormFactors(dge)
 
-  # Filter by replicates
-  keep <- rowSums(edgeR::cpm(dge) > 1) >= min_replicates
+  # Filter before calcNormFactors(): normalization factors estimated on
+  # unfiltered low-count genes are biased (see the edgeR user's guide).
+  # The predicate matches the DESeq2 backend so `min_counts`/`min_replicates`
+  # mean the same thing across all three engines.
+  keep <- rowSums(dge$counts >= min_counts) >= min_replicates
   dge <- dge[keep, , keep.lib.sizes = FALSE]
+  dge <- edgeR::calcNormFactors(dge)
 
   design <- stats::model.matrix(de_design, data = col_data)
 
@@ -639,9 +650,11 @@ run_limma_analysis <- function(
   }
 
   dge <- edgeR::DGEList(counts = count_data)
-  dge <- edgeR::calcNormFactors(dge)
-  keep <- rowSums(edgeR::cpm(dge) > 1) >= min_replicates
+
+  # Filter before calcNormFactors(); see run_edger_analysis() for rationale.
+  keep <- rowSums(dge$counts >= min_counts) >= min_replicates
   dge <- dge[keep, , keep.lib.sizes = FALSE]
+  dge <- edgeR::calcNormFactors(dge)
 
   design <- stats::model.matrix(de_design, data = col_data)
   v <- limma::voom(dge, design = design, plot = FALSE)
@@ -837,80 +850,6 @@ run_limma_analysis <- function(
 }
 
 
-#' Prepare sample metadata with optional filtering and group ordering
-#'
-#' This internal helper returns a sample metadata `data.frame` from a VISTA object, optionally filtered
-#' by specific sample groups. The function also ensures the grouping column is treated as a factor
-#' with appropriate level ordering, either based on user input (`sample_group`) or on original appearance.
-#'
-#' This is a general-purpose metadata preparation function intended to support multiple downstream
-#' plotting or reporting utilities.
-#'
-#' @param x A VISTA object.
-#' @param sample_group Optional character vector of groups to include, based on the `group_column`.
-#'
-#' @return A filtered `data.frame` containing sample metadata and a `sample` column.
-#' @keywords internal
-.prepare_sample_metadata <- function(x, sample_group) {
-  meta <- as.data.frame(sample_info(x)) %>% tibble::rownames_to_column("sample")
-  group_info <- S4Vectors::metadata(x)$group %||% list()
-  group_col <- group_info$column %||% "group"
-
-  if (!group_col %in% colnames(meta)) {
-    cli::cli_abort("Grouping column {.val {group_col}} not found in sample_info.")
-  }
-
-  if (!is.null(sample_group)) {
-    available_groups <- unique(meta[[group_col]])
-    if (!all(sample_group %in% available_groups)) {
-      cli::cli_abort("Some {.arg sample_group} values are not present in column {.val {group_col}} of sample_info.")
-    }
-    meta <- meta %>%
-      dplyr::filter(forcats::fct_drop(factor(.data[[group_col]], levels = sample_group)) %in% sample_group) %>%
-      dplyr::mutate({{ group_col }} := factor(.data[[group_col]], levels = sample_group),
-                    sample = factor(sample, levels = sample))
-  } else {
-    meta <- meta %>%
-      dplyr::mutate({{ group_col }} := factor(.data[[group_col]], levels = unique(.data[[group_col]])),
-                    sample = factor(sample, levels = sample))
-  }
-
-  meta
-}
-
-
-
-
-
-
-
-
-
-#' Filter genes by user-specified IDs or variability
-#'
-#' This internal function subsets the normalized expression matrix to retain only
-#' selected genes (by name) or top variable genes (by variance).
-#'
-#' @param mat A numeric matrix with genes as rows and samples as columns.
-#' @param genes Optional character vector of gene IDs to retain.
-#' @param top_n_genes Optional integer; the number of top variable genes to keep.
-#'
-#' @return A filtered matrix.
-#' @keywords internal
-.filter_genes <- function(mat, genes, top_n_genes) {
-  if (!is.null(genes)) {
-    mat <- mat[rownames(mat) %in% genes, , drop = FALSE]
-  }
-
-  if (!is.null(top_n_genes)) {
-    vars <- matrixStats::rowVars(mat)
-    top_genes <- order(vars, decreasing = TRUE)[seq_len(min(top_n_genes, nrow(mat)))]
-    mat <- mat[top_genes, , drop = FALSE]
-  }
-
-  mat
-}
-
 #' Prepare PCA result as a tidy data frame
 #'
 #' Converts PCA output and metadata into a tidy format suitable for ggplot2.
@@ -925,96 +864,6 @@ run_limma_analysis <- function(
   as.data.frame(pca$x[, seq_len(2), drop = FALSE]) %>%
     tibble::rownames_to_column("sample") %>%
     dplyr::left_join(meta, by = "sample")
-}
-
-#' Plot PCA results using ggplot2
-#'
-#' Internal function that creates a PCA plot using ggplot2 with optional coloring,
-#' labeling, clustering ellipses, and customizable color palettes.
-#'
-#' @param pca_df A data frame of PCA coordinates and metadata (from `.prepare_pca_dataframe()`).
-#' @param group_col Column name used for grouping/coloring samples.
-#' @param circle_size Point size for the scatter plot.
-#' @param label_replicates Logical; whether to display sample labels.
-#' @param sample_colors Logical; whether to color by group.
-#' @param show_clusters Logical; whether to draw ellipses for group clusters.
-#' @param color_vals Named color vector for groups.
-#' @param pca Original PCA object used to compute variance explained for axis labels.
-#'
-#' @return A ggplot2 object.
-#' @keywords internal
-.plot_pca <- function(pca_df, group_col, circle_size, label_replicates, sample_colors, show_clusters, color_vals, pca) {
-  plt <- ggplot(pca_df, aes(x = PC1, y = PC2)) +
-    geom_point(aes_string(color = if (sample_colors) group_col else NULL), size = circle_size) +
-    {
-      if (sample_colors) {
-        n_groups <- length(unique(pca_df[[group_col]]))
-        group_colors <-color_vals
-        scale_color_manual(values = group_colors)
-      }
-    }
-
-  if (label_replicates) {
-    plt <- plt + ggrepel::geom_text_repel(aes(label = sample))
-  }
-
-  if (show_clusters && sample_colors) {
-    plt <- plt + stat_ellipse(aes_string(group = group_col, color = group_col), type = "norm")
-  }
-
-  pvar <- summary(pca)$importance["Proportion of Variance", seq_len(2), drop = TRUE] * 100
-  xlab <- sprintf("PC1 (%.1f%%)", pvar[1])
-  ylab <- sprintf("PC2 (%.1f%%)", pvar[2])
-
-  plt + theme_minimal() + labs(title = "PCA Plot", x = xlab, y = ylab)
-}
-
-
-#' Prepare MDS Data Frame
-#'
-#' Internal helper to convert MDS coordinates and sample metadata into a plottable data frame.
-#'
-#' @param mds A matrix of MDS coordinates from `cmdscale()`.
-#' @param meta A data frame with sample metadata.
-#'
-#' @return A tidy data frame for MDS plotting.
-#' @keywords internal
-.prepare_mds_dataframe <- function(mds, meta) {
-  as.data.frame(mds) %>%
-    setNames(c("Dim1", "Dim2")) %>%
-    tibble::rownames_to_column("sample") %>%
-    dplyr::left_join(meta, by = "sample")
-}
-
-#' Plot MDS Coordinates
-#'
-#' Internal plotting function for rendering MDS results using `ggplot2`.
-#'
-#' @param mds_df A data frame with MDS coordinates and sample metadata.
-#' @param group_col The grouping column used for coloring points.
-#' @param circle_size Size of the points.
-#' @param label_replicates Logical; whether to label each point with the sample name.
-#' @param sample_colors Logical; whether to color points by group.
-#' @param color_vals Named color vector for groups.
-#'
-#' @return A `ggplot` object.
-#' @keywords internal
-.plot_mds <- function(mds_df, group_col, circle_size, label_replicates, sample_colors, color_vals) {
-  plt <- ggplot(mds_df, aes(x = Dim1, y = Dim2)) +
-    geom_point(aes_string(color = if (sample_colors) group_col else NULL), size = circle_size) +
-    {
-      if (sample_colors) {
-        n_groups <- length(unique(mds_df[[group_col]]))
-        group_colors <- color_vals
-        scale_color_manual(values = group_colors)
-      }
-    }
-
-  if (label_replicates) {
-    plt <- plt + ggrepel::geom_text_repel(aes(label = sample))
-  }
-
-  plt + theme_minimal() + labs(title = "MDS Plot", x = "Dimension 1", y = "Dimension 2")
 }
 
 #' Enhanced volcano plot with smart column detection & coloring
@@ -1158,81 +1007,6 @@ run_limma_analysis <- function(
 }
 
 
-
-#' Prepare correlation matrix from normalized expression
-#'
-#' @param mat A numeric matrix of log-normalized gene expression (genes × samples).
-#' @param corr_method Correlation method; one of "pearson", "kendall", or "spearman".
-#'
-#' @return A correlation matrix.
-#' @keywords internal
-
-.prepare_corr_matrix <- function(mat, meta, corr_method = "pearson") {
-  # Reorder sample columns in mat based on metadata
-  mat <- mat[, meta$sample, drop = FALSE]
-
-  # Compute correlation matrix
-  cor_mat <- stats::cor(log2(mat + 1), method = corr_method)
-
-  # Reorder correlation matrix based on sample group ordering (used in meta)
-  cor_mat <- cor_mat[meta$sample, meta$sample]
-
-  return(cor_mat)
-}
-
-
-
-#' Plot a correlation heatmap from a matrix
-#'
-#' @param cor_mat A symmetric correlation matrix.
-#' @param vis_method Type of shape for visualization: "square" or "circle".
-#' @param plot_type Type of plot: "full", "lower", or "upper".
-#' @param show_diagonal Logical; whether to show diagonal values.
-#' @param show_corr_values Logical; whether to label correlation values.
-#' @param col_corr_values Color for text labels.
-#' @param size_corr_values Numeric size of text labels.
-#' @param cluster_samples Logical; whether to cluster samples hierarchically.
-#' @param scale_range Optional numeric vector of length 2 to fix the color scale.
-#'
-#' @return A ggplot2 heatmap.
-#' @keywords internal
-.plot_corr_heatmap <- function(cor_mat,
-                               vis_method = "square",
-                               plot_type = "full",
-                               show_diagonal = TRUE,
-                               show_corr_values = TRUE,
-                               col_corr_values = "black",
-                               size_corr_values = 4,
-                               cluster_samples = TRUE,
-                               scale_range = NULL) {
-
-  if (!requireNamespace("ggcorrplot", quietly = TRUE)) {
-    cli::cli_abort("Package {.pkg ggcorrplot} must be installed to plot correlation heatmaps.")
-  }
-  plot <- ggcorrplot::ggcorrplot(cor_mat,
-                                 method = vis_method,
-                                 type = plot_type,
-                                 lab = show_corr_values,
-                                 lab_col = col_corr_values,
-                                 lab_size = size_corr_values,
-                                 show.diag = show_diagonal,
-                                 outline.col = "white",
-                                 hc.order = cluster_samples,
-                                 colors = viridis::viridis(3, option = "C"),
-                                 ggtheme = ggplot2::theme_minimal(),
-                                 title = "Sample Correlation Heatmap",
-                                 legend.title = "Correlation")
-
-  # Custom color scale if provided
-  if (!is.null(scale_range)) {
-    plot <- plot +
-      ggplot2::scale_fill_gradientn(colours = viridis::viridis(10) %>% rev(),
-                                    limits = scale_range,
-                                    oob = scales::squish,name = "correlation")
-  }
-
-  plot
-}
 
 #' Perform pairwise DE comparisons using DESeq2 results
 #'
@@ -1652,19 +1426,21 @@ run_limma_analysis <- function(
     log2fc_consensus[support == "edger_only"] <- e_log2fc[support == "edger_only"]
     log2fc_consensus[!is.finite(log2fc_consensus)] <- NA_real_
 
-    pvalue_consensus <- rep(1, length(ref_rn))
-    padj_consensus <- rep(1, length(ref_rn))
     d_pvalue <- if ("pvalue" %in% names(d)) .safe_numeric(d$pvalue, default = 1) else rep(1, length(ref_rn))
     e_pvalue <- if ("pvalue" %in% names(e)) .safe_numeric(e$pvalue, default = 1) else rep(1, length(ref_rn))
     d_padj <- if ("padj" %in% names(d)) .safe_numeric(d$padj, default = 1) else d_pvalue
     e_padj <- if ("padj" %in% names(e)) .safe_numeric(e$padj, default = 1) else e_pvalue
 
-    both_idx <- support %in% c("both", "discordant")
+    # Every gene carries the less-significant (more conservative) of the two
+    # backends, so the consensus p-value columns stay continuous and usable for
+    # volcano/MA plots and ranking. Genes called by a single backend then take
+    # that backend's value below.
+    pvalue_consensus <- pmax(d_pvalue, e_pvalue, na.rm = TRUE)
+    padj_consensus <- pmax(d_padj, e_padj, na.rm = TRUE)
+
     d_only_idx <- support == "deseq2_only"
     e_only_idx <- support == "edger_only"
 
-    pvalue_consensus[both_idx] <- pmax(d_pvalue[both_idx], e_pvalue[both_idx], na.rm = TRUE)
-    padj_consensus[both_idx] <- pmax(d_padj[both_idx], e_padj[both_idx], na.rm = TRUE)
     pvalue_consensus[d_only_idx] <- d_pvalue[d_only_idx]
     padj_consensus[d_only_idx] <- d_padj[d_only_idx]
     pvalue_consensus[e_only_idx] <- e_pvalue[e_only_idx]
@@ -1714,32 +1490,6 @@ run_limma_analysis <- function(
 
 
 
-
-#' Cluster genes by their log2FC profiles using k-means
-#'
-#' @param df A long data.frame with columns: gene_id_col, comparison, log2fc.
-#' @param gene_id_col Character string of column name for gene IDs (e.g. "gene_name" or "display_gene").
-#' @param k Number of clusters.
-#'
-#' @return A data.frame with gene IDs and cluster assignments.
-#' @keywords internal
-.cluster_log2fc_matrix <- function(df, gene_id_col = "display_gene", k = 3) {
-  stopifnot(gene_id_col %in% colnames(df))
-  stopifnot("comparison" %in% colnames(df))
-  stopifnot("log2fc" %in% colnames(df))
-  stopifnot(is.numeric(k) && k >= 1)
-
-  wide <- df %>%
-    dplyr::select(gene_id = .data[[gene_id_col]], comparison, log2fc) %>%
-    tidyr::pivot_wider(names_from = comparison, values_from = log2fc) %>%
-    tibble::column_to_rownames("gene_id")
-
-  wide_scaled <- scale(wide)
-
-  km <- stats::kmeans(wide_scaled, centers = k)
-
-  tibble::tibble(!!gene_id_col := rownames(wide), cluster = factor(km$cluster))
-}
 
 # Map gene IDs to display labels using an orgdb or supplied map
 .map_gene_ids <- function(ids,

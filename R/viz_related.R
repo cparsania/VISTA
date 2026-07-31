@@ -17,7 +17,7 @@
 #' @importFrom colorspace qualitative_hcl
 #' @importFrom stats prcomp cmdscale dist setNames
 #' @importFrom cli cli_abort cli_warn
-#' @importFrom rlang `%||%`
+#' @importFrom rlang `%||%` .data
 NULL
 
 `%||%` <- function(a, b) if (!is.null(a)) a else b
@@ -923,10 +923,25 @@ get_umap_plot <- function(x,
 #' Wraps EnhancedVolcano to visualize log2FC vs p-values for a selected
 #' comparison.
 #'
+#' @details By default the plot inherits the thresholds the object was built
+#'   with, so the genes coloured here match the ones reported by
+#'   [deg_summary()], [get_deg_count_barplot()], and
+#'   [get_genes_by_regulation()]. Specifically, `log2fc_cutoff`, `pval_cutoff`,
+#'   and `p_value_type` default to `cutoffs(x)$log2fc`, `cutoffs(x)$pval`, and
+#'   `cutoffs(x)$p_value_type`. Supplying any of them explicitly overrides the
+#'   stored value for that argument only.
+#'
+#'   Objects created before VISTA 1.1.1, and objects whose stored `p_value_type`
+#'   column is absent from the DE table, fall back to the raw `pvalue` column.
+#'
 #' @param x A `VISTA` object containing differential expression results.
 #' @param sample_comparison Character scalar naming the comparison to display.
-#' @param log2fc_cutoff Numeric absolute log2 fold-change threshold used to color significant points.
+#' @param log2fc_cutoff Numeric absolute log2 fold-change threshold used to color
+#'   significant points. Defaults to `cutoffs(x)$log2fc`.
 #' @param pval_cutoff Numeric p-value threshold used to color significant points.
+#'   Defaults to `cutoffs(x)$pval`.
+#' @param p_value_type Which p-value column to place on the y-axis and threshold
+#'   against: `"padj"` or `"pvalue"`. Defaults to `cutoffs(x)$p_value_type`.
 #' @param label_genes Optional character vector of gene identifiers to force-label.
 #' @param label_size Numeric label text size.
 #' @param point_size Numeric point size.
@@ -966,12 +981,19 @@ get_umap_plot <- function(x,
 #' comps <- names(comparisons(vista))
 #' get_volcano_plot(vista, sample_comparison = comps[1])
 #'
-#' # With custom thresholds
+#' # With custom thresholds (overrides the stored cutoffs)
 #' get_volcano_plot(
 #'   vista,
 #'   sample_comparison = comps[1],
 #'   log2fc_cutoff = 1.5,
 #'   pval_cutoff = 0.01
+#' )
+#'
+#' # Force the raw p-value axis regardless of how the object was built
+#' get_volcano_plot(
+#'   vista,
+#'   sample_comparison = comps[1],
+#'   p_value_type = "pvalue"
 #' )
 #'
 #' # Highlight specific genes
@@ -986,8 +1008,9 @@ get_umap_plot <- function(x,
 #' @export
 get_volcano_plot <- function(x,
                              sample_comparison,
-                             log2fc_cutoff = 1,
-                             pval_cutoff = 0.05,
+                             log2fc_cutoff = NULL,
+                             pval_cutoff = NULL,
+                             p_value_type = NULL,
                              label_genes = NULL,
                              label_size = 3,
                              point_size = 1,
@@ -1037,6 +1060,28 @@ get_volcano_plot <- function(x,
   }
 
   volcano_data <- comps[[sample_comparison]]
+
+  # Inherit the thresholds the object was built with so the points coloured here
+  # agree with deg_summary() / get_deg_count_barplot() / get_genes_by_regulation().
+  cuts <- cutoffs(x)
+  log2fc_cutoff <- log2fc_cutoff %||% cuts$log2fc %||% 1
+  pval_cutoff <- pval_cutoff %||% cuts$pval %||% 0.05
+  p_value_type <- p_value_type %||% cuts$p_value_type %||% "pvalue"
+  p_value_type <- match.arg(p_value_type, c("padj", "pvalue"))
+  if (!p_value_type %in% colnames(volcano_data)) {
+    fallback <- setdiff(c("padj", "pvalue"), p_value_type)
+    fallback <- fallback[fallback %in% colnames(volcano_data)]
+    if (!length(fallback)) {
+      cli::cli_abort(
+        "Comparison {.val {sample_comparison}} has neither a {.field padj} nor a {.field pvalue} column."
+      )
+    }
+    cli::cli_warn(
+      "Column {.field {p_value_type}} not found in comparison {.val {sample_comparison}}; using {.field {fallback[[1]]}} instead."
+    )
+    p_value_type <- fallback[[1]]
+  }
+
   gid_col <- if ("gene_id" %in% colnames(volcano_data)) "gene_id" else colnames(volcano_data)[1]
 
   gn <- volcano_data[[gid_col]] %||% rownames(volcano_data)
@@ -1057,12 +1102,22 @@ get_volcano_plot <- function(x,
     lab <- display
   }
 
+  # EnhancedVolcano always labels the y-axis "-Log10 P"; make it honest when the
+  # axis is actually the adjusted p-value. Still overridable through `...`.
+  if (!"ylab" %in% names(dots)) {
+    dots$ylab <- if (identical(p_value_type, "padj")) {
+      bquote(~ -Log[10] ~ italic(P)[adj])
+    } else {
+      bquote(~ -Log[10] ~ italic(P))
+    }
+  }
+
   vol_args <- c(
     list(
       toptable = volcano_data,
       lab = lab,
       x = "log2fc",
-      y = "pvalue",
+      y = p_value_type,
       pCutoff = pval_cutoff,
       FCcutoff = log2fc_cutoff,
       col_by_regul = TRUE,
@@ -5515,9 +5570,9 @@ get_ma_plot <- function(x,
 
   # regulation if missing
   if (!"regulation" %in% names(comp_tbl)) {
-    cuts <- S4Vectors::metadata(x)$cutoffs %||% list()
+    cuts <- cutoffs(x)
     lfc_cut <- cuts$log2fc %||% 1
-    p_cut   <- cuts$pvalue %||% 0.05
+    p_cut   <- cuts$pval %||% 0.05
     if (!is.na(p_col)) {
       comp_tbl$regulation <- ifelse(comp_tbl$log2fc >=  lfc_cut & comp_tbl[[p_col]] <= p_cut, "Up",
                                     ifelse(comp_tbl$log2fc <= -lfc_cut & comp_tbl[[p_col]] <= p_cut, "Down", "Other"))

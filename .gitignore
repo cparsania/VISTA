@@ -29,3 +29,6 @@ renv/python/
 
 /.quarto/
 VISTA.BiocCheck/00BiocCheck.log
+
+# stray graphics artifact written by test runs
+tests/testthat/Rplots.pdf

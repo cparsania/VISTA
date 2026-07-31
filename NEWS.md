@@ -1,3 +1,66 @@
+# VISTA 1.1.1
+
+## Bug fixes
+
+- `get_volcano_plot()` now inherits `log2fc_cutoff`, `pval_cutoff`, and the new
+  `p_value_type` argument from `cutoffs(x)` instead of hard-coding the raw
+  `pvalue` column at 0.05. Previously the volcano could colour a different set
+  of genes than `deg_summary()`, `get_deg_count_barplot()`, and
+  `get_genes_by_regulation()` reported for the same object. Pass the arguments
+  explicitly to restore the old behaviour
+  (`p_value_type = "pvalue"`, `pval_cutoff = 0.05`). The y-axis label now
+  reflects which p-value column is plotted.
+
+- Consensus DE tables (`method = "both"`) no longer overwrite `pvalue` and
+  `padj` with `1` for every gene that is not called by both backends. Each gene
+  now carries the less-significant of the two backend values, so the columns
+  stay continuous and usable for volcano/MA plots and ranking. Per-backend
+  values remain available in `pvalue_deseq2`/`pvalue_edger`/`padj_deseq2`/
+  `padj_edger`, and DEG calls are unchanged.
+
+- `get_ma_plot()` read its threshold fallback from the non-existent
+  `metadata(x)$cutoffs` key, silently using package defaults instead of the
+  object's stored cutoffs.
+
+## Analysis changes
+
+- The edgeR and limma-voom backends now filter genes with the same predicate as
+  the DESeq2 backend — a gene is kept when at least `min_replicates` samples
+  reach `min_counts`. They previously ignored `min_counts` at this step and used
+  a hard-coded `cpm > 1` threshold, so the same arguments produced different
+  feature sets across backends.
+
+- The edgeR and limma-voom backends now filter *before* calling
+  `edgeR::calcNormFactors()`, per the edgeR user's guide; normalization factors
+  were previously estimated from genes that were about to be discarded. Both
+  changes shift edgeR/limma results slightly relative to 1.1.0.
+
+## Documentation
+
+- `min_replicates` is documented accurately: it counts samples across the whole
+  experiment, not within each group, which is what all backends have always
+  implemented.
+- `create_vista()` now documents the consensus table's column semantics,
+  including the `support` column.
+- Removed a reference to `get_enrichment_network()` from the README; no such
+  function exists. Corrected the citation block and listed the missing
+  expression-plot entries.
+
+## Internal
+
+- Removed duplicate definitions of `.prepare_sample_metadata()` and
+  `.filter_genes()`, which existed in both `utils-internal.R` and
+  `viz_related.R`, with collation order silently deciding which one ran.
+- Removed unreachable helpers `.plot_pca()`, `.plot_mds()`,
+  `.prepare_mds_dataframe()`, `.prepare_corr_matrix()`, `.plot_corr_heatmap()`,
+  and `.cluster_log2fc_matrix()` along with their generated man pages.
+- pkgdown-only articles under `vignettes/guides/` and `vignettes/workflows/`
+  are no longer shipped in the source tarball.
+
+# VISTA 1.0.0
+
+- First Bioconductor release (Bioconductor 3.23).
+
 # VISTA 0.99.8
 
 # VISTA 0.99.7

@@ -2,8 +2,10 @@
 .build_example_vista <- function(n_genes = 150,
                                  n_per_group = 3,
                                  method = "deseq2") {
-  data("count_data", package = "VISTA", envir = environment())
-  data("sample_metadata", package = "VISTA", envir = environment())
+  utils::data("count_data", package = "VISTA", envir = environment())
+  utils::data("sample_metadata", package = "VISTA", envir = environment())
+  count_data <- get("count_data", envir = environment())
+  sample_metadata <- get("sample_metadata", envir = environment())
 
   stopifnot(is.numeric(n_genes), length(n_genes) == 1L, n_genes > 0)
   stopifnot(is.numeric(n_per_group), length(n_per_group) == 1L, n_per_group > 0)

@@ -76,9 +76,13 @@ the specified grouping column.}
 it overrides automatic design construction from \code{group_column} +
 \code{covariates}. Must include \code{group_column}.}
 
-\item{min_counts}{Minimum total read count across all samples to retain a gene. Default: \code{10}.}
+\item{min_counts}{Minimum per-sample read count a gene must reach to count as
+detected in that sample. Also applied as a minimum row total across all
+samples in an initial pre-filter. Default: \code{10}.}
 
-\item{min_replicates}{Minimum number of replicates within each group that must exceed \code{min_counts}. Default: \code{1}.}
+\item{min_replicates}{Minimum number of samples in which a gene must reach
+\code{min_counts} for that gene to enter the model. Counted across the whole
+experiment, not within each group. Default: \code{1}.}
 
 \item{log2fc_cutoff}{Absolute log2 fold-change threshold to define DEGs. Default: \code{1}.}
 
@@ -121,7 +125,11 @@ compatible with \code{VISTA}-based visualization and analysis.
 \item For limma, normalization uses \link[edgeR]{calcNormFactors} + \link[limma]{voom},
 and testing uses \link[limma]{eBayes}.
 }
-Low-abundance filtering is applied before model fitting.
+Low-abundance filtering is applied before model fitting, and for the
+edgeR/limma backends before \link[edgeR]{calcNormFactors} so that
+normalization factors are not estimated from genes that will be discarded.
+All three backends use the same filtering predicate: a gene is retained when
+at least \code{min_replicates} samples reach \code{min_counts}.
 Gene regulation status is determined via \code{.categorize_deg_results()} based on user thresholds.
 
 All output comparison results are internally standardized via \code{.tidy_de_results()} to ensure

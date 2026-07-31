@@ -11,3 +11,9 @@
 ^tmp_render$
 ^GITHUB_ENTRY\.md$
 ^VISTA-deconvolution\.R$
+^vignettes/guides$
+^vignettes/workflows$
+^tests/testthat/Rplots\.pdf$
+^TODO\.md$
+^\.Rhistory$
+^VISTA\.BiocCheck$
