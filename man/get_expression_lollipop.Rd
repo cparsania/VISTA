@@ -17,14 +17,15 @@ get_expression_lollipop(
   facet_nrow = NULL,
   facet_ncol = NULL,
   point_size = 6,
-  line_size = 1.2,
+  linewidth = 1.2,
   label = TRUE,
   label_digits = 1,
   display_id = NULL,
   display_from = NULL,
   display_orgdb = NULL,
   facet_scales = facet_scale,
-  max_genes = 15
+  max_genes = 15,
+  line_size = NULL
 )
 }
 \arguments{
@@ -56,7 +57,7 @@ than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes
 
 \item{point_size}{Numeric size of the dots.}
 
-\item{line_size}{Numeric size of the stems.}
+\item{linewidth}{Numeric width of the stems.}
 
 \item{label}{Logical; draw numeric labels above the dots.}
 
@@ -76,6 +77,8 @@ is not found in \code{rowData}).}
 
 \item{max_genes}{Maximum number of genes accepted in one call (default 15).
 Previously an undocumented hard cap.}
+
+\item{line_size}{Deprecated; use \code{linewidth}.}
 }
 \value{
 A \code{ggplot2} object drawing expression as lollipops.

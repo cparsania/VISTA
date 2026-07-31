@@ -11,7 +11,7 @@ get_foldchange_lollipop(
   sort_by = c("input", "log2fc", "abs_log2fc"),
   palette = NULL,
   point_size = 6,
-  line_size = 1.2,
+  linewidth = 1.2,
   label = TRUE,
   label_digits = 2,
   display_id = NULL,
@@ -21,7 +21,8 @@ get_foldchange_lollipop(
   facet_scales = "free_y",
   facet_nrow = NULL,
   facet_ncol = NULL,
-  facet_by = c("auto", "gene", "comparison", "none")
+  facet_by = c("auto", "gene", "comparison", "none"),
+  line_size = NULL
 )
 }
 \arguments{
@@ -45,7 +46,7 @@ entry per comparison (defaults to a qualitative palette).}
 
 \item{point_size}{Numeric size of dots.}
 
-\item{line_size}{Numeric size of stems (linewidth).}
+\item{linewidth}{Numeric width of the stems.}
 
 \item{label}{Logical; draw numeric labels next to the dots.}
 
@@ -70,6 +71,8 @@ two comparisons on the same axis.}
 
 \item{facet_by}{Faceting mode: \code{"auto"} (default), \code{"gene"},
 \code{"comparison"}, or \code{"none"}.}
+
+\item{line_size}{Deprecated; use \code{linewidth}.}
 }
 \value{
 A \code{ggplot2} object drawing log2 fold change as lollipops.

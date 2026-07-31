@@ -314,3 +314,23 @@ test_that("stat_comparisons replaces the colliding comparisons argument (3c)", {
   # The accessor of the same name is untouched.
   expect_type(comparisons(v), "list")
 })
+
+test_that("concept names are unified with warning aliases (3d)", {
+  v <- make_small_vista()
+
+  # top_n_genes -> top_n on the embeddings
+  expect_warning(a <- get_pca_plot(v, top_n_genes = 50), class = "vista_deprecated_arg")
+  b <- get_pca_plot(v, top_n = 50)
+  expect_equal(ggplot2::ggplot_build(a)$data, ggplot2::ggplot_build(b)$data)
+
+  expect_warning(get_mds_plot(v, top_n_genes = 50), class = "vista_deprecated_arg")
+
+  # line_size -> linewidth on the lollipops (matches ggplot2 >= 3.4)
+  genes <- rownames(v)[seq_len(2)]
+  expect_warning(
+    l_old <- get_expression_lollipop(v, genes = genes, line_size = 2),
+    class = "vista_deprecated_arg"
+  )
+  l_new <- get_expression_lollipop(v, genes = genes, linewidth = 2)
+  expect_equal(ggplot2::ggplot_build(l_old)$data, ggplot2::ggplot_build(l_new)$data)
+})

@@ -43,6 +43,11 @@
     c("get_expression_lineplot", "comparisons", "stat_comparisons", "1.2.0", "1.4.0", "1.6.0", ""),
     c("get_expression_violinplot", "comparisons", "stat_comparisons", "1.2.0", "1.4.0", "1.6.0", ""),
     c("get_expression_barplot", "comparisons", "stat_comparisons", "1.2.0", "1.4.0", "1.6.0", ""),
+    c("get_pca_plot", "top_n_genes", "top_n", "1.2.0", "1.4.0", "1.6.0", ""),
+    c("get_mds_plot", "top_n_genes", "top_n", "1.2.0", "1.4.0", "1.6.0", ""),
+    c("get_umap_plot", "top_n_genes", "top_n", "1.2.0", "1.4.0", "1.6.0", ""),
+    c("get_expression_lollipop", "line_size", "linewidth", "1.2.0", "1.4.0", "1.6.0", ""),
+    c("get_foldchange_lollipop", "line_size", "linewidth", "1.2.0", "1.4.0", "1.6.0", ""),
     c("get_expression_violinplot", "value_transform", "log_transform", "1.2.0", "1.4.0", "1.6.0", ""),
     c("get_expression_lineplot", "value_transform", "log_transform", "1.2.0", "1.4.0", "1.6.0", "")
   )

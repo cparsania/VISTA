@@ -372,19 +372,21 @@ NULL
 }
 
 # Keep only requested genes or the top-N variable genes; return matrix
-.filter_genes <- function(mat, genes = NULL, top_n_genes = NULL) {
+.filter_genes <- function(mat, genes = NULL, top_n = NULL, max_genes = 20) {
   if (!is.null(genes)) {
-    if (length(genes) > 20) {
-      cli::cli_abort("Maximum 20 genes can be plotted at once.")
+    if (length(genes) > max_genes) {
+      cli::cli_abort(
+        "At most {max_genes} gene{?s} can be plotted at once; {length(genes)} were supplied. Raise {.arg max_genes} to override."
+      )
     }
     keep <- intersect(genes, rownames(mat))
     if (!length(keep)) cli::cli_abort("None of the specified {.arg genes} were found in the data.")
     mat <- mat[keep, , drop = FALSE]
   }
-  if (!is.null(top_n_genes)) {
+  if (!is.null(top_n)) {
     v <- matrixStats::rowVars(mat)
     ord <- order(v, decreasing = TRUE)
-    n <- min(top_n_genes, nrow(mat))
+    n <- min(top_n, nrow(mat))
     mat <- mat[ord[seq_len(n)], , drop = FALSE]
   }
   mat
@@ -403,7 +405,7 @@ NULL
 #'   `NULL` to include all samples.
 #' @param genes Optional character vector of gene identifiers to restrict the PCA input matrix.
 #'   When `NULL`, all genes are used.
-#' @param top_n_genes Optional integer selecting the top most variable genes to include. Ignored
+#' @param top_n Optional integer selecting the top most variable genes to include. Ignored
 #'   when `genes` is supplied.
 #' @param label Logical; if `TRUE`, sample names are drawn next to the points.
 #' @param label_size Numeric size of sample labels when `label = TRUE`.
@@ -459,7 +461,7 @@ get_pca_plot <- function(x,
                          sample_group = NULL,
                          group_column = NULL,
                          genes = NULL,
-                         top_n_genes = NULL,
+                         top_n = NULL,
                          label = FALSE,
                          label_size = 3,
                          point_size = 10,
@@ -471,9 +473,16 @@ get_pca_plot <- function(x,
                          use_vista_colors = NULL,
                          palette = NULL,
                          colors = NULL,
-                         use_group_colors = TRUE) {
+                         use_group_colors = TRUE,
+                         top_n_genes = NULL,
+                         max_genes = 20) {
 
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(top_n_genes)) {
+    top_n <- .vista_deprecate_arg(
+      old = "top_n_genes", new = "top_n", value = top_n_genes, fun = "get_pca_plot"
+    )
+  }
   use_group_colors <- .resolve_group_color_preference(
     use_group_colors = use_group_colors,
     use_vista_colors = use_vista_colors
@@ -494,7 +503,7 @@ get_pca_plot <- function(x,
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
   }
 
-  mat <- .filter_genes(mat, genes, top_n_genes)
+  mat <- .filter_genes(mat, genes, top_n, max_genes = max_genes)
   mat <- mat[matrixStats::rowVars(mat) > 0, , drop = FALSE]
 
   pca <- stats::prcomp(t(mat), center = TRUE, scale. = TRUE)
@@ -604,7 +613,9 @@ get_pca_plot <- function(x,
 #' @param x A `VISTA` object.
 #' @param sample_group Optional character vector of groups to include (based on the column specified by `group_column`).
 #' @param genes Optional character vector of gene identifiers to restrict the matrix.
-#' @param top_n_genes Optional integer selecting the top variable genes to include.
+#' @param top_n Optional integer selecting the top variable genes to include.
+#' @param top_n_genes Deprecated; use `top_n`.
+#' @param max_genes Maximum number of genes accepted in `genes` (default 20).
 #' @param label Logical; draw sample labels when `TRUE`.
 #' @param label_size Numeric size of sample labels when `label = TRUE`.
 #' @param point_size Numeric size for points.
@@ -629,7 +640,7 @@ get_mds_plot <- function(x,
                          sample_group = NULL,
                          group_column = NULL,
                          genes = NULL,
-                         top_n_genes = NULL,
+                         top_n = NULL,
                          label = FALSE,
                          label_size = 3,
                          point_size = 10,
@@ -639,9 +650,16 @@ get_mds_plot <- function(x,
                          use_vista_colors = NULL,
                          palette = NULL,
                          colors = NULL,
-                         use_group_colors = TRUE) {
+                         use_group_colors = TRUE,
+                         top_n_genes = NULL,
+                         max_genes = 20) {
 
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(top_n_genes)) {
+    top_n <- .vista_deprecate_arg(
+      old = "top_n_genes", new = "top_n", value = top_n_genes, fun = "get_mds_plot"
+    )
+  }
   use_group_colors <- .resolve_group_color_preference(
     use_group_colors = use_group_colors,
     use_vista_colors = use_vista_colors
@@ -659,7 +677,7 @@ get_mds_plot <- function(x,
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
   }
 
-  mat <- .filter_genes(mat, genes, top_n_genes)
+  mat <- .filter_genes(mat, genes, top_n, max_genes = max_genes)
   mat <- mat[matrixStats::rowVars(mat) > 0, , drop = FALSE]
 
   dist_matrix <- stats::dist(t(mat), method = "euclidean")
@@ -761,7 +779,9 @@ get_mds_plot <- function(x,
 #' @param color_by Optional column name in `sample_info` used for point color.
 #'   Defaults to `group_column`.
 #' @param genes Optional character vector of gene identifiers to restrict the matrix.
-#' @param top_n_genes Optional integer selecting top variable genes to include.
+#' @param top_n Optional integer selecting top variable genes to include.
+#' @param top_n_genes Deprecated; use `top_n`.
+#' @param max_genes Maximum number of genes accepted in `genes` (default 20).
 #' @param label Logical; draw sample labels when `TRUE`.
 #' @param label_size Numeric label size when `label = TRUE`.
 #' @param point_size Numeric point size.
@@ -794,7 +814,7 @@ get_umap_plot <- function(x,
                           group_column = NULL,
                           color_by = NULL,
                           genes = NULL,
-                          top_n_genes = NULL,
+                          top_n = NULL,
                           label = FALSE,
                           label_size = 3,
                           point_size = 10,
@@ -807,9 +827,16 @@ get_umap_plot <- function(x,
                           use_vista_colors = NULL,
                           palette = NULL,
                           colors = NULL,
-                          use_group_colors = TRUE) {
+                          use_group_colors = TRUE,
+                         top_n_genes = NULL,
+                         max_genes = 20) {
 
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(top_n_genes)) {
+    top_n <- .vista_deprecate_arg(
+      old = "top_n_genes", new = "top_n", value = top_n_genes, fun = "get_umap_plot"
+    )
+  }
   if (!requireNamespace("uwot", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg uwot} must be installed to compute UMAP.")
   }
@@ -830,7 +857,7 @@ get_umap_plot <- function(x,
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
   }
 
-  mat <- .filter_genes(mat, genes, top_n_genes)
+  mat <- .filter_genes(mat, genes, top_n, max_genes = max_genes)
   mat <- mat[matrixStats::rowVars(mat) > 0, , drop = FALSE]
 
   n_samples <- ncol(mat)
@@ -2882,7 +2909,8 @@ get_expression_scatter <- function(x,
 #'   Previously an undocumented hard cap.
 #' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param point_size Numeric size of the dots.
-#' @param line_size Numeric size of the stems.
+#' @param linewidth Numeric width of the stems.
+#' @param line_size Deprecated; use `linewidth`.
 #' @param label Logical; draw numeric labels above the dots.
 #' @param label_digits Integer; digits to show in labels when `label = TRUE`.
 #' @param display_id Optional ID/column name to use for labels/facets. If supplied
@@ -2924,15 +2952,21 @@ get_expression_lollipop <- function(x,
                                     facet_nrow = NULL,
                                     facet_ncol = NULL,
                                     point_size = 6,
-                                    line_size = 1.2,
+                                    linewidth = 1.2,
                                     label = TRUE,
                                     label_digits = 1,
                                     display_id = NULL,
                                     display_from = NULL,
                                     display_orgdb = NULL,
                                     facet_scales = facet_scale,
-                                    max_genes = 15) {
+                                    max_genes = 15,
+                                    line_size = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(line_size)) {
+    linewidth <- .vista_deprecate_arg(
+      old = "line_size", new = "linewidth", value = line_size, fun = "get_expression_lollipop"
+    )
+  }
   if (length(genes) > max_genes) {
     cli::cli_abort(
       "At most {max_genes} gene{?s} can be plotted at once; {length(genes)} were supplied. Raise {.arg max_genes} to override."
@@ -3021,7 +3055,7 @@ get_expression_lollipop <- function(x,
   ) +
     ggplot2::geom_segment(
       ggplot2::aes(xend = .data[[x_var]], y = 0, yend = expression),
-      linewidth = line_size,
+      linewidth = linewidth,
       lineend = "round"
     ) +
     ggplot2::geom_point(size = point_size) +
@@ -4739,7 +4773,8 @@ get_expression_barplot <- function(x,
 #'   sign). For two comparisons, a named or unnamed vector of colors with one
 #'   entry per comparison (defaults to a qualitative palette).
 #' @param point_size Numeric size of dots.
-#' @param line_size Numeric size of stems (linewidth).
+#' @param linewidth Numeric width of the stems.
+#' @param line_size Deprecated; use `linewidth`.
 #' @param label Logical; draw numeric labels next to the dots.
 #' @param label_digits Integer; digits to show in labels when `label = TRUE`.
 #' @param display_id Optional column in `rowData(x)` used to interpret `genes`
@@ -4770,7 +4805,7 @@ get_foldchange_lollipop <- function(x,
                                     sort_by = c("input", "log2fc", "abs_log2fc"),
                                     palette = NULL,
                                     point_size = 6,
-                                    line_size = 1.2,
+                                    linewidth = 1.2,
                                     label = TRUE,
                                     label_digits = 2,
                                     display_id = NULL,
@@ -4780,8 +4815,14 @@ get_foldchange_lollipop <- function(x,
                                     facet_scales = "free_y",
                                     facet_nrow = NULL,
                                     facet_ncol = NULL,
-                                    facet_by = c("auto", "gene", "comparison", "none")) {
+                                    facet_by = c("auto", "gene", "comparison", "none"),
+                                    line_size = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(line_size)) {
+    linewidth <- .vista_deprecate_arg(
+      old = "line_size", new = "linewidth", value = line_size, fun = "get_foldchange_lollipop"
+    )
+  }
   sort_by <- match.arg(sort_by)
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
@@ -4877,7 +4918,7 @@ get_foldchange_lollipop <- function(x,
         ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
         ggplot2::geom_segment(
           ggplot2::aes(xend = comparison, y = 0, yend = log2fc),
-          linewidth = line_size,
+          linewidth = linewidth,
           lineend = "round"
         ) +
         ggplot2::geom_point(size = point_size) +
@@ -4919,7 +4960,7 @@ get_foldchange_lollipop <- function(x,
         ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
         ggplot2::geom_segment(
           ggplot2::aes(xend = comparison, y = 0, yend = log2fc),
-          linewidth = line_size,
+          linewidth = linewidth,
           lineend = "round"
         ) +
         ggplot2::geom_point(size = point_size) +
@@ -4983,7 +5024,7 @@ get_foldchange_lollipop <- function(x,
     plt <- base_plot +
       ggplot2::geom_segment(
         ggplot2::aes(xend = gene_id, y = 0, yend = log2fc, color = fc_dir),
-        linewidth = line_size,
+        linewidth = linewidth,
         lineend = "round",
         data = df
       ) +
@@ -5033,7 +5074,7 @@ get_foldchange_lollipop <- function(x,
         ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
         ggplot2::geom_segment(
           ggplot2::aes(xend = gene_id, y = 0, yend = log2fc),
-          linewidth = line_size,
+          linewidth = linewidth,
           lineend = "round"
         ) +
         ggplot2::geom_point(size = point_size) +
@@ -5070,7 +5111,7 @@ get_foldchange_lollipop <- function(x,
         ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
         ggplot2::geom_segment(
           ggplot2::aes(xend = x_dodge, y = 0, yend = log2fc),
-          linewidth = line_size,
+          linewidth = linewidth,
           lineend = "round"
         ) +
         ggplot2::geom_point(size = point_size) +
