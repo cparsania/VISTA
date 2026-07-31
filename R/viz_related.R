@@ -2904,14 +2904,17 @@ get_expression_lollipop <- function(x,
   }
 
   underlying_ids <- rownames(mat)
-  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-    map <- rd[[display_id]]
-    names(map) <- rownames(x)
-    gene_ids <- names(map)[match(genes, map)]
-    gene_ids <- gene_ids[!is.na(gene_ids)]
-  } else {
-    gene_ids <- .map_gene_ids(genes, from_type = display_from, to_type = display_from, orgdb = display_orgdb)
-  }
+  # Shared resolver: `genes` may be display labels (SYMBOLs), so it maps back to
+  # the object's own identifiers. The previous inline OrgDb branch called
+  # .map_gene_ids(from_type = display_from, to_type = display_from) -- source and
+  # target identical, which is a no-op, so symbols never resolved.
+  gene_ids <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
   if (!length(gene_ids)) gene_ids <- genes
 
   missing_genes <- setdiff(gene_ids, underlying_ids)
