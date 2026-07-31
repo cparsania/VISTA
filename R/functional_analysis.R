@@ -71,8 +71,8 @@ setGeneric("enrichMsigDB", function(x,
                                     col_genetype = "GENETYPE",
                                     feature_type = "protein-coding",
                                     ...) {
-  methods::standardGeneric("enrichMsigDB")
-})
+  standardGeneric("enrichMsigDB")
+}, signature = "x")
 
 setMethod(
   "enrichMsigDB", "VISTA",

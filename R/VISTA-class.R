@@ -19,6 +19,8 @@
 #' primary end-user constructor. Advanced users can convert an existing
 #' \code{SummarizedExperiment} with \code{as_vista()}.
 #' @name VISTA-class
+#' @aliases VISTA VISTA-class
+#' @docType class
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom methods setClass setValidity
 #' @exportClass VISTA

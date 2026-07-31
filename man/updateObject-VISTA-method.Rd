@@ -25,7 +25,7 @@ the migration is recorded in \code{metadata(x)$provenance$updates}.
 \details{
 Some content cannot be recovered by migration. In particular, objects built
 before VISTA 1.2.0 did not retain raw counts, and normalized counts are not
-invertible -- \code{\link[BiocGenerics:dge]{BiocGenerics::counts()}} on such an object reports that a rebuild is
+invertible -- \code{\link[=counts]{counts()}} on such an object reports that a rebuild is
 required rather than inventing values.
 
 Objects carrying a \emph{newer} schema than the running package are left

@@ -267,3 +267,27 @@ test_that("group summarisation drops empty factor levels instead of emitting NaN
     unname(rowMeans(SummarizedExperiment::assay(v, "norm_counts")[, ctrl, drop = FALSE]))
   )
 })
+
+test_that("accessor generics dispatch only on the object (2e)", {
+  for (g in c("comparisons", "deg_summary", "cutoffs", "norm_counts",
+              "sample_info", "row_data", "group_colors", "group_palette")) {
+    expect_identical(
+      methods::getGeneric(g)@signature, "object",
+      info = g
+    )
+  }
+  expect_identical(methods::getGeneric("enrichMsigDB")@signature, "x")
+})
+
+test_that("non-class arguments are no longer forced at dispatch", {
+  v <- make_small_vista()
+
+  # Every formal used to join the dispatch signature, so `summarise` was
+  # evaluated before the method body ran.
+  expect_silent(nc <- norm_counts(v))
+  expect_true(is.matrix(nc))
+
+  # A lazy default that would error if forced at dispatch is fine now.
+  f <- function(obj, s = stop("forced at dispatch")) norm_counts(obj)
+  expect_true(is.matrix(f(v)))
+})

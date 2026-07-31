@@ -13,7 +13,7 @@ Description: The VISTA (Visualization and Integrated System for Transcriptomic A
     experiments.
 License: GPL-3
 Encoding: UTF-8
-Depends: R (>= 4.3)
+Depends: R (>= 4.6.0)
 Imports:
     AnnotationDbi,
     BiocGenerics,
