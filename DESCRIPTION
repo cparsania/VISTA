@@ -16,6 +16,7 @@ Encoding: UTF-8
 Depends: R (>= 4.3)
 Imports:
     AnnotationDbi,
+    BiocGenerics,
     cli,
     clusterProfiler,
     colorspace,
