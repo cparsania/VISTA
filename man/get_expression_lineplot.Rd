@@ -92,7 +92,7 @@ choice; one of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
 \item{base_size}{Base theme size.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object connecting expression values across groups or samples.
 }
 \description{
 Plots normalized expression for selected genes across samples or

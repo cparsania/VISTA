@@ -67,7 +67,8 @@ the first comparison color (if stored) for consistency across plots.}
 \item{base_size}{Numeric base theme size.}
 }
 \value{
-An object returned by this function.
+A list with \code{plot} (a \code{ggplot2} object) and \code{clustered_data}
+(the long data frame behind it, including any k-means cluster assignment).
 
 A list with \code{plot} (the \code{ggplot2} object) and \code{clustered_data}
 (gene-to-cluster assignments).

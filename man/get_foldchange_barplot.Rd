@@ -50,7 +50,7 @@ not present in \code{rowData(x)}.}
 \code{"comparison"}, or \code{"none"}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object with one bar per gene showing log2 fold change.
 
 A \code{ggplot2} object.
 }

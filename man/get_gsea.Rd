@@ -37,7 +37,8 @@ get_gsea(
 depending on \code{set_type}.}
 }
 \value{
-An object returned by this function.
+A list with a single element \code{enrich}, holding the \code{gseaResult}
+returned by the selected clusterProfiler GSEA function.
 }
 \description{
 Gene set enrichment analysis (GSEA) from a VISTA comparison

@@ -46,7 +46,7 @@ or \code{"none"} for a single pie.}
 \item{ncol}{Optional number of columns when faceting.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object drawing DEG counts as a pie chart.
 }
 \description{
 Pie chart of DEG counts (Up/Down) across comparisons

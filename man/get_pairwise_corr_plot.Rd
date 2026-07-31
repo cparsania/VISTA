@@ -31,7 +31,7 @@ current order, while \code{"group"} sorts by \code{group_column}.}
 \item{title}{Plot title.}
 }
 \value{
-An object returned by this function.
+A \code{GGally::ggmatrix} object of pairwise sample scatter plots.
 }
 \description{
 Uses GGally::ggpairs on normalized expression to display correlations among

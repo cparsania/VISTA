@@ -71,7 +71,7 @@ is not found in \code{rowData}).}
 \code{display_id} is set but not found in \code{rowData}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object drawing expression as lollipops.
 
 A \code{ggplot2} object.
 }

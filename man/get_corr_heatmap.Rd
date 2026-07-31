@@ -68,7 +68,7 @@ color scale.}
 \item{viridis_begin, viridis_end}{Palette endpoints between 0 and 1.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object showing the sample-by-sample correlation heatmap.
 }
 \description{
 Plots sample-sample correlation matrix derived from normalized counts with

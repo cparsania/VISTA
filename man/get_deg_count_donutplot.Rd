@@ -46,7 +46,7 @@ or \code{"none"} for a single donut.}
 \item{ncol}{Optional number of columns when faceting.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object drawing DEG counts as a donut chart.
 }
 \description{
 Donut chart of DEG counts (Up/Down) across comparisons

@@ -61,7 +61,7 @@ both \code{palette} and stored VISTA colours.}
 colours when colouring by the grouping column.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object showing the first two MDS dimensions.
 }
 \description{
 Runs classical multidimensional scaling on normalized counts, optionally

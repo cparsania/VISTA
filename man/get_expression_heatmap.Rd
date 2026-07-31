@@ -114,7 +114,8 @@ annotation column.}
 \item{...}{Additional arguments passed to \code{ComplexHeatmap::Heatmap()}.}
 }
 \value{
-An object returned by this function.
+A \code{ComplexHeatmap::Heatmap} object, a tibble of k-means cluster
+assignments, or a list of both, depending on \code{return_type}.
 
 A \code{ComplexHeatmap} object, a cluster data frame, or a list containing
 both depending on \code{return_type}.

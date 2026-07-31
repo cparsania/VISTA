@@ -75,7 +75,7 @@ column or \code{"sample"}.}
 \code{"input"}, \code{"group"}, or \code{"expression"}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object with one box per group (or per sample).
 }
 \description{
 Displays per-sample or per-group distributions for selected genes using

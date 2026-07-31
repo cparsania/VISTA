@@ -72,7 +72,7 @@ two comparisons on the same axis.}
 \code{"comparison"}, or \code{"none"}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object drawing log2 fold change as lollipops.
 
 A \code{ggplot2} object.
 }
