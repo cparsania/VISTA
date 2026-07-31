@@ -144,3 +144,39 @@ test_that("get_celltype_heatmap returns matrix and plot outputs", {
   expect_true(is.matrix(mat_only))
   expect_equal(nrow(mat_only), 2)
 })
+
+test_that(".collapse_ensembl_symbol_ids works on the matrix its caller passes", {
+  v <- make_small_vista()
+  mat <- SummarizedExperiment::assay(v, "norm_counts")[seq_len(6), , drop = FALSE]
+  rownames(mat) <- c(
+    "ENSG00000000001:AAA", "ENSG00000000002:BBB", "ENSG00000000003:AAA",
+    "ENSG00000000004:CCC", "ENSG00000000005:BBB", "ENSG00000000006:DDD"
+  )
+
+  # run_cell_deconvolution() hands this a matrix, not a data.frame.
+  out <- VISTA:::.collapse_ensembl_symbol_ids(mat)
+
+  expect_true(is.matrix(out))
+  expect_setequal(rownames(out), c("AAA", "BBB", "CCC", "DDD"))
+  expect_identical(colnames(out), colnames(mat))
+
+  # Duplicated symbols are averaged.
+  expect_equal(
+    unname(out["AAA", ]),
+    unname(colMeans(mat[c(1, 3), , drop = FALSE]))
+  )
+  expect_equal(unname(out["CCC", ]), unname(mat[4, ]))
+})
+
+test_that("ENSEMBL:SYMBOL rownames are auto-detected and routed to the collapser", {
+  ids <- c("ENSG00000000001:AAA", "ENSG00000000002:BBB", "ENSG00000000003:CCC")
+  expect_identical(VISTA:::.infer_gene_id_type(ids), "ensembl_symbol")
+
+  # This is the combination that made run_cell_deconvolution() unusable: the
+  # default gene_id_type = "auto" resolves to "ensembl_symbol", which then hit
+  # the collapser with a matrix.
+  v <- make_small_vista()
+  mat <- SummarizedExperiment::assay(v, "norm_counts")[seq_len(3), , drop = FALSE]
+  rownames(mat) <- ids
+  expect_no_error(VISTA:::.collapse_ensembl_symbol_ids(mat))
+})

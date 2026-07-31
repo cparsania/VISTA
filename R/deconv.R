@@ -76,7 +76,9 @@
 }
 
 .collapse_ensembl_symbol_ids <- function(mat) {
-  mat %>%
+  # Callers pass assay(x, "norm_counts"), which is a matrix; rownames_to_column()
+  # requires a data.frame.
+  as.data.frame(mat) %>%
     tibble::rownames_to_column("gene") %>%
     dplyr::mutate(gene_symbol = sub("^.+:(.+)$", "\\1", gene)) %>%
     dplyr::group_by(gene_symbol) %>%
