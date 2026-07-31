@@ -120,7 +120,38 @@ validate_vista <- function(x, level = c("core", "full"), error = TRUE) {
     }
   }
 
+  # The DE tables must describe the genes actually present. This lived only in
+  # .validate_vista_full(), so a stale-metadata object -- the state row
+  # subsetting used to produce -- passed a core check. It stays out of
+  # setValidity(), which runs on every new() and slot assignment and must remain
+  # cheap and structural.
+  issues <- c(issues, .validate_de_rownames(md$de_results, rownames(mat), "metadata(x)$de_results"))
+  if (!is.null(md$de_results_by_method) && is.list(md$de_results_by_method)) {
+    for (src in names(md$de_results_by_method)) {
+      issues <- c(issues, .validate_de_rownames(
+        md$de_results_by_method[[src]], rownames(mat),
+        sprintf("metadata(x)$de_results_by_method[['%s']]", src)
+      ))
+    }
+  }
+
   unique(issues)
+}
+
+#' @keywords internal
+.validate_de_rownames <- function(tbls, rn, label) {
+  if (is.null(tbls)) return(character())
+  if (inherits(tbls, "SimpleList")) tbls <- as.list(tbls)
+  if (!is.list(tbls)) return(character())
+
+  out <- character()
+  for (nm in names(tbls)) {
+    trn <- rownames(as.data.frame(tbls[[nm]], stringsAsFactors = FALSE))
+    if (is.null(trn) || !identical(trn, rn)) {
+      out <- c(out, sprintf("%s[['%s']] rownames must match rownames(norm_counts).", label, nm))
+    }
+  }
+  out
 }
 
 #' @keywords internal
