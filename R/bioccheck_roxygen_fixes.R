@@ -373,13 +373,6 @@ NULL
 #' }
 NULL
 
-#' @name print.VISTA
-#' @aliases print.vista
-#' @return The input object `x`, returned invisibly.
-#' @examples
-#' v <- example_vista()
-#' print(v)
-NULL
 
 #' @name run_cell_deconvolution
 #' @examples

@@ -1,22 +1,19 @@
-#' Print a VISTA object like a SummarizedExperiment
+#' Print a VISTA object
 #'
-#' Forwards to SummarizedExperiment's `show()` so the output is identical to a
-#' plain SE. Invisibly returns `x`.
+#' S3 entry point kept for code that calls `print()` explicitly (including
+#' knitr, which prints rather than auto-displaying). It forwards to the S4
+#' `show()` method so both routes produce identical output.
 #'
 #' @param x A VISTA object.
 #' @param ... Ignored.
 #'
+#' @return `x`, invisibly. Called for its output.
+#' @examples
+#' v <- example_vista()
+#' print(v)
 #' @export
 #' @method print VISTA
 print.VISTA <- function(x, ...) {
-  se_show <- methods::selectMethod("show", "SummarizedExperiment")
-  se_show(as(x, "SummarizedExperiment"))
+  methods::show(x)
   invisible(x)
-}
-
-#' @export
-#' @method print vista
-print.vista <- function(x, ...) {
-  # Back-compat if anything in your code still calls print() on old 'vista' class
-  print.VISTA(x, ...)
 }

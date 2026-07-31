@@ -91,18 +91,35 @@ test_that(".vista validates core constructor inputs", {
   )
 })
 
-test_that("print methods return invisibly and produce SE-like output", {
+test_that("show() and print() both identify the object as VISTA", {
   vista <- make_mock_vista(with_comparisons = TRUE)
 
+  expect_true(existsMethod("show", "VISTA"))
+
+  shown <- capture.output(methods::show(vista))
   printed <- capture.output(out <- withVisible(print(vista)))
+  auto <- capture.output(vista)
+
+  # All three routes must agree, and none may claim the parent class.
+  expect_identical(printed, shown)
+  expect_identical(auto, shown)
+  expect_match(shown[[1]], "^class: VISTA")
+  expect_false(any(grepl("^class: SummarizedExperiment", shown)))
+
   expect_false(out$visible)
   expect_identical(out$value, vista)
-  expect_true(length(printed) > 0)
+})
 
-  printed_legacy <- capture.output(out_legacy <- withVisible(print.vista(vista)))
-  expect_false(out_legacy$visible)
-  expect_identical(out_legacy$value, vista)
-  expect_true(length(printed_legacy) > 0)
+test_that("show() surfaces the analysis state", {
+  vista <- make_small_vista()
+  shown <- paste(capture.output(methods::show(vista)), collapse = "\n")
+
+  expect_match(shown, "VISTA", fixed = TRUE)
+  expect_match(shown, "group column", fixed = TRUE)
+  expect_match(shown, "comparisons", fixed = TRUE)
+  expect_match(shown, names(comparisons(vista))[[1]], fixed = TRUE)
+  expect_match(shown, "cutoffs", fixed = TRUE)
+  expect_match(shown, "schema", fixed = TRUE)
 })
 
 test_that("run_vista_report validates config inputs before rendering", {
