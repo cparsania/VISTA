@@ -481,7 +481,9 @@ get_expression_matrix <- function(x,
       # treat sample_names as group labels when summarising
       meta <- meta[meta[[group_col]] %in% sample_names, , drop = FALSE]
     }
-    group_map <- split(meta$sample, meta[[group_col]])
+    # droplevels(): see norm_counts() -- a retained-but-empty factor level would
+    # otherwise produce an all-NaN column.
+    group_map <- split(meta$sample, droplevels(as.factor(meta[[group_col]])))
     mat <- vapply(group_map, function(samps) rowMeans(mat[, samps, drop = FALSE]),
                   FUN.VALUE = numeric(nrow(mat)))
     mat <- as.matrix(mat)

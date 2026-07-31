@@ -237,3 +237,33 @@ test_that("set_vista_comparison_colors validates complete mapping", {
     "Missing comparison color"
   )
 })
+
+test_that("group summarisation drops empty factor levels instead of emitting NaN", {
+  v <- make_small_vista()
+  group_col <- S4Vectors::metadata(v)$group$column
+
+  # Force the grouping column to a factor that retains a level with no samples,
+  # which is what subsetting an object produces.
+  cd <- SummarizedExperiment::colData(v)
+  cd[[group_col]] <- factor(
+    as.character(cd[[group_col]]),
+    levels = c(unique(as.character(cd[[group_col]])), "ghost_group")
+  )
+  SummarizedExperiment::colData(v) <- cd
+
+  nc <- norm_counts(v, summarise = TRUE)
+  expect_false(anyNA(nc))
+  expect_false("ghost_group" %in% colnames(nc))
+  expect_setequal(colnames(nc), unique(as.character(cd[[group_col]])))
+
+  em <- get_expression_matrix(v, summarise = TRUE)
+  expect_false(anyNA(em))
+  expect_false("ghost_group" %in% colnames(em))
+
+  # The surviving groups still carry the right values.
+  ctrl <- rownames(cd)[as.character(cd[[group_col]]) == "control"]
+  expect_equal(
+    unname(nc[, "control"]),
+    unname(rowMeans(SummarizedExperiment::assay(v, "norm_counts")[, ctrl, drop = FALSE]))
+  )
+})

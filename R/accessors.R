@@ -166,7 +166,10 @@ setMethod("norm_counts", "VISTA", function(object, summarise = FALSE) {
   }
 
   si$sample <- rownames(si)
-  group_map <- split(si$sample, si[[group_column]])
+  # droplevels(): a factor grouping column can retain levels with no remaining
+  # samples (for example after subsetting the object). split() would then emit an
+  # empty group whose rowMeans is NaN for every gene.
+  group_map <- split(si$sample, droplevels(as.factor(si[[group_column]])))
   summarized <- vapply(group_map, function(samples) {
     rowMeans(mat[, samples, drop = FALSE])
   }, FUN.VALUE = numeric(nrow(mat)))
