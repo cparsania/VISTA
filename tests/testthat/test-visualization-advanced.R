@@ -260,3 +260,55 @@ test_that("plots fall back to a default palette when stored comparison colors dr
     get_foldchange_lineplot(v, sample_comparisons = names(comparisons(v)))
   )
 })
+
+test_that("corr heatmap triangle mask matches the rendered axis order (B3)", {
+  v <- make_small_vista()
+
+  # The mask used to be computed against input-order factor codes while the axes
+  # were re-levelled to hclust order afterwards, so the retained cells formed a
+  # staircase rather than a triangle.
+  count_per_row <- function(p) {
+    d <- p$data
+    lv <- levels(d$Var1)
+    as.integer(table(factor(as.character(d$Var1), levels = lv)))
+  }
+
+  for (cb in c("correlation", "group", "input", "none")) {
+    lower <- get_corr_heatmap(v, triangle = "lower", cluster_by = cb)
+    expect_identical(
+      count_per_row(lower), seq_len(ncol(v)),
+      info = paste("lower /", cb)
+    )
+
+    upper <- get_corr_heatmap(v, triangle = "upper", cluster_by = cb)
+    expect_identical(
+      count_per_row(upper), rev(seq_len(ncol(v))),
+      info = paste("upper /", cb)
+    )
+  }
+})
+
+test_that("corr heatmap full triangle and show_diagonal stay consistent", {
+  v <- make_small_vista()
+  n <- ncol(v)
+
+  full <- get_corr_heatmap(v, triangle = "full")
+  expect_identical(nrow(full$data), as.integer(n * n))
+
+  no_diag <- get_corr_heatmap(v, triangle = "full", show_diagonal = FALSE)
+  expect_identical(nrow(no_diag$data), as.integer(n * n - n))
+
+  lower_no_diag <- get_corr_heatmap(v, triangle = "lower", show_diagonal = FALSE)
+  expect_identical(nrow(lower_no_diag$data), as.integer(n * (n - 1) / 2))
+
+  # Values must still belong to their own sample pair after re-levelling.
+  mat <- log2(SummarizedExperiment::assay(v, "norm_counts") + 1)
+  cm <- stats::cor(mat, method = "pearson", use = "pairwise.complete.obs")
+  d <- full$data
+  for (i in sample(seq_len(nrow(d)), min(10L, nrow(d)))) {
+    expect_equal(
+      d$value[[i]],
+      cm[as.character(d$Var1[[i]]), as.character(d$Var2[[i]])]
+    )
+  }
+})

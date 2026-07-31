@@ -1275,13 +1275,10 @@ get_corr_heatmap <- function(x,
   df <- as.data.frame(as.table(cor_mat))
   colnames(df) <- c("Var1", "Var2", "value")
 
-  if (!show_diagonal) df <- dplyr::filter(df, Var1 != Var2)
-  if (triangle == "lower") {
-    df <- dplyr::filter(df, as.integer(Var1) >= as.integer(Var2))
-  } else if (triangle == "upper") {
-    df <- dplyr::filter(df, as.integer(Var1) <= as.integer(Var2))
-  }
-
+  # Resolve the axis order FIRST. The triangle mask below compares factor codes,
+  # so it has to run against the levels the plot will actually be drawn with --
+  # otherwise the retained cells describe the input order while the axes show the
+  # clustered order, and the "triangle" renders as a jagged staircase.
   if (cluster_by == "correlation") {
     ord <- hclust(as.dist(1 - cor_mat))$order
     sample_levels <- rownames(cor_mat)[ord]
@@ -1295,6 +1292,13 @@ get_corr_heatmap <- function(x,
   }
   df$Var1 <- factor(df$Var1, levels = sample_levels)
   df$Var2 <- factor(df$Var2, levels = sample_levels)
+
+  if (!show_diagonal) df <- dplyr::filter(df, Var1 != Var2)
+  if (triangle == "lower") {
+    df <- dplyr::filter(df, as.integer(Var1) >= as.integer(Var2))
+  } else if (triangle == "upper") {
+    df <- dplyr::filter(df, as.integer(Var1) <= as.integer(Var2))
+  }
 
   p <- ggplot2::ggplot(df, ggplot2::aes(Var1, Var2, fill = value)) +
     ggplot2::geom_tile() +
