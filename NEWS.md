@@ -1,3 +1,104 @@
+# VISTA 1.1.2
+
+Targeted at Bioconductor 3.24 (VISTA 1.2.0). This release fixes several
+defects that produced silently wrong results, makes VISTA behave like a
+proper Bioconductor object, and begins a deprecation cycle for a number of
+inconsistent argument names. **No existing script stops working**: every
+renamed argument still functions and warns.
+
+## Data-integrity fixes
+
+Check whether you were affected:
+
+- **`get_expression_matrix(genes = ..., summarise = TRUE)` mislabelled rows.**
+  Rows were subset in assay order but labelled in the order `genes` was
+  supplied, so whenever those differed every row carried another gene's
+  identifier and values. If you passed `genes` in an order other than the
+  object's own row order together with `summarise = TRUE`, re-run that call.
+- **GSEA ranked vectors slid scores onto the wrong genes.** `get_gsea()`
+  reassigned `names(rank_vec)` from a mapping helper that drops unmapped and
+  duplicate identifiers, so the shorter vector was padded with `NA` and every
+  score after the first gap moved to a different gene. The KEGG path always
+  maps to ENTREZID, so any real dataset was affected. Re-run affected GSEA.
+- **`get_corr_heatmap()` drew a staircase, not a triangle.** The `triangle`
+  mask was computed against input order while the axes were re-levelled to
+  clustered order, under the default `cluster_by = "correlation"`.
+- **Multi-file count importers bound columns positionally.** The STAR, HTSeq
+  and RSEM importers took gene identifiers from the first file only and never
+  checked that row *i* described the same gene in the others. Files with equal
+  row counts but different ordering were silently misaligned. They now match by
+  identifier and **error** if a file does not cover the reference gene set.
+- **`run_vista_report()` reported its own defaults as your parameters.** When a
+  prebuilt object was supplied via `vista_rds`, the report printed
+  deseq2 / 1 / 0.05 / padj regardless of how the object was built.
+- **Deconvolution was broken for `ENSG...:SYMBOL` rownames** — the common case
+  reached automatically by `gene_id_type = "auto"`.
+- Fixed `get_ma_plot()` reading a non-existent metadata key for its threshold
+  fallback, `get_expression_lollipop()` failing to resolve symbols through an
+  OrgDb, comparison colours collapsing to `character(0)` and crashing
+  `get_foldchange_lineplot()`, `NaN` columns when summarising over a factor
+  with unused levels, and YAML/filename escaping in report and asset output.
+
+## Analysis changes
+
+- The edgeR and limma backends now filter with the same predicate as DESeq2
+  (a gene is kept when at least `min_replicates` samples reach `min_counts`);
+  they previously ignored `min_counts` and used a hardcoded `cpm > 1`. They
+  also filter *before* `calcNormFactors()`, per the edgeR user's guide. edgeR
+  and limma results shift slightly relative to 1.1.1.
+- `min_replicates` is documented accurately: it counts samples across the
+  whole experiment, never within each group.
+
+## New features
+
+- **Raw counts are retained** as a `counts` assay, reachable with `counts(v)`.
+  `as_deseq_dataset()` converts a VISTA object back into a `DESeqDataSet`.
+  Roughly doubles the assay footprint; opt out with
+  `create_vista(keep_raw_counts = FALSE)`.
+- **`[` method.** Subsetting now keeps metadata consistent: row subsetting
+  reindexes every DE table and recounts DEG summaries, column subsetting
+  prunes orphaned colour maps and warns when a comparison loses its samples.
+  Previously `v[1:10, ]` left the DE tables describing all original genes and
+  `validObject()` still returned `TRUE`.
+- **`show()` method.** Objects now display as `class: VISTA` with their
+  grouping, comparisons, active DE source, cutoffs and schema version.
+- **`updateObject()`** migrates objects from older metadata schemas.
+- **`?VISTA`** resolves, and there is a package overview page.
+- Unknown arguments passed through `...` are now rejected with a did-you-mean
+  suggestion. A typo such as `get_expression_heatmap(v, gene = my_genes)`
+  previously plotted the default gene set instead of erroring.
+
+## Deprecations
+
+All still work and warn once per session. See `?VISTA-deprecated` for the
+full table and timelines; each becomes defunct in 1.4.0.
+
+| Function | Deprecated | Use instead |
+|---|---|---|
+| `get_deg_count_pieplot()`, `get_deg_count_donutplot()` | `label` | `label_type` |
+| `get_corr_heatmap()` | `cluster_by` | `order_by` |
+| `get_corr_heatmap()` | `show_corr_values`, `col_corr_values` | `label`, `label_color` |
+| `get_celltype_group_dotplot()` | `error` | `errorbar` |
+| four `get_expression_*()` plots | `comparisons` | `stat_comparisons` |
+| `get_pca_plot()`, `get_mds_plot()`, `get_umap_plot()` | `top_n_genes` | `top_n` |
+| `get_expression_lollipop()`, `get_foldchange_lollipop()` | `line_size` | `linewidth` |
+| `get_volcano_plot()` | `col_up`, `col_down`, `col_other(s)`, `lab_size` | `colors`, `label_size` |
+| `get_pca_plot()` | `sample.seed` | removed; it never had any effect |
+| `get_expression_barplot()`, `get_expression_lollipop()` | `facet_scale` | `facet_scales` |
+| `get_expression_violinplot()`, `get_expression_lineplot()` | `value_transform` | `log_transform` |
+
+Undocumented gene caps (20 for embeddings, 15 for lollipop, 25 for barplot)
+are now the `max_genes` argument, with the existing values as defaults.
+
+## Internal
+
+- Accessor generics dispatch only on the object rather than on every formal.
+- `Depends: R (>= 4.6.0)`; `viridis` dropped from Imports (unused);
+  `BiocGenerics` added.
+- `print.vista` removed — no object could carry that class.
+- Plot layer data is pinned by snapshot tests so API renames cannot silently
+  change output.
+
 # VISTA 1.1.1
 
 ## Bug fixes
