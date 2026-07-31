@@ -271,33 +271,20 @@
 #' options(warn = 2)
 #' }
 #'
-#' @section Registry:
-#' \Sexpr[stage=render,results=rd]{VISTA:::.vista_deprecation_rd()}
+#' @section Inspecting the registry:
+#' The authoritative list lives in the package itself rather than being
+#' duplicated here, so it cannot drift out of date. Print it with the example
+#' below, or filter it to the function you are migrating.
 #'
 #' @name VISTA-deprecated
 #' @aliases VISTA-deprecated
 #' @return Not applicable; this page documents argument deprecations only.
 #' @examples
-#' # Inspect the timeline for a specific function
+#' # The full table of deprecated arguments and their timelines
+#' VISTA:::.vista_deprecations()[, c("fun", "old_arg", "new_arg", "defunct_in")]
+#'
+#' # Or just the one function you are migrating
 #' reg <- VISTA:::.vista_deprecations()
 #' reg[reg$fun == "get_corr_heatmap", c("old_arg", "new_arg", "defunct_in")]
 NULL
 
-#' @keywords internal
-#' @noRd
-.vista_deprecation_rd <- function() {
-  reg <- .vista_deprecations()
-  reg <- reg[order(reg$fun, reg$old_arg), , drop = FALSE]
-  esc <- function(x) gsub("([\\\\{}%])", "\\\\\\1", x)
-  body <- paste0(
-    "\\code{", esc(reg$fun), "()} \\tab \\code{", esc(reg$old_arg), "} \\tab ",
-    ifelse(nzchar(reg$new_arg), paste0("\\code{", esc(reg$new_arg), "}"), "removed"),
-    " \\tab ", esc(reg$defunct_in), " \\cr",
-    collapse = "\n"
-  )
-  paste0(
-    "\\tabular{llll}{\n",
-    "\\strong{Function} \\tab \\strong{Deprecated} \\tab \\strong{Use instead} \\tab \\strong{Defunct in} \\cr\n",
-    body, "\n}"
-  )
-}

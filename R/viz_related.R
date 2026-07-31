@@ -5538,6 +5538,9 @@ get_deg_count_barplot <- function(x,
 #' @param x A `VISTA` object containing DEG summaries.
 #' @param sample_comparisons Optional character vector of comparison names to display.
 #' @param label Label mode: `"both"` (default), `"count"`, `"percent"`, or `"none"`.
+#' @param label_type Label content: `"both"`, `"count"`, `"percent"` or `"none"`.
+#' @param label Deprecated; use `label_type`. `TRUE`/`FALSE` map to
+#'   `"both"`/`"none"`.
 #' @param label_digits Integer number of decimals used for percentage labels.
 #' @param base_size Numeric base font size for the plot.
 #' @param colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
@@ -5593,6 +5596,9 @@ get_deg_count_pieplot <- function(x,
 #' @param x A `VISTA` object containing DEG summaries.
 #' @param sample_comparisons Optional character vector of comparison names to display.
 #' @param label Label mode: `"both"` (default), `"count"`, `"percent"`, or `"none"`.
+#' @param label_type Label content: `"both"`, `"count"`, `"percent"` or `"none"`.
+#' @param label Deprecated; use `label_type`. `TRUE`/`FALSE` map to
+#'   `"both"`/`"none"`.
 #' @param label_digits Integer number of decimals used for percentage labels.
 #' @param base_size Numeric base font size for the plot.
 #' @param colors Named vector giving fill colors for `"Up"` and `"Down"` slices.

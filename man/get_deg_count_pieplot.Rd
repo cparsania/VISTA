@@ -24,6 +24,8 @@ get_deg_count_pieplot(
 
 \item{sample_comparisons}{Optional character vector of comparison names to display.}
 
+\item{label_type}{Label content: \code{"both"}, \code{"count"}, \code{"percent"} or \code{"none"}.}
+
 \item{label_digits}{Integer number of decimals used for percentage labels.}
 
 \item{base_size}{Numeric base font size for the plot.}
@@ -44,7 +46,8 @@ or \code{"none"} for a single pie.}
 
 \item{ncol}{Optional number of columns when faceting.}
 
-\item{label}{Label mode: \code{"both"} (default), \code{"count"}, \code{"percent"}, or \code{"none"}.}
+\item{label}{Deprecated; use \code{label_type}. \code{TRUE}/\code{FALSE} map to
+\code{"both"}/\code{"none"}.}
 }
 \value{
 A \code{ggplot2} object drawing DEG counts as a pie chart.

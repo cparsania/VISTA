@@ -28,13 +28,18 @@ errors:
 options(warn = 2)
 }
 }
-\section{Registry}{
+\section{Inspecting the registry}{
 
-\Sexpr[stage=render,results=rd]{VISTA:::.vista_deprecation_rd()}
+The authoritative list lives in the package itself rather than being
+duplicated here, so it cannot drift out of date. Print it with the example
+below, or filter it to the function you are migrating.
 }
 
 \examples{
-# Inspect the timeline for a specific function
+# The full table of deprecated arguments and their timelines
+VISTA:::.vista_deprecations()[, c("fun", "old_arg", "new_arg", "defunct_in")]
+
+# Or just the one function you are migrating
 reg <- VISTA:::.vista_deprecations()
 reg[reg$fun == "get_corr_heatmap", c("old_arg", "new_arg", "defunct_in")]
 }
