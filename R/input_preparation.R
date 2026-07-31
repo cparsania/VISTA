@@ -860,6 +860,116 @@ match_vista_inputs <- function(counts,
   make.unique(out)
 }
 
+#' Bind per-sample count files by gene identifier
+#'
+#' Shared by the STAR, HTSeq and RSEM importers. Each of those previously used
+#' `vapply(FUN.VALUE = numeric(length(genes)))`, which enforces only that every
+#' file has the same *number* of rows -- never that row `i` describes the same
+#' gene. Files with equal row counts but different ordering were silently pasted
+#' onto the first file's gene labels.
+#'
+#' Rows are taken from the first file and every other file is indexed by
+#' `match()` against it. A file that does not cover the reference gene set is an
+#' error rather than a silent zero-fill, because a silent zero is the same class
+#' of bug this function exists to prevent.
+#'
+#' @param tabs List of data frames, one per sample.
+#' @param id_col Column name or index holding gene identifiers.
+#' @param value_col Column name or index holding counts.
+#' @param sample_names Character vector of sample names, parallel to `tabs`.
+#' @param files Optional file paths used in diagnostics; falls back to `sample_names`.
+#' @param format Short label for the input format, used in messages.
+#'
+#' @return A `data.frame` with `gene_id` plus one numeric column per sample.
+#' @keywords internal
+#' @noRd
+.bind_count_files <- function(tabs, id_col, value_col, sample_names,
+                              files = NULL, format = "count") {
+  labels <- if (!is.null(files) && length(files) == length(tabs)) {
+    basename(as.character(files))
+  } else {
+    as.character(sample_names)
+  }
+
+  has_col <- function(df, col) {
+    if (is.numeric(col)) ncol(df) >= col else col %in% colnames(df)
+  }
+  for (i in seq_along(tabs)) {
+    if (!has_col(tabs[[i]], id_col) || !has_col(tabs[[i]], value_col)) {
+      cli::cli_abort(
+        "{format} file {.file {labels[[i]]}} is missing the expected identifier or count column."
+      )
+    }
+  }
+
+  ref_ids <- as.character(tabs[[1]][[id_col]])
+  if (!length(ref_ids)) {
+    cli::cli_abort("{format} file {.file {labels[[1]]}} contains no rows.")
+  }
+
+  as_counts <- function(df, label) {
+    vals <- suppressWarnings(as.numeric(df[[value_col]]))
+    if (anyNA(vals) && any(!is.na(df[[value_col]]))) {
+      cli::cli_abort("{format} file {.file {label}} contains non-numeric counts.")
+    }
+    vals
+  }
+
+  ids_list <- lapply(tabs, function(df) as.character(df[[id_col]]))
+  identical_ids <- all(vapply(ids_list, identical, logical(1), ref_ids))
+
+  if (identical_ids) {
+    # Fast path: every file already lists the same genes in the same order, so
+    # positional binding is correct even when identifiers repeat.
+    counts <- vapply(
+      seq_along(tabs),
+      function(i) as_counts(tabs[[i]], labels[[i]]),
+      numeric(length(ref_ids))
+    )
+  } else {
+    if (anyDuplicated(ref_ids)) {
+      cli::cli_abort(c(
+        "{format} file {.file {labels[[1]]}} has duplicated gene identifiers and the files are not in a common order.",
+        "i" = "Deduplicate the identifiers, or supply the files in a matching row order."
+      ))
+    }
+    counts <- matrix(NA_real_, nrow = length(ref_ids), ncol = length(tabs))
+    for (i in seq_along(tabs)) {
+      ids <- ids_list[[i]]
+      if (anyDuplicated(ids)) {
+        cli::cli_abort(
+          "{format} file {.file {labels[[i]]}} has duplicated gene identifiers, so it cannot be matched by identifier."
+        )
+      }
+      idx <- match(ref_ids, ids)
+      if (anyNA(idx)) {
+        missing_ids <- ref_ids[is.na(idx)]
+        cli::cli_abort(c(
+          "Gene identifiers in {format} file {.file {labels[[i]]}} do not cover the reference gene set.",
+          "x" = "Missing ({length(missing_ids)} of {length(ref_ids)}): {.val {utils::head(missing_ids, 5)}}",
+          "i" = "The reference set is taken from {.file {labels[[1]]}}."
+        ))
+      }
+      extra <- length(ids) - length(ref_ids)
+      if (extra > 0L) {
+        cli::cli_inform(
+          "Dropped {extra} identifier{?s} present in {.file {labels[[i]]}} but absent from {.file {labels[[1]]}}."
+        )
+      }
+      counts[, i] <- as_counts(tabs[[i]], labels[[i]])[idx]
+    }
+  }
+
+  counts <- as.matrix(counts)
+  colnames(counts) <- sample_names
+  data.frame(
+    gene_id = ref_ids,
+    counts,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+}
+
 #' @keywords internal
 #' @noRd
 .import_counts_star <- function(x,
@@ -878,19 +988,19 @@ match_vista_inputs <- function(counts,
     mats <- lapply(files, function(path) {
       utils::read.delim(path, header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     })
-    genes <- mats[[1]][[1]]
-    counts <- vapply(mats, function(df) {
-      if (ncol(df) < 4L) {
+    for (i in seq_along(mats)) {
+      if (ncol(mats[[i]]) < 4L) {
         cli::cli_abort("STAR gene count files must have four columns.")
       }
-      vals <- suppressWarnings(as.numeric(df[[star_col]]))
-      if (anyNA(vals) && any(!is.na(df[[star_col]]))) {
-        cli::cli_abort("STAR count column contains non-numeric values.")
-      }
-      vals
-    }, numeric(length(genes)))
-    colnames(counts) <- sample_names
-    out <- data.frame(gene_id = genes, counts, stringsAsFactors = FALSE, check.names = FALSE)
+    }
+    out <- .bind_count_files(
+      tabs = mats,
+      id_col = 1L,
+      value_col = star_col,
+      sample_names = sample_names,
+      files = files,
+      format = "STAR"
+    )
   } else {
     df <- .read_tabular_input(x)
     if (ncol(df) < 4L) {
@@ -935,16 +1045,14 @@ match_vista_inputs <- function(counts,
     mats <- lapply(files, function(path) {
       utils::read.delim(path, header = FALSE, stringsAsFactors = FALSE, check.names = FALSE)
     })
-    genes <- mats[[1]][[1]]
-    counts <- vapply(mats, function(df) {
-      vals <- suppressWarnings(as.numeric(df[[2]]))
-      if (anyNA(vals) && any(!is.na(df[[2]]))) {
-        cli::cli_abort("HTSeq count files must contain numeric counts in column 2.")
-      }
-      vals
-    }, numeric(length(genes)))
-    colnames(counts) <- sample_names
-    out <- data.frame(gene_id = genes, counts, stringsAsFactors = FALSE, check.names = FALSE)
+    out <- .bind_count_files(
+      tabs = mats,
+      id_col = 1L,
+      value_col = 2L,
+      sample_names = sample_names,
+      files = files,
+      format = "HTSeq"
+    )
   } else {
     df <- .read_tabular_input(x)
     gene_col <- .resolve_gene_id_column(df)
@@ -1029,19 +1137,19 @@ match_vista_inputs <- function(counts,
     if (!all(c("gene_id", count_column) %in% colnames(first))) {
       cli::cli_abort("RSEM input must contain {.field gene_id} and {.field {count_column}} columns.")
     }
-    gene_ids <- as.character(first$gene_id)
-    counts <- vapply(tabs, function(df) {
+    for (df in tabs) {
       if (!all(c("gene_id", count_column) %in% colnames(df))) {
         cli::cli_abort("Every RSEM file must contain {.field gene_id} and {.field {count_column}}.")
       }
-      vals <- suppressWarnings(as.numeric(df[[count_column]]))
-      if (anyNA(vals) && any(!is.na(df[[count_column]]))) {
-        cli::cli_abort("RSEM count column {.field {count_column}} contains non-numeric values.")
-      }
-      vals
-    }, numeric(length(gene_ids)))
-    colnames(counts) <- sample_names
-    out_counts <- data.frame(gene_id = gene_ids, counts, stringsAsFactors = FALSE, check.names = FALSE)
+    }
+    out_counts <- .bind_count_files(
+      tabs = tabs,
+      id_col = "gene_id",
+      value_col = count_column,
+      sample_names = sample_names,
+      files = files,
+      format = "RSEM"
+    )
     row_cols <- unique(c("gene_id", annotation_columns %||% setdiff(colnames(first), count_column)))
     row_cols <- row_cols[row_cols %in% colnames(first)]
     row_data <- first[, row_cols, drop = FALSE]
