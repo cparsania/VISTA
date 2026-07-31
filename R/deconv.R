@@ -575,13 +575,22 @@ get_celltype_group_dotplot <- function(x,
                                        cell_types = NULL,
                                        top_n = 12,
                                        summary_fun = c("mean", "median"),
-                                       error = c("se", "sd", "none"),
+                                       errorbar = c("se", "sd", "none"),
                                        add_points = TRUE,
                                        point_size = 2.5,
-                                       base_size = 12) {
+                                       base_size = 12,
+                                       error = NULL) {
   stopifnot(inherits(x, "VISTA"))
   summary_fun <- match.arg(summary_fun)
-  error <- match.arg(error)
+  errorbar <- match.arg(errorbar)
+  if (!is.null(error)) {
+    errorbar <- .vista_deprecate_arg(
+      old = "error", new = "errorbar",
+      value = match.arg(error, c("se", "sd", "none")),
+      fun = "get_celltype_group_dotplot"
+    )
+  }
+  error <- errorbar
 
   df <- .deconv_long_table(x)
   gcol <- .resolve_celltype_group_column(x, group_column, colnames(df))

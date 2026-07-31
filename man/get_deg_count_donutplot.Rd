@@ -7,7 +7,7 @@
 get_deg_count_donutplot(
   x,
   sample_comparisons = NULL,
-  label = c("both", "count", "percent", "none"),
+  label_type = c("both", "count", "percent", "none"),
   label_digits = 1,
   base_size = 12,
   colors = c(Up = "red4", Down = "blue4"),
@@ -15,15 +15,14 @@ get_deg_count_donutplot(
   other_color = "grey70",
   text_color = "black",
   facet_by = c("comparison", "none"),
-  ncol = NULL
+  ncol = NULL,
+  label = NULL
 )
 }
 \arguments{
 \item{x}{A \code{VISTA} object containing DEG summaries.}
 
 \item{sample_comparisons}{Optional character vector of comparison names to display.}
-
-\item{label}{Label mode: \code{"both"} (default), \code{"count"}, \code{"percent"}, or \code{"none"}.}
 
 \item{label_digits}{Integer number of decimals used for percentage labels.}
 
@@ -44,6 +43,8 @@ slice using \code{other_color} unless overridden in \code{colors}.}
 or \code{"none"} for a single donut.}
 
 \item{ncol}{Optional number of columns when faceting.}
+
+\item{label}{Label mode: \code{"both"} (default), \code{"count"}, \code{"percent"}, or \code{"none"}.}
 }
 \value{
 A \code{ggplot2} object drawing DEG counts as a donut chart.

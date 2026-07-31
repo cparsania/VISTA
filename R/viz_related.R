@@ -1229,7 +1229,8 @@ get_pairwise_corr_plot <- function(x,
 #' @param genes Optional character vector of gene IDs to limit the matrix.
 #' @param corr_method Correlation method passed to `stats::cor()` (e.g., `"pearson"`).
 #' @param triangle Either `"full"`, `"lower"`, or `"upper"` to control which triangle is drawn.
-#' @param cluster_by Ordering strategy for samples: `"correlation"` (default),
+#' @param cluster_by Deprecated; use `order_by`.
+#' @param order_by Ordering strategy for samples: `"correlation"` (default),
 #'   `"group"`, `"input"`, or `"none"`.
 #' @param show_diagonal Logical; include the correlation diagonal when `TRUE`.
 #' @param label Logical; overlay correlation coefficients as text.
@@ -1255,7 +1256,7 @@ get_corr_heatmap <- function(x,
                              genes = NULL,
                              corr_method = "pearson",
                              triangle = c("full", "lower", "upper"),
-                             cluster_by = c("correlation", "group", "input", "none"),
+                             order_by = c("correlation", "group", "input", "none"),
                              show_diagonal = TRUE,
                              label = TRUE,
                              show_corr_values = NULL,
@@ -1268,11 +1269,19 @@ get_corr_heatmap <- function(x,
                              viridis_option = "viridis",  # "magma","plasma","inferno","cividis","turbo"
                              viridis_direction = 1,       # 1 or -1
                              viridis_begin = 0,           # 0–1; raise to ~0.6 for more contrast near 1
-                             viridis_end = 1) {
+                             viridis_end = 1,
+                             cluster_by = NULL) {
 
   stopifnot(inherits(x, "VISTA"))
   triangle <- match.arg(triangle)
-  cluster_by <- match.arg(cluster_by)
+  order_by <- match.arg(order_by)
+  if (!is.null(cluster_by)) {
+    order_by <- .vista_deprecate_arg(
+      old = "cluster_by", new = "order_by",
+      value = match.arg(cluster_by, c("correlation", "group", "input", "none")),
+      fun = "get_corr_heatmap"
+    )
+  }
   label <- .resolve_plot_label_flag(
     label = label, legacy = show_corr_values,
     legacy_arg = "show_corr_values", fun = "get_corr_heatmap"
@@ -1307,10 +1316,10 @@ get_corr_heatmap <- function(x,
   # so it has to run against the levels the plot will actually be drawn with --
   # otherwise the retained cells describe the input order while the axes show the
   # clustered order, and the "triangle" renders as a jagged staircase.
-  if (cluster_by == "correlation") {
+  if (order_by == "correlation") {
     ord <- hclust(as.dist(1 - cor_mat))$order
     sample_levels <- rownames(cor_mat)[ord]
-  } else if (cluster_by == "group" && group_col %in% colnames(meta)) {
+  } else if (order_by == "group" && group_col %in% colnames(meta)) {
     sample_levels <- meta |>
       dplyr::arrange(.data[[group_col]], .data$sample) |>
       dplyr::pull(.data$sample) |>
@@ -1382,7 +1391,9 @@ get_corr_heatmap <- function(x,
 #' @param stats_group Logical; add statistical comparisons between groups when
 #'   `TRUE`. Only supported when `by = "group"`.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
-#' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
+#' @param stat_comparisons Optional list of length-2 group pairs passed to
+#'   `ggpubr::stat_compare_means()` for significance brackets.
+#' @param comparisons Deprecated; use `stat_comparisons`.
 #' @param pool_genes Logical; when `TRUE`, pool selected genes into one
 #'   distribution per x-axis category (scenario 1).
 #' @param by When `pool_genes = TRUE`, either `"group"` or `"sample"` (x-axis
@@ -1411,13 +1422,15 @@ get_expression_boxplot <- function(x,
                                    facet_ncol = NULL,
                                    stats_group = FALSE,
                                    p.label = "p.signif",
-                                   comparisons = NULL,
+                                   stat_comparisons = NULL,
                                    pool_genes = FALSE,
                                    by = "group",
                                    facet_by = "auto",
                                    fill_by = NULL,
-                                   sample_order = c("input", "group", "expression")) {
+                                   sample_order = c("input", "group", "expression"),
+                                   comparisons = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  stat_comparisons <- .resolve_stat_comparisons(stat_comparisons, comparisons, "get_expression_boxplot")
   sample_order <- match.arg(sample_order)
   allowed_by <- if (pool_genes) c("group", "sample") else c("group", "gene")
   if (!is.null(by) && !by %in% allowed_by) {
@@ -1552,7 +1565,7 @@ get_expression_boxplot <- function(x,
     } else {
       plt <- plt + ggpubr::stat_compare_means(
         ggplot2::aes(group = .data[[x_var]]),
-        comparisons = comparisons,
+        comparisons = stat_comparisons,
         method = "t.test",
         label = p.label,
         label.x.npc = "center"
@@ -3062,7 +3075,10 @@ get_expression_lollipop <- function(x,
 #'   are not currently added by `get_expression_lineplot()`.
 #' @param p.label Label format retained for API consistency with other
 #'   expression plots.
-#' @param comparisons Optional list of comparisons retained for API consistency.
+#' @param stat_comparisons Optional list of group pairs, retained for API
+#'   consistency with the other expression plots; this plot does not draw
+#'   significance brackets.
+#' @param comparisons Deprecated; use `stat_comparisons`.
 #' @param pool_genes Logical; when `TRUE`, average the selected genes into a
 #'   single trajectory.
 #' @param by Plot unit: `"sample"` (default) or `"group"` to average
@@ -3094,7 +3110,7 @@ get_expression_lineplot <- function(x,
                                     facet_ncol = NULL,
                                     stats_group = FALSE,
                                     p.label = "p.signif",
-                                    comparisons = NULL,
+                                    stat_comparisons = NULL,
                                     pool_genes = FALSE,
                                     by = c("sample", "group"),
                                     facet_by = c("auto", "group", "gene", "none"),
@@ -3105,8 +3121,10 @@ get_expression_lineplot <- function(x,
                                     colors = NULL,
                                     line_width = 1,
                                     point_size = 2,
-                                    base_size = 12) {
+                                    base_size = 12,
+                                   comparisons = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  stat_comparisons <- .resolve_stat_comparisons(stat_comparisons, comparisons, "get_expression_lineplot")
   by <- match.arg(by)
   facet_by <- match.arg(facet_by)
   sample_order <- match.arg(sample_order)
@@ -3427,7 +3445,9 @@ get_expression_lineplot <- function(x,
 #' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
-#' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
+#' @param stat_comparisons Optional list of length-2 group pairs passed to
+#'   `ggpubr::stat_compare_means()` for significance brackets.
+#' @param comparisons Deprecated; use `stat_comparisons`.
 #' @param pool_genes Logical; pool all selected genes into one violin per group.
 #' @param by Plot unit. Violin plots currently support only `"group"`.
 #' @param facet_by Faceting mode. Uses the same argument pattern as
@@ -3458,15 +3478,17 @@ get_expression_violinplot <- function(x,
                                       facet_ncol = NULL,
                                       stats_group = FALSE,
                                       p.label = "p.signif",
-                                      comparisons = NULL,
+                                      stat_comparisons = NULL,
                                       pool_genes = FALSE,
                                       by = "group",
                                       facet_by = c("auto", "gene", "none"),
                                       fill_by = NULL,
                                       sample_order = c("input", "group", "expression"),
                                       value_transform = NULL,
-                                      summarise = FALSE) {
+                                      summarise = FALSE,
+                                   comparisons = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  stat_comparisons <- .resolve_stat_comparisons(stat_comparisons, comparisons, "get_expression_violinplot")
   if (!identical(by, "group")) {
     cli::cli_abort(
       "{.fun get_expression_violinplot} currently supports only {.code by = 'group'} because violins require replicate distributions within groups."
@@ -3618,7 +3640,7 @@ get_expression_violinplot <- function(x,
     } else {
       plt <- plt + ggpubr::stat_compare_means(
         ggplot2::aes(group = .data[[group_col]]),
-        comparisons = comparisons,
+        comparisons = stat_comparisons,
         method = "t.test",
         label = p.label,
         label.x.npc = "center"
@@ -4445,7 +4467,9 @@ get_foldchange_scatter <- function(x,
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` when faceting by gene.
 #' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
-#' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
+#' @param stat_comparisons Optional list of length-2 group pairs passed to
+#'   `ggpubr::stat_compare_means()` for significance brackets.
+#' @param comparisons Deprecated; use `stat_comparisons`.
 #' @param group_column Optional column name in `sample_info` to use for grouping samples.
 #' @param display_id Optional ID/column name to use for labels/facets. If supplied
 #'   and present in `rowData(x)`, those values are used; otherwise falls back to
@@ -4506,7 +4530,7 @@ get_expression_barplot <- function(x,
                                    facet_nrow = NULL,
                                    facet_ncol = NULL,
                                    p.label = "p.signif",
-                                   comparisons = NULL,
+                                   stat_comparisons = NULL,
                                    display_id = NULL,
                                    display_from = NULL,
                                    display_orgdb = NULL,
@@ -4514,8 +4538,10 @@ get_expression_barplot <- function(x,
                                    sample_order = c("input", "group", "expression"),
                                    fill_by = NULL,
                                    facet_by = c("auto", "gene", "none"),
-                                   max_genes = 25) {
+                                   max_genes = 25,
+                                   comparisons = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  stat_comparisons <- .resolve_stat_comparisons(stat_comparisons, comparisons, "get_expression_barplot")
   if (length(genes) > max_genes) {
     cli::cli_abort(
       "At most {max_genes} gene{?s} can be plotted at once; {length(genes)} were supplied. Raise {.arg max_genes} to override."
@@ -4651,7 +4677,7 @@ get_expression_barplot <- function(x,
     }
     plt <- plt + ggpubr::stat_compare_means(
       ggplot2::aes(group = .data[[group_col]]),
-      comparisons = comparisons,
+      comparisons = stat_comparisons,
       method = "t.test",
       label = p.label,
       label.x.npc = "center"
@@ -5307,6 +5333,35 @@ get_deg_venn_diagram <- function(x,
   paste0(pct_lab, "%")
 }
 
+# `label` is logical across the rest of VISTA but was a character enum on the
+# circular DEG plots, so label = TRUE silently failed there. The enum moved to
+# `label_type`; `label` is accepted for one deprecation cycle and TRUE/FALSE are
+# translated to the enum values a user would have meant.
+# `comparisons` collided with the comparisons() accessor and with the
+# sample_comparisons argument meaning DE contrasts. On these plots it means
+# group pairs for ggpubr significance brackets, so it moved to
+# `stat_comparisons`.
+.resolve_stat_comparisons <- function(stat_comparisons, comparisons, fun) {
+  if (is.null(comparisons)) return(stat_comparisons)
+  .vista_deprecate_arg(
+    old = "comparisons", new = "stat_comparisons", value = comparisons, fun = fun
+  )
+}
+
+.resolve_deg_label_type <- function(label_type, label, fun) {
+  label_type <- match.arg(label_type, c("both", "count", "percent", "none"))
+  if (is.null(label)) return(label_type)
+
+  translated <- if (is.logical(label) && length(label) == 1L && !is.na(label)) {
+    if (isTRUE(label)) "both" else "none"
+  } else {
+    match.arg(as.character(label), c("both", "count", "percent", "none"))
+  }
+  .vista_deprecate_arg(
+    old = "label", new = "label_type", value = translated, fun = fun
+  )
+}
+
 .plot_deg_count_circular <- function(df,
                                      label = c("both", "count", "percent", "none"),
                                      label_digits = 1,
@@ -5458,7 +5513,7 @@ get_deg_count_barplot <- function(x,
 #' @export
 get_deg_count_pieplot <- function(x,
                                   sample_comparisons = NULL,
-                                  label = c("both", "count", "percent", "none"),
+                                  label_type = c("both", "count", "percent", "none"),
                                   label_digits = 1,
                                   base_size = 12,
                                   colors = c(Up = "red4", Down = "blue4"),
@@ -5466,8 +5521,10 @@ get_deg_count_pieplot <- function(x,
                                   other_color = "grey70",
                                   text_color = "black",
                                   facet_by = c("comparison", "none"),
-                                  ncol = NULL) {
+                                  ncol = NULL,
+                                  label = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  label_type <- .resolve_deg_label_type(label_type, label, "get_deg_count_pieplot")
   df <- .collect_deg_count_data(
     x = x,
     sample_comparisons = sample_comparisons,
@@ -5481,7 +5538,7 @@ get_deg_count_pieplot <- function(x,
   )
   .plot_deg_count_circular(
     df = df,
-    label = label,
+    label = label_type,
     label_digits = label_digits,
     base_size = base_size,
     colors = colors,
@@ -5511,7 +5568,7 @@ get_deg_count_pieplot <- function(x,
 #' @export
 get_deg_count_donutplot <- function(x,
                                     sample_comparisons = NULL,
-                                    label = c("both", "count", "percent", "none"),
+                                    label_type = c("both", "count", "percent", "none"),
                                     label_digits = 1,
                                     base_size = 12,
                                     colors = c(Up = "red4", Down = "blue4"),
@@ -5519,8 +5576,10 @@ get_deg_count_donutplot <- function(x,
                                     other_color = "grey70",
                                     text_color = "black",
                                     facet_by = c("comparison", "none"),
-                                    ncol = NULL) {
+                                    ncol = NULL,
+                                    label = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  label_type <- .resolve_deg_label_type(label_type, label, "get_deg_count_donutplot")
   df <- .collect_deg_count_data(
     x = x,
     sample_comparisons = sample_comparisons,
@@ -5534,7 +5593,7 @@ get_deg_count_donutplot <- function(x,
   )
   .plot_deg_count_circular(
     df = df,
-    label = label,
+    label = label_type,
     label_digits = label_digits,
     base_size = base_size,
     colors = colors,

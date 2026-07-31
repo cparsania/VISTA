@@ -18,14 +18,15 @@ get_expression_violinplot(
   facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
-  comparisons = NULL,
+  stat_comparisons = NULL,
   pool_genes = FALSE,
   by = "group",
   facet_by = c("auto", "gene", "none"),
   fill_by = NULL,
   sample_order = c("input", "group", "expression"),
   value_transform = NULL,
-  summarise = FALSE
+  summarise = FALSE,
+  comparisons = NULL
 )
 }
 \arguments{
@@ -58,7 +59,8 @@ with \code{\link[=get_expression_boxplot]{get_expression_boxplot()}}).}
 
 \item{p.label}{Label format for \code{ggpubr::stat_compare_means()}.}
 
-\item{comparisons}{Optional list of specific group comparisons for \code{stat_compare_means()}.}
+\item{stat_comparisons}{Optional list of length-2 group pairs passed to
+\code{ggpubr::stat_compare_means()} for significance brackets.}
 
 \item{pool_genes}{Logical; pool all selected genes into one violin per group.}
 
@@ -80,6 +82,8 @@ per-gene z-score transform.}
 
 \item{summarise}{Logical retained for compatibility. Violin plots always use
 replicate-level values, so \code{summarise = TRUE} is ignored with a warning.}
+
+\item{comparisons}{Deprecated; use \code{stat_comparisons}.}
 }
 \value{
 A \code{ggplot2} object.

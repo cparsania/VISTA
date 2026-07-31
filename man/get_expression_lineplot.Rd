@@ -18,7 +18,7 @@ get_expression_lineplot(
   facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
-  comparisons = NULL,
+  stat_comparisons = NULL,
   pool_genes = FALSE,
   by = c("sample", "group"),
   facet_by = c("auto", "group", "gene", "none"),
@@ -29,7 +29,8 @@ get_expression_lineplot(
   colors = NULL,
   line_width = 1,
   point_size = 2,
-  base_size = 12
+  base_size = 12,
+  comparisons = NULL
 )
 }
 \arguments{
@@ -62,7 +63,9 @@ are not currently added by \code{get_expression_lineplot()}.}
 \item{p.label}{Label format retained for API consistency with other
 expression plots.}
 
-\item{comparisons}{Optional list of comparisons retained for API consistency.}
+\item{stat_comparisons}{Optional list of group pairs, retained for API
+consistency with the other expression plots; this plot does not draw
+significance brackets.}
 
 \item{pool_genes}{Logical; when \code{TRUE}, average the selected genes into a
 single trajectory.}
@@ -90,6 +93,8 @@ choice; one of \code{"log2"}, \code{"zscore"}, or \code{"none"}.}
 \item{point_size}{Point size.}
 
 \item{base_size}{Base theme size.}
+
+\item{comparisons}{Deprecated; use \code{stat_comparisons}.}
 }
 \value{
 A \code{ggplot2} object connecting expression values across groups or samples.

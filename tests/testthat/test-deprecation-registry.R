@@ -276,3 +276,41 @@ test_that("gene caps are documented arguments rather than hard limits (3e)", {
     get_expression_barplot(v, genes = genes[seq_len(26)], max_genes = 30)
   )
 })
+
+test_that("semantic-collision renames warn and preserve behaviour (3c)", {
+  v <- make_small_vista()
+
+  # `label` was a character enum here while it is logical everywhere else.
+  expect_warning(p_old <- get_deg_count_pieplot(v, label = "percent"), class = "vista_deprecated_arg")
+  p_new <- get_deg_count_pieplot(v, label_type = "percent")
+  expect_equal(ggplot2::ggplot_build(p_old)$data, ggplot2::ggplot_build(p_new)$data)
+
+  # label = TRUE previously did nothing useful; it now maps to "both".
+  expect_warning(p_true <- get_deg_count_donutplot(v, label = TRUE), class = "vista_deprecated_arg")
+  expect_equal(
+    ggplot2::ggplot_build(p_true)$data,
+    ggplot2::ggplot_build(get_deg_count_donutplot(v, label_type = "both"))$data
+  )
+
+  # cluster_by named a column in the heatmaps but an ordering strategy here.
+  expect_warning(c_old <- get_corr_heatmap(v, cluster_by = "input"), class = "vista_deprecated_arg")
+  c_new <- get_corr_heatmap(v, order_by = "input")
+  expect_equal(ggplot2::ggplot_build(c_old)$data, ggplot2::ggplot_build(c_new)$data)
+})
+
+test_that("stat_comparisons replaces the colliding comparisons argument (3c)", {
+  v <- make_small_vista()
+  genes <- rownames(v)[seq_len(2)]
+  groups <- unique(as.character(sample_info(v)$cond_long))
+  pairs <- list(groups)
+
+  expect_warning(
+    a <- get_expression_boxplot(v, genes = genes, stats_group = TRUE, comparisons = pairs),
+    class = "vista_deprecated_arg"
+  )
+  b <- get_expression_boxplot(v, genes = genes, stats_group = TRUE, stat_comparisons = pairs)
+  expect_equal(ggplot2::ggplot_build(a)$data, ggplot2::ggplot_build(b)$data)
+
+  # The accessor of the same name is untouched.
+  expect_type(comparisons(v), "list")
+})
