@@ -557,9 +557,9 @@ validate_vista_deep <- function(counts,
   )
 
   dge <- edgeR::DGEList(counts = inputs$count_data, group = inputs$col_data[[group_column]])
-  dge <- edgeR::calcNormFactors(dge)
-  keep <- rowSums(edgeR::cpm(dge) > 1) >= min_replicates
+  keep <- rowSums(dge$counts >= min_counts) >= min_replicates
   dge <- dge[keep, , keep.lib.sizes = FALSE]
+  dge <- edgeR::calcNormFactors(dge)
 
   design <- stats::model.matrix(inputs$design_formula, data = inputs$col_data)
   dge <- edgeR::estimateDisp(dge, design)
@@ -642,9 +642,9 @@ validate_vista_deep <- function(counts,
   )
 
   dge <- edgeR::DGEList(counts = inputs$count_data)
-  dge <- edgeR::calcNormFactors(dge)
-  keep <- rowSums(edgeR::cpm(dge) > 1) >= min_replicates
+  keep <- rowSums(dge$counts >= min_counts) >= min_replicates
   dge <- dge[keep, , keep.lib.sizes = FALSE]
+  dge <- edgeR::calcNormFactors(dge)
 
   design <- stats::model.matrix(inputs$design_formula, data = inputs$col_data)
   v <- limma::voom(dge, design = design, plot = FALSE)

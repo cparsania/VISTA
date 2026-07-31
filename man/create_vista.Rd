@@ -43,9 +43,13 @@ create_vista(
 
 \item{method}{\code{"deseq2"}, \code{"edger"}, \code{"limma"}, or \code{"both"}.}
 
-\item{min_counts}{Minimum total counts per gene to retain (default: 10).}
+\item{min_counts}{Minimum per-sample count a gene must reach to count as
+detected in that sample; also applied as a minimum row total in an initial
+pre-filter (default: 10).}
 
-\item{min_replicates}{Minimum samples per group meeting \code{min_counts} (default: 1).}
+\item{min_replicates}{Minimum number of samples in which a gene must reach
+\code{min_counts} to enter the model. Counted across the whole experiment,
+not within each group (default: 1).}
 
 \item{log2fc_cutoff}{Absolute LFC threshold for DEG calling (default: 1).}
 
@@ -107,6 +111,17 @@ Each DE table must have rownames identical to the final \code{norm_counts} rowna
 When \code{method = "both"}, method-specific and consensus DE tables are stored in
 \code{metadata(v)$de_results_by_method} and \code{metadata(v)$de_summary_by_method},
 and the active source is tracked in \code{metadata(v)$de_active_source}.
+
+In the consensus table, \code{log2fc} follows \code{consensus_log2fc} (with
+single-backend calls taking the contributing backend's estimate), while
+\code{pvalue} and \code{padj} carry the less-significant of the two backends
+so the columns remain continuous and usable for volcano/MA plots and ranking.
+Per-backend values are always preserved alongside them in
+\code{log2fc_deseq2}, \code{log2fc_edger}, \code{pvalue_deseq2},
+\code{pvalue_edger}, \code{padj_deseq2}, and \code{padj_edger}, and the
+\code{support} column records which backends called each gene
+(\code{"both"}, \code{"deseq2_only"}, \code{"edger_only"},
+\code{"discordant"}, or \code{"none"}).
 }
 \examples{
 # Load example data

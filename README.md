@@ -275,6 +275,8 @@ run_vista_report("vista-report.yml")
 -   `get_expression_density()`
 -   `get_expression_joyplot()`
 -   `get_expression_raincloud()`
+-   `get_expression_chromosome_plot()`
+-   `get_expression_matrix()`
 
 ### Fold-change structure
 
@@ -295,7 +297,6 @@ run_vista_report("vista-report.yml")
 -   `get_gsea()`
 -   `get_enrichment_plot()`
 -   `get_enrichment_chord()`
--   `get_enrichment_network()`
 -   `get_pathway_genes()`
 -   `get_pathway_heatmap()`
 
@@ -433,9 +434,13 @@ Local help remains available through standard R documentation, for example:
 
 If you use VISTA in published work, cite the package release used in your analysis.
 
+``` r
+citation("VISTA")
+```
+
 ``` text
 Parsania C (2026). VISTA: Visualization and Integrated System for Transcriptomic Analysis.
-R package version 0.99.0.
+doi:10.18129/B9.bioc.VISTA, https://bioconductor.org/packages/VISTA/
 ```
 
 ## Support

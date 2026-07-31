@@ -527,7 +527,11 @@ get_deg_count_barplot(
 
 ## Volcano Plot
 
-Classic volcano plot showing log2FC vs -log10(p-value).
+Classic volcano plot showing log2FC against significance. By default the axis
+and thresholds are inherited from the cutoffs the object was built with, so the
+genes coloured here are exactly the ones `deg_summary()` reports. Because this
+object used `p_value_type = "padj"`, the y-axis is -log10(adjusted p-value);
+pass `p_value_type = "pvalue"` to plot raw p-values instead.
 
 ### Basic volcano plot
 

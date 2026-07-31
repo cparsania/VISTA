@@ -7,8 +7,9 @@
 get_volcano_plot(
   x,
   sample_comparison,
-  log2fc_cutoff = 1,
-  pval_cutoff = 0.05,
+  log2fc_cutoff = NULL,
+  pval_cutoff = NULL,
+  p_value_type = NULL,
   label_genes = NULL,
   label_size = 3,
   point_size = 1,
@@ -25,9 +26,14 @@ get_volcano_plot(
 
 \item{sample_comparison}{Character scalar naming the comparison to display.}
 
-\item{log2fc_cutoff}{Numeric absolute log2 fold-change threshold used to color significant points.}
+\item{log2fc_cutoff}{Numeric absolute log2 fold-change threshold used to color
+significant points. Defaults to \code{cutoffs(x)$log2fc}.}
 
-\item{pval_cutoff}{Numeric p-value threshold used to color significant points.}
+\item{pval_cutoff}{Numeric p-value threshold used to color significant points.
+Defaults to \code{cutoffs(x)$pval}.}
+
+\item{p_value_type}{Which p-value column to place on the y-axis and threshold
+against: \code{"padj"} or \code{"pvalue"}. Defaults to \code{cutoffs(x)$p_value_type}.}
 
 \item{label_genes}{Optional character vector of gene identifiers to force-label.}
 
@@ -59,6 +65,18 @@ A \code{ggplot2} object.
 Wraps EnhancedVolcano to visualize log2FC vs p-values for a selected
 comparison.
 }
+\details{
+By default the plot inherits the thresholds the object was built
+with, so the genes coloured here match the ones reported by
+\code{\link[=deg_summary]{deg_summary()}}, \code{\link[=get_deg_count_barplot]{get_deg_count_barplot()}}, and
+\code{\link[=get_genes_by_regulation]{get_genes_by_regulation()}}. Specifically, \code{log2fc_cutoff}, \code{pval_cutoff},
+and \code{p_value_type} default to \code{cutoffs(x)$log2fc}, \code{cutoffs(x)$pval}, and
+\code{cutoffs(x)$p_value_type}. Supplying any of them explicitly overrides the
+stored value for that argument only.
+
+Objects created before VISTA 1.1.1, and objects whose stored \code{p_value_type}
+column is absent from the DE table, fall back to the raw \code{pvalue} column.
+}
 \examples{
 vista <- example_vista()
 comps <- names(comparisons(vista))
@@ -82,12 +100,19 @@ vista <- create_vista(
 comps <- names(comparisons(vista))
 get_volcano_plot(vista, sample_comparison = comps[1])
 
-# With custom thresholds
+# With custom thresholds (overrides the stored cutoffs)
 get_volcano_plot(
   vista,
   sample_comparison = comps[1],
   log2fc_cutoff = 1.5,
   pval_cutoff = 0.01
+)
+
+# Force the raw p-value axis regardless of how the object was built
+get_volcano_plot(
+  vista,
+  sample_comparison = comps[1],
+  p_value_type = "pvalue"
 )
 
 # Highlight specific genes
