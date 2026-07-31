@@ -172,24 +172,25 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     pval_cutoff = "config", p_value_type = "config"
   )
   if (length(obj_cuts)) {
-    reconcile <- function(cfg_key, cut_key, label) {
-      stored <- obj_cuts[[cut_key]]
-      if (is.null(stored)) return(invisible(NULL))
-      supplied <- cfg_key %in% cfg_supplied
-      if (supplied && !identical(as.character(cfg[[cfg_key]]), as.character(stored))) {
+    reconcile_map <- list(
+      de_method = "method",
+      log2fc_cutoff = "log2fc",
+      pval_cutoff = "pval",
+      p_value_type = "p_value_type"
+    )
+    for (cfg_key in names(reconcile_map)) {
+      stored <- obj_cuts[[reconcile_map[[cfg_key]]]]
+      if (is.null(stored)) next
+      if (cfg_key %in% cfg_supplied &&
+          !identical(as.character(cfg[[cfg_key]]), as.character(stored))) {
         cli::cli_warn(c(
           "Config {.field {cfg_key}} ({.val {cfg[[cfg_key]]}}) disagrees with the supplied VISTA object ({.val {stored}}).",
           "i" = "Reporting the object's value; the config setting did not produce these results."
         ))
       }
-      cfg[[cfg_key]] <<- stored
-      param_source[[label]] <<- "object"
-      invisible(NULL)
+      cfg[[cfg_key]] <- stored
+      param_source[[cfg_key]] <- "object"
     }
-    reconcile("de_method", "method", "de_method")
-    reconcile("log2fc_cutoff", "log2fc", "log2fc_cutoff")
-    reconcile("pval_cutoff", "pval", "pval_cutoff")
-    reconcile("p_value_type", "p_value_type", "p_value_type")
   }
 
   primary_comp <- cfg$primary_comparison %||% comps[[1]]

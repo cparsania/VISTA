@@ -72,23 +72,19 @@ setMethod("updateObject", "VISTA", function(object, ..., verbose = FALSE) {
     return(object)
   }
 
-  filled <- character()
-  ensure <- function(key, value) {
-    if (is.null(md[[key]])) {
-      md[[key]] <<- value
-      filled <<- c(filled, key)
-    }
-  }
-
-  ensure("de_results", S4Vectors::SimpleList())
-  ensure("de_summary", S4Vectors::SimpleList())
-  ensure("de_cutoffs", list())
-  ensure("provenance", list())
-  ensure("group", list(
-    column = colnames(SummarizedExperiment::colData(object))[1],
-    palette = .vista_default("group_palette"),
-    colors = NULL
-  ))
+  defaults <- list(
+    de_results = S4Vectors::SimpleList(),
+    de_summary = S4Vectors::SimpleList(),
+    de_cutoffs = list(),
+    provenance = list(),
+    group = list(
+      column = colnames(SummarizedExperiment::colData(object))[1],
+      palette = .vista_default("group_palette"),
+      colors = NULL
+    )
+  )
+  filled <- names(defaults)[vapply(names(defaults), function(k) is.null(md[[k]]), logical(1))]
+  for (key in filled) md[[key]] <- defaults[[key]]
 
   prov <- md$provenance
   if (!is.list(prov)) prov <- list()
