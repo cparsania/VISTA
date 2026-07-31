@@ -171,3 +171,101 @@ test_that("run_vista_report errors when VISTA has no comparisons", {
     "No differential comparisons found"
   )
 })
+
+# --- B8/B9: the report must describe the analysis that actually ran ---
+
+test_that("report parameters come from the object, not the config defaults (B8)", {
+  skip_if_not_installed("quarto")
+  skip_if_not_installed("yaml")
+
+  data("count_data", package = "VISTA", envir = environment())
+  data("sample_metadata", package = "VISTA", envir = environment())
+  si <- sample_metadata[sample_metadata$cond_long %in% c("control", "treatment1"), ]
+  cnt <- count_data[seq_len(300), c("gene_id", si$sample_names)]
+
+  # Built with settings that differ from every run_vista_report() default.
+  v <- suppressMessages(create_vista(
+    counts = cnt, sample_info = si, column_geneid = "gene_id",
+    group_column = "cond_long", group_numerator = "treatment1",
+    group_denominator = "control",
+    method = "edger", log2fc_cutoff = 2, pval_cutoff = 0.01,
+    p_value_type = "pvalue", min_counts = 5, min_replicates = 1
+  ))
+
+  cuts <- cutoffs(v)
+  expect_identical(cuts$method, "edger")
+  expect_equal(cuts$log2fc, 2)
+  expect_equal(cuts$pval, 0.01)
+  expect_identical(cuts$p_value_type, "pvalue")
+
+  rds <- tempfile(fileext = ".rds")
+  on.exit(unlink(rds), add = TRUE)
+  saveRDS(v, rds)
+
+  out_dir <- tempfile()
+  dir.create(out_dir)
+  on.exit(unlink(out_dir, recursive = TRUE), add = TRUE)
+
+  # Rendering needs the quarto CLI, which may be absent; the reconciliation we
+  # care about happens before that and writes summary_*.csv either way.
+  try(
+    suppressWarnings(suppressMessages(run_vista_report(
+      list(
+        vista_rds = rds,
+        assets_dir = "assets",
+        output_file = file.path(out_dir, "r.html"),
+        include_msigdb = FALSE, include_go = FALSE, include_kegg = FALSE,
+        include_pathway_heatmap = FALSE
+      )
+    ))),
+    silent = TRUE
+  )
+
+  summary_csv <- list.files(
+    out_dir, pattern = "^summary_.*\\.csv$", recursive = TRUE, full.names = TRUE
+  )
+  skip_if(length(summary_csv) == 0, "report did not reach the summary table")
+
+  tbl <- utils::read.csv(summary_csv[[1]], stringsAsFactors = FALSE)
+  val <- function(m) tbl$value[match(m, tbl$metric)]
+
+  # Previously these reported the config defaults deseq2 / 1 / 0.05 / padj.
+  expect_identical(val("DE method"), "edger")
+  expect_identical(val("LFC cutoff"), "2")
+  expect_identical(val("P-value cutoff"), "0.01")
+  expect_identical(val("P-value type"), "pvalue")
+
+  expect_true("source" %in% colnames(tbl))
+  expect_identical(tbl$source[match("DE method", tbl$metric)], "object")
+})
+
+test_that("enrichment identifier type is detected, not taken from display_id (B9)", {
+  v <- make_small_vista()
+  de_tbl <- comparisons(v)[[1]]
+  expect_true(any(grepl("^ENS", de_tbl$gene_id)))
+
+  # Reproduce the resolution rule now used in run_vista_report().
+  resolve <- function(cfg) {
+    cfg$from_type %||%
+      (if (any(grepl("^ENS", de_tbl$gene_id))) "ENSEMBL" else "SYMBOL")
+  }
+
+  # The problem pairing: Ensembl IDs with SYMBOL labels and no from_type.
+  expect_identical(resolve(list(display_id = "SYMBOL")), "ENSEMBL")
+  # An explicit from_type still wins.
+  expect_identical(resolve(list(from_type = "SYMBOL", display_id = "SYMBOL")), "SYMBOL")
+  # display_id is irrelevant to the decision now.
+  expect_identical(
+    resolve(list(display_id = "SYMBOL")),
+    resolve(list(display_id = "GENENAME"))
+  )
+
+  # Guard the implementation itself: display_id must not be in the chain.
+  body_txt <- paste(deparse(body(run_vista_report)), collapse = " ")
+  chain <- regmatches(
+    body_txt, regexpr("enrich_from <- [^\n]*?(?=\\s{2,}if \\(is\\.null)", body_txt, perl = TRUE)
+  )
+  expect_length(chain, 1L)
+  expect_false(grepl("display_id", chain, fixed = TRUE))
+  expect_true(grepl("from_type", chain, fixed = TRUE))
+})

@@ -120,6 +120,8 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     }
   }
 
+  cfg_supplied <- names(if (is.character(config)) cfg else config)
+
   if (!is.null(cfg$vista_rds)) {
     vista_obj <- readRDS(cfg$vista_rds)
   } else {
@@ -159,6 +161,36 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
 
   comps <- names(comparisons(vista_obj))
   if (!length(comps)) cli::cli_abort("No differential comparisons found in the VISTA object.")
+
+  # The object is the authority on how it was actually analysed. When a
+  # prebuilt object is supplied via `vista_rds`, the DE settings in the config
+  # were never used to produce anything -- reporting them would describe an
+  # analysis that did not happen.
+  obj_cuts <- cutoffs(vista_obj)
+  param_source <- c(
+    de_method = "config", log2fc_cutoff = "config",
+    pval_cutoff = "config", p_value_type = "config"
+  )
+  if (length(obj_cuts)) {
+    reconcile <- function(cfg_key, cut_key, label) {
+      stored <- obj_cuts[[cut_key]]
+      if (is.null(stored)) return(invisible(NULL))
+      supplied <- cfg_key %in% cfg_supplied
+      if (supplied && !identical(as.character(cfg[[cfg_key]]), as.character(stored))) {
+        cli::cli_warn(c(
+          "Config {.field {cfg_key}} ({.val {cfg[[cfg_key]]}}) disagrees with the supplied VISTA object ({.val {stored}}).",
+          "i" = "Reporting the object's value; the config setting did not produce these results."
+        ))
+      }
+      cfg[[cfg_key]] <<- stored
+      param_source[[label]] <<- "object"
+      invisible(NULL)
+    }
+    reconcile("de_method", "method", "de_method")
+    reconcile("log2fc_cutoff", "log2fc", "log2fc_cutoff")
+    reconcile("pval_cutoff", "pval", "pval_cutoff")
+    reconcile("p_value_type", "p_value_type", "p_value_type")
+  }
 
   primary_comp <- cfg$primary_comparison %||% comps[[1]]
   if (!primary_comp %in% comps) {
@@ -287,6 +319,13 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
       as.character(cfg$log2fc_cutoff),
       as.character(cfg$pval_cutoff),
       as.character(cfg$p_value_type)
+    ),
+    source = c(
+      rep("report", 7L),
+      param_source[["de_method"]],
+      param_source[["log2fc_cutoff"]],
+      param_source[["pval_cutoff"]],
+      param_source[["p_value_type"]]
     ),
     stringsAsFactors = FALSE
   )
@@ -427,7 +466,18 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     register_download("plot", paste("Plot:", nm), plot_paths[[nm]])
   }
 
-  enrich_from <- cfg$from_type %||% cfg$display_id %||% if (any(grepl("^ENS", de_tbl$gene_id))) "ENSEMBL" else "SYMBOL"
+  # `display_id` names a rowData column used for LABELS; `from_type` describes
+  # what the gene_ids themselves ARE. Falling back from one to the other made
+  # the common pairing of Ensembl identifiers with `display_id: SYMBOL` claim
+  # the IDs were symbols, so every lookup failed and the enrichment section came
+  # back empty while looking like a real biological result.
+  enrich_from <- cfg$from_type %||%
+    (if (any(grepl("^ENS", de_tbl$gene_id))) "ENSEMBL" else "SYMBOL")
+  if (is.null(cfg$from_type)) {
+    cli::cli_inform(
+      "Detected gene identifier type {.val {enrich_from}} for enrichment. Set {.field from_type} in the config to override."
+    )
+  }
 
   collect_enrichment <- function(kind, enrich_fun, file_stub) {
     out <- tryCatch(enrich_fun(), error = function(e) {
