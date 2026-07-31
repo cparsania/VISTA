@@ -195,6 +195,39 @@
   ))
 }
 
+#' Make a string safe to embed in a filename
+#'
+#' Collapses every run of characters outside `[A-Za-z0-9_-]` to a single
+#' underscore and trims leading/trailing underscores. Comparison names reach
+#' asset filenames, so anything path-significant has to go.
+#'
+#' @param x Character vector to sanitize.
+#' @param fallback Value used when sanitizing leaves an empty string.
+#'
+#' @return A character vector of the same length as `x`.
+#' @keywords internal
+#' @noRd
+.vista_sanitize_name <- function(x, fallback = "item") {
+  # `-` last so it is a literal rather than a range. An earlier
+  # "[^A-Za-z0-9_\\-]" also whitelisted a literal backslash.
+  out <- gsub("[^A-Za-z0-9_-]+", "_", as.character(x))
+  out <- gsub("^_+|_+$", "", out)
+  ifelse(nzchar(out), out, fallback)
+}
+
+#' Escape a value for a double-quoted YAML scalar
+#'
+#' @param x Character vector to escape.
+#' @return A character vector safe to place between double quotes in YAML.
+#' @keywords internal
+#' @noRd
+.vista_escape_yaml <- function(x) {
+  # Backslash first, then quote; both fixed = TRUE so the replacement text is
+  # taken literally instead of being reparsed for backreferences.
+  x <- gsub("\\", "\\\\", as.character(x), fixed = TRUE)
+  gsub("\"", "\\\"", x, fixed = TRUE)
+}
+
 #' Deprecated and defunct arguments in VISTA
 #'
 #' @description

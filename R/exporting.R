@@ -433,11 +433,7 @@ export_vista_assets <- function(x,
     )
   }
 
-  sanitize_name <- function(txt) {
-    out <- gsub("[^A-Za-z0-9_\\-]+", "_", txt)
-    out <- gsub("^_+|_+$", "", out)
-    if (!nzchar(out)) "comparison" else out
-  }
+  sanitize_name <- function(txt) .vista_sanitize_name(txt, fallback = "comparison")
   comp_tag <- sanitize_name(comp_name)
 
   plots_dir <- file.path(out_dir, "plots")

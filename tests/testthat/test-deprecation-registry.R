@@ -170,3 +170,36 @@ test_that("shared defaults are available and internally consistent", {
   expect_identical(VISTA:::.vista_default("label_size"), 3)
   expect_identical(VISTA:::.vista_default("max_genes_embedding"), 20)
 })
+
+test_that(".vista_escape_yaml produces parseable double-quoted scalars", {
+  skip_if_not_installed("yaml")
+
+  values <- c(
+    "plain title",
+    'has "quotes"',
+    "C:\\project\\dir",
+    "trailing\\",
+    'mixed "q" and \\ slash'
+  )
+
+  for (v in values) {
+    y <- paste0("title: \"", VISTA:::.vista_escape_yaml(v), "\"")
+    parsed <- yaml::yaml.load(y)
+    expect_identical(parsed$title, v, info = encodeString(v))
+  }
+})
+
+test_that(".vista_sanitize_name strips path-significant characters", {
+  expect_identical(
+    VISTA:::.vista_sanitize_name("treatment1_VS_control"),
+    "treatment1_VS_control"
+  )
+  # A backslash was previously whitelisted by "[^A-Za-z0-9_\\-]" and reached
+  # asset filenames.
+  expect_identical(VISTA:::.vista_sanitize_name("A\\B_VS_C"), "A_B_VS_C")
+  expect_identical(VISTA:::.vista_sanitize_name("a/b:c*d"), "a_b_c_d")
+  expect_identical(VISTA:::.vista_sanitize_name("keeps-hyphen"), "keeps-hyphen")
+  expect_identical(VISTA:::.vista_sanitize_name("__trimmed__"), "trimmed")
+  expect_identical(VISTA:::.vista_sanitize_name("///", fallback = "comparison"), "comparison")
+  expect_false(any(grepl("[\\\\/]", VISTA:::.vista_sanitize_name(c("a\\b", "c/d")))))
+})

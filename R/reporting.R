@@ -167,11 +167,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     )
   }
 
-  sanitize_name <- function(x) {
-    out <- gsub("[^A-Za-z0-9_\\-]+", "_", as.character(x))
-    out <- gsub("^_+|_+$", "", out)
-    if (!nzchar(out)) "item" else out
-  }
+  sanitize_name <- function(x) .vista_sanitize_name(x, fallback = "item")
   comp_tag <- sanitize_name(primary_comp)
 
   assets_rel <- cfg$assets_dir
@@ -606,7 +602,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
   saveRDS(bundle, data_rds)
   data_rds <- normalizePath(data_rds, winslash = "/", mustWork = FALSE)
 
-  esc_yaml <- function(x) gsub("\"", "\\\\\"", as.character(x), fixed = TRUE)
+  esc_yaml <- .vista_escape_yaml
   fmt_lines <- if (cfg$output_format %in% c("html", "html-default", "html4")) {
     Filter(Negate(is.null), c(
       "format:",
