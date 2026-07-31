@@ -1,0 +1,172 @@
+# The registry is the source of truth for VISTA's deprecation timelines. These
+# tests make it impossible to add an alias and forget to wire up its warning --
+# which is exactly how six silent aliases accumulated before 1.2.0.
+
+test_that("the deprecation registry is well formed", {
+  reg <- VISTA:::.vista_deprecations()
+
+  expect_s3_class(reg, "data.frame")
+  expect_gt(nrow(reg), 0L)
+  expect_named(
+    reg,
+    c("fun", "old_arg", "new_arg", "deprecated_in", "defunct_in", "removed_in", "note")
+  )
+
+  expect_false(anyNA(reg))
+  expect_true(all(nzchar(reg$fun)))
+  expect_true(all(nzchar(reg$old_arg)))
+
+  # A function/argument pair may only appear once.
+  key <- paste(reg$fun, reg$old_arg, sep = "/")
+  expect_false(anyDuplicated(key) > 0L)
+
+  # Timelines must be ordered: deprecated < defunct < removed.
+  for (col in c("deprecated_in", "defunct_in", "removed_in")) {
+    expect_true(all(nzchar(reg[[col]])), info = col)
+  }
+  expect_true(all(
+    package_version(reg$deprecated_in) < package_version(reg$defunct_in)
+  ))
+  expect_true(all(
+    package_version(reg$defunct_in) < package_version(reg$removed_in)
+  ))
+})
+
+test_that("every registered function is exported and still has the old formal", {
+  reg <- VISTA:::.vista_deprecations()
+  exported <- getNamespaceExports("VISTA")
+
+  for (i in seq_len(nrow(reg))) {
+    fun <- reg$fun[[i]]
+    old <- reg$old_arg[[i]]
+    new <- reg$new_arg[[i]]
+
+    expect_true(fun %in% exported, info = sprintf("%s is not exported", fun))
+
+    fmls <- names(formals(getExportedValue("VISTA", fun)))
+    if (is.null(fmls)) {
+      # S4 generic: inspect the method instead.
+      fmls <- names(formals(getMethod(fun, "VISTA")))
+    }
+
+    expect_true(
+      old %in% fmls || "..." %in% fmls,
+      info = sprintf("%s() no longer accepts the deprecated `%s`", fun, old)
+    )
+
+    if (nzchar(new)) {
+      expect_true(
+        new %in% fmls || "..." %in% fmls,
+        info = sprintf("%s() does not have the replacement `%s`", fun, new)
+      )
+    }
+  }
+})
+
+test_that(".vista_deprecate_arg warns with the documented class and returns the value", {
+  expect_warning(
+    out <- VISTA:::.vista_deprecate_arg(
+      old = "show_corr_values", value = TRUE, fun = "get_corr_heatmap"
+    ),
+    class = "vista_deprecated_arg"
+  )
+  expect_true(out)
+
+  # It also carries base R's deprecation class, so suppressWarnings and
+  # Bioconductor tooling treat it the way they treat .Deprecated().
+  expect_warning(
+    VISTA:::.vista_deprecate_arg(old = "col_up", value = "red", fun = "get_volcano_plot"),
+    class = "deprecatedWarning"
+  )
+
+  # transform is applied to the legacy value.
+  suppressWarnings(
+    expect_identical(
+      VISTA:::.vista_deprecate_arg(
+        old = "label", value = TRUE, fun = "get_deg_count_pieplot",
+        transform = function(v) if (isTRUE(v)) "both" else "none"
+      ),
+      "both"
+    )
+  )
+})
+
+test_that("the deprecation message names the replacement and the defunct release", {
+  msg <- tryCatch(
+    VISTA:::.vista_deprecate_arg(old = "show_corr_values", value = TRUE, fun = "get_corr_heatmap"),
+    vista_deprecated_arg = function(w) conditionMessage(w)
+  )
+  expect_match(msg, "show_corr_values", fixed = TRUE)
+  expect_match(msg, "label", fixed = TRUE)
+  expect_match(msg, "1.4.0", fixed = TRUE)
+
+  # Arguments with no replacement say so rather than pointing at "".
+  msg2 <- tryCatch(
+    VISTA:::.vista_deprecate_arg(old = "sample.seed", value = 1, fun = "get_pca_plot"),
+    vista_deprecated_arg = function(w) conditionMessage(w)
+  )
+  expect_match(msg2, "no longer has any effect", fixed = TRUE)
+})
+
+test_that(".vista_defunct_arg aborts with the documented class", {
+  expect_error(
+    VISTA:::.vista_defunct_arg(old = "col_up", fun = "get_volcano_plot"),
+    class = "vista_defunct_arg"
+  )
+  expect_error(
+    VISTA:::.vista_defunct_arg(old = "col_up", fun = "get_volcano_plot"),
+    class = "defunctError"
+  )
+})
+
+test_that(".vista_check_dots accepts known names and rejects unknown ones", {
+  expect_true(VISTA:::.vista_check_dots(list(), fun = "get_volcano_plot"))
+  expect_true(
+    VISTA:::.vista_check_dots(
+      list(pointSize = 2), fun = "get_volcano_plot", allowed = "pointSize"
+    )
+  )
+
+  expect_error(
+    VISTA:::.vista_check_dots(list(definitely_not_real = 1), fun = "get_volcano_plot"),
+    "unknown argument"
+  )
+
+  # Unnamed arguments in ... are always a mistake for these functions.
+  expect_error(
+    VISTA:::.vista_check_dots(stats::setNames(list(1), ""), fun = "get_volcano_plot"),
+    "unnamed argument"
+  )
+
+  # Managed arguments are blocked with a distinct message.
+  expect_error(
+    VISTA:::.vista_check_dots(
+      list(genes = "x"), fun = "get_pathway_heatmap", blocked = c("genes", "sample_group")
+    ),
+    "managed by"
+  )
+})
+
+test_that(".vista_check_dots suggests a near-miss argument name", {
+  msg <- tryCatch(
+    VISTA:::.vista_check_dots(list(point_siz = 2), fun = "get_volcano_plot"),
+    error = function(e) conditionMessage(e)
+  )
+  expect_match(msg, "did you mean", ignore.case = TRUE)
+  expect_match(msg, "point_size", fixed = TRUE)
+})
+
+test_that("shared defaults are available and internally consistent", {
+  d <- VISTA:::.vista_defaults()
+  expect_type(d, "list")
+  expect_true(all(nzchar(names(d))))
+  expect_false(anyDuplicated(names(d)) > 0L)
+
+  expect_identical(VISTA:::.vista_default("group_palette"), "Dark 2")
+  expect_error(VISTA:::.vista_default("no_such_default"), "Unknown VISTA default")
+
+  # 1.2.0 must not move any default; these pin the current values.
+  expect_identical(VISTA:::.vista_default("point_size_embedding"), 10)
+  expect_identical(VISTA:::.vista_default("label_size"), 3)
+  expect_identical(VISTA:::.vista_default("max_genes_embedding"), 20)
+})
