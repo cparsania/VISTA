@@ -78,6 +78,7 @@
 #' v
 #' @name VISTA-show
 #' @aliases show,VISTA-method
+#' @importFrom methods show
 #' @exportMethod show
 setMethod("show", "VISTA", function(object) {
   se_show <- methods::selectMethod("show", "SummarizedExperiment")

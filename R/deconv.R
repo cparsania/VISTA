@@ -539,7 +539,8 @@ get_celltype_barplot <- function(x,
 #' @param cell_types Optional character vector of cell types to include.
 #' @param top_n Number of top cell types by mean score when `cell_types` is `NULL`.
 #' @param summary_fun One of `"mean"` or `"median"` for group summary.
-#' @param error Error-bar type: `"se"`, `"sd"`, or `"none"`.
+#' @param errorbar Error-bar type: `"se"`, `"sd"`, or `"none"`.
+#' @param error Deprecated; use `errorbar`.
 #' @param add_points Logical; overlay sample-level jittered points.
 #' @param point_size Point size for summary points.
 #' @param base_size Base font size.

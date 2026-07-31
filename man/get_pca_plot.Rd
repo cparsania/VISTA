@@ -72,6 +72,10 @@ both \code{palette} and stored VISTA colours.}
 
 \item{use_group_colors}{Logical; when \code{TRUE}, prefer the stored VISTA group
 colours when colouring by the grouping column.}
+
+\item{top_n_genes}{Deprecated; use \code{top_n}.}
+
+\item{max_genes}{Maximum number of genes accepted in \code{genes} (default 20).}
 }
 \value{
 A ggplot object showing the first two PCs.

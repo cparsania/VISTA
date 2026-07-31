@@ -408,6 +408,8 @@ NULL
 #' @param top_n Optional integer selecting the top most variable genes to include. Ignored
 #'   when `genes` is supplied.
 #' @param label Logical; if `TRUE`, sample names are drawn next to the points.
+#' @param top_n_genes Deprecated; use `top_n`.
+#' @param max_genes Maximum number of genes accepted in `genes` (default 20).
 #' @param label_size Numeric size of sample labels when `label = TRUE`.
 #' @param point_size Numeric size of the plotted points.
 #' @param shape_by Optional column name in `sample_info` used to map point shape. When `NULL`,
@@ -1705,9 +1707,6 @@ get_chromosome_plot <- function(x,
   scale_mode <- match.arg(scale_mode)
   if (!requireNamespace("AnnotationDbi", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg AnnotationDbi} is required for TxDb queries.")
-  }
-  if (!requireNamespace("viridis", quietly = TRUE)) {
-    cli::cli_abort("Package {.pkg viridis} is required for colouring.")
   }
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)

@@ -3,6 +3,7 @@
 \name{VISTA-subset}
 \alias{VISTA-subset}
 \alias{[,VISTA,ANY,ANY-method}
+\alias{[,VISTA,ANY,ANY,ANY-method}
 \title{Subset a VISTA object}
 \usage{
 \S4method{[}{VISTA,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)

@@ -85,7 +85,7 @@
 #' group_colors(v_ctrl)
 #'
 #' @name VISTA-subset
-#' @aliases [,VISTA,ANY,ANY-method
+#' @aliases [,VISTA,ANY,ANY-method [,VISTA,ANY,ANY,ANY-method
 #' @exportMethod [
 setMethod("[", c("VISTA", "ANY", "ANY"), function(x, i, j, ..., drop = FALSE) {
   if (!missing(drop) && !identical(drop, FALSE)) {

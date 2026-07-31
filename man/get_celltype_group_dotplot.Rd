@@ -29,13 +29,15 @@ If \code{NULL}, uses the active VISTA group column when available.}
 
 \item{summary_fun}{One of \code{"mean"} or \code{"median"} for group summary.}
 
+\item{errorbar}{Error-bar type: \code{"se"}, \code{"sd"}, or \code{"none"}.}
+
 \item{add_points}{Logical; overlay sample-level jittered points.}
 
 \item{point_size}{Point size for summary points.}
 
 \item{base_size}{Base font size.}
 
-\item{error}{Error-bar type: \code{"se"}, \code{"sd"}, or \code{"none"}.}
+\item{error}{Deprecated; use \code{errorbar}.}
 }
 \value{
 A ggplot object.
