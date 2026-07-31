@@ -966,6 +966,11 @@ get_go_enrichment <- function(x,
     bg_ids <- .vista_convert_ids(background, from_type = from_type, to_type = from_type, orgdb = orgdb)
   }
 
+  .vista_check_dots(
+    list(...), fun = "get_go_enrichment",
+    allowed = names(formals(clusterProfiler::enrichGO)),
+    blocked = c("gene", "OrgDb", "keyType", "ont", "universe")
+  )
   res <- clusterProfiler::enrichGO(gene          = gene_ids,
                                    OrgDb         = orgdb,
                                    keyType       = toupper(from_type),
@@ -1008,6 +1013,11 @@ get_kegg_enrichment <- function(x,
     bg_ids <- .vista_convert_ids(background, from_type = from_type, to_type = "ENTREZID", orgdb = orgdb)
   }
 
+  .vista_check_dots(
+    list(...), fun = "get_kegg_enrichment",
+    allowed = names(formals(clusterProfiler::enrichKEGG)),
+    blocked = c("gene", "organism", "universe")
+  )
   res <- clusterProfiler::enrichKEGG(gene = gene_ids,
                                      organism = kegg_species,
                                      universe = bg_ids,

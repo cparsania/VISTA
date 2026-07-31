@@ -1130,6 +1130,15 @@ get_volcano_plot <- function(x,
     }
   }
 
+  .vista_check_dots(
+    dots, fun = "get_volcano_plot",
+    allowed = c(
+      names(formals(EnhancedVolcano::EnhancedVolcano)),
+      names(formals(.EnhancedVolcano2))
+    ),
+    blocked = c("toptable", "lab", "x", "y")
+  )
+
   vol_args <- c(
     list(
       toptable = volcano_data,
@@ -5102,6 +5111,11 @@ get_deg_venn_diagram <- function(x,
   if (!requireNamespace("ggvenn", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg ggvenn} must be installed to use `get_deg_venn_diagram()`.")
   }
+  .vista_check_dots(
+    list(...), fun = "get_deg_venn_diagram",
+    allowed = names(formals(ggvenn::ggvenn)),
+    blocked = c("data", "columns")
+  )
   if (length(sample_comparisons) < 2 || length(sample_comparisons) > 4) {
     cli::cli_abort("{.arg sample_comparisons} must contain 2 to 4 comparison names.")
   }
@@ -6273,6 +6287,12 @@ get_expression_heatmap <- function(x,
 
   group_col <- group_column %||% .vista_group_col(x)
 
+  .vista_check_dots(
+    list(...), fun = "get_expression_heatmap",
+    allowed = names(formals(ComplexHeatmap::Heatmap)),
+    blocked = c("matrix", "name", "col")
+  )
+
   expr <- SummarizedExperiment::assay(x, "norm_counts") |>
     as.data.frame() |>
     tibble::rownames_to_column("gene_id")
@@ -6828,6 +6848,12 @@ get_foldchange_heatmap <- function(x,
     cli::cli_abort("Packages {.pkg ComplexHeatmap} and {.pkg circlize} must be installed to draw heatmaps.")
   }
   return_type <- match.arg(return_type)
+
+  .vista_check_dots(
+    list(...), fun = "get_foldchange_heatmap",
+    allowed = names(formals(ComplexHeatmap::Heatmap)),
+    blocked = c("matrix", "name", "col")
+  )
 
   comps <- .vista_comparisons(x)
   if (!length(comps)) {

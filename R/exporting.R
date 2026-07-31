@@ -102,6 +102,11 @@ save_vista_plot <- function(plot,
   if (inherits(plot, c("Heatmap", "HeatmapList"))) {
     save_heatmap(plot, dev)
   } else {
+    .vista_check_dots(
+      list(...), fun = "save_vista_plot",
+      allowed = names(formals(ggplot2::ggsave)),
+      blocked = c("filename", "plot", "device")
+    )
     ggplot2::ggsave(
       filename = file,
       plot = plot,
