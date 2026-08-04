@@ -257,32 +257,28 @@ test_that("report parameters come from the object, not the config defaults (B8)"
 })
 
 test_that("enrichment identifier type is detected, not taken from display_id (B9)", {
+  # Exercises the real detector rather than a reimplementation of the rule, and
+  # without deparsing the function body -- that broke under covr, which
+  # instruments the installed package.
+  ensembl <- c("ENSG00000000003", "ENSG00000000419", "ENSG00000000457")
+  symbols <- c("TSPAN6", "DPM1", "SCYL3")
+
+  expect_identical(VISTA:::.vista_detect_id_type(ensembl), "ENSEMBL")
+  expect_identical(VISTA:::.vista_detect_id_type(symbols), "SYMBOL")
+  expect_identical(VISTA:::.vista_detect_id_type(character()), "SYMBOL")
+  expect_identical(VISTA:::.vista_detect_id_type(c(NA, "")), "SYMBOL")
+
+  # Mouse and versioned identifiers are still Ensembl.
+  expect_identical(VISTA:::.vista_detect_id_type(c("ENSMUSG00000000001")), "ENSEMBL")
+  expect_identical(VISTA:::.vista_detect_id_type(c("ENSG00000000003.15")), "ENSEMBL")
+
+  # The detector takes only the identifiers. display_id cannot reach it, which
+  # is the property that broke before: an Ensembl object with
+  # `display_id: SYMBOL` must still be detected as ENSEMBL.
+  expect_identical(names(formals(VISTA:::.vista_detect_id_type)), "ids")
+
   v <- make_small_vista()
-  de_tbl <- comparisons(v)[[1]]
-  expect_true(any(grepl("^ENS", de_tbl$gene_id)))
-
-  # Reproduce the resolution rule now used in run_vista_report().
-  resolve <- function(cfg) {
-    cfg$from_type %||%
-      (if (any(grepl("^ENS", de_tbl$gene_id))) "ENSEMBL" else "SYMBOL")
-  }
-
-  # The problem pairing: Ensembl IDs with SYMBOL labels and no from_type.
-  expect_identical(resolve(list(display_id = "SYMBOL")), "ENSEMBL")
-  # An explicit from_type still wins.
-  expect_identical(resolve(list(from_type = "SYMBOL", display_id = "SYMBOL")), "SYMBOL")
-  # display_id is irrelevant to the decision now.
   expect_identical(
-    resolve(list(display_id = "SYMBOL")),
-    resolve(list(display_id = "GENENAME"))
+    VISTA:::.vista_detect_id_type(comparisons(v)[[1]]$gene_id), "ENSEMBL"
   )
-
-  # Guard the implementation itself: display_id must not be in the chain.
-  body_txt <- paste(deparse(body(run_vista_report)), collapse = " ")
-  chain <- regmatches(
-    body_txt, regexpr("enrich_from <- [^\n]*?(?=\\s{2,}if \\(is\\.null)", body_txt, perl = TRUE)
-  )
-  expect_length(chain, 1L)
-  expect_false(grepl("display_id", chain, fixed = TRUE))
-  expect_true(grepl("from_type", chain, fixed = TRUE))
 })

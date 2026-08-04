@@ -799,6 +799,25 @@ get_msigdb_enrichment <- function(x,
 # GO / KEGG / GSEA helpers
 # ──────────────────────────────────────────────────────────────────────────────
 
+#' Detect the identifier type of a set of gene IDs
+#'
+#' Used to choose `from_type` for enrichment when the caller has not said.
+#' Deliberately separate from `display_id`, which names a rowData column used
+#' for labels and says nothing about what the identifiers themselves are --
+#' conflating the two made Ensembl-identified objects claim to hold symbols and
+#' silently returned empty enrichment.
+#'
+#' @param ids Character vector of gene identifiers.
+#' @return `"ENSEMBL"` or `"SYMBOL"`.
+#' @keywords internal
+#' @noRd
+.vista_detect_id_type <- function(ids) {
+  ids <- as.character(ids)
+  ids <- ids[!is.na(ids) & nzchar(ids)]
+  if (!length(ids)) return("SYMBOL")
+  if (mean(grepl("^ENS[A-Z]*G[0-9]", ids)) >= 0.5) "ENSEMBL" else "SYMBOL"
+}
+
 .vista_default_orgdb <- function(species) {
   if (missing(species) || is.null(species)) species <- "Mus musculus"
   if (species %in% c("Mus musculus", "mouse", "mus musculus")) {

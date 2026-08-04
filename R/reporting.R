@@ -472,8 +472,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
   # the common pairing of Ensembl identifiers with `display_id: SYMBOL` claim
   # the IDs were symbols, so every lookup failed and the enrichment section came
   # back empty while looking like a real biological result.
-  enrich_from <- cfg$from_type %||%
-    (if (any(grepl("^ENS", de_tbl$gene_id))) "ENSEMBL" else "SYMBOL")
+  enrich_from <- cfg$from_type %||% .vista_detect_id_type(de_tbl$gene_id)
   if (is.null(cfg$from_type)) {
     cli::cli_inform(
       "Detected gene identifier type {.val {enrich_from}} for enrichment. Set {.field from_type} in the config to override."
