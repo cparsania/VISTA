@@ -98,3 +98,68 @@ test_that("fold-change matrices keep each gene's own values under permutation", 
     expect_equal(unname(a[g, comps[[1]]]), unname(tbl[g, "log2fc"]), info = g)
   }
 })
+
+# --- deconvolution: never attach scores to a sample by position alone ---------
+
+test_that(".normalize_xcell2_scores aligns by name in either orientation", {
+  samples <- c("s1", "s2", "s3")
+  scores <- data.frame(A = c(1, 2, 3), B = c(4, 5, 6), row.names = samples)
+
+  # Already row-oriented, but shuffled: must be reordered by name, not position.
+  shuffled <- scores[c("s3", "s1", "s2"), , drop = FALSE]
+  out <- VISTA:::.normalize_xcell2_scores(shuffled, samples)
+  expect_identical(rownames(out), samples)
+  expect_equal(out["s1", "A"], 1)
+  expect_equal(out["s3", "A"], 3)
+
+  # Column-oriented input is transposed and then aligned by name.
+  out_t <- VISTA:::.normalize_xcell2_scores(t(as.matrix(scores)), samples)
+  expect_identical(rownames(out_t), samples)
+  expect_equal(out_t["s2", "A"], 2)
+})
+
+test_that("labelled scores that disagree with the samples are refused, not guessed", {
+  samples <- c("s1", "s2", "s3")
+  # Right number of rows, real labels, but they are someone else's samples.
+  wrong <- data.frame(A = c(1, 2, 3), row.names = c("x1", "x2", "x3"))
+
+  expect_error(
+    VISTA:::.normalize_xcell2_scores(wrong, samples),
+    "do not match"
+  )
+  # The message must make the refusal and its reason explicit.
+  msg <- tryCatch(
+    VISTA:::.normalize_xcell2_scores(wrong, samples),
+    error = function(e) conditionMessage(e)
+  )
+  expect_match(msg, "position", fixed = TRUE)
+})
+
+test_that("unlabelled scores fall back to position, and say so", {
+  samples <- c("s1", "s2", "s3")
+  bare <- data.frame(A = c(1, 2, 3))          # default 1..n rownames
+  expect_message(
+    out <- VISTA:::.normalize_xcell2_scores(bare, samples),
+    "by position"
+  )
+  expect_identical(rownames(out), samples)
+  expect_equal(out[["A"]], c(1, 2, 3))
+
+  # Truly absent rownames behave the same way.
+  m <- matrix(c(1, 2, 3), ncol = 1, dimnames = list(NULL, "A"))
+  expect_message(out2 <- VISTA:::.normalize_xcell2_scores(m, samples), "by position")
+  expect_identical(rownames(out2), samples)
+})
+
+test_that("a sample-count mismatch is an error rather than a warning", {
+  samples <- c("s1", "s2", "s3")
+  short <- data.frame(A = c(1, 2), row.names = c("x1", "x2"))
+  expect_error(VISTA:::.normalize_xcell2_scores(short, samples), "Could not align")
+})
+
+test_that(".vista_labels_uninformative recognises the defaults R invents", {
+  expect_true(VISTA:::.vista_labels_uninformative(NULL, 3))
+  expect_true(VISTA:::.vista_labels_uninformative(c("", "", ""), 3))
+  expect_true(VISTA:::.vista_labels_uninformative(c("1", "2", "3"), 3))
+  expect_false(VISTA:::.vista_labels_uninformative(c("s1", "s2", "s3"), 3))
+})

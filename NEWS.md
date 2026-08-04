@@ -92,6 +92,14 @@ Check whether you were affected:
   call could plot a different subset of genes on different runs. The heatmap now
   ranks candidates by expression variance (most informative rows first) and the
   chord by pathway participation, both breaking ties on the gene identifier.
+- **Deconvolution scores are no longer aligned to samples by position when
+  their own labels disagree.** `run_cell_deconvolution()` accepted scores whose
+  row count matched the sample count and stamped the object's sample names onto
+  them, even when the scores carried different labels of their own -- which
+  would attach every sample's cell fractions to the wrong sample. Alignment is
+  now by name whenever names are available in either orientation; contradictory
+  labels are an error; and position is used only when the scores carry no
+  labels at all, with a message saying so.
 - The airway vignette sets a seed. GSEA estimates p-values by permutation and
   ComplexHeatmap's row k-means is unseeded, so the rendered document previously
   changed on every build for reasons unrelated to the code.
@@ -205,6 +213,14 @@ are now the `max_genes` argument, with the existing values as defaults.
   call could plot a different subset of genes on different runs. The heatmap now
   ranks candidates by expression variance (most informative rows first) and the
   chord by pathway participation, both breaking ties on the gene identifier.
+- **Deconvolution scores are no longer aligned to samples by position when
+  their own labels disagree.** `run_cell_deconvolution()` accepted scores whose
+  row count matched the sample count and stamped the object's sample names onto
+  them, even when the scores carried different labels of their own -- which
+  would attach every sample's cell fractions to the wrong sample. Alignment is
+  now by name whenever names are available in either orientation; contradictory
+  labels are an error; and position is used only when the scores carry no
+  labels at all, with a message saying so.
 - The airway vignette sets a seed. GSEA estimates p-values by permutation and
   ComplexHeatmap's row k-means is unseeded, so the rendered document previously
   changed on every build for reasons unrelated to the code.

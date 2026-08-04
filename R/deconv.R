@@ -47,6 +47,16 @@
   NULL
 }
 
+# TRUE when a set of labels carries no identifying information -- absent, empty,
+# or the positional defaults R invents ("1", "2", ...).
+#' @keywords internal
+#' @noRd
+.vista_labels_uninformative <- function(labels, n) {
+  is.null(labels) ||
+    !any(nzchar(labels)) ||
+    identical(as.character(labels), as.character(seq_len(n)))
+}
+
 .normalize_xcell2_scores <- function(scores, sample_names) {
   df <- as.data.frame(scores)
   sample_names <- as.character(sample_names)
@@ -56,22 +66,40 @@
     df <- as.data.frame(t(as.matrix(df)))
   }
 
+  # Preferred: align by name, in either orientation.
   if (!is.null(rownames(df)) && all(sample_names %in% rownames(df))) {
-    df <- df[sample_names, , drop = FALSE]
-  } else if (nrow(df) == length(sample_names)) {
-    rownames(df) <- sample_names
-  } else if (!is.null(colnames(df)) && all(sample_names %in% colnames(df))) {
+    return(df[sample_names, , drop = FALSE])
+  }
+  if (!is.null(colnames(df)) && all(sample_names %in% colnames(df))) {
     df <- as.data.frame(t(as.matrix(df)))
-    rownames(df) <- sample_names
-  } else {
-    cli::cli_warn(
-      c(
-        "Could not confidently align deconvolution scores to samples.",
-        "i" = "Expected {.val {length(sample_names)}} samples; got {.val {nrow(df)}} rows."
-      )
-    )
+    return(df[sample_names, , drop = FALSE])
   }
 
+  if (nrow(df) != length(sample_names)) {
+    cli::cli_abort(c(
+      "Could not align deconvolution scores to samples.",
+      "x" = "Expected {.val {length(sample_names)}} samples; the scores have {.val {nrow(df)}} rows.",
+      "i" = "Supply an {.pkg xCell2} reference whose output is labelled with the sample identifiers."
+    ))
+  }
+
+  # The row count matches but the labels do not. If the scores carry real labels
+  # that simply disagree, that is contradictory evidence: assigning positionally
+  # would silently attach every sample's fractions to the wrong sample. Only
+  # fall back to position when there is no label information to contradict.
+  if (!.vista_labels_uninformative(rownames(df), nrow(df))) {
+    cli::cli_abort(c(
+      "Deconvolution scores are labelled, but the labels do not match the object's samples.",
+      "x" = "Scores: {.val {utils::head(rownames(df), 3)}}...",
+      "i" = "Object: {.val {utils::head(sample_names, 3)}}...",
+      "i" = "Refusing to align by position, which would mislabel every sample."
+    ))
+  }
+
+  cli::cli_inform(
+    "Deconvolution scores are unlabelled; aligning to the object's {.val {length(sample_names)}} samples by position."
+  )
+  rownames(df) <- sample_names
   df
 }
 
@@ -355,6 +383,10 @@ get_cell_fractions <- function(x) {
   if (is.null(rownames(frac)) || any(!nzchar(rownames(frac)))) {
     sample_ids <- colnames(SummarizedExperiment::assay(x, "norm_counts"))
     if (nrow(frac) == length(sample_ids)) {
+      # No labels to align by, so position is the only option available.
+      cli::cli_inform(
+        "Cell fractions carry no sample labels; aligning to the object's samples by position."
+      )
       rownames(frac) <- sample_ids
     } else {
       cli::cli_abort("Cell fractions must include sample rownames (or a {.val sample_names} column).")
