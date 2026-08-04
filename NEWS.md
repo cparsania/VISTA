@@ -33,16 +33,45 @@ Check whether you were affected:
 - **GSEA ranked vectors slid scores onto the wrong genes.** `get_gsea()`
   reassigned `names(rank_vec)` from a mapping helper that drops unmapped and
   duplicate identifiers, so the shorter vector was padded with `NA` and every
-  score after the first gap moved to a different gene. The KEGG path always
-  maps to ENTREZID, so any real dataset was affected. Re-run affected GSEA.
+  score after the first gap moved to a different gene. The resulting NES
+  values and leading-edge gene lists were meaningless.
+
+  *Scope:* only `set_type = "kegg"` was affected in practice. That path always
+  converts to ENTREZID, and any real dataset contains identifiers with no
+  ENTREZ mapping, so the vector always shortened. `set_type = "msigdb"`
+  converted an identifier type to *itself*, which short-circuits before
+  querying the annotation database and cannot shorten. `set_type = "go"`
+  never reassigned the names at all. Verified on a 22-gene input containing
+  two identifiers absent from the OrgDb: `"kegg"` returned 20 names for 22
+  scores, `"msigdb"` returned 22.
+
+  No other VISTA function called `get_gsea()`, so nothing else in the package
+  consumed a corrupted ranking. Re-run any `get_gsea(set_type = "kegg")`
+  results; MSigDB and GO results are unaffected.
 - **`get_corr_heatmap()` drew a staircase, not a triangle.** The `triangle`
   mask was computed against input order while the axes were re-levelled to
   clustered order, under the default `cluster_by = "correlation"`.
 - **Multi-file count importers bound columns positionally.** The STAR, HTSeq
   and RSEM importers took gene identifiers from the first file only and never
-  checked that row *i* described the same gene in the others. Files with equal
-  row counts but different ordering were silently misaligned. They now match by
-  identifier and **error** if a file does not cover the reference gene set.
+  checked that row *i* described the same gene in the others, so files with
+  equal row counts but different ordering were silently misaligned and every
+  count for those samples was attributed to the wrong gene.
+
+  *Scope:* only `read_vista_counts()` given a **vector of two or more file
+  paths** with `format` of `"star"`, `"htseq"` or `"rsem"`, and only when
+  those files did not already list the same genes in the same order. A single
+  file, a data frame, a matrix, `"featurecounts"` and `"tximport"` all take a
+  name-keyed path and were never affected. Files written by one pipeline run
+  normally do share an order, so a uniform set of inputs was fine; the risk is
+  mixing files produced at different times or by different pipeline versions,
+  where HTSeq's trailing `__no_feature`/`__ambiguous` rows or STAR's four
+  leading `N_*` rows may differ.
+
+  Imports now match by gene identifier and **error**, naming the file and up
+  to five missing identifiers, when a file does not cover the reference gene
+  set. This can surface an error where a script previously appeared to work;
+  it was producing wrong numbers. Anything built from a multi-file STAR,
+  HTSeq or RSEM import should be re-imported and re-analysed.
 - **`run_vista_report()` reported its own defaults as your parameters.** When a
   prebuilt object was supplied via `vista_rds`, the report printed
   deseq2 / 1 / 0.05 / padj regardless of how the object was built.
