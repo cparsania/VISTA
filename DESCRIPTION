@@ -28,6 +28,8 @@ Imports:
     ggrepel,
     GGally,
     ggpubr,
+    grDevices,
+    graphics,
     grid,
     matrixStats,
     methods,
@@ -37,11 +39,14 @@ Imports:
     rlang,
     S4Vectors,
     scales,
+    stats,
     stringr,
     SummarizedExperiment,
     tibble,
     tidyr,
-    tidyselect
+    tidyselect,
+    tools,
+    utils
 Suggests:
     airway,
     BiocStyle,

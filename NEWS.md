@@ -209,7 +209,8 @@ are now the `max_genes` argument, with the existing values as defaults.
 
 - Accessor generics dispatch only on the object rather than on every formal.
 - `Depends: R (>= 4.6.0)`; `viridis` dropped from Imports (unused);
-  `BiocGenerics` added.
+  `BiocGenerics` added. `grDevices`, `graphics`, `stats`, `tools` and `utils`
+  are now declared — all five were already used via `::` without being listed.
 - `print.vista` removed — no object could carry that class.
 - Plot layer data is pinned by snapshot tests so API renames cannot silently
   change output.
