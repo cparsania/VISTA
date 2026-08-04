@@ -803,13 +803,13 @@ get_msigdb_enrichment <- function(x,
 
 #' Map identifiers preserving length and position
 #'
-#' Unlike [.vista_convert_ids()], which de-duplicates and drops unmapped
+#' Unlike `.vista_convert_ids()`, which de-duplicates and drops unmapped
 #' identifiers because its callers want a gene *set*, this returns a vector the
 #' same length as `ids` with `NA` where no mapping exists. That property is
 #' essential anywhere identifiers are used as keys against a parallel vector of
 #' values.
 #'
-#' It also differs from [.map_gene_ids()], which falls back to the *input*
+#' It also differs from `.map_gene_ids()`, which falls back to the *input*
 #' identifier when a mapping is missing. That is right for display labels and
 #' wrong for keys -- handing an unmapped SYMBOL to a function expecting ENTREZ
 #' IDs trades a visible gap for a silent mismatch.

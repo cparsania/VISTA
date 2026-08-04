@@ -132,7 +132,7 @@
 
 #' Signal a defunct VISTA argument
 #'
-#' Companion to [.vista_deprecate_arg()] used once an alias graduates from
+#' Companion to `.vista_deprecate_arg()` used once an alias graduates from
 #' warning to error. Not wired up yet; see `?VISTA-deprecated` for timelines.
 #'
 #' @inheritParams .vista_deprecate_arg
@@ -155,7 +155,7 @@
 
 #' Signal a deprecated *value* of an argument
 #'
-#' Companion to [.vista_deprecate_arg()] for cases where the argument name is
+#' Companion to `.vista_deprecate_arg()` for cases where the argument name is
 #' unchanged but one of its accepted values has been renamed. The registry is
 #' keyed on argument names, so value renames carry their timeline explicitly
 #' rather than being looked up.

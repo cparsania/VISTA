@@ -57,7 +57,7 @@
 
 #' Look up a shared VISTA default
 #'
-#' @param name Character scalar naming an entry in [.vista_defaults()].
+#' @param name Character scalar naming an entry in `.vista_defaults()`.
 #' @return The default value.
 #' @keywords internal
 #' @noRd
