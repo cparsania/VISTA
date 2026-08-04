@@ -212,7 +212,7 @@ test_that("get_pathway_heatmap returns mapped genes and supports SYMBOL mapping"
     sample_group = unique(SummarizedExperiment::colData(vista)$cond_long),
     top_n = 1,
     gene_id_column = "SYMBOL",
-    return_type = "genes"
+    return_type = "data"
   )
 
   expect_type(mapped_genes, "character")
@@ -266,7 +266,7 @@ test_that("get_pathway_heatmap blocks genes and samples override via ...", {
       sample_group = unique(SummarizedExperiment::colData(vista)$cond_long),
       pathways = "Pathway_A",
       genes = genes[1:5],
-      return_type = "genes"
+      return_type = "data"
     ),
     "managed by"
   )
@@ -316,7 +316,7 @@ test_that("get_pathway_heatmap supports intersection and max_genes cap", {
     top_n = 2,
     gene_mode = "intersection",
     max_genes = 5,
-    return_type = "genes"
+    return_type = "data"
   )
 
   expect_lte(length(got), 5)

@@ -140,7 +140,7 @@ test_that("get_celltype_heatmap returns matrix and plot outputs", {
   expect_equal(nrow(out$matrix), 2)
   expect_equal(colnames(out$matrix), colnames(norm_counts(v)))
 
-  mat_only <- get_celltype_heatmap(v, top_n = 2, return_type = "matrix")
+  mat_only <- get_celltype_heatmap(v, top_n = 2, return_type = "data")
   expect_true(is.matrix(mat_only))
   expect_equal(nrow(mat_only), 2)
 })

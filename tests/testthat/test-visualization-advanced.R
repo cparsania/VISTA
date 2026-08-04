@@ -273,19 +273,26 @@ test_that("corr heatmap triangle mask matches the rendered axis order (B3)", {
     as.integer(table(factor(as.character(d$Var1), levels = lv)))
   }
 
-  for (cb in c("correlation", "group", "input", "none")) {
-    lower <- get_corr_heatmap(v, triangle = "lower", cluster_by = cb)
+  for (ob in c("correlation", "group", "input", "none")) {
+    lower <- get_corr_heatmap(v, triangle = "lower", order_by = ob)
     expect_identical(
       count_per_row(lower), seq_len(ncol(v)),
-      info = paste("lower /", cb)
+      info = paste("lower /", ob)
     )
 
-    upper <- get_corr_heatmap(v, triangle = "upper", cluster_by = cb)
+    upper <- get_corr_heatmap(v, triangle = "upper", order_by = ob)
     expect_identical(
       count_per_row(upper), rev(seq_len(ncol(v))),
-      info = paste("upper /", cb)
+      info = paste("upper /", ob)
     )
   }
+
+  # The deprecated spelling must still produce the same masking.
+  expect_warning(
+    legacy <- get_corr_heatmap(v, triangle = "lower", cluster_by = "input"),
+    class = "vista_deprecated_arg"
+  )
+  expect_identical(count_per_row(legacy), seq_len(ncol(v)))
 })
 
 test_that("corr heatmap full triangle and show_diagonal stay consistent", {

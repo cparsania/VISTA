@@ -35,7 +35,7 @@ get_expression_heatmap(
   col = NULL,
   heatmap_name = NULL,
   show_heatmap_legend = TRUE,
-  return_type = c("heatmap", "clusters", "both"),
+  return_type = c("plot", "data", "both"),
   ...
 )
 }
@@ -109,7 +109,8 @@ annotation column.}
 
 \item{show_heatmap_legend}{Logical; display the heatmap legend.}
 
-\item{return_type}{\code{"heatmap"}, \code{"clusters"}, or \code{"both"} selecting the returned object.}
+\item{return_type}{One of \code{"plot"} (default), \code{"data"}, or \code{"both"}. The
+legacy values \code{"heatmap"} and \code{"clusters"} are still accepted and warn.}
 
 \item{...}{Additional arguments passed to \code{ComplexHeatmap::Heatmap()}.}
 }
@@ -141,7 +142,7 @@ if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
 v <- example_vista()
 if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
     requireNamespace("circlize", quietly = TRUE)) {
-  hm <- get_expression_heatmap(v, return_type = "heatmap")
+  hm <- get_expression_heatmap(v, return_type = "plot")
   ComplexHeatmap::draw(hm)
 }
 }

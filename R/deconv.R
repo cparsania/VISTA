@@ -690,7 +690,8 @@ get_celltype_group_dotplot <- function(x,
 #' @param cluster_columns Logical; hierarchical cluster samples.
 #' @param label Logical; overlay numeric values on tiles.
 #' @param base_size Base font size.
-#' @param return_type One of `"plot"`, `"matrix"`, or `"both"`.
+#' @param return_type One of `"plot"` (default), `"data"`, or `"both"`. The
+#'   legacy value `"matrix"` is still accepted and warns.
 #'
 #' @return A ggplot object, matrix, or list depending on `return_type`.
 #' @examples
@@ -728,10 +729,12 @@ get_celltype_heatmap <- function(x,
                                  cluster_columns = TRUE,
                                  label = FALSE,
                                  base_size = 11,
-                                 return_type = c("plot", "matrix", "both")) {
+                                 return_type = c("plot", "data", "both")) {
   stopifnot(inherits(x, "VISTA"))
   transform <- match.arg(transform)
-  return_type <- match.arg(return_type)
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_celltype_heatmap", legacy = c(matrix = "data")
+  )
 
   df <- .deconv_long_table(x, sample_names = sample_names)
   selected <- .choose_celltypes(df, cell_types = cell_types, top_n = top_n)
@@ -769,7 +772,7 @@ get_celltype_heatmap <- function(x,
     }
   }
 
-  if (return_type == "matrix") {
+  if (return_type == "data") {
     return(mat)
   }
 

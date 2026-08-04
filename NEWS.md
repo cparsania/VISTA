@@ -67,6 +67,14 @@ Check whether you were affected:
 - Unknown arguments passed through `...` are now rejected with a did-you-mean
   suggestion. A typo such as `get_expression_heatmap(v, gene = my_genes)`
   previously plotted the default gene set instead of erroring.
+- `get_foldchange_lineplot()` gains `return_type`. Its default stays `"both"`
+  (the list it has always returned); pass `"plot"` for a bare ggplot.
+- `get_enrichment_chord()` gains `return_type`. Its default stays `"data"`
+  because it draws to the active device and has always returned its table
+  invisibly; `"plot"` returns a recorded plot that `save_vista_plot()` can now
+  write to a file. VISTA enables the device display list before drawing, since
+  `png()` and `pdf()` leave it off and would otherwise yield an empty
+  recording that silently saved nothing.
 
 ## Deprecations
 
@@ -86,6 +94,14 @@ full table and timelines; each becomes defunct in 1.4.0.
 | `get_pca_plot()` | `sample.seed` | removed; it never had any effect |
 | `get_expression_barplot()`, `get_expression_lollipop()` | `facet_scale` | `facet_scales` |
 | `get_expression_violinplot()`, `get_expression_lineplot()` | `value_transform` | `log_transform` |
+
+`return_type` values are unified on `c("plot", "data", "both")`. The legacy
+spellings still work and warn: `"heatmap"`/`"clusters"` (both heatmaps),
+`"matrix"` (`get_celltype_heatmap()`), `"genes"` (`get_pathway_heatmap()`).
+Arguments that select the *shape* of a purely tabular result --
+`get_pathway_genes()`, `get_genes_by_regulation()`, `read_vista_counts()`,
+`derive_vista_metadata()` -- keep their own vocabularies, because they have no
+plot component.
 
 Undocumented gene caps (20 for embeddings, 15 for lollipop, 25 for barplot)
 are now the `max_genes` argument, with the existing values as defaults.

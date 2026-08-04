@@ -16,7 +16,7 @@ test_that("expression heatmap supports rowData display_id", {
     cluster_rows = FALSE,
     cluster_columns = FALSE,
     summarise_replicates = FALSE,
-    return_type = "heatmap"
+    return_type = "plot"
   )
   expect_true(inherits(hm, "Heatmap") || inherits(hm, "HeatmapList"))
 })
@@ -31,7 +31,7 @@ test_that("expression heatmap rejects non-character genes", {
     get_expression_heatmap(
       vista,
       genes = 1:5,
-      return_type = "heatmap"
+      return_type = "plot"
     ),
     "must be a character vector"
   )
@@ -46,7 +46,7 @@ test_that("expression heatmap works with minimal inputs and auto-selects labeled
 
   hm <- get_expression_heatmap(
     vista,
-    return_type = "heatmap",
+    return_type = "plot",
     cluster_rows = FALSE,
     cluster_columns = FALSE
   )
@@ -72,7 +72,7 @@ test_that("expression heatmap supports column annotation with summarised replica
     summarise_replicates = TRUE,
     cluster_rows = FALSE,
     cluster_columns = FALSE,
-    return_type = "heatmap"
+    return_type = "plot"
   )
   expect_true(inherits(hm, "Heatmap") || inherits(hm, "HeatmapList"))
 })
@@ -98,7 +98,7 @@ test_that("expression heatmap supports custom colors for multiple annotations", 
     summarise_replicates = FALSE,
     cluster_rows = FALSE,
     cluster_columns = FALSE,
-    return_type = "heatmap"
+    return_type = "plot"
   )
 
   expect_s4_class(hm, "Heatmap")
@@ -122,7 +122,7 @@ test_that("expression heatmap supports multiple column annotations and custom cl
     summarise_replicates = FALSE,
     cluster_rows = FALSE,
     cluster_columns = TRUE,
-    return_type = "heatmap"
+    return_type = "plot"
   )
   expect_true(inherits(hm, "Heatmap") || inherits(hm, "HeatmapList"))
 })
@@ -144,7 +144,7 @@ test_that("expression heatmap includes cluster_by when annotate_columns is TRUE"
     summarise_replicates = FALSE,
     cluster_rows = FALSE,
     cluster_columns = TRUE,
-    return_type = "heatmap"
+    return_type = "plot"
   )
 
   expect_true(inherits(hm, "Heatmap") || inherits(hm, "HeatmapList"))
@@ -166,7 +166,7 @@ test_that("expression heatmap validates cluster_by against active annotation col
       annotate_columns = c("cond_long"),
       cluster_by = "nonexistent_col",
       summarise_replicates = FALSE,
-      return_type = "heatmap"
+      return_type = "plot"
     ),
     "cluster_by"
   )
@@ -192,7 +192,7 @@ test_that("expression heatmap matrix values and row order match source data", {
     summarise_replicates = FALSE,
     cluster_rows = FALSE,
     cluster_columns = FALSE,
-    return_type = "heatmap"
+    return_type = "plot"
   )
 
   expect_s4_class(hm, "Heatmap")
@@ -225,7 +225,7 @@ test_that("expression heatmap kmeans clusters match matrix clustering partition"
     cluster_rows = FALSE,
     cluster_columns = FALSE,
     kmeans_k = 3,
-    return_type = "clusters"
+    return_type = "data"
   )
 
   expect_true(all(c("gene", "cluster") %in% colnames(out)))
@@ -301,7 +301,7 @@ test_that("fold-change heatmap matrix values and row order match foldchange matr
     genes = genes,
     cluster_rows = FALSE,
     cluster_columns = FALSE,
-    return_type = "heatmap"
+    return_type = "plot"
   )
 
   expect_s4_class(hm, "Heatmap")
@@ -322,7 +322,7 @@ test_that("fold-change heatmap rejects non-character genes", {
       fixture$vista,
       sample_comparisons = fixture$comps,
       genes = 1:5,
-      return_type = "heatmap"
+      return_type = "plot"
     ),
     "must be a character vector"
   )
@@ -349,7 +349,7 @@ test_that("fold-change heatmap works with minimal inputs and auto-selects top ge
 
   hm <- get_foldchange_heatmap(
     vista,
-    return_type = "heatmap",
+    return_type = "plot",
     cluster_rows = FALSE,
     cluster_columns = FALSE
   )
@@ -369,7 +369,7 @@ test_that("fold-change heatmap minimal call works without rowData gene_id", {
 
   hm <- get_foldchange_heatmap(
     vista,
-    return_type = "heatmap",
+    return_type = "plot",
     cluster_rows = FALSE,
     cluster_columns = FALSE
   )
@@ -397,7 +397,7 @@ test_that("fold-change heatmap kmeans clusters match matrix clustering partition
     cluster_rows = FALSE,
     cluster_columns = FALSE,
     kmeans_k = 3,
-    return_type = "clusters"
+    return_type = "data"
   )
 
   expect_true(all(c("gene", "cluster") %in% colnames(out)))

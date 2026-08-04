@@ -352,6 +352,8 @@ get_pathway_genes <- function(x,
                               return_type = c("long", "list", "vector")) {
   pathway_column <- match.arg(pathway_column)
   gene_column <- match.arg(gene_column)
+  # Not the plot-vs-data vocabulary: this selects the SHAPE of a purely tabular
+  # result, so it is deliberately left alone.
   return_type <- match.arg(return_type)
 
   if (is.list(x) && !inherits(x, c("enrichResult", "gseaResult")) && "enrich" %in% names(x)) {
@@ -496,7 +498,8 @@ get_pathway_genes <- function(x,
 #'   enrichment genes back to VISTA rownames (e.g., `"SYMBOL"` or `"ENTREZID"`).
 #'   Leave `NULL` when enrichment genes already match VISTA rownames.
 #' @param max_genes Optional cap on the number of genes passed to the heatmap.
-#' @param return_type One of `"heatmap"` (default), `"both"`, or `"genes"`.
+#' @param return_type One of `"plot"` (default), `"data"`, or `"both"`. The
+#'   legacy values `"heatmap"` and `"genes"` are still accepted and warn.
 #' @param ... Additional arguments passed to [get_expression_heatmap()].
 #'
 #' @return
@@ -522,7 +525,7 @@ get_pathway_genes <- function(x,
 #'     enrichment = msig,
 #'     sample_group = c("control", "treatment1"),
 #'     top_n = 3,
-#'     return_type = "genes"
+#'     return_type = "data"
 #'   )
 #'   head(genes)
 #' }
@@ -571,11 +574,14 @@ get_pathway_heatmap <- function(x,
                                 gene_mode = c("union", "intersection"),
                                 gene_id_column = NULL,
                                 max_genes = NULL,
-                                return_type = c("heatmap", "both", "genes"),
+                                return_type = c("plot", "data", "both"),
                                 ...) {
   stopifnot(inherits(x, "VISTA"))
   gene_mode <- match.arg(gene_mode)
-  return_type <- match.arg(return_type)
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_pathway_heatmap",
+    legacy = c(heatmap = "plot", genes = "data")
+  )
 
   dots <- list(...)
   blocked <- intersect(c("genes", "sample_group"), names(dots))
@@ -639,7 +645,7 @@ get_pathway_heatmap <- function(x,
     }
   }
 
-  if (return_type == "genes") {
+  if (return_type == "data") {
     return(genes_in_object)
   }
 
@@ -655,7 +661,7 @@ get_pathway_heatmap <- function(x,
     )
   )
 
-  if (return_type == "heatmap") {
+  if (return_type == "plot") {
     return(heatmap_obj)
   }
 
@@ -1162,8 +1168,12 @@ get_gsea <- function(x,
 #' @param gap_degree Gap between sectors in degrees (default `2`).
 #' @param label_cex Text size for sector labels (default `0.7`).
 #' @param title Optional plot title.
+#' @param return_type One of `"data"` (default), `"plot"` or `"both"`. The
+#'   default is `"data"` because this function draws to the active device and
+#'   has always returned its table invisibly. `"plot"` returns a recorded plot
+#'   that [save_vista_plot()] can write to a file.
 #'
-#' @return Invisibly returns a list with:
+#' @return With `return_type = "data"` (the default), invisibly a list with:
 #'   \describe{
 #'     \item{gene_data}{Tibble of genes with pathway membership and (optionally)
 #'       fold-change values.}
@@ -1241,7 +1251,22 @@ get_enrichment_chord <- function(x,
                                  transparency    = 0.4,
                                  gap_degree      = 2,
                                  label_cex       = 0.7,
-                                 title           = NULL) {
+                                 title           = NULL,
+                                 return_type     = c("data", "plot", "both")) {
+
+  # Default is "data" rather than "plot" because this function has always drawn
+  # to the active device and returned its table invisibly; changing that would
+  # break existing code.
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_enrichment_chord", default = "data"
+  )
+  want_plot <- return_type %in% c("plot", "both")
+  if (want_plot) {
+    # Off-screen devices (png, pdf) keep their display list off by default, so
+    # recordPlot() would return an empty recording that silently saves nothing.
+    # This has to happen before circlize draws.
+    .vista_enable_display_list()
+  }
 
   if (!requireNamespace("circlize", quietly = TRUE)) {
     cli::cli_abort(
@@ -1548,8 +1573,30 @@ get_enrichment_chord <- function(x,
     gene_data$gene <- as.character(gene_data$gene)
   }
 
-  invisible(list(
-    gene_data = gene_data,
-    hub_genes = hub_genes
-  ))
+  # circlize draws to the active device rather than returning an object, so
+  # capture the result to let save_vista_plot() handle it like any other plot.
+  recorded <- if (want_plot) .vista_record_plot() else NULL
+
+  if (identical(return_type, "plot")) {
+    if (is.null(recorded)) {
+      cli::cli_abort(c(
+        "Could not capture the chord diagram from the active graphics device.",
+        "i" = "The device recorded an empty display list. Open a device before calling, e.g. {.code png(f); get_enrichment_chord(..., return_type = \"plot\"); dev.off()}."
+      ))
+    }
+    return(recorded)
+  }
+
+  out <- list(gene_data = gene_data, hub_genes = hub_genes)
+  if (identical(return_type, "both")) {
+    if (is.null(recorded)) {
+      cli::cli_warn(c(
+        "Could not capture the chord diagram; {.field plot} will be NULL.",
+        "i" = "Open a device before calling if you need the recorded plot."
+      ))
+    }
+    out$plot <- recorded
+    return(out)
+  }
+  invisible(out)
 }

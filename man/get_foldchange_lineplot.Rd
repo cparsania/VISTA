@@ -22,7 +22,8 @@ get_foldchange_lineplot(
   summary_color = NULL,
   summary_linewidth = 1,
   summary_fun = c("median", "mean"),
-  base_size = 14
+  base_size = 14,
+  return_type = c("both", "plot", "data")
 )
 }
 \arguments{
@@ -65,13 +66,18 @@ the first comparison color (if stored) for consistency across plots.}
 \item{summary_fun}{Character string selecting \code{"median"} or \code{"mean"} for the summary statistic.}
 
 \item{base_size}{Numeric base theme size.}
+
+\item{return_type}{One of \code{"both"} (default), \code{"plot"} or \code{"data"}. The
+default is \code{"both"} rather than \code{"plot"} because this function has always
+returned the list; pass \code{"plot"} for a bare \code{ggplot2} object.}
 }
 \value{
 A list with \code{plot} (a \code{ggplot2} object) and \code{clustered_data}
 (the long data frame behind it, including any k-means cluster assignment).
 
-A list with \code{plot} (the \code{ggplot2} object) and \code{clustered_data}
-(gene-to-cluster assignments).
+With \code{return_type = "both"} (the default), a list with \code{plot} (the
+\code{ggplot2} object) and \code{clustered_data} (gene-to-cluster assignments); with
+\code{"plot"} the \code{ggplot2} object alone; with \code{"data"} the cluster table alone.
 }
 \description{
 Plots log2 fold-change trajectories for selected genes across multiple comparisons,

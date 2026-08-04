@@ -15,7 +15,7 @@ get_celltype_heatmap(
   cluster_columns = TRUE,
   label = FALSE,
   base_size = 11,
-  return_type = c("plot", "matrix", "both")
+  return_type = c("plot", "data", "both")
 )
 }
 \arguments{
@@ -40,7 +40,8 @@ If provided and \code{cluster_columns = FALSE}, samples are ordered by this grou
 
 \item{base_size}{Base font size.}
 
-\item{return_type}{One of \code{"plot"}, \code{"matrix"}, or \code{"both"}.}
+\item{return_type}{One of \code{"plot"} (default), \code{"data"}, or \code{"both"}. The
+legacy value \code{"matrix"} is still accepted and warns.}
 }
 \value{
 A ggplot object, matrix, or list depending on \code{return_type}.

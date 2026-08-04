@@ -5868,8 +5868,12 @@ get_ma_plot <- function(x,
 #' @param summary_linewidth Numeric line width for the summary line.
 #' @param summary_fun Character string selecting `"median"` or `"mean"` for the summary statistic.
 #' @param base_size Numeric base theme size.
-#' @return A list with `plot` (the `ggplot2` object) and `clustered_data`
-#'   (gene-to-cluster assignments).
+#' @param return_type One of `"both"` (default), `"plot"` or `"data"`. The
+#'   default is `"both"` rather than `"plot"` because this function has always
+#'   returned the list; pass `"plot"` for a bare `ggplot2` object.
+#' @return With `return_type = "both"` (the default), a list with `plot` (the
+#'   `ggplot2` object) and `clustered_data` (gene-to-cluster assignments); with
+#'   `"plot"` the `ggplot2` object alone; with `"data"` the cluster table alone.
 # ──────────────────────────────────────────────────────────────────────────────
 
 #' @export
@@ -5890,10 +5894,16 @@ get_foldchange_lineplot <- function(x,
                                     summary_color = NULL,
                                     summary_linewidth = 1,
                                     summary_fun = c("median", "mean"),
-                                    base_size = 14) {
+                                    base_size = 14,
+                                    return_type = c("both", "plot", "data")) {
 
   stopifnot(inherits(x, "VISTA"))
   stopifnot(is.character(sample_comparisons))
+  # Default is "both" here, unlike its siblings, because this function has
+  # always returned the list and changing that would break existing code.
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_foldchange_lineplot", default = "both"
+  )
   facet_by <- match.arg(facet_by)
   summary_fun <- match.arg(summary_fun)
 
@@ -5991,12 +6001,14 @@ get_foldchange_lineplot <- function(x,
     p$facet$params$labeller <- ggplot2::labeller(cluster = cluster_counts)
   }
 
-  list(
-    plot = p,
-    clustered_data = res |>
-      dplyr::select(dplyr::all_of(gene_id_col), display_gene, cluster) |>
-      dplyr::distinct()
-  )
+  if (identical(return_type, "plot")) return(p)
+
+  clustered_data <- res |>
+    dplyr::select(dplyr::all_of(gene_id_col), display_gene, cluster) |>
+    dplyr::distinct()
+  if (identical(return_type, "data")) return(clustered_data)
+
+  list(plot = p, clustered_data = clustered_data)
 }
 
 
@@ -6336,14 +6348,15 @@ get_deg_alluvial <- function(x,
 #' @param col Optional `circlize::colorRamp2` function used when `color_default = FALSE`.
 #' @param heatmap_name Optional legend title.
 #' @param show_heatmap_legend Logical; display the heatmap legend.
-#' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned object.
+#' @param return_type One of `"plot"` (default), `"data"`, or `"both"`. The
+#'   legacy values `"heatmap"` and `"clusters"` are still accepted and warn.
 #' @return A `ComplexHeatmap` object, a cluster data frame, or a list containing
 #'   both depending on `return_type`.
 #' @examples
 #' v <- example_vista()
 #' if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
 #'     requireNamespace("circlize", quietly = TRUE)) {
-#'   hm <- get_expression_heatmap(v, return_type = "heatmap")
+#'   hm <- get_expression_heatmap(v, return_type = "plot")
 #'   ComplexHeatmap::draw(hm)
 #' }
 #' @param ... Additional arguments passed to `ComplexHeatmap::Heatmap()`.
@@ -6378,7 +6391,7 @@ get_expression_heatmap <- function(x,
                                    col = NULL,
                                    heatmap_name = NULL,
                                    show_heatmap_legend = TRUE,
-                                   return_type = c("heatmap", "clusters", "both"),
+                                   return_type = c("plot", "data", "both"),
                                    ...) {
 
   stopifnot(inherits(x, "VISTA"))
@@ -6388,7 +6401,10 @@ get_expression_heatmap <- function(x,
   }
   value_transform <- match.arg(value_transform)
   summarise_method <- match.arg(summarise_method)
-  return_type <- match.arg(return_type)
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_expression_heatmap",
+    legacy = c(heatmap = "plot", clusters = "data")
+  )
 
   group_col <- group_column %||% .vista_group_col(x)
 
@@ -6677,18 +6693,18 @@ get_expression_heatmap <- function(x,
 
   if (!is.null(row_anno)) ht <-  ht + row_anno
 
-  if (!is.null(kmeans_k) && return_type != "heatmap") {
+  if (!is.null(kmeans_k) && return_type != "plot") {
     drawn <- ComplexHeatmap::draw(ht)
     clusters <- ComplexHeatmap::row_order(drawn)
     row_names <- rownames(mat)
     row_clusters <- rep(NA_integer_, length(row_names))
     for (k in seq_along(clusters)) row_clusters[clusters[[k]]] <- k
     cluster_df <- tibble::tibble(gene = row_names, cluster = row_clusters)
-    if (return_type == "clusters") return(cluster_df)
+    if (return_type == "data") return(cluster_df)
     return(list(heatmap = ht, clusters = cluster_df))
   }
 
-  if (return_type == "heatmap") return(ht)
+  if (return_type == "plot") return(ht)
   list(heatmap = ht, clusters = NULL)
 }
 
@@ -6909,14 +6925,15 @@ get_foldchange_barplot <- function(x,
 #' @param col Optional `circlize::colorRamp2` color function used when `color_default = FALSE`.
 #' @param heatmap_name Optional legend title.
 #' @param show_heatmap_legend Logical; display the heatmap legend.
-#' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned value.
+#' @param return_type One of `"plot"` (default), `"data"`, or `"both"`. The
+#'   legacy values `"heatmap"` and `"clusters"` are still accepted and warn.
 #' @return A `ComplexHeatmap` object, a cluster data frame, or a list containing
 #'   both depending on `return_type`.
 #' @examples
 #' v <- example_vista()
 #' if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
 #'     requireNamespace("circlize", quietly = TRUE)) {
-#'   hm <- get_foldchange_heatmap(v, return_type = "heatmap")
+#'   hm <- get_foldchange_heatmap(v, return_type = "plot")
 #'   ComplexHeatmap::draw(hm)
 #' }
 #' @param ... Additional arguments forwarded to `ComplexHeatmap::Heatmap()`.
@@ -6944,7 +6961,7 @@ get_foldchange_heatmap <- function(x,
                                    col = NULL,
                                    heatmap_name = NULL,
                                    show_heatmap_legend = TRUE,
-                                   return_type = c("heatmap", "clusters", "both"),
+                                   return_type = c("plot", "data", "both"),
                                    ...) {
 
   stopifnot(inherits(x, "VISTA"))
@@ -6952,7 +6969,10 @@ get_foldchange_heatmap <- function(x,
       !requireNamespace("circlize", quietly = TRUE)) {
     cli::cli_abort("Packages {.pkg ComplexHeatmap} and {.pkg circlize} must be installed to draw heatmaps.")
   }
-  return_type <- match.arg(return_type)
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_foldchange_heatmap",
+    legacy = c(heatmap = "plot", clusters = "data")
+  )
 
   .vista_check_dots(
     list(...), fun = "get_foldchange_heatmap",
@@ -7082,18 +7102,18 @@ get_foldchange_heatmap <- function(x,
 
   if (!is.null(row_anno)) ht <- ht + row_anno
 
-  if (!is.null(kmeans_k) && return_type != "heatmap") {
+  if (!is.null(kmeans_k) && return_type != "plot") {
     drawn <- ComplexHeatmap::draw(ht)
     clusters <- ComplexHeatmap::row_order(drawn)
     row_names <- rownames(fc_mat)
     row_clusters <- rep(NA_integer_, length(row_names))
     for (k in seq_along(clusters)) row_clusters[clusters[[k]]] <- k
     cluster_df <- tibble::tibble(gene = row_names, cluster = row_clusters)
-    if (return_type == "clusters") return(cluster_df)
+    if (return_type == "data") return(cluster_df)
     return(list(heatmap = ht, clusters = cluster_df))
   }
 
-  if (return_type == "heatmap") return(ht)
+  if (return_type == "plot") return(ht)
   list(heatmap = ht, clusters = NULL)
 }
 

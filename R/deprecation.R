@@ -153,6 +153,45 @@
   )
 }
 
+#' Signal a deprecated *value* of an argument
+#'
+#' Companion to [.vista_deprecate_arg()] for cases where the argument name is
+#' unchanged but one of its accepted values has been renamed. The registry is
+#' keyed on argument names, so value renames carry their timeline explicitly
+#' rather than being looked up.
+#'
+#' @param arg Character scalar naming the argument.
+#' @param old,new The deprecated and replacement values.
+#' @param fun Character scalar naming the calling function.
+#' @param defunct_in Release in which the old value stops being accepted.
+#'
+#' @return `invisible(NULL)`; called for its warning.
+#' @keywords internal
+#' @noRd
+.vista_deprecate_value <- function(arg, old, new, fun, defunct_in = NULL) {
+  msg <- sprintf(
+    '`%s = "%s"` in `%s()` is deprecated. Use `%s = "%s"` instead.%s',
+    arg, old, fun, arg, new,
+    if (!is.null(defunct_in)) sprintf(" It becomes defunct in VISTA %s.", defunct_in) else ""
+  )
+  cls <- c("vista_deprecated_value", "vista_deprecated_arg", "deprecatedWarning")
+
+  freq <- match.arg(
+    getOption("vista.deprecation_frequency", "regularly"),
+    c("regularly", "once", "always")
+  )
+  if (identical(freq, "always")) {
+    rlang::warn(message = msg, class = cls)
+  } else {
+    rlang::warn(
+      message = msg, class = cls,
+      .frequency = freq,
+      .frequency_id = paste(fun, arg, old, sep = "/")
+    )
+  }
+  invisible(NULL)
+}
+
 #' @keywords internal
 #' @noRd
 .vista_did_you_mean <- function(bad, candidates, n = 1L) {
@@ -212,6 +251,52 @@
     "{cli::qty(unknown)}{.fun {fun}} received unknown argument{?s} in {.arg ...}.",
     stats::setNames(bullets, rep("x", length(bullets)))
   ))
+}
+
+#' Resolve a `return_type` argument to VISTA's canonical vocabulary
+#'
+#' VISTA grew three incompatible `return_type` vocabularies --
+#' `c("heatmap","clusters","both")`, `c("plot","matrix","both")` and
+#' `c("heatmap","both","genes")` -- for the same underlying choice of "give me
+#' the picture, the numbers behind it, or both". They are unified on
+#' `c("plot","data","both")`; the legacy spellings still work and warn.
+#'
+#' @param return_type The value supplied by the caller.
+#' @param fun Character scalar naming the calling function.
+#' @param legacy Named character vector mapping legacy values to canonical ones,
+#'   e.g. `c(heatmap = "plot", clusters = "data")`.
+#' @param default Canonical value used when `return_type` is left at its
+#'   (multi-element) default.
+#'
+#' @return One of `"plot"`, `"data"` or `"both"`.
+#' @keywords internal
+#' @noRd
+.vista_resolve_return_type <- function(return_type, fun,
+                                       legacy = character(),
+                                       default = "plot") {
+  canonical <- c("plot", "data", "both")
+
+  # Unevaluated default (the full choice vector) means the caller said nothing.
+  if (length(return_type) > 1L) {
+    return(default)
+  }
+  return_type <- as.character(return_type)[[1]]
+
+  if (return_type %in% canonical) {
+    return(return_type)
+  }
+  if (return_type %in% names(legacy)) {
+    canonical_value <- unname(legacy[[return_type]])
+    .vista_deprecate_value(
+      arg = "return_type", old = return_type, new = canonical_value,
+      fun = fun, defunct_in = "1.4.0"
+    )
+    return(canonical_value)
+  }
+
+  cli::cli_abort(
+    "{.arg return_type} must be one of {.val {canonical}}. Received: {.val {return_type}}."
+  )
 }
 
 #' Make a string safe to embed in a filename

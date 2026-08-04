@@ -422,7 +422,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
   }, width = 12, height = 7)
 
   cluster_tbl <- NULL
-  hm_return_type <- if (!is.na(cfg$heatmap_kmeans) && cfg$heatmap_kmeans >= 2) "both" else "heatmap"
+  hm_return_type <- if (!is.na(cfg$heatmap_kmeans) && cfg$heatmap_kmeans >= 2) "both" else "plot"
   hm_annotate <- if (cfg$summarise_replicates) FALSE else cfg$annotate_columns
   if (length(heatmap_genes) >= 2) {
     hm_out <- tryCatch(
