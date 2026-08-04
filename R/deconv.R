@@ -294,6 +294,14 @@ run_cell_deconvolution <- function(
         bulk_symbol <- .collapse_rowdata_symbols(x, bulk_expr)
         if (!is.null(bulk_symbol)) {
           dots_symbol <- dots
+          # The retry swaps in a SYMBOL-keyed matrix, so the identifier type has
+          # to be updated too. Copying `dots` wholesale kept the original
+          # gene_id_type (e.g. "ensembl"), telling xCell2 the rownames were
+          # Ensembl IDs while handing it symbols -- which either fails with the
+          # original error masked, or scores against a near-empty gene overlap.
+          if (!is.null(analysis_gid_arg)) {
+            dots_symbol[[analysis_gid_arg]] <- "symbol"
+          }
           supplied_analysis_mat <- any(analysis_mat_arg_names %in% names(dots_symbol))
           if (supplied_analysis_mat && !is.null(analysis_mat_arg) && analysis_mat_arg %in% names(dots_symbol)) {
             dots_symbol[[analysis_mat_arg]] <- bulk_symbol

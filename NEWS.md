@@ -75,6 +75,13 @@ Check whether you were affected:
 - **`run_vista_report()` reported its own defaults as your parameters.** When a
   prebuilt object was supplied via `vista_rds`, the report printed
   deseq2 / 1 / 0.05 / padj regardless of how the object was built.
+- **`run_cell_deconvolution()`'s SYMBOL retry told xCell2 the wrong identifier
+  type.** When the first scoring attempt failed, VISTA retried with a
+  SYMBOL-keyed matrix built from `rowData`, but carried the original
+  `gene_id_type` (for example `"ensembl"`) into the retry -- handing xCell2
+  symbols while declaring them Ensembl IDs. The retry therefore either failed
+  with the real error masked behind a generic message, or scored against a
+  near-empty gene overlap.
 - **Deconvolution was broken for `ENSG...:SYMBOL` rownames** — the common case
   reached automatically by `gene_id_type = "auto"`.
 - Fixed `get_ma_plot()` reading a non-existent metadata key for its threshold
