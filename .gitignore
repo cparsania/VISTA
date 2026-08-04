@@ -35,3 +35,5 @@ tests/testthat/Rplots.pdf
 
 # stray graphics artifact written by plotting calls
 Rplots.pdf
+/doc/
+/Meta/
