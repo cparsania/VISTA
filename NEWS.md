@@ -89,6 +89,16 @@ Check whether you were affected:
   OrgDb, comparison colours collapsing to `character(0)` and crashing
   `get_foldchange_lineplot()`, `NaN` columns when summarising over a factor
   with unused levels, and YAML/filename escaping in report and asset output.
+- **Hardened the DE-table alignment helper**, which reindexes every comparison
+  onto the counts matrix and so underpins the whole package. It now rejects a
+  duplicated reference gene list instead of emitting rows whose names R had
+  silently de-duplicated (`g2` -> `g2.1`) away from the `gene_id` column they
+  came from, coerces tibble input to a plain data frame — a tibble ignores
+  `rownames<-`, so every gene read as absent and was replaced by an `NA` row
+  with a perfectly correct label — and asserts as a post-condition that the
+  returned rownames and `gene_id` column both match the reference exactly.
+  No shipped code path reached the tibble case; both are closed against future
+  callers, because a wrong answer here is invisible in the output's shape.
 
 ## Reproducibility
 
@@ -189,6 +199,11 @@ are now the `max_genes` argument, with the existing values as defaults.
 - Verified by mutation testing: reintroducing the exact 1.0.0 defect now fails
   five tests across three files, and replacing a name-keyed lookup with a
   positional one elsewhere fails nine.
+- The DE-table alignment helper is now covered end to end: identifier resolution
+  and its fallbacks, DESeq2/edgeR/limma column canonicalisation, type-preserving
+  `NA` padding across numeric, integer, character, logical, factor, `Date` and
+  `POSIXct` columns, and the reordering guarantee itself. Both faults fixed above
+  were found by these tests.
 
 ## Internal
 
