@@ -13,8 +13,23 @@ Check whether you were affected:
 - **`get_expression_matrix(genes = ..., summarise = TRUE)` mislabelled rows.**
   Rows were subset in assay order but labelled in the order `genes` was
   supplied, so whenever those differed every row carried another gene's
-  identifier and values. If you passed `genes` in an order other than the
-  object's own row order together with `summarise = TRUE`, re-run that call.
+  identifier and values.
+
+  *Scope:* no other VISTA function called `get_expression_matrix()`, so no
+  plot, heatmap, DEG table, export or generated report was affected. Internal
+  group averaging goes through `norm_counts(summarise = TRUE)`, which labels
+  rows from the matrix itself and was never affected by this. Only code that
+  called `get_expression_matrix()` directly could be wrong.
+
+  *Were you affected?* Only if you passed `genes` **and** `summarise = TRUE`
+  **and** your gene vector was in some order other than the object's own row
+  order. Passing genes already in `rownames(x)` order (or omitting `genes`)
+  always produced correct output. Note that ranked inputs — for example
+  `get_genes_by_regulation(top_n = ...)`, which sorts by absolute fold change —
+  are normally *not* in row order, so those calls were affected. Re-run them.
+
+  The bug dates back to the first release, so it is present in 1.0.0 and every
+  0.99.x.
 - **GSEA ranked vectors slid scores onto the wrong genes.** `get_gsea()`
   reassigned `names(rank_vec)` from a mapping helper that drops unmapped and
   duplicate identifiers, so the shorter vector was padded with `NA` and every
