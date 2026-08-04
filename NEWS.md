@@ -83,6 +83,19 @@ Check whether you were affected:
   `get_foldchange_lineplot()`, `NaN` columns when summarising over a factor
   with unused levels, and YAML/filename escaping in report and asset output.
 
+## Reproducibility
+
+- **Pathway gene capping is now deterministic.** `get_pathway_heatmap(max_genes)`
+  and `get_enrichment_chord(max_genes)` truncated the pathway gene set
+  positionally. Pathway membership is a *set*, and clusterProfiler's ordering of
+  it is arbitrary and, verified here, differs between R sessions -- so the same
+  call could plot a different subset of genes on different runs. The heatmap now
+  ranks candidates by expression variance (most informative rows first) and the
+  chord by pathway participation, both breaking ties on the gene identifier.
+- The airway vignette sets a seed. GSEA estimates p-values by permutation and
+  ComplexHeatmap's row k-means is unseeded, so the rendered document previously
+  changed on every build for reasons unrelated to the code.
+
 ## Analysis changes
 
 - The edgeR and limma backends now filter with the same predicate as DESeq2
@@ -182,6 +195,19 @@ are now the `max_genes` argument, with the existing values as defaults.
 - `get_ma_plot()` read its threshold fallback from the non-existent
   `metadata(x)$cutoffs` key, silently using package defaults instead of the
   object's stored cutoffs.
+
+## Reproducibility
+
+- **Pathway gene capping is now deterministic.** `get_pathway_heatmap(max_genes)`
+  and `get_enrichment_chord(max_genes)` truncated the pathway gene set
+  positionally. Pathway membership is a *set*, and clusterProfiler's ordering of
+  it is arbitrary and, verified here, differs between R sessions -- so the same
+  call could plot a different subset of genes on different runs. The heatmap now
+  ranks candidates by expression variance (most informative rows first) and the
+  chord by pathway participation, both breaking ties on the gene identifier.
+- The airway vignette sets a seed. GSEA estimates p-values by permutation and
+  ComplexHeatmap's row k-means is unseeded, so the rendered document previously
+  changed on every build for reasons unrelated to the code.
 
 ## Analysis changes
 

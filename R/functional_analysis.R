@@ -641,7 +641,16 @@ get_pathway_heatmap <- function(x,
       cli::cli_abort("{.arg max_genes} must be a single positive number.")
     }
     if (length(genes_in_object) > max_genes) {
-      genes_in_object <- genes_in_object[seq_len(max_genes)]
+      # Pathway membership is a SET. clusterProfiler's gene order is arbitrary
+      # and is not stable across R sessions, so taking the positional head would
+      # make the plotted genes differ between runs of the same analysis. Rank by
+      # expression variance -- the most informative rows for a heatmap -- and
+      # break ties on the identifier so the selection is fully deterministic.
+      mat <- SummarizedExperiment::assay(x, "norm_counts")[genes_in_object, , drop = FALSE]
+      score <- matrixStats::rowVars(mat)
+      score[!is.finite(score)] <- -Inf
+      ord <- order(-score, genes_in_object)
+      genes_in_object <- genes_in_object[utils::head(ord, max_genes)]
     }
   }
 
@@ -1319,8 +1328,16 @@ get_enrichment_chord <- function(x,
 
   # --- cap gene count for readability ----------------------------------------
   if (length(keep_genes) > max_genes) {
-    hub_first  <- intersect(hub_genes, keep_genes)
-    non_hub    <- setdiff(keep_genes, hub_first)
+    # Within each tier, order by how many pathways a gene participates in and
+    # then by identifier. Without this the cap keeps whichever genes happened to
+    # come first in clusterProfiler's arbitrary ordering, which is not stable
+    # across R sessions, so the same call could draw different genes.
+    rank_tier <- function(g) {
+      if (!length(g)) return(g)
+      g[order(-as.integer(gene_counts[g]), g)]
+    }
+    hub_first  <- rank_tier(intersect(hub_genes, keep_genes))
+    non_hub    <- rank_tier(setdiff(keep_genes, hub_first))
     keep_genes <- c(hub_first, non_hub)[seq_len(max_genes)]
     long_tbl   <- long_tbl[long_tbl$gene %in% keep_genes, , drop = FALSE]
     cli::cli_warn(

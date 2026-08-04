@@ -26,6 +26,13 @@ knitr::opts_chunk$set(
   fig.align = "center"
 )
 
+# GSEA estimates p-values by permutation and ComplexHeatmap's row k-means is
+# unseeded, so without a fixed seed every render of this vignette would produce
+# different NES values, p-values and heatmap row-slice assignments. Seeding here
+# makes the document reproducible; the GSEA chunks re-seed so they stay stable
+# if chunks above them are edited.
+set.seed(20260101)
+
 ensure_pkgs_available <- function(pkgs) {
   missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
   if (length(missing)) {
@@ -202,12 +209,12 @@ validate_vista(vista2, level = "full")
 
 ## Alternative: Using edgeR backend
 
-```{r create-vista-edger, eval=FALSE}
+```{r create-vista-edger}
 # Create VISTA object with edgeR backend
 vista_edger <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -218,16 +225,18 @@ vista_edger <- create_vista(
   pval_cutoff = 0.05,
   p_value_type = "padj"
 )
+
+vista_edger
 ```
 
 ## Alternative: Using limma-voom backend
 
-```{r create-vista-limma, eval=FALSE}
+```{r create-vista-limma}
 # Create VISTA object with limma-voom backend
 vista_limma <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -238,16 +247,34 @@ vista_limma <- create_vista(
   pval_cutoff = 0.05,
   p_value_type = "padj"
 )
+
+vista_limma
+```
+
+All three backends share the same filtering rule: a gene is kept when at least
+`min_replicates` samples reach `min_counts`.
+
+```{r backend-comparison}
+# The three backends model the same feature set
+data.frame(
+  backend = c("deseq2", "edger", "limma"),
+  genes   = c(nrow(vista), nrow(vista_edger), nrow(vista_limma)),
+  DEGs    = c(
+    sum(comparisons(vista)[[1]]$regulation %in% c("Up", "Down")),
+    sum(comparisons(vista_edger)[[1]]$regulation %in% c("Up", "Down")),
+    sum(comparisons(vista_limma)[[1]]$regulation %in% c("Up", "Down"))
+  )
+)
 ```
 
 ## Advanced: covariates, design formula, and consensus mode
 
-```{r advanced-design-consensus, eval=FALSE}
+```{r advanced-design-consensus}
 # Covariate-adjusted model (additive design)
 vista_cov <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -257,9 +284,9 @@ vista_cov <- create_vista(
 
 # Equivalent explicit model formula
 vista_formula <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -269,9 +296,9 @@ vista_formula <- create_vista(
 
 # Run both DESeq2 and edgeR and keep consensus as active source
 vista_both <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -280,13 +307,21 @@ vista_both <- create_vista(
   result_source = "consensus"       # or "deseq2"/"edger"
 )
 
-# Access source-specific outputs
-comparisons(vista_both, source = "consensus")
-comparisons(vista_both, source = "deseq2")
-comparisons(vista_both, source = "edger")
+# Access source-specific outputs. Each returns one table per contrast; count
+# the DEG calls rather than printing 17,000 rows.
+vapply(
+  c("consensus", "deseq2", "edger"),
+  function(src) sum(comparisons(vista_both, source = src)[[1]]$regulation %in% c("Up", "Down")),
+  integer(1)
+)
+
+# The consensus table keeps each backend's own estimates alongside the
+# consensus call, plus a `support` column recording which backends agreed.
+table(comparisons(vista_both, source = "consensus")[[1]]$support)
 
 # Switch the active source used by plotting functions
 vista_both <- set_de_source(vista_both, "edger")
+vista_both
 ```
 
 ## Add gene annotations
@@ -1124,8 +1159,10 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
     return_type = "list"
   )
 
-  # Preview first few genes per pathway
-  lapply(pathway_gene_list, head, n = 5)
+  # Preview a few genes per pathway. Pathway membership is a SET -- the order
+  # clusterProfiler returns genes in is not meaningful and is not stable across
+  # R sessions -- so sort before taking a head().
+  lapply(pathway_gene_list, function(g) head(sort(g), 5))
 }
 ```
 
@@ -1184,6 +1221,7 @@ GSEA uses ranked gene lists to identify pathways enriched at the top or bottom o
 
 ```{r gsea-hallmark, eval=requireNamespace("msigdbr", quietly=TRUE) && requireNamespace("clusterProfiler", quietly=TRUE)}
 # Run GSEA using VISTA's native function
+set.seed(20260101)
 gsea_results <- get_gsea(
   vista,
   sample_comparison = comp_names[1],
@@ -1205,6 +1243,7 @@ if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
 
 ```{r gsea-go, eval=requireNamespace("clusterProfiler", quietly=TRUE)}
 # Run GSEA with GO terms
+set.seed(20260101)
 gsea_go <- get_gsea(
   vista,
   sample_comparison = comp_names[1],
