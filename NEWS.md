@@ -178,6 +178,18 @@ plot component.
 Undocumented gene caps (20 for embeddings, 15 for lollipop, 25 for barplot)
 are now the `max_genes` argument, with the existing values as defaults.
 
+## Testing
+
+- Added label/value integrity tests covering every exported function that
+  accepts a gene set. They assert two properties the 1.0.0 defect violated:
+  results do not depend on the order genes were supplied in, and the value
+  reported for a gene is that gene's own value, checked against an independent
+  recomputation from the object. The previous suite asserted shape --
+  `is.matrix()`, `nrow()`, class -- all of which the broken output satisfied.
+- Verified by mutation testing: reintroducing the exact 1.0.0 defect now fails
+  five tests across three files, and replacing a name-keyed lookup with a
+  positional one elsewhere fails nine.
+
 ## Internal
 
 - Accessor generics dispatch only on the object rather than on every formal.
@@ -255,6 +267,18 @@ are now the `max_genes` argument, with the existing values as defaults.
 - Removed a reference to `get_enrichment_network()` from the README; no such
   function exists. Corrected the citation block and listed the missing
   expression-plot entries.
+
+## Testing
+
+- Added label/value integrity tests covering every exported function that
+  accepts a gene set. They assert two properties the 1.0.0 defect violated:
+  results do not depend on the order genes were supplied in, and the value
+  reported for a gene is that gene's own value, checked against an independent
+  recomputation from the object. The previous suite asserted shape --
+  `is.matrix()`, `nrow()`, class -- all of which the broken output satisfied.
+- Verified by mutation testing: reintroducing the exact 1.0.0 defect now fails
+  five tests across three files, and replacing a name-keyed lookup with a
+  positional one elsewhere fails nine.
 
 ## Internal
 
