@@ -4,8 +4,15 @@ template:
 
 navbar:
   structure:
-    left: [intro, reference, articles]
+    left: [intro, reference, articles, news]
     right: [search, github]
+
+news:
+  releases:
+    - text: "Development (1.1.x)"
+      href: https://bioconductor.org/packages/devel/bioc/html/VISTA.html
+    - text: "Release (Bioconductor)"
+      href: https://bioconductor.org/packages/release/bioc/html/VISTA.html
 
 articles:
   - title: Workflows
