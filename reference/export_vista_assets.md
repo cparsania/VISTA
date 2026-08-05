@@ -57,7 +57,7 @@ export_vista_assets(
 - include_data:
 
   Character vector of data keys passed to
-  [`save_vista_data()`](save_vista_data.md).
+  [`save_vista_data()`](https://cparsania.github.io/VISTA/reference/save_vista_data.md).
 
 - plot_format:
 

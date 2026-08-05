@@ -11,7 +11,7 @@ get_mds_plot(
   sample_group = NULL,
   group_column = NULL,
   genes = NULL,
-  top_n_genes = NULL,
+  top_n = NULL,
   label = FALSE,
   label_size = 3,
   point_size = 10,
@@ -21,7 +21,9 @@ get_mds_plot(
   use_vista_colors = NULL,
   palette = NULL,
   colors = NULL,
-  use_group_colors = TRUE
+  use_group_colors = TRUE,
+  top_n_genes = NULL,
+  max_genes = 20
 )
 ```
 
@@ -44,7 +46,7 @@ get_mds_plot(
 
   Optional character vector of gene identifiers to restrict the matrix.
 
-- top_n_genes:
+- top_n:
 
   Optional integer selecting the top variable genes to include.
 
@@ -96,9 +98,17 @@ get_mds_plot(
   Logical; when `TRUE`, prefer the stored VISTA group colours when
   colouring by the grouping column.
 
+- top_n_genes:
+
+  Deprecated; use `top_n`.
+
+- max_genes:
+
+  Maximum number of genes accepted in `genes` (default 20).
+
 ## Value
 
-An object returned by this function.
+A `ggplot2` object showing the first two MDS dimensions.
 
 ## Examples
 

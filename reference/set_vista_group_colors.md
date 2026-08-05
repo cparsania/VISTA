@@ -32,13 +32,20 @@ v <- example_vista()
 groups <- unique(as.character(sample_info(v)$cond_long))
 gmap <- stats::setNames(c('#1b9e77', '#d95f02')[seq_along(groups)], groups)
 set_vista_group_colors(v, gmap)
-#> class: SummarizedExperiment 
+#> class: VISTA 
 #> dim: 123 6 
 #> metadata(12): de_results de_summary ... design comparison
-#> assays(1): norm_counts
+#> assays(2): norm_counts counts
 #> rownames(123): ENSG00000000003 ENSG00000000419 ... ENSG00000006607
 #>   ENSG00000006625
 #> rowData names(1): baseMean
 #> colnames(6): SRR1039508 SRR1039512 ... SRR1039513 SRR1039517
 #> colData names(14): SampleName cell ... sizeFactor sample_names
+#> -------- VISTA --------
+#> group column: cond_long (control, treatment1)
+#> comparisons: treatment1_VS_control
+#> DE source: deseq2
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 ```

@@ -49,7 +49,7 @@ get_deg_count_barplot(
 
 ## Value
 
-An object returned by this function.
+A `ggplot2` object with one bar per regulation class.
 
 ## Examples
 

@@ -13,7 +13,7 @@ get_corr_heatmap(
   genes = NULL,
   corr_method = "pearson",
   triangle = c("full", "lower", "upper"),
-  cluster_by = c("correlation", "group", "input", "none"),
+  order_by = c("correlation", "group", "input", "none"),
   show_diagonal = TRUE,
   label = TRUE,
   show_corr_values = NULL,
@@ -25,7 +25,8 @@ get_corr_heatmap(
   viridis_option = "viridis",
   viridis_direction = 1,
   viridis_begin = 0,
-  viridis_end = 1
+  viridis_end = 1,
+  cluster_by = NULL
 )
 ```
 
@@ -60,7 +61,7 @@ get_corr_heatmap(
   Either `"full"`, `"lower"`, or `"upper"` to control which triangle is
   drawn.
 
-- cluster_by:
+- order_by:
 
   Ordering strategy for samples: `"correlation"` (default), `"group"`,
   `"input"`, or `"none"`.
@@ -111,9 +112,13 @@ get_corr_heatmap(
 
   Palette endpoints between 0 and 1.
 
+- cluster_by:
+
+  Deprecated; use `order_by`.
+
 ## Value
 
-An object returned by this function.
+A `ggplot2` object showing the sample-by-sample correlation heatmap.
 
 ## Examples
 

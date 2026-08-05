@@ -21,12 +21,13 @@ get_expression_boxplot(
   facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
-  comparisons = NULL,
+  stat_comparisons = NULL,
   pool_genes = FALSE,
   by = "group",
   facet_by = "auto",
   fill_by = NULL,
-  sample_order = c("input", "group", "expression")
+  sample_order = c("input", "group", "expression"),
+  comparisons = NULL
 )
 ```
 
@@ -86,10 +87,11 @@ get_expression_boxplot(
   Label format for
   [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
 
-- comparisons:
+- stat_comparisons:
 
-  Optional list of specific group comparisons for
-  `stat_compare_means()`.
+  Optional list of length-2 group pairs passed to
+  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html)
+  for significance brackets.
 
 - pool_genes:
 
@@ -120,9 +122,13 @@ get_expression_boxplot(
   Ordering used when sample names are shown on the x-axis: `"input"`,
   `"group"`, or `"expression"`.
 
+- comparisons:
+
+  Deprecated; use `stat_comparisons`.
+
 ## Value
 
-An object returned by this function.
+A `ggplot2` object with one box per group (or per sample).
 
 ## Examples
 

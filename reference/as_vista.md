@@ -14,6 +14,7 @@ as_vista(
   deg_summary = list(),
   cutoffs = list(),
   group_palette = "Dark 3",
+  raw_counts = NULL,
   validate = TRUE
 )
 ```
@@ -48,6 +49,13 @@ as_vista(
 
   Palette name for group colors.
 
+- raw_counts:
+
+  Optional matrix of raw (unnormalized) counts covering the same genes
+  and samples as `assay_name`. Stored as a second assay named `"counts"`
+  and reachable with
+  [`counts()`](https://cparsania.github.io/VISTA/reference/counts.md).
+
 - validate:
 
   Logical; run object validation before returning.
@@ -75,7 +83,7 @@ se <- SummarizedExperiment::SummarizedExperiment(
 )
 v <- as_vista(se, group_column = "cond")
 v
-#> class: SummarizedExperiment 
+#> class: VISTA 
 #> dim: 10 6 
 #> metadata(6): de_results de_summary ... provenance vista_schema_version
 #> assays(1): norm_counts
@@ -83,4 +91,8 @@ v
 #> rowData names(1): gene_id
 #> colnames(6): sample1 sample2 ... sample5 sample6
 #> colData names(2): cond sample_names
+#> -------- VISTA --------
+#> group column: cond (A, B)
+#> comparisons: none
+#> schema: 1.1.0
 ```

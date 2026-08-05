@@ -2,7 +2,8 @@
 
 Convenience wrapper that pulls regulated genes from a stored
 differential expression comparison in a `VISTA` object and runs
-[`enrichMsigDB()`](enrichMsigDB.md) on them.
+[`enrichMsigDB()`](https://cparsania.github.io/VISTA/reference/enrichMsigDB.md)
+on them.
 
 ## Usage
 
@@ -41,8 +42,8 @@ get_msigdb_enrichment(
 - from_type:
 
   Identifier type of the genes in the DE table (passed to
-  [`enrichMsigDB()`](enrichMsigDB.md), default `"SYMBOL"`). Ensembl
-  versions are stripped automatically.
+  [`enrichMsigDB()`](https://cparsania.github.io/VISTA/reference/enrichMsigDB.md),
+  default `"SYMBOL"`). Ensembl versions are stripped automatically.
 
 - orgdb:
 
@@ -64,8 +65,9 @@ get_msigdb_enrichment(
 - background:
 
   Optional background gene set (passed to
-  [`enrichMsigDB()`](enrichMsigDB.md)). Default `NULL` uses all features
-  in `x` (optionally filtered by `feature_type`).
+  [`enrichMsigDB()`](https://cparsania.github.io/VISTA/reference/enrichMsigDB.md)).
+  Default `NULL` uses all features in `x` (optionally filtered by
+  `feature_type`).
 
 - col_genetype:
 
@@ -79,7 +81,8 @@ get_msigdb_enrichment(
 
 - ...:
 
-  Additional arguments forwarded to [`enrichMsigDB()`](enrichMsigDB.md).
+  Additional arguments forwarded to
+  [`enrichMsigDB()`](https://cparsania.github.io/VISTA/reference/enrichMsigDB.md).
 
 ## Value
 
@@ -100,9 +103,10 @@ if (requireNamespace("msigdbr", quietly = TRUE)) {
   )
   class(msig$enrich)
 }
+#> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
 #> [1] "enrichResult"
 #> attr(,"package")
-#> [1] "DOSE"
+#> [1] "enrichit"
 
 # \donttest{
 # Create VISTA object
@@ -133,6 +137,7 @@ msig_up <- get_msigdb_enrichment(
   msigdb_category = "H",  # Hallmark gene sets
   from_type = "ENSEMBL"
 )
+#> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
 
 if (!is.null(msig_up$enrich)) {
   # View results
@@ -149,5 +154,6 @@ msig_down <- get_msigdb_enrichment(
   regulation = "Down",
   msigdb_category = "C2"  # Curated gene sets
 )
+#> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
 # }
 ```

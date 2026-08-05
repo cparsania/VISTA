@@ -2,9 +2,9 @@
 
 This wrapper bridges enrichment results and expression heatmaps. It
 extracts genes from selected pathways (via
-[`get_pathway_genes()`](get_pathway_genes.md)), maps them to the `VISTA`
-feature IDs, and forwards to
-[`get_expression_heatmap()`](get_expression_heatmap.md).
+[`get_pathway_genes()`](https://cparsania.github.io/VISTA/reference/get_pathway_genes.md)),
+maps them to the `VISTA` feature IDs, and forwards to
+[`get_expression_heatmap()`](https://cparsania.github.io/VISTA/reference/get_expression_heatmap.md).
 
 ## Usage
 
@@ -21,7 +21,7 @@ get_pathway_heatmap(
   gene_mode = c("union", "intersection"),
   gene_id_column = NULL,
   max_genes = NULL,
-  return_type = c("heatmap", "both", "genes"),
+  return_type = c("plot", "data", "both"),
   ...
 )
 ```
@@ -40,7 +40,7 @@ get_pathway_heatmap(
 - sample_group:
 
   Character vector of group labels to include (same semantics as
-  [`get_expression_heatmap()`](get_expression_heatmap.md)).
+  [`get_expression_heatmap()`](https://cparsania.github.io/VISTA/reference/get_expression_heatmap.md)).
 
 - pathways:
 
@@ -81,19 +81,20 @@ get_pathway_heatmap(
 
 - return_type:
 
-  One of `"heatmap"` (default), `"both"`, or `"genes"`.
+  One of `"plot"` (default), `"data"`, or `"both"`. The legacy values
+  `"heatmap"` and `"genes"` are still accepted and warn.
 
 - ...:
 
   Additional arguments passed to
-  [`get_expression_heatmap()`](get_expression_heatmap.md).
+  [`get_expression_heatmap()`](https://cparsania.github.io/VISTA/reference/get_expression_heatmap.md).
 
 ## Value
 
 Depending on `return_type`:
 
 - `"heatmap"`: a `ComplexHeatmap` object from
-  [`get_expression_heatmap()`](get_expression_heatmap.md).
+  [`get_expression_heatmap()`](https://cparsania.github.io/VISTA/reference/get_expression_heatmap.md).
 
 - `"both"`: list with `heatmap`, `genes`, and `pathway_genes`.
 
@@ -116,11 +117,12 @@ if (requireNamespace("msigdbr", quietly = TRUE)) {
     enrichment = msig,
     sample_group = c("control", "treatment1"),
     top_n = 3,
-    return_type = "genes"
+    return_type = "data"
   )
   head(genes)
 }
-#> [1] "ENSG00000003402" "ENSG00000004799"
+#> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
+#> [1] "ENSG00000004799" "ENSG00000003402"
 
 # \donttest{
 data("count_data", package = "VISTA")

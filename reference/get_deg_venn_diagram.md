@@ -56,7 +56,7 @@ get_deg_venn_diagram(
 
 ## Value
 
-An object returned by this function.
+A `ggplot2` object showing the overlap of DEG sets across comparisons.
 
 ## Examples
 

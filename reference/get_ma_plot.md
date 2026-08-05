@@ -27,7 +27,8 @@ get_ma_plot(
 
 - x:
 
-  A [VISTA](VISTA-class.md) object.
+  A [VISTA](https://cparsania.github.io/VISTA/reference/VISTA-class.md)
+  object.
 
 - sample_comparison:
 

@@ -20,12 +20,15 @@ get_expression_lollipop(
   facet_nrow = NULL,
   facet_ncol = NULL,
   point_size = 6,
-  line_size = 1.2,
+  linewidth = 1.2,
   label = TRUE,
   label_digits = 1,
   display_id = NULL,
   display_from = NULL,
-  display_orgdb = NULL
+  display_orgdb = NULL,
+  facet_scales = facet_scale,
+  max_genes = 15,
+  line_size = NULL
 )
 ```
 
@@ -71,7 +74,7 @@ get_expression_lollipop(
 
 - facet_scale:
 
-  Scaling option passed to `facet_wrap()` when plotting multiple genes.
+  Deprecated; use `facet_scales`.
 
 - facet_nrow, facet_ncol:
 
@@ -81,9 +84,9 @@ get_expression_lollipop(
 
   Numeric size of the dots.
 
-- line_size:
+- linewidth:
 
-  Numeric size of the stems.
+  Numeric width of the stems.
 
 - label:
 
@@ -109,9 +112,22 @@ get_expression_lollipop(
   Optional `OrgDb` object used for ID mapping when `display_id` is set
   but not found in `rowData`.
 
+- facet_scales:
+
+  Scaling option passed to `facet_wrap()` when plotting multiple genes.
+
+- max_genes:
+
+  Maximum number of genes accepted in one call (default 15). Previously
+  an undocumented hard cap.
+
+- line_size:
+
+  Deprecated; use `linewidth`.
+
 ## Value
 
-An object returned by this function.
+A `ggplot2` object drawing expression as lollipops.
 
 A `ggplot2` object.
 

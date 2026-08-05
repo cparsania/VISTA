@@ -20,6 +20,7 @@ for navigating sections.
 ## Load Packages and Data
 
 ``` r
+
 library(VISTA)
 library(ggplot2)
 library(dplyr)
@@ -42,6 +43,7 @@ table(sample_metadata$cond_long)
 ## Build a Baseline VISTA Object
 
 ``` r
+
 vista_dark <- create_vista(
   counts = count_small,
   sample_info = sample_metadata,
@@ -59,17 +61,25 @@ vista_dark
 #> class: VISTA 
 #> dim: 1305 8 
 #> metadata(12): de_results de_summary ... design comparison
-#> assays(1): norm_counts
+#> assays(2): norm_counts counts
 #> rownames(1305): ENSG00000000003 ENSG00000000419 ... ENSG00000080007
 #>   ENSG00000080031
 #> rowData names(1): baseMean
 #> colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
 #> colData names(14): SampleName cell ... sizeFactor sample_names
+#> -------- VISTA --------
+#> group column: cond_long (control, treatment1)
+#> comparisons: treatment1_VS_control
+#> DE source: deseq2
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 ```
 
 Inspect the stored palette metadata:
 
 ``` r
+
 group_palette(vista_dark)
 #> [1] "Dark 2"
 group_colors(vista_dark)
@@ -82,6 +92,7 @@ group_colors(vista_dark)
 VISTA group palettes are based on colorspace qualitative HCL palettes.
 
 ``` r
+
 palette_table <- colorspace::hcl_palettes(type = "qualitative") |>
   as.data.frame() |>
   tibble::rownames_to_column("palette") |>
@@ -107,6 +118,7 @@ palette_table
 Create a visual palette atlas:
 
 ``` r
+
 palette_grid <- do.call(
   rbind,
   lapply(palette_table$palette, function(pal) {
@@ -143,6 +155,7 @@ Use the same `VISTA` object and verify that group colors are preserved
 across multiple visualization types.
 
 ``` r
+
 comp_name <- names(comparisons(vista_dark))[1]
 up_genes <- get_genes_by_regulation(
   vista_dark,
@@ -164,6 +177,7 @@ genes_demo
 ### PCA (group colors from object metadata)
 
 ``` r
+
 get_pca_plot(
   vista_dark,
   label = TRUE,
@@ -177,6 +191,7 @@ get_pca_plot(
 ### MDS (same group colors)
 
 ``` r
+
 get_mds_plot(
   vista_dark,
   label = TRUE,
@@ -190,6 +205,7 @@ get_mds_plot(
 ### Expression barplot (same group colors)
 
 ``` r
+
 get_expression_barplot(
   vista_dark,
   genes = genes_demo[1:4],
@@ -202,6 +218,7 @@ get_expression_barplot(
 ### Expression boxplot (same group colors)
 
 ``` r
+
 get_expression_boxplot(
   vista_dark,
   genes = genes_demo[1:4],
@@ -221,6 +238,7 @@ Rebuild with a different global palette. No plot-specific color edits
 are needed.
 
 ``` r
+
 vista_warm <- create_vista(
   counts = count_small,
   sample_info = sample_metadata,
@@ -242,6 +260,7 @@ group_colors(vista_warm)
 ```
 
 ``` r
+
 p_dark <- get_pca_plot(vista_dark, label = FALSE, point_size = 5) +
   ggtitle("Dark 2")
 
@@ -263,6 +282,7 @@ if (requireNamespace("patchwork", quietly = TRUE)) {
 For multi-comparison workflows, VISTA also stores comparison colors.
 
 ``` r
+
 # Build two directed comparisons to demonstrate comparison color mapping
 vista_multi <- create_vista(
   counts = count_small,
@@ -283,6 +303,7 @@ S4Vectors::metadata(vista_multi)$comparison$colors
 ```
 
 ``` r
+
 get_foldchange_barplot(
   vista_multi,
   genes = head(rownames(vista_multi), 6),
@@ -303,6 +324,7 @@ Available manual setters:
 - `set_vista_comparison_colors(vista, color_map)`
 
 ``` r
+
 custom_group_cols <- c(
   control = "#264653",
   treatment1 = "#E76F51"
@@ -325,6 +347,7 @@ S4Vectors::metadata(vista_multi_custom)$comparison$colors
 ```
 
 ``` r
+
 p_custom_group <- get_pca_plot(
   vista_custom,
   label = FALSE,
@@ -350,8 +373,8 @@ if (requireNamespace("patchwork", quietly = TRUE)) {
 ## Practical Guidance
 
 - Use `group_palette` and `comparison_palette` in
-  [`create_vista()`](../../reference/create_vista.md) for fast, global
-  styling.
+  [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md)
+  for fast, global styling.
 - Use `group_colors(vista)` to audit mapping before generating
   publication panels.
 - Keep one palette per manuscript/project to preserve interpretation
@@ -362,8 +385,9 @@ if (requireNamespace("patchwork", quietly = TRUE)) {
 ## Session Information
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.3 (2026-03-11)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -384,81 +408,81 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] colorspace_2.1-2 tibble_3.3.1     dplyr_1.2.1      ggplot2_4.0.2   
-#> [5] VISTA_0.99.8     BiocStyle_2.38.0
+#> [1] colorspace_2.1-3 tibble_3.3.1     dplyr_1.2.1      ggplot2_4.0.3   
+#> [5] VISTA_1.1.3      BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             
 #>   [3] tidydr_0.0.6                magrittr_2.0.5             
-#>   [5] ggtangle_0.1.1              farver_2.1.2               
-#>   [7] rmarkdown_2.31              fs_2.0.1                   
+#>   [5] ggtangle_0.1.2              farver_2.1.2               
+#>   [7] rmarkdown_2.31              fs_2.1.0                   
 #>   [9] ragg_1.5.2                  vctrs_0.7.3                
-#>  [11] memoise_2.0.1               ggtree_4.0.5               
-#>  [13] rstatix_0.7.3               htmltools_0.5.9            
-#>  [15] S4Arrays_1.10.1             curl_7.0.0                 
-#>  [17] broom_1.0.12                Formula_1.2-5              
-#>  [19] SparseArray_1.10.10         gridGraphics_0.5-1         
-#>  [21] sass_0.4.10                 bslib_0.10.0               
+#>  [11] memoise_2.0.1               ggtree_4.2.0               
+#>  [13] rstatix_1.1.0               htmltools_0.5.9            
+#>  [15] S4Arrays_1.12.0             curl_7.1.0                 
+#>  [17] broom_1.0.13                Formula_1.2-6              
+#>  [19] SparseArray_1.12.2          gridGraphics_0.5-1         
+#>  [21] sass_0.4.10                 bslib_0.12.0               
 #>  [23] htmlwidgets_1.6.4           desc_1.4.3                 
-#>  [25] plyr_1.8.9                  cachem_1.1.0               
-#>  [27] igraph_2.2.3                lifecycle_1.0.5            
-#>  [29] pkgconfig_2.0.3             gson_0.1.0                 
-#>  [31] Matrix_1.7-4                R6_2.6.1                   
-#>  [33] fastmap_1.2.0               MatrixGenerics_1.22.0      
-#>  [35] digest_0.6.39               aplot_0.2.9                
-#>  [37] enrichplot_1.30.5           ggnewscale_0.5.2           
-#>  [39] GGally_2.4.0                patchwork_1.3.2            
-#>  [41] AnnotationDbi_1.72.0        S4Vectors_0.49.1-1         
-#>  [43] DESeq2_1.50.2               textshaping_1.0.5          
-#>  [45] GenomicRanges_1.62.1        RSQLite_2.4.6              
-#>  [47] ggpubr_0.6.3                labeling_0.4.3             
-#>  [49] polyclip_1.10-7             httr_1.4.8                 
-#>  [51] abind_1.4-8                 compiler_4.5.3             
-#>  [53] withr_3.0.2                 bit64_4.6.0-1              
-#>  [55] fontquiver_0.2.1            backports_1.5.1            
-#>  [57] S7_0.2.1                    BiocParallel_1.44.0        
-#>  [59] carData_3.0-6               DBI_1.3.0                  
-#>  [61] ggstats_0.13.0              ggforce_0.5.0              
-#>  [63] R.utils_2.13.0              ggsignif_0.6.4             
-#>  [65] MASS_7.3-65                 rappdirs_0.3.4             
-#>  [67] DelayedArray_0.36.1         tools_4.5.3                
-#>  [69] otel_0.2.0                  scatterpie_0.2.6           
-#>  [71] ape_5.8-1                   msigdbr_26.1.0             
-#>  [73] R.oo_1.27.1                 glue_1.8.0                 
-#>  [75] nlme_3.1-168                GOSemSim_2.36.0            
-#>  [77] grid_4.5.3                  cluster_2.1.8.2            
-#>  [79] reshape2_1.4.5              fgsea_1.36.2               
-#>  [81] generics_0.1.4              gtable_0.3.6               
-#>  [83] R.methodsS3_1.8.2           tidyr_1.3.2                
-#>  [85] data.table_1.18.2.1         car_3.1-5                  
-#>  [87] XVector_0.50.0              BiocGenerics_0.56.0        
-#>  [89] ggrepel_0.9.8               pillar_1.11.1              
-#>  [91] stringr_1.6.0               babelgene_22.9             
-#>  [93] limma_3.66.0                yulab.utils_0.2.4          
-#>  [95] splines_4.5.3               tweenr_2.0.3               
-#>  [97] treeio_1.34.0               lattice_0.22-9             
-#>  [99] bit_4.6.0                   tidyselect_1.2.1           
-#> [101] fontLiberation_0.1.0        GO.db_3.22.0               
-#> [103] locfit_1.5-9.12             Biostrings_2.78.0          
-#> [105] knitr_1.51                  fontBitstreamVera_0.1.1    
-#> [107] bookdown_0.46               IRanges_2.44.0             
-#> [109] Seqinfo_1.0.0               edgeR_4.8.2                
-#> [111] SummarizedExperiment_1.40.0 stats4_4.5.3               
-#> [113] xfun_0.57                   Biobase_2.70.0             
-#> [115] statmod_1.5.1               matrixStats_1.5.0          
-#> [117] stringi_1.8.7               lazyeval_0.2.3             
-#> [119] ggfun_0.2.0                 yaml_2.3.12                
-#> [121] evaluate_1.0.5              codetools_0.2-20           
-#> [123] gdtools_0.5.0               qvalue_2.42.0              
-#> [125] BiocManager_1.30.27         ggplotify_0.1.3            
-#> [127] cli_3.6.6                   systemfonts_1.3.2          
-#> [129] jquerylib_0.1.4             Rcpp_1.1.1                 
-#> [131] png_0.1-9                   parallel_4.5.3             
-#> [133] assertthat_0.2.1            pkgdown_2.2.0              
-#> [135] blob_1.3.0                  clusterProfiler_4.18.4     
-#> [137] DOSE_4.4.0                  tidytree_0.4.7             
-#> [139] ggiraph_0.9.6               scales_1.4.0               
-#> [141] purrr_1.2.2                 crayon_1.5.3               
-#> [143] rlang_1.2.0                 cowplot_1.2.0              
-#> [145] fastmatch_1.1-8             KEGGREST_1.50.0
+#>  [25] plyr_1.8.9                  httr2_1.3.0                
+#>  [27] cachem_1.1.0                igraph_2.3.3               
+#>  [29] lifecycle_1.0.5             pkgconfig_2.0.3            
+#>  [31] gson_0.2.1                  Matrix_1.7-5               
+#>  [33] R6_2.6.1                    fastmap_1.2.0              
+#>  [35] MatrixGenerics_1.24.0       digest_0.6.39              
+#>  [37] aplot_0.3.1                 enrichplot_1.32.0          
+#>  [39] ggnewscale_0.5.2            GGally_2.4.0               
+#>  [41] patchwork_1.3.2             AnnotationDbi_1.74.0       
+#>  [43] S4Vectors_0.50.1            aisdk_1.4.12               
+#>  [45] ps_1.9.3                    DESeq2_1.52.0              
+#>  [47] textshaping_1.0.5           GenomicRanges_1.64.0       
+#>  [49] RSQLite_3.53.3              ggpubr_1.0.0               
+#>  [51] labeling_0.4.3              polyclip_1.10-7            
+#>  [53] httr_1.4.8                  abind_1.4-8                
+#>  [55] compiler_4.6.1              withr_3.0.3                
+#>  [57] bit64_4.8.2                 fontquiver_0.2.1           
+#>  [59] backports_1.5.1             S7_0.2.2                   
+#>  [61] BiocParallel_1.46.0         carData_3.0-6              
+#>  [63] DBI_1.3.0                   ggstats_0.13.0             
+#>  [65] ggforce_0.5.0               ggsignif_0.6.4             
+#>  [67] MASS_7.3-65                 rappdirs_0.3.4             
+#>  [69] DelayedArray_0.38.2         tools_4.6.1                
+#>  [71] otel_0.2.0                  scatterpie_0.2.6           
+#>  [73] ape_5.8-1                   msigdbr_26.1.0             
+#>  [75] glue_1.8.1                  callr_3.8.0                
+#>  [77] nlme_3.1-169                GOSemSim_2.38.3            
+#>  [79] grid_4.6.1                  cluster_2.1.8.2            
+#>  [81] reshape2_1.4.5              generics_0.1.4             
+#>  [83] gtable_0.3.6                tidyr_1.3.2                
+#>  [85] car_3.1-5                   XVector_0.52.0             
+#>  [87] BiocGenerics_0.58.1         ggrepel_0.9.8              
+#>  [89] pillar_1.11.1               stringr_1.6.0              
+#>  [91] babelgene_22.9              limma_3.68.4               
+#>  [93] yulab.utils_0.2.4           splines_4.6.1              
+#>  [95] tweenr_2.0.3                treeio_1.36.1              
+#>  [97] lattice_0.22-9              bit_4.6.0                  
+#>  [99] tidyselect_1.2.1            fontLiberation_0.1.0       
+#> [101] GO.db_3.23.1                locfit_1.5-9.12            
+#> [103] Biostrings_2.80.1           knitr_1.51                 
+#> [105] fontBitstreamVera_0.1.1     bookdown_0.47              
+#> [107] IRanges_2.46.0              Seqinfo_1.2.0              
+#> [109] edgeR_4.10.1                SummarizedExperiment_1.42.0
+#> [111] stats4_4.6.1                xfun_0.60                  
+#> [113] Biobase_2.72.0              statmod_1.5.2              
+#> [115] matrixStats_1.5.0           stringi_1.8.9              
+#> [117] lazyeval_0.2.3              ggfun_0.2.1                
+#> [119] yaml_2.3.12                 evaluate_1.0.5             
+#> [121] codetools_0.2-20            qvalue_2.44.0              
+#> [123] gdtools_0.5.1               BiocManager_1.30.27        
+#> [125] ggplotify_0.1.3             cli_3.6.6                  
+#> [127] systemfonts_1.3.2           processx_3.9.0             
+#> [129] jquerylib_0.1.4             Rcpp_1.1.2                 
+#> [131] png_0.1-9                   parallel_4.6.1             
+#> [133] assertthat_0.2.1            pkgdown_2.2.1              
+#> [135] blob_1.3.0                  clusterProfiler_4.20.0     
+#> [137] DOSE_4.6.0                  tidytree_0.4.8             
+#> [139] ggiraph_0.9.6               enrichit_0.2.1             
+#> [141] scales_1.4.0                purrr_1.2.2                
+#> [143] crayon_1.5.3                rlang_1.3.0                
+#> [145] KEGGREST_1.52.2
 ```

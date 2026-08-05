@@ -2,17 +2,17 @@
 
 One-stop doc for fold-change plots:
 
-- [`get_foldchange_barplot()`](get_foldchange_barplot.md): log2FC by
-  comparison (bars).
+- [`get_foldchange_barplot()`](https://cparsania.github.io/VISTA/reference/get_foldchange_barplot.md):
+  log2FC by comparison (bars).
 
-- [`get_foldchange_boxplot()`](get_foldchange_boxplot.md): log2FC
-  distributions per comparison (boxes).
+- [`get_foldchange_boxplot()`](https://cparsania.github.io/VISTA/reference/get_foldchange_boxplot.md):
+  log2FC distributions per comparison (boxes).
 
 - `get_foldchange_lollipop()`: log2FC stems/dots; supports 1–2
   comparisons.
 
-- [`get_foldchange_lineplot()`](get_foldchange_lineplot.md): log2FC
-  trajectories across comparisons (optional clustering).
+- [`get_foldchange_lineplot()`](https://cparsania.github.io/VISTA/reference/get_foldchange_lineplot.md):
+  log2FC trajectories across comparisons (optional clustering).
 
 ## Usage
 
@@ -24,7 +24,7 @@ get_foldchange_lollipop(
   sort_by = c("input", "log2fc", "abs_log2fc"),
   palette = NULL,
   point_size = 6,
-  line_size = 1.2,
+  linewidth = 1.2,
   label = TRUE,
   label_digits = 2,
   display_id = NULL,
@@ -34,7 +34,8 @@ get_foldchange_lollipop(
   facet_scales = "free_y",
   facet_nrow = NULL,
   facet_ncol = NULL,
-  facet_by = c("auto", "gene", "comparison", "none")
+  facet_by = c("auto", "gene", "comparison", "none"),
+  line_size = NULL
 )
 ```
 
@@ -72,9 +73,9 @@ get_foldchange_lollipop(
 
   Numeric size of dots.
 
-- line_size:
+- linewidth:
 
-  Numeric size of stems (linewidth).
+  Numeric width of the stems.
 
 - label:
 
@@ -118,9 +119,13 @@ get_foldchange_lollipop(
   Faceting mode: `"auto"` (default), `"gene"`, `"comparison"`, or
   `"none"`.
 
+- line_size:
+
+  Deprecated; use `linewidth`.
+
 ## Value
 
-An object returned by this function.
+A `ggplot2` object drawing log2 fold change as lollipops.
 
 A `ggplot2` object.
 

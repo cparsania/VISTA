@@ -2,9 +2,11 @@
 
 Generates a dot plot of enrichment results for `enrichResult`,
 `gseaResult`, or `compareClusterResult` objects (including those
-returned by [`enrichMsigDB()`](enrichMsigDB.md)). Points are sized by
-gene/set count and coloured by -log10(FDR). For compareCluster results,
-the plot is faceted by cluster with top terms selected per cluster.
+returned by
+[`enrichMsigDB()`](https://cparsania.github.io/VISTA/reference/enrichMsigDB.md)).
+Points are sized by gene/set count and coloured by -log10(FDR). For
+compareCluster results, the plot is faceted by cluster with top terms
+selected per cluster.
 
 ## Usage
 

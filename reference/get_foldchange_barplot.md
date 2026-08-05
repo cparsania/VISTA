@@ -79,7 +79,7 @@ get_foldchange_barplot(
 
 ## Value
 
-An object returned by this function.
+A `ggplot2` object with one bar per gene showing log2 fold change.
 
 A `ggplot2` object.
 

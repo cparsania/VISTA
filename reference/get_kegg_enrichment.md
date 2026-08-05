@@ -60,7 +60,9 @@ get_kegg_enrichment(
 
 ## Value
 
-An object returned by this function.
+A list with a single element `enrich`, holding the `enrichResult`
+returned by
+[`clusterProfiler::enrichKEGG()`](https://rdrr.io/pkg/clusterProfiler/man/enrichKEGG.html).
 
 ## Examples
 

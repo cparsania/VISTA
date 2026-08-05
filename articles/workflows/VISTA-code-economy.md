@@ -30,6 +30,7 @@ We use the airway dataset (Himes et al. 2014): 8 samples of human airway
 smooth muscle cells, 4 treated with dexamethasone, 4 untreated.
 
 ``` r
+
 library(airway)
 library(org.Hs.eg.db)
 
@@ -48,6 +49,7 @@ AnnotationDbi. This is representative of real analysis scripts found in
 published supplementary materials.
 
 ``` r
+
 library(DESeq2)
 library(ggplot2)
 library(ggrepel)
@@ -64,6 +66,7 @@ library(org.Hs.eg.db)
 ### Step 1: Differential Expression (Standard)
 
 ``` r
+
 # Build DESeqDataSet
 dds <- DESeqDataSetFromMatrix(
   countData = counts_matrix,
@@ -103,6 +106,7 @@ regulation classification.
 ### Step 2: Gene Annotation (Standard)
 
 ``` r
+
 # Map Ensembl IDs to gene symbols
 gene_symbols <- mapIds(
   org.Hs.eg.db,
@@ -122,6 +126,7 @@ know the correct keytype, and deal with multi-mapping.
 ### Step 3: PCA Plot (Standard)
 
 ``` r
+
 # Variance-stabilising transform
 vsd <- vst(dds, blind = FALSE)
 
@@ -152,6 +157,7 @@ ggplot2 construction, and hardcoded colour assignment.
 ### Step 4: Volcano Plot (Standard)
 
 ``` r
+
 volcano_df <- res_df %>%
   mutate(
     neg_log10_p = -log10(pvalue),
@@ -179,6 +185,7 @@ threshold lines, manual colour mapping.
 ### Step 5: Expression Heatmap (Standard)
 
 ``` r
+
 if (requireNamespace("ComplexHeatmap", quietly = TRUE)) {
   library(ComplexHeatmap)
   library(circlize)
@@ -232,6 +239,7 @@ repeated colours, map gene symbols for row labels, and configure
 ### Step 6: MSigDB Enrichment (Standard)
 
 ``` r
+
 # Get upregulated gene symbols
 up_genes <- res_df %>%
   filter(regulation == "Up", !is.na(SYMBOL)) %>%
@@ -260,6 +268,7 @@ with correct parameters.
 ### Step 7: Enrichment Plot (Standard)
 
 ``` r
+
 if (!is.null(enrich_result) && nrow(enrich_result@result) > 0) {
   enrich_df <- enrich_result@result %>%
     arrange(p.adjust) %>%
@@ -285,6 +294,7 @@ ggplot2 construction.
 ### Standard Workflow: Summary
 
 ``` r
+
 knitr::kable(
   standard_counts[, c("Step", "Lines", "Packages")],
   caption = paste0("Standard workflow: ", total_std, " lines, ", total_pkg, " packages"),
@@ -303,7 +313,7 @@ knitr::kable(
 | MSigDB enrichment       |    14 |        0 |
 | Enrichment plot         |    14 |        0 |
 
-Standard workflow: 123 lines, 11 packages
+Standard workflow: 123 lines, 11 packages {.table}
 
 **Total: 123 lines of code, 11 packages loaded.**
 
@@ -324,6 +334,7 @@ Additional cognitive costs not captured in line count:
 The same analysis, same data, same outputs.
 
 ``` r
+
 library(VISTA)
 ```
 
@@ -332,6 +343,7 @@ library(VISTA)
 ### Steps 1–2: Differential Expression + Annotation
 
 ``` r
+
 # Prepare inputs (same as standard workflow)
 count_data <- as.data.frame(counts_matrix) %>%
   tibble::as_tibble() %>%
@@ -370,16 +382,17 @@ vista <- set_rowdata(
 
 **23 lines** (including data preparation shared with both workflows).
 
-[`create_vista()`](../../reference/create_vista.md) performed: count
-filtering, DESeq2 pipeline execution, normalized count extraction,
-fold-change/p-value thresholding, regulation classification, colour
-palette assignment, and metadata persistence – in one call.
-[`set_rowdata()`](../../reference/set_rowdata.md) handled all ID
-mapping.
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md)
+performed: count filtering, DESeq2 pipeline execution, normalized count
+extraction, fold-change/p-value thresholding, regulation classification,
+colour palette assignment, and metadata persistence – in one call.
+[`set_rowdata()`](https://cparsania.github.io/VISTA/reference/set_rowdata.md)
+handled all ID mapping.
 
 ### Step 3: PCA Plot
 
 ``` r
+
 get_pca_plot(vista, label = TRUE)
 ```
 
@@ -391,6 +404,7 @@ variance percentages are generated automatically.
 ### Step 4: Volcano Plot
 
 ``` r
+
 get_volcano_plot(
   vista,
   sample_comparison = names(comparisons(vista))[1],
@@ -406,6 +420,7 @@ from the stored cutoffs and palette.
 ### Step 5: Expression Heatmap
 
 ``` r
+
 # Select top 50 DE genes using VISTA accessor
 comp_name <- names(comparisons(vista))[1]
 de_tbl    <- comparisons(vista)[[comp_name]]
@@ -433,6 +448,7 @@ colours, and symbol mapping are handled internally.
 ### Step 6: MSigDB Enrichment
 
 ``` r
+
 msig_up <- get_msigdb_enrichment(
   vista,
   sample_comparison = names(comparisons(vista))[1],
@@ -449,6 +465,7 @@ enrichment execution are handled internally.
 ### Step 7: Enrichment Plot
 
 ``` r
+
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_enrichment_plot(msig_up$enrich, top_n = 10)
 }
@@ -461,6 +478,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ### VISTA Workflow: Summary
 
 ``` r
+
 knitr::kable(
   vista_counts[, c("Step", "Lines")],
   caption = paste0("VISTA workflow: ", total_vista, " lines, ", total_pkg_vista, " package"),
@@ -478,7 +496,7 @@ knitr::kable(
 | MSigDB enrichment  |     7 |
 | Enrichment plot    |     3 |
 
-VISTA workflow: 52 lines, 1 package
+VISTA workflow: 52 lines, 1 package {.table}
 
 **Total: 52 lines of code, 1 package loaded.**
 
@@ -496,7 +514,7 @@ VISTA workflow: 52 lines, 1 package
 | MSigDB enrichment  |               14 |             7 |       50% |
 | Enrichment plot    |               14 |             3 |       79% |
 
-Lines of code: Standard (123) vs. VISTA (52)
+Lines of code: Standard (123) vs. VISTA (52) {.table}
 
 ![](VISTA-code-economy_files/figure-html/comparison-plot-1.png)
 
@@ -507,23 +525,23 @@ have to think about**:
 
 ### Data structure conversions eliminated
 
-| Standard workflow                     | VISTA                                                                            |
-|---------------------------------------|----------------------------------------------------------------------------------|
-| matrix -\> `DESeqDataSet`             | Handled internally                                                               |
-| `DESeqResults` -\> data.frame         | Stored in metadata                                                               |
-| data.frame -\> filtered tibble        | Accessor: [`comparisons()`](../../reference/VISTA-accessors.md)                  |
-| matrix -\> z-score matrix             | `value_transform = "zscore"`                                                     |
-| tibble -\> gene vector for enrichment | Handled by [`get_msigdb_enrichment()`](../../reference/get_msigdb_enrichment.md) |
+| Standard workflow | VISTA |
+|----|----|
+| matrix -\> `DESeqDataSet` | Handled internally |
+| `DESeqResults` -\> data.frame | Stored in metadata |
+| data.frame -\> filtered tibble | Accessor: [`comparisons()`](https://cparsania.github.io/VISTA/reference/VISTA-accessors.md) |
+| matrix -\> z-score matrix | `value_transform = "zscore"` |
+| tibble -\> gene vector for enrichment | Handled by [`get_msigdb_enrichment()`](https://cparsania.github.io/VISTA/reference/get_msigdb_enrichment.md) |
 
 **5 manual conversions -\> 0.**
 
 ### Identifier mappings eliminated
 
-| Standard workflow                                 | VISTA                                    |
-|---------------------------------------------------|------------------------------------------|
-| `mapIds(org.Hs.eg.db, keys, "ENSEMBL", "SYMBOL")` | `set_rowdata(orgdb, keytype)` (once)     |
-| Manual symbol extraction for enrichment           | `from_type = "ENSEMBL"` (auto-converted) |
-| Manual symbol lookup for plot labels              | `display_id = "SYMBOL"` (every plot)     |
+| Standard workflow | VISTA |
+|----|----|
+| `mapIds(org.Hs.eg.db, keys, "ENSEMBL", "SYMBOL")` | `set_rowdata(orgdb, keytype)` (once) |
+| Manual symbol extraction for enrichment | `from_type = "ENSEMBL"` (auto-converted) |
+| Manual symbol lookup for plot labels | `display_id = "SYMBOL"` (every plot) |
 
 **3 manual ID operations -\> 1 setup call + a parameter.**
 
@@ -532,6 +550,7 @@ have to think about**:
 In the standard workflow, the user defines colours in each plot:
 
 ``` r
+
 # PCA: manually set
 scale_color_manual(values = c("Untreated" = "#4575B4", "Dexamethasone" = "#D73027"))
 
@@ -549,6 +568,7 @@ downstream plot automatically.
 ### State persistence: object vs. variables
 
 ``` r
+
 # Standard: state is scattered
 dds            # DESeqDataSet
 res            # DESeqResults
@@ -562,6 +582,7 @@ Six separate variables. If the script is interrupted and restarted, the
 user must re-run everything from the top.
 
 ``` r
+
 # VISTA: state is in one object
 vista          # everything
 ```
@@ -580,21 +601,22 @@ state. Any plot or enrichment can be reproduced from this object alone.
 | Hardcoded color definitions |      3      |     0     |
 | Persistent analysis objects | 0 (scripts) |  1 (S4)   |
 
-Workflow complexity comparison
+Workflow complexity comparison {.table}
 
 VISTA does not introduce new statistical methods. DESeq2 and edgeR
 perform the same computations inside
-[`create_vista()`](../../reference/create_vista.md) as they do
-standalone. What VISTA eliminates is the engineering overhead between
-these computations: the data reshaping, identifier juggling, colour
-coordination, and state management that consume the majority of analysis
-scripting time without contributing to scientific reasoning.
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md)
+as they do standalone. What VISTA eliminates is the engineering overhead
+between these computations: the data reshaping, identifier juggling,
+colour coordination, and state management that consume the majority of
+analysis scripting time without contributing to scientific reasoning.
 
 ## Session Information
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.3 (2026-03-11)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -616,67 +638,67 @@ sessionInfo()
 #> [8] methods   base     
 #> 
 #> other attached packages:
-#>  [1] VISTA_0.99.8                circlize_0.4.18            
-#>  [3] ComplexHeatmap_2.26.1       msigdbr_26.1.0             
-#>  [5] clusterProfiler_4.18.4      tibble_3.3.1               
+#>  [1] VISTA_1.1.3                 circlize_0.4.18            
+#>  [3] ComplexHeatmap_2.28.0       msigdbr_26.1.0             
+#>  [5] clusterProfiler_4.20.0      tibble_3.3.1               
 #>  [7] dplyr_1.2.1                 ggrepel_0.9.8              
-#>  [9] ggplot2_4.0.2               DESeq2_1.50.2              
-#> [11] org.Hs.eg.db_3.22.0         AnnotationDbi_1.72.0       
-#> [13] airway_1.30.0               SummarizedExperiment_1.40.0
-#> [15] Biobase_2.70.0              GenomicRanges_1.62.1       
-#> [17] Seqinfo_1.0.0               IRanges_2.44.0             
-#> [19] S4Vectors_0.49.1-1          BiocGenerics_0.56.0        
-#> [21] generics_0.1.4              MatrixGenerics_1.22.0      
-#> [23] matrixStats_1.5.0           BiocStyle_2.38.0           
+#>  [9] ggplot2_4.0.3               DESeq2_1.52.0              
+#> [11] org.Hs.eg.db_3.23.1         AnnotationDbi_1.74.0       
+#> [13] airway_1.32.0               SummarizedExperiment_1.42.0
+#> [15] Biobase_2.72.0              GenomicRanges_1.64.0       
+#> [17] Seqinfo_1.2.0               IRanges_2.46.0             
+#> [19] S4Vectors_0.50.1            BiocGenerics_0.58.1        
+#> [21] generics_0.1.4              MatrixGenerics_1.24.0      
+#> [23] matrixStats_1.5.0           BiocStyle_2.40.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] splines_4.5.3           ggplotify_0.1.3         R.oo_1.27.1            
-#>   [4] polyclip_1.10-7         lifecycle_1.0.5         rstatix_0.7.3          
-#>   [7] edgeR_4.8.2             doParallel_1.0.17       lattice_0.22-9         
-#>  [10] MASS_7.3-65             backports_1.5.1         magrittr_2.0.5         
-#>  [13] limma_3.66.0            sass_0.4.10             rmarkdown_2.31         
-#>  [16] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             
-#>  [19] ggtangle_0.1.1          EnhancedVolcano_1.28.2  cowplot_1.2.0          
-#>  [22] DBI_1.3.0               RColorBrewer_1.1-3      abind_1.4-8            
-#>  [25] purrr_1.2.2             R.utils_2.13.0          yulab.utils_0.2.4      
-#>  [28] tweenr_2.0.3            rappdirs_0.3.4          gdtools_0.5.0          
-#>  [31] enrichplot_1.30.5       tidytree_0.4.7          pkgdown_2.2.0          
-#>  [34] codetools_0.2-20        DelayedArray_0.36.1     DOSE_4.4.0             
-#>  [37] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          
-#>  [40] aplot_0.2.9             farver_2.1.2            jsonlite_2.0.0         
-#>  [43] GetoptLong_1.1.1        Formula_1.2-5           iterators_1.0.14       
-#>  [46] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
-#>  [49] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.2             
-#>  [52] Rcpp_1.1.1              glue_1.8.0              SparseArray_1.10.10    
-#>  [55] xfun_0.57               qvalue_2.42.0           withr_3.0.2            
-#>  [58] BiocManager_1.30.27     fastmap_1.2.0           GGally_2.4.0           
-#>  [61] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     
-#>  [64] textshaping_1.0.5       colorspace_2.1-2        GO.db_3.22.0           
-#>  [67] RSQLite_2.4.6           R.methodsS3_1.8.2       tidyr_1.3.2            
-#>  [70] fontLiberation_0.1.0    data.table_1.18.2.1     httr_1.4.8             
-#>  [73] htmlwidgets_1.6.4       S4Arrays_1.10.1         scatterpie_0.2.6       
+#>   [1] splines_4.6.1           ggplotify_0.1.3         polyclip_1.10-7        
+#>   [4] enrichit_0.2.1          lifecycle_1.0.5         httr2_1.3.0            
+#>   [7] rstatix_1.1.0           edgeR_4.10.1            doParallel_1.0.17      
+#>  [10] processx_3.9.0          lattice_0.22-9          MASS_7.3-65            
+#>  [13] backports_1.5.1         magrittr_2.0.5          limma_3.68.4           
+#>  [16] sass_0.4.10             rmarkdown_2.31          jquerylib_0.1.4        
+#>  [19] yaml_2.3.12             otel_0.2.0              ggtangle_0.1.2         
+#>  [22] EnhancedVolcano_1.30.0  DBI_1.3.0               RColorBrewer_1.1-3     
+#>  [25] abind_1.4-8             purrr_1.2.2             yulab.utils_0.2.4      
+#>  [28] tweenr_2.0.3            rappdirs_0.3.4          aisdk_1.4.12           
+#>  [31] gdtools_0.5.1           enrichplot_1.32.0       tidytree_0.4.8         
+#>  [34] pkgdown_2.2.1           codetools_0.2-20        DelayedArray_0.38.2    
+#>  [37] DOSE_4.6.0              ggforce_0.5.0           tidyselect_1.2.1       
+#>  [40] shape_1.4.6.1           aplot_0.3.1             farver_2.1.2           
+#>  [43] jsonlite_2.0.0          GetoptLong_1.1.1        Formula_1.2-6          
+#>  [46] iterators_1.0.14        systemfonts_1.3.2       foreach_1.5.2          
+#>  [49] tools_4.6.1             ggnewscale_0.5.2        treeio_1.36.1          
+#>  [52] ragg_1.5.2              Rcpp_1.1.2              glue_1.8.1             
+#>  [55] SparseArray_1.12.2      xfun_0.60               qvalue_2.44.0          
+#>  [58] withr_3.0.3             BiocManager_1.30.27     fastmap_1.2.0          
+#>  [61] GGally_2.4.0            callr_3.8.0             digest_0.6.39          
+#>  [64] R6_2.6.1                gridGraphics_0.5-1      textshaping_1.0.5      
+#>  [67] colorspace_2.1-3        GO.db_3.23.1            RSQLite_3.53.3         
+#>  [70] tidyr_1.3.2             fontLiberation_0.1.0    httr_1.4.8             
+#>  [73] htmlwidgets_1.6.4       S4Arrays_1.12.0         scatterpie_0.2.6       
 #>  [76] ggstats_0.13.0          pkgconfig_2.0.3         gtable_0.3.6           
-#>  [79] blob_1.3.0              S7_0.2.1                XVector_0.50.0         
+#>  [79] blob_1.3.0              S7_0.2.2                XVector_0.52.0         
 #>  [82] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          
-#>  [85] bookdown_0.46           fgsea_1.36.2            clue_0.3-68            
-#>  [88] scales_1.4.0            png_0.1-9               ggfun_0.2.0            
-#>  [91] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
-#>  [94] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
-#>  [97] GlobalOptions_0.1.4     stringr_1.6.0           parallel_4.5.3         
-#> [100] desc_1.4.3              pillar_1.11.1           vctrs_0.7.3            
-#> [103] ggpubr_0.6.3            car_3.1-5               tidydr_0.0.6           
-#> [106] cluster_2.1.8.2         evaluate_1.0.5          cli_3.6.6              
-#> [109] locfit_1.5-9.12         compiler_4.5.3          rlang_1.2.0            
-#> [112] crayon_1.5.3            ggsignif_0.6.4          labeling_0.4.3         
-#> [115] forcats_1.0.1           plyr_1.8.9              fs_2.0.1               
-#> [118] ggiraph_0.9.6           stringi_1.8.7           BiocParallel_1.44.0    
-#> [121] assertthat_0.2.1        babelgene_22.9          Biostrings_2.78.0      
-#> [124] lazyeval_0.2.3          GOSemSim_2.36.0         fontquiver_0.2.1       
-#> [127] Matrix_1.7-4            patchwork_1.3.2         bit64_4.6.0-1          
-#> [130] KEGGREST_1.50.0         statmod_1.5.1           igraph_2.2.3           
-#> [133] broom_1.0.12            memoise_2.0.1           bslib_0.10.0           
-#> [136] ggtree_4.0.5            fastmatch_1.1-8         bit_4.6.0              
-#> [139] ape_5.8-1               gson_0.1.0
+#>  [85] bookdown_0.47           clue_0.3-68             scales_1.4.0           
+#>  [88] png_0.1-9               ggfun_0.2.1             knitr_1.51             
+#>  [91] reshape2_1.4.5          rjson_0.2.23            nlme_3.1-169           
+#>  [94] curl_7.1.0              cachem_1.1.0            GlobalOptions_0.1.4    
+#>  [97] stringr_1.6.0           parallel_4.6.1          desc_1.4.3             
+#> [100] pillar_1.11.1           vctrs_0.7.3             ggpubr_1.0.0           
+#> [103] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.2        
+#> [106] evaluate_1.0.5          cli_3.6.6               locfit_1.5-9.12        
+#> [109] compiler_4.6.1          rlang_1.3.0             crayon_1.5.3           
+#> [112] ggsignif_0.6.4          labeling_0.4.3          ps_1.9.3               
+#> [115] forcats_1.0.1           plyr_1.8.9              fs_2.1.0               
+#> [118] ggiraph_0.9.6           stringi_1.8.9           BiocParallel_1.46.0    
+#> [121] assertthat_0.2.1        babelgene_22.9          Biostrings_2.80.1      
+#> [124] lazyeval_0.2.3          GOSemSim_2.38.3         fontquiver_0.2.1       
+#> [127] Matrix_1.7-5            patchwork_1.3.2         bit64_4.8.2            
+#> [130] KEGGREST_1.52.2         statmod_1.5.2           igraph_2.3.3           
+#> [133] broom_1.0.13            memoise_2.0.1           bslib_0.12.0           
+#> [136] ggtree_4.2.0            bit_4.6.0               ape_5.8-1              
+#> [139] gson_0.2.1
 ```
 
 ## References

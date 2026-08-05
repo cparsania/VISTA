@@ -16,7 +16,7 @@ get_celltype_heatmap(
   cluster_columns = TRUE,
   label = FALSE,
   base_size = 11,
-  return_type = c("plot", "matrix", "both")
+  return_type = c("plot", "data", "both")
 )
 ```
 
@@ -65,7 +65,8 @@ get_celltype_heatmap(
 
 - return_type:
 
-  One of `"plot"`, `"matrix"`, or `"both"`.
+  One of `"plot"` (default), `"data"`, or `"both"`. The legacy value
+  `"matrix"` is still accepted and warns.
 
 ## Value
 

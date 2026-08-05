@@ -29,7 +29,8 @@ get_enrichment_chord(
   transparency = 0.4,
   gap_degree = 2,
   label_cex = 0.7,
-  title = NULL
+  title = NULL,
+  return_type = c("data", "plot", "both")
 )
 ```
 
@@ -39,7 +40,8 @@ get_enrichment_chord(
 
   An `enrichResult`, `gseaResult`, or `compareClusterResult` from
   clusterProfiler, or a list containing an `enrich` element (e.g. output
-  of [`get_msigdb_enrichment()`](get_msigdb_enrichment.md)).
+  of
+  [`get_msigdb_enrichment()`](https://cparsania.github.io/VISTA/reference/get_msigdb_enrichment.md)).
 
 - vista:
 
@@ -141,9 +143,18 @@ get_enrichment_chord(
 
   Optional plot title.
 
+- return_type:
+
+  One of `"data"` (default), `"plot"` or `"both"`. The default is
+  `"data"` because this function draws to the active device and has
+  always returned its table invisibly. `"plot"` returns a recorded plot
+  that
+  [`save_vista_plot()`](https://cparsania.github.io/VISTA/reference/save_vista_plot.md)
+  can write to a file.
+
 ## Value
 
-Invisibly returns a list with:
+With `return_type = "data"` (the default), invisibly a list with:
 
 - gene_data:
 
@@ -160,8 +171,9 @@ The chord diagram is drawn as a side effect.
 
 The plot reveals **hub genes** (those driving multiple enriched terms)
 and pathway redundancy (terms sharing many genes). This complements
-[`get_enrichment_plot()`](get_enrichment_plot.md) (which shows
-significance) and [`get_pathway_heatmap()`](get_pathway_heatmap.md)
+[`get_enrichment_plot()`](https://cparsania.github.io/VISTA/reference/get_enrichment_plot.md)
+(which shows significance) and
+[`get_pathway_heatmap()`](https://cparsania.github.io/VISTA/reference/get_pathway_heatmap.md)
 (which shows expression patterns).
 
 ## Examples
@@ -178,6 +190,7 @@ msig <- get_msigdb_enrichment(
 #> 
 #> Using human MSigDB with ortholog mapping to mouse. Use `db_species = "MM"` for mouse-native gene sets.
 #> This message is displayed once per session.
+#> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
 get_enrichment_chord(msig, top_n = 5)
 #> Warning: `vista` and `sample_comparison` are required for "foldchange" colouring.
 #> Falling back to "pathway".
@@ -207,6 +220,7 @@ msig <- get_msigdb_enrichment(
   sample_comparison = names(comparisons(vista))[1],
   regulation = "Up", from_type = "ENSEMBL"
 )
+#> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
 
 # Simple: pathway-coloured chords
 get_enrichment_chord(msig)

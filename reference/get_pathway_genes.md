@@ -23,7 +23,7 @@ get_pathway_genes(
 
   An `enrichResult`/`gseaResult`, or a list containing element `enrich`
   (e.g. output from
-  [`get_msigdb_enrichment()`](get_msigdb_enrichment.md)).
+  [`get_msigdb_enrichment()`](https://cparsania.github.io/VISTA/reference/get_msigdb_enrichment.md)).
 
 - pathways:
 
@@ -78,9 +78,10 @@ if (requireNamespace("msigdbr", quietly = TRUE)) {
   pathway_tbl <- get_pathway_genes(msig, top_n = 5, return_type = "long")
   head(pathway_tbl)
 }
+#> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
 #>     pathway_id      pathway            gene
-#> 1 UN_ANNOTATED UN_ANNOTATED ENSG00000003402
-#> 2 UN_ANNOTATED UN_ANNOTATED ENSG00000004799
+#> 1 UN_ANNOTATED UN_ANNOTATED ENSG00000004799
+#> 2 UN_ANNOTATED UN_ANNOTATED ENSG00000003402
 
 # \donttest{
 data("count_data", package = "VISTA")
@@ -120,11 +121,11 @@ head(pathway_tbl)
 #> 5 HALLMARK_TNFA_SIGNALING_VIA_NFKB HALLMARK_TNFA_SIGNALING_VIA_NFKB
 #> 6 HALLMARK_TNFA_SIGNALING_VIA_NFKB HALLMARK_TNFA_SIGNALING_VIA_NFKB
 #>              gene
-#> 1 ENSG00000003402
-#> 2 ENSG00000067082
-#> 3 ENSG00000099860
-#> 4 ENSG00000102804
-#> 5 ENSG00000105835
-#> 6 ENSG00000107968
+#> 1 ENSG00000131459
+#> 2 ENSG00000132334
+#> 3 ENSG00000130066
+#> 4 ENSG00000185950
+#> 5 ENSG00000102804
+#> 6 ENSG00000119508
 # }
 ```

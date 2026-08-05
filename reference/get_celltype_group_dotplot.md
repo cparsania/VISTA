@@ -11,10 +11,11 @@ get_celltype_group_dotplot(
   cell_types = NULL,
   top_n = 12,
   summary_fun = c("mean", "median"),
-  error = c("se", "sd", "none"),
+  errorbar = c("se", "sd", "none"),
   add_points = TRUE,
   point_size = 2.5,
-  base_size = 12
+  base_size = 12,
+  error = NULL
 )
 ```
 
@@ -41,7 +42,7 @@ get_celltype_group_dotplot(
 
   One of `"mean"` or `"median"` for group summary.
 
-- error:
+- errorbar:
 
   Error-bar type: `"se"`, `"sd"`, or `"none"`.
 
@@ -56,6 +57,10 @@ get_celltype_group_dotplot(
 - base_size:
 
   Base font size.
+
+- error:
+
+  Deprecated; use `errorbar`.
 
 ## Value
 

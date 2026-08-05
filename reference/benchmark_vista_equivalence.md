@@ -123,12 +123,14 @@ bm <- benchmark_vista_equivalence(
   min_counts = 5,
   min_replicates = 1
 )
+#> calcNormFactors has been renamed to normLibSizes
+#> calcNormFactors has been renamed to normLibSizes
 
 bm$comparison_summary
 #> # A tibble: 1 × 20
 #>   method comparison            n_genes up_genes_identical down_genes_identical
 #>   <chr>  <chr>                   <int> <lgl>              <lgl>               
-#> 1 limma  treatment1_VS_control     442 TRUE               TRUE                
+#> 1 limma  treatment1_VS_control     423 TRUE               TRUE                
 #> # ℹ 15 more variables: deg_sets_identical <lgl>, regulation_identical <lgl>,
 #> #   norm_counts_identical <lgl>, baseMean_within_tolerance <lgl>,
 #> #   log2fc_within_tolerance <lgl>, pvalue_within_tolerance <lgl>,
@@ -168,13 +170,15 @@ bm <- benchmark_vista_equivalence(
 #> mean-dispersion relationship
 #> final dispersion estimates
 #> fitting model and testing
+#> calcNormFactors has been renamed to normLibSizes
+#> calcNormFactors has been renamed to normLibSizes
 
 bm$comparison_summary
 #> # A tibble: 2 × 20
 #>   method comparison            n_genes up_genes_identical down_genes_identical
 #>   <chr>  <chr>                   <int> <lgl>              <lgl>               
 #> 1 deseq2 treatment1_VS_control     123 TRUE               TRUE                
-#> 2 edger  treatment1_VS_control     130 TRUE               TRUE                
+#> 2 edger  treatment1_VS_control     123 TRUE               TRUE                
 #> # ℹ 15 more variables: deg_sets_identical <lgl>, regulation_identical <lgl>,
 #> #   norm_counts_identical <lgl>, baseMean_within_tolerance <lgl>,
 #> #   log2fc_within_tolerance <lgl>, pvalue_within_tolerance <lgl>,

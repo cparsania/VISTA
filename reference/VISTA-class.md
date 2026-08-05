@@ -30,14 +30,16 @@ Core elements stored in `metadata(v)`:
 Feature-level annotations live in `rowData(v)`, sample metadata in
 `colData(v)`, and normalized counts (and any additional assays) in
 `assay(v, "norm_counts")` by default. Use
-[`create_vista()`](create_vista.md) as the primary end-user constructor.
-Advanced users can convert an existing `SummarizedExperiment` with
-[`as_vista()`](as_vista.md).
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md)
+as the primary end-user constructor. Advanced users can convert an
+existing `SummarizedExperiment` with
+[`as_vista()`](https://cparsania.github.io/VISTA/reference/as_vista.md).
 
 ## See also
 
-[`create_vista`](create_vista.md), [`as_vista`](as_vista.md),
-[`validate_vista`](validate_vista.md)
+[`create_vista`](https://cparsania.github.io/VISTA/reference/create_vista.md),
+[`as_vista`](https://cparsania.github.io/VISTA/reference/as_vista.md),
+[`validate_vista`](https://cparsania.github.io/VISTA/reference/validate_vista.md)
 
 ## Examples
 

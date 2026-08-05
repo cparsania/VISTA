@@ -53,7 +53,9 @@ get_pairwise_corr_plot(
 
 ## Value
 
-An object returned by this function.
+A
+[`GGally::ggmatrix`](https://ggobi.github.io/ggally/reference/ggmatrix.html)
+object of pairwise sample scatter plots.
 
 ## Examples
 

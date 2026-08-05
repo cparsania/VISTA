@@ -1,5 +1,5 @@
-pandoc: 3.1.11
-pkgdown: 2.2.0
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   VISTA-airway: VISTA-airway.html
@@ -10,4 +10,7 @@ articles:
   workflows/VISTA-deconvolution: workflows/VISTA-deconvolution.html
   guides/VISTA-input-preparation: guides/VISTA-input-preparation.html
   guides/VISTA-raincloud: guides/VISTA-raincloud.html
-last_built: 2026-04-17T04:48Z
+last_built: 2026-08-05T07:32Z
+urls:
+  reference: https://cparsania.github.io/VISTA/reference
+  article: https://cparsania.github.io/VISTA/articles

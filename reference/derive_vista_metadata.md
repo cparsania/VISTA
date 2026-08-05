@@ -4,8 +4,9 @@
 count sample names. It is intended for projects where users have count
 columns but do not yet have a separate metadata sheet. The derived table
 can be edited, passed through
-[`read_vista_metadata()`](read_vista_metadata.md), and then aligned with
-[`match_vista_inputs()`](match_vista_inputs.md).
+[`read_vista_metadata()`](https://cparsania.github.io/VISTA/reference/read_vista_metadata.md),
+and then aligned with
+[`match_vista_inputs()`](https://cparsania.github.io/VISTA/reference/match_vista_inputs.md).
 
 ## Usage
 
@@ -29,14 +30,16 @@ derive_vista_metadata(
 
 - counts:
 
-  Count input accepted by [`read_vista_counts()`](read_vista_counts.md),
-  or the list returned by [`read_vista_counts()`](read_vista_counts.md).
+  Count input accepted by
+  [`read_vista_counts()`](https://cparsania.github.io/VISTA/reference/read_vista_counts.md),
+  or the list returned by
+  [`read_vista_counts()`](https://cparsania.github.io/VISTA/reference/read_vista_counts.md).
 
 - column_geneid:
 
   Optional gene identifier column for raw tabular count inputs. Ignored
   when `counts` is the list output of
-  [`read_vista_counts()`](read_vista_counts.md).
+  [`read_vista_counts()`](https://cparsania.github.io/VISTA/reference/read_vista_counts.md).
 
 - sample_names:
 
@@ -72,8 +75,10 @@ derive_vista_metadata(
 
 - repair_sample_names:
 
-  Strategy passed to [`read_vista_counts()`](read_vista_counts.md) when
-  sample names are taken from `counts`. One of `"auto"` or `"none"`.
+  Strategy passed to
+  [`read_vista_counts()`](https://cparsania.github.io/VISTA/reference/read_vista_counts.md)
+  when sample names are taken from `counts`. One of `"auto"` or
+  `"none"`.
 
 - return_type:
 

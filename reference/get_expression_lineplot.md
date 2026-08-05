@@ -20,7 +20,7 @@ get_expression_lineplot(
   facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
-  comparisons = NULL,
+  stat_comparisons = NULL,
   pool_genes = FALSE,
   by = c("sample", "group"),
   facet_by = c("auto", "group", "gene", "none"),
@@ -31,7 +31,8 @@ get_expression_lineplot(
   colors = NULL,
   line_width = 1,
   point_size = 2,
-  base_size = 12
+  base_size = 12,
+  comparisons = NULL
 )
 ```
 
@@ -91,9 +92,10 @@ get_expression_lineplot(
 
   Label format retained for API consistency with other expression plots.
 
-- comparisons:
+- stat_comparisons:
 
-  Optional list of comparisons retained for API consistency.
+  Optional list of group pairs, retained for API consistency with the
+  other expression plots; this plot does not draw significance brackets.
 
 - pool_genes:
 
@@ -144,9 +146,14 @@ get_expression_lineplot(
 
   Base theme size.
 
+- comparisons:
+
+  Deprecated; use `stat_comparisons`.
+
 ## Value
 
-An object returned by this function.
+A `ggplot2` object connecting expression values across groups or
+samples.
 
 ## Examples
 

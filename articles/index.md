@@ -2,18 +2,22 @@
 
 ### Workflows
 
-- [Complete RNA-seq Analysis Workflow with VISTA](VISTA-airway.md):
+- [Complete RNA-seq Analysis Workflow with
+  VISTA](https://cparsania.github.io/VISTA/articles/VISTA-airway.md):
 - [Comparing DESeq2 and edgeR with
-  VISTA](workflows/VISTA-comparison.md):
+  VISTA](https://cparsania.github.io/VISTA/articles/workflows/VISTA-comparison.md):
 - [Code Economy: VISTA vs. Standard R
-  Workflows](workflows/VISTA-code-economy.md):
+  Workflows](https://cparsania.github.io/VISTA/articles/workflows/VISTA-code-economy.md):
 - [Cell-Type Deconvolution with VISTA
-  (airway)](workflows/VISTA-deconvolution.md):
+  (airway)](https://cparsania.github.io/VISTA/articles/workflows/VISTA-deconvolution.md):
 
 ### Visualization Guides
 
 - [Preparing Counts and Metadata for
-  VISTA](guides/VISTA-input-preparation.md):
-- [Enrichment Chord Diagrams with VISTA](guides/VISTA-chord.md):
-- [Raincloud Plots in VISTA](guides/VISTA-raincloud.md):
-- [Color and Palette Design with VISTA](guides/VISTA-colors.md):
+  VISTA](https://cparsania.github.io/VISTA/articles/guides/VISTA-input-preparation.md):
+- [Enrichment Chord Diagrams with
+  VISTA](https://cparsania.github.io/VISTA/articles/guides/VISTA-chord.md):
+- [Raincloud Plots in
+  VISTA](https://cparsania.github.io/VISTA/articles/guides/VISTA-raincloud.md):
+- [Color and Palette Design with
+  VISTA](https://cparsania.github.io/VISTA/articles/guides/VISTA-colors.md):

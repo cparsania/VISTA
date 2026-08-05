@@ -13,7 +13,7 @@ get_umap_plot(
   group_column = NULL,
   color_by = NULL,
   genes = NULL,
-  top_n_genes = NULL,
+  top_n = NULL,
   label = FALSE,
   label_size = 3,
   point_size = 10,
@@ -26,7 +26,9 @@ get_umap_plot(
   use_vista_colors = NULL,
   palette = NULL,
   colors = NULL,
-  use_group_colors = TRUE
+  use_group_colors = TRUE,
+  top_n_genes = NULL,
+  max_genes = 20
 )
 ```
 
@@ -55,7 +57,7 @@ get_umap_plot(
 
   Optional character vector of gene identifiers to restrict the matrix.
 
-- top_n_genes:
+- top_n:
 
   Optional integer selecting top variable genes to include.
 
@@ -116,6 +118,14 @@ get_umap_plot(
   Logical; when `TRUE`, prefer the stored VISTA group colours when
   colouring by the grouping column.
 
+- top_n_genes:
+
+  Deprecated; use `top_n`.
+
+- max_genes:
+
+  Maximum number of genes accepted in `genes` (default 20).
+
 ## Value
 
 A ggplot object with UMAP1/UMAP2 coordinates.
@@ -127,5 +137,7 @@ if (requireNamespace("uwot", quietly = TRUE)) {
   vista <- example_vista()
   get_umap_plot(vista, top_n_genes = 50)
 }
+#> Warning: `top_n_genes` in `get_umap_plot()` is deprecated. Use `top_n` instead. It becomes defunct in VISTA 1.4.0.
+#> This warning is displayed once every 8 hours.
 #> Warning: `n_neighbors` (15) must be smaller than sample size (6); using 5.
 ```

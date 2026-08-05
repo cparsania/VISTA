@@ -58,7 +58,8 @@ get_gsea(
 
 ## Value
 
-An object returned by this function.
+A list with a single element `enrich`, holding the `gseaResult` returned
+by the selected clusterProfiler GSEA function.
 
 ## Examples
 

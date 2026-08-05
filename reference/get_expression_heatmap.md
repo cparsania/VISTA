@@ -38,7 +38,7 @@ get_expression_heatmap(
   col = NULL,
   heatmap_name = NULL,
   show_heatmap_legend = TRUE,
-  return_type = c("heatmap", "clusters", "both"),
+  return_type = c("plot", "data", "both"),
   ...
 )
 ```
@@ -186,7 +186,8 @@ get_expression_heatmap(
 
 - return_type:
 
-  `"heatmap"`, `"clusters"`, or `"both"` selecting the returned object.
+  One of `"plot"` (default), `"data"`, or `"both"`. The legacy values
+  `"heatmap"` and `"clusters"` are still accepted and warn.
 
 - ...:
 
@@ -195,7 +196,10 @@ get_expression_heatmap(
 
 ## Value
 
-An object returned by this function.
+A
+[`ComplexHeatmap::Heatmap`](https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html)
+object, a tibble of k-means cluster assignments, or a list of both,
+depending on `return_type`.
 
 A `ComplexHeatmap` object, a cluster data frame, or a list containing
 both depending on `return_type`.
@@ -215,11 +219,13 @@ if (requireNamespace('ComplexHeatmap', quietly = TRUE) &&
   )
   ComplexHeatmap::draw(hm)
 }
+#> Warning: `return_type = "heatmap"` in `get_expression_heatmap()` is deprecated. Use `return_type = "plot"` instead. It becomes defunct in VISTA 1.4.0.
+#> This warning is displayed once every 8 hours.
 
 v <- example_vista()
 if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
     requireNamespace("circlize", quietly = TRUE)) {
-  hm <- get_expression_heatmap(v, return_type = "heatmap")
+  hm <- get_expression_heatmap(v, return_type = "plot")
   ComplexHeatmap::draw(hm)
 }
 ```

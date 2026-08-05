@@ -1,10 +1,11 @@
 # Match count and metadata inputs for VISTA
 
 `match_vista_inputs()` aligns standardized counts and sample metadata so
-they can be passed directly to [`create_vista()`](create_vista.md). It
-accepts the raw output from
-[`read_vista_counts()`](read_vista_counts.md) or a count data
-frame/matrix plus sample metadata.
+they can be passed directly to
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
+It accepts the raw output from
+[`read_vista_counts()`](https://cparsania.github.io/VISTA/reference/read_vista_counts.md)
+or a count data frame/matrix plus sample metadata.
 
 ## Usage
 
@@ -25,19 +26,20 @@ match_vista_inputs(
 - counts:
 
   Standardized counts from
-  [`read_vista_counts()`](read_vista_counts.md), or a compatible count
-  matrix/data frame.
+  [`read_vista_counts()`](https://cparsania.github.io/VISTA/reference/read_vista_counts.md),
+  or a compatible count matrix/data frame.
 
 - sample_info:
 
-  Sample metadata from [`read_vista_metadata()`](read_vista_metadata.md)
+  Sample metadata from
+  [`read_vista_metadata()`](https://cparsania.github.io/VISTA/reference/read_vista_metadata.md)
   or a data frame coercible to that format.
 
 - column_geneid:
 
   Optional gene identifier column for raw tabular counts. Ignored when
   `counts` is the list output of
-  [`read_vista_counts()`](read_vista_counts.md).
+  [`read_vista_counts()`](https://cparsania.github.io/VISTA/reference/read_vista_counts.md).
 
 - sample_column:
 

@@ -37,6 +37,7 @@ v <- example_vista(method = "both")
 #> mean-dispersion relationship
 #> final dispersion estimates
 #> fitting model and testing
+#> calcNormFactors has been renamed to normLibSizes
 v <- set_de_source(v, "edger")
 names(comparisons(v, source = "active"))
 #> [1] "treatment1_VS_control"

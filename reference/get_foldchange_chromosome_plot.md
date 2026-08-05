@@ -1,9 +1,9 @@
 # Chromosome plot for fold change
 
 Convenience wrapper around
-[`get_chromosome_plot()`](get_chromosome_plot.md) for fold-change
-colouring. When multiple comparisons are supplied, panels are facetted
-by comparison with log2FC clipped to +/-2.
+[`get_chromosome_plot()`](https://cparsania.github.io/VISTA/reference/get_chromosome_plot.md)
+for fold-change colouring. When multiple comparisons are supplied,
+panels are facetted by comparison with log2FC clipped to +/-2.
 
 ## Usage
 

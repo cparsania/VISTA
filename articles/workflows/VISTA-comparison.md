@@ -24,6 +24,7 @@ visualization functions.
 ## Setup
 
 ``` r
+
 library(VISTA)
 library(ggplot2)
 library(dplyr)
@@ -40,6 +41,7 @@ dataset (Himes et al. 2014), which contains RNA-seq counts from human
 airway smooth muscle cells treated with dexamethasone.
 
 ``` r
+
 data("count_data", package = "VISTA")
 data("sample_metadata", package = "VISTA")
 
@@ -64,6 +66,7 @@ one using edgeR — with identical cutoffs so that any differences in
 results are attributable to the method.
 
 ``` r
+
 vista_deseq <- create_vista(
   counts        = count_data,
   sample_info   = sample_metadata,
@@ -81,15 +84,23 @@ vista_deseq
 #> class: VISTA 
 #> dim: 18086 8 
 #> metadata(12): de_results de_summary ... design comparison
-#> assays(1): norm_counts
+#> assays(2): norm_counts counts
 #> rownames(18086): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
 #>   ENSG00000273488
 #> rowData names(1): baseMean
 #> colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
 #> colData names(14): SampleName cell ... sizeFactor sample_names
+#> -------- VISTA --------
+#> group column: dex (untrt, trt)
+#> comparisons: trt_VS_untrt
+#> DE source: deseq2
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 ```
 
 ``` r
+
 vista_edger <- create_vista(
   counts        = count_data,
   sample_info   = sample_metadata,
@@ -105,19 +116,27 @@ vista_edger <- create_vista(
 )
 vista_edger
 #> class: VISTA 
-#> dim: 15557 8 
+#> dim: 18086 8 
 #> metadata(12): de_results de_summary ... design comparison
-#> assays(1): norm_counts
-#> rownames(15557): ENSG00000000003 ENSG00000000419 ... ENSG00000273382
-#>   ENSG00000273486
+#> assays(2): norm_counts counts
+#> rownames(18086): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
+#>   ENSG00000273488
 #> rowData names(1): baseMean
 #> colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
 #> colData names(13): SampleName cell ... groups sample_names
+#> -------- VISTA --------
+#> group column: dex (untrt, trt)
+#> comparisons: trt_VS_untrt
+#> DE source: edger
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 ```
 
 Both objects contain the same comparison (treated vs untreated):
 
 ``` r
+
 names(comparisons(vista_deseq))
 #> [1] "trt_VS_untrt"
 names(comparisons(vista_edger))
@@ -132,6 +151,7 @@ A quick way to compare the methods is to count the number of up- and
 down-regulated genes detected by each.
 
 ``` r
+
 p_deseq <- get_deg_count_barplot(vista_deseq) +
   ggtitle("DESeq2") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
@@ -149,6 +169,7 @@ p_deseq + p_edger +
 ### DEG composition (pie and donut)
 
 ``` r
+
 pie_deseq <- get_deg_count_pieplot(vista_deseq, facet_by = "none") +
   ggtitle("DESeq2 (Pie)") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
@@ -173,6 +194,7 @@ donut_edger <- get_deg_count_donutplot(vista_edger, facet_by = "none") +
 ### Tabular summary
 
 ``` r
+
 summarise_degs <- function(vista, method_name) {
   comps <- comparisons(vista)
   do.call(rbind, lapply(names(comps), function(comp) {
@@ -202,9 +224,9 @@ knitr::kable(deg_summary_table, row.names = FALSE,
 | Method | Comparison   |  Up | Down | Total_DEG | Tested |
 |:-------|:-------------|----:|-----:|----------:|-------:|
 | DESeq2 | trt_VS_untrt | 475 |  392 |       867 |  18086 |
-| edgeR  | trt_VS_untrt | 447 |  366 |       813 |  15557 |
+| edgeR  | trt_VS_untrt | 496 |  446 |       942 |  18086 |
 
-DEG counts by method and comparison
+DEG counts by method and comparison {.table}
 
 ## Volcano Plots
 
@@ -214,6 +236,7 @@ differences in how each method distributes p-values and fold-change
 estimates.
 
 ``` r
+
 comp1 <- names(comparisons(vista_deseq))[1]
 
 v_deseq <- get_volcano_plot(vista_deseq, sample_comparison = comp1) +
@@ -234,6 +257,7 @@ useful for assessing whether low-expression genes show inflated
 fold-changes and how each method handles shrinkage.
 
 ``` r
+
 ma_deseq <- get_ma_plot(vista_deseq, sample_comparison = comp1) +
   ggtitle(paste("DESeq2 -", comp1))
 
@@ -254,6 +278,7 @@ their overall concordance. Genes on the diagonal have identical
 estimates; deviations indicate method-specific differences.
 
 ``` r
+
 # Extract DE results for the first comparison
 de_deseq <- as.data.frame(comparisons(vista_deseq)[[comp1]])
 de_edger <- as.data.frame(comparisons(vista_edger)[[comp1]])
@@ -307,6 +332,7 @@ ggplot(merged, aes(x = log2fc_deseq2, y = log2fc_edger, color = concordance)) +
 ### Concordance summary table
 
 ``` r
+
 conc_table <- merged %>%
   count(concordance) %>%
   mutate(pct = round(n / sum(n) * 100, 1)) %>%
@@ -318,12 +344,12 @@ knitr::kable(conc_table, col.names = c("Category", "Genes", "Percent"),
 
 | Category   | Genes | Percent |
 |:-----------|------:|--------:|
-| Not DE     | 14726 |    94.7 |
-| Both Up    |   438 |     2.8 |
-| Both Down  |   354 |     2.3 |
-| Discordant |    39 |     0.3 |
+| Not DE     | 17122 |    94.7 |
+| Both Up    |   459 |     2.5 |
+| Both Down  |   386 |     2.1 |
+| Discordant |   119 |     0.7 |
 
-Concordance between DESeq2 and edgeR calls
+Concordance between DESeq2 and edgeR calls {.table}
 
 ## P-value Comparison
 
@@ -333,6 +359,7 @@ Comparing adjusted p-values (on the -log10 scale) shows whether both
 methods agree on which genes are most significant.
 
 ``` r
+
 merged$neg_log10_padj_deseq2 <- -log10(merged$padj_deseq2 + 1e-300)
 merged$neg_log10_padj_edger  <- -log10(merged$padj_edger + 1e-300)
 
@@ -360,6 +387,7 @@ A well-calibrated test produces a uniform distribution under the null,
 with a spike near zero for truly DE genes.
 
 ``` r
+
 pval_df <- rbind(
   data.frame(pvalue = de_deseq$pvalue, Method = "DESeq2"),
   data.frame(pvalue = de_edger$pvalue, Method = "edgeR")
@@ -383,16 +411,17 @@ ggplot(pval_df, aes(x = pvalue, fill = Method)) +
 ## Venn Diagram of DEGs
 
 VISTA provides
-[`get_deg_venn_diagram()`](../../reference/get_deg_venn_diagram.md) for
-comparing DEG overlap across comparisons within a single object. For
+[`get_deg_venn_diagram()`](https://cparsania.github.io/VISTA/reference/get_deg_venn_diagram.md)
+for comparing DEG overlap across comparisons within a single object. For
 cross-method comparison (DESeq2 vs edgeR), we use
-[`get_genes_by_regulation()`](../../reference/get_genes_by_regulation.md)
+[`get_genes_by_regulation()`](https://cparsania.github.io/VISTA/reference/get_genes_by_regulation.md)
 to extract gene lists from each VISTA object, then pass them to
 `ggvenn`.
 
 ### Upregulated genes
 
 ``` r
+
 # Extract upregulated gene sets using VISTA's accessor
 up_deseq <- get_genes_by_regulation(
   vista_deseq, sample_comparisons = comp1, regulation = "Up"
@@ -412,6 +441,7 @@ ggvenn::ggvenn(venn_up, fill_color = c("#1B9E77", "#D95F02")) +
 ### Downregulated genes
 
 ``` r
+
 down_deseq <- get_genes_by_regulation(
   vista_deseq, sample_comparisons = comp1, regulation = "Down"
 )[[1]]
@@ -430,6 +460,7 @@ ggvenn::ggvenn(venn_down, fill_color = c("#1B9E77", "#D95F02")) +
 ### All DEGs (Up + Down)
 
 ``` r
+
 all_deseq <- union(up_deseq, down_deseq)
 all_edger <- union(up_edger, down_edger)
 venn_all  <- list(DESeq2 = all_deseq, edgeR = all_edger)
@@ -448,6 +479,7 @@ distributions helps assess whether normalization choices drive
 downstream differences.
 
 ``` r
+
 nc_deseq <- norm_counts(vista_deseq)
 nc_edger <- norm_counts(vista_edger)
 
@@ -482,6 +514,7 @@ ggplot(norm_df, aes(x = log2_count, fill = Method)) +
 ### Sample-level comparison
 
 ``` r
+
 # Compare normalized counts for each sample
 sample_norm_df <- data.frame(
   DESeq2 = as.vector(log2(nc_deseq[common_genes, sample_cols] + 1)),
@@ -509,6 +542,7 @@ Principal component analysis reveals whether the two normalization
 strategies preserve the same sample-level structure.
 
 ``` r
+
 pca_deseq <- get_pca_plot(vista_deseq) +
   ggtitle("PCA: DESeq2 Normalization")
 
@@ -527,20 +561,22 @@ interest. Visualizing their expression patterns helps assess whether
 method-specific calls are biologically meaningful.
 
 ``` r
+
 deseq_only <- setdiff(all_deseq, all_edger)
 edger_only <- setdiff(all_edger, all_deseq)
 
 cat("DEGs unique to DESeq2:", length(deseq_only), "\n")
-#> DEGs unique to DESeq2: 75
+#> DEGs unique to DESeq2: 22
 cat("DEGs unique to edgeR:", length(edger_only), "\n")
-#> DEGs unique to edgeR: 21
+#> DEGs unique to edgeR: 97
 cat("DEGs shared:", length(intersect(all_deseq, all_edger)), "\n")
-#> DEGs shared: 792
+#> DEGs shared: 845
 ```
 
 ### Expression of DESeq2-only genes
 
 ``` r
+
 if (length(deseq_only) >= 3) {
   # Show top genes by fold change
   deseq_only_de <- de_deseq[de_deseq$gene_id %in% deseq_only, ]
@@ -558,6 +594,7 @@ if (length(deseq_only) >= 3) {
 ### Expression of edgeR-only genes
 
 ``` r
+
 if (length(edger_only) >= 3) {
   edger_only_de <- de_edger[de_edger$gene_id %in% edger_only, ]
   top_edger_only <- head(
@@ -577,6 +614,7 @@ Different significance and fold-change thresholds can shift the balance
 between methods. Here we sweep across a range of cutoffs.
 
 ``` r
+
 sweep_cutoffs <- function(de_deseq, de_edger, fc_vals, pval_cut = 0.05) {
   results <- lapply(fc_vals, function(fc) {
     n_deseq <- sum(
@@ -627,6 +665,7 @@ Sample-sample correlation heatmaps can reveal whether both normalization
 approaches preserve the same correlation structure.
 
 ``` r
+
 corr_deseq <- get_corr_heatmap(vista_deseq) +
   ggtitle("DESeq2: Sample Correlation")
 
@@ -641,6 +680,7 @@ corr_deseq + corr_edger
 ## Summary and Recommendations
 
 ``` r
+
 overlap    <- length(intersect(all_deseq, all_edger))
 union_size <- length(union(all_deseq, all_edger))
 jaccard    <- round(overlap / union_size, 3)
@@ -652,17 +692,17 @@ cat("Comparison:", comp1, "\n\n")
 cat("DESeq2 DEGs:", length(all_deseq), "\n")
 #> DESeq2 DEGs: 867
 cat("edgeR DEGs:", length(all_edger), "\n")
-#> edgeR DEGs: 813
+#> edgeR DEGs: 942
 cat("Shared DEGs:", overlap, "\n")
-#> Shared DEGs: 792
+#> Shared DEGs: 845
 cat("DESeq2-only:", length(deseq_only), "\n")
-#> DESeq2-only: 75
+#> DESeq2-only: 22
 cat("edgeR-only:", length(edger_only), "\n")
-#> edgeR-only: 21
+#> edgeR-only: 97
 cat("Jaccard index:", jaccard, "\n")
-#> Jaccard index: 0.892
+#> Jaccard index: 0.877
 cat("Fold-change Pearson r:", round(r_val, 3), "\n")
-#> Fold-change Pearson r: 1
+#> Fold-change Pearson r: 0.999
 ```
 
 ### Key takeaways
@@ -689,8 +729,9 @@ cat("Fold-change Pearson r:", round(r_val, 3), "\n")
 ## Session Info
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.3 (2026-03-11)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -711,84 +752,83 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] patchwork_1.3.2  dplyr_1.2.1      ggplot2_4.0.2    VISTA_0.99.8    
-#> [5] BiocStyle_2.38.0
+#> [1] patchwork_1.3.2  dplyr_1.2.1      ggplot2_4.0.3    VISTA_1.1.3     
+#> [5] BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] splines_4.5.3               ggplotify_0.1.3            
-#>   [3] tibble_3.3.1                R.oo_1.27.1                
-#>   [5] polyclip_1.10-7             lifecycle_1.0.5            
-#>   [7] rstatix_0.7.3               edgeR_4.8.2                
-#>   [9] lattice_0.22-9              MASS_7.3-65                
-#>  [11] backports_1.5.1             magrittr_2.0.5             
-#>  [13] limma_3.66.0                sass_0.4.10                
-#>  [15] rmarkdown_2.31              jquerylib_0.1.4            
-#>  [17] yaml_2.3.12                 otel_0.2.0                 
-#>  [19] ggtangle_0.1.1              EnhancedVolcano_1.28.2     
-#>  [21] ggvenn_0.1.19               cowplot_1.2.0              
-#>  [23] DBI_1.3.0                   RColorBrewer_1.1-3         
-#>  [25] abind_1.4-8                 GenomicRanges_1.62.1       
-#>  [27] purrr_1.2.2                 R.utils_2.13.0             
-#>  [29] BiocGenerics_0.56.0         msigdbr_26.1.0             
-#>  [31] yulab.utils_0.2.4           tweenr_2.0.3               
-#>  [33] rappdirs_0.3.4              gdtools_0.5.0              
-#>  [35] IRanges_2.44.0              S4Vectors_0.49.1-1         
-#>  [37] enrichplot_1.30.5           ggrepel_0.9.8              
-#>  [39] tidytree_0.4.7              pkgdown_2.2.0              
-#>  [41] codetools_0.2-20            DelayedArray_0.36.1        
-#>  [43] DOSE_4.4.0                  ggforce_0.5.0              
-#>  [45] tidyselect_1.2.1            aplot_0.2.9                
-#>  [47] farver_2.1.2                matrixStats_1.5.0          
-#>  [49] stats4_4.5.3                Seqinfo_1.0.0              
-#>  [51] jsonlite_2.0.0              Formula_1.2-5              
-#>  [53] systemfonts_1.3.2           tools_4.5.3                
-#>  [55] ggnewscale_0.5.2            treeio_1.34.0              
-#>  [57] ragg_1.5.2                  Rcpp_1.1.1                 
-#>  [59] glue_1.8.0                  SparseArray_1.10.10        
-#>  [61] xfun_0.57                   DESeq2_1.50.2              
-#>  [63] qvalue_2.42.0               MatrixGenerics_1.22.0      
-#>  [65] withr_3.0.2                 BiocManager_1.30.27        
-#>  [67] fastmap_1.2.0               GGally_2.4.0               
-#>  [69] digest_0.6.39               R6_2.6.1                   
-#>  [71] gridGraphics_0.5-1          textshaping_1.0.5          
-#>  [73] colorspace_2.1-2            GO.db_3.22.0               
-#>  [75] RSQLite_2.4.6               R.methodsS3_1.8.2          
-#>  [77] utf8_1.2.6                  tidyr_1.3.2                
-#>  [79] generics_0.1.4              fontLiberation_0.1.0       
-#>  [81] data.table_1.18.2.1         httr_1.4.8                 
-#>  [83] htmlwidgets_1.6.4           S4Arrays_1.10.1            
-#>  [85] scatterpie_0.2.6            ggstats_0.13.0             
-#>  [87] pkgconfig_2.0.3             gtable_0.3.6               
-#>  [89] blob_1.3.0                  S7_0.2.1                   
-#>  [91] XVector_0.50.0              clusterProfiler_4.18.4     
-#>  [93] htmltools_0.5.9             fontBitstreamVera_0.1.1    
-#>  [95] carData_3.0-6               bookdown_0.46              
-#>  [97] fgsea_1.36.2                scales_1.4.0               
-#>  [99] Biobase_2.70.0              png_0.1-9                  
-#> [101] ggfun_0.2.0                 knitr_1.51                 
-#> [103] reshape2_1.4.5              nlme_3.1-168               
-#> [105] curl_7.0.0                  cachem_1.1.0               
-#> [107] stringr_1.6.0               parallel_4.5.3             
-#> [109] AnnotationDbi_1.72.0        desc_1.4.3                 
-#> [111] pillar_1.11.1               grid_4.5.3                 
-#> [113] vctrs_0.7.3                 ggpubr_0.6.3               
-#> [115] car_3.1-5                   tidydr_0.0.6               
-#> [117] cluster_2.1.8.2             evaluate_1.0.5             
-#> [119] cli_3.6.6                   locfit_1.5-9.12            
-#> [121] compiler_4.5.3              rlang_1.2.0                
-#> [123] crayon_1.5.3                ggsignif_0.6.4             
-#> [125] labeling_0.4.3              plyr_1.8.9                 
-#> [127] fs_2.0.1                    ggiraph_0.9.6              
-#> [129] stringi_1.8.7               viridisLite_0.4.3          
-#> [131] BiocParallel_1.44.0         assertthat_0.2.1           
-#> [133] babelgene_22.9              Biostrings_2.78.0          
-#> [135] lazyeval_0.2.3              GOSemSim_2.36.0            
-#> [137] fontquiver_0.2.1            Matrix_1.7-4               
-#> [139] bit64_4.6.0-1               KEGGREST_1.50.0            
-#> [141] statmod_1.5.1               SummarizedExperiment_1.40.0
-#> [143] igraph_2.2.3                broom_1.0.12               
-#> [145] memoise_2.0.1               bslib_0.10.0               
-#> [147] ggtree_4.0.5                fastmatch_1.1-8            
-#> [149] bit_4.6.0                   ape_5.8-1                  
-#> [151] gson_0.1.0
+#>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             
+#>   [3] tidydr_0.0.6                magrittr_2.0.5             
+#>   [5] ggtangle_0.1.2              farver_2.1.2               
+#>   [7] rmarkdown_2.31              fs_2.1.0                   
+#>   [9] ragg_1.5.2                  vctrs_0.7.3                
+#>  [11] memoise_2.0.1               ggtree_4.2.0               
+#>  [13] rstatix_1.1.0               htmltools_0.5.9            
+#>  [15] S4Arrays_1.12.0             curl_7.1.0                 
+#>  [17] broom_1.0.13                Formula_1.2-6              
+#>  [19] SparseArray_1.12.2          gridGraphics_0.5-1         
+#>  [21] sass_0.4.10                 bslib_0.12.0               
+#>  [23] htmlwidgets_1.6.4           desc_1.4.3                 
+#>  [25] plyr_1.8.9                  httr2_1.3.0                
+#>  [27] cachem_1.1.0                igraph_2.3.3               
+#>  [29] lifecycle_1.0.5             pkgconfig_2.0.3            
+#>  [31] gson_0.2.1                  Matrix_1.7-5               
+#>  [33] R6_2.6.1                    fastmap_1.2.0              
+#>  [35] MatrixGenerics_1.24.0       digest_0.6.39              
+#>  [37] aplot_0.3.1                 enrichplot_1.32.0          
+#>  [39] colorspace_2.1-3            ggnewscale_0.5.2           
+#>  [41] GGally_2.4.0                AnnotationDbi_1.74.0       
+#>  [43] S4Vectors_0.50.1            aisdk_1.4.12               
+#>  [45] ps_1.9.3                    DESeq2_1.52.0              
+#>  [47] textshaping_1.0.5           GenomicRanges_1.64.0       
+#>  [49] RSQLite_3.53.3              ggpubr_1.0.0               
+#>  [51] labeling_0.4.3              polyclip_1.10-7            
+#>  [53] httr_1.4.8                  abind_1.4-8                
+#>  [55] compiler_4.6.1              withr_3.0.3                
+#>  [57] bit64_4.8.2                 fontquiver_0.2.1           
+#>  [59] backports_1.5.1             S7_0.2.2                   
+#>  [61] BiocParallel_1.46.0         carData_3.0-6              
+#>  [63] DBI_1.3.0                   ggstats_0.13.0             
+#>  [65] ggforce_0.5.0               ggsignif_0.6.4             
+#>  [67] MASS_7.3-65                 rappdirs_0.3.4             
+#>  [69] DelayedArray_0.38.2         tools_4.6.1                
+#>  [71] otel_0.2.0                  scatterpie_0.2.6           
+#>  [73] ape_5.8-1                   msigdbr_26.1.0             
+#>  [75] glue_1.8.1                  callr_3.8.0                
+#>  [77] nlme_3.1-169                GOSemSim_2.38.3            
+#>  [79] grid_4.6.1                  ggvenn_0.1.19              
+#>  [81] cluster_2.1.8.2             reshape2_1.4.5             
+#>  [83] generics_0.1.4              gtable_0.3.6               
+#>  [85] tidyr_1.3.2                 utf8_1.2.6                 
+#>  [87] car_3.1-5                   XVector_0.52.0             
+#>  [89] BiocGenerics_0.58.1         ggrepel_0.9.8              
+#>  [91] pillar_1.11.1               stringr_1.6.0              
+#>  [93] babelgene_22.9              limma_3.68.4               
+#>  [95] yulab.utils_0.2.4           splines_4.6.1              
+#>  [97] tweenr_2.0.3                treeio_1.36.1              
+#>  [99] lattice_0.22-9              bit_4.6.0                  
+#> [101] tidyselect_1.2.1            fontLiberation_0.1.0       
+#> [103] GO.db_3.23.1                locfit_1.5-9.12            
+#> [105] Biostrings_2.80.1           knitr_1.51                 
+#> [107] fontBitstreamVera_0.1.1     bookdown_0.47              
+#> [109] IRanges_2.46.0              Seqinfo_1.2.0              
+#> [111] edgeR_4.10.1                SummarizedExperiment_1.42.0
+#> [113] stats4_4.6.1                xfun_0.60                  
+#> [115] Biobase_2.72.0              statmod_1.5.2              
+#> [117] matrixStats_1.5.0           stringi_1.8.9              
+#> [119] lazyeval_0.2.3              ggfun_0.2.1                
+#> [121] yaml_2.3.12                 evaluate_1.0.5             
+#> [123] codetools_0.2-20            qvalue_2.44.0              
+#> [125] gdtools_0.5.1               tibble_3.3.1               
+#> [127] BiocManager_1.30.27         ggplotify_0.1.3            
+#> [129] cli_3.6.6                   systemfonts_1.3.2          
+#> [131] processx_3.9.0              jquerylib_0.1.4            
+#> [133] EnhancedVolcano_1.30.0      Rcpp_1.1.2                 
+#> [135] png_0.1-9                   parallel_4.6.1             
+#> [137] assertthat_0.2.1            pkgdown_2.2.1              
+#> [139] blob_1.3.0                  clusterProfiler_4.20.0     
+#> [141] DOSE_4.6.0                  viridisLite_0.4.3          
+#> [143] tidytree_0.4.8              ggiraph_0.9.6              
+#> [145] enrichit_0.2.1              scales_1.4.0               
+#> [147] purrr_1.2.2                 crayon_1.5.3               
+#> [149] rlang_1.3.0                 KEGGREST_1.52.2
 ```

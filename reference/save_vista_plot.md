@@ -25,8 +25,9 @@ save_vista_plot(
 
 - plot:
 
-  A plot object. Typically `ggplot`, `patchwork`, `Heatmap`, or
-  `HeatmapList`.
+  A plot object. Typically `ggplot`, `patchwork`, `Heatmap`,
+  `HeatmapList`, or a `recordedplot` (as returned by
+  `get_enrichment_chord(return_type = "plot")`).
 
 - file:
 

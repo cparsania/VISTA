@@ -2,9 +2,10 @@
 
 `read_vista_counts()` helps standardize common RNA-seq count inputs into
 a count table that can be passed directly to
-[`create_vista()`](create_vista.md). It supports plain matrices/data
-frames, featureCounts outputs, STAR gene counts, HTSeq-count outputs,
-tximport-like lists, and RSEM gene result files.
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
+It supports plain matrices/data frames, featureCounts outputs, STAR gene
+counts, HTSeq-count outputs, tximport-like lists, and RSEM gene result
+files.
 
 ## Usage
 

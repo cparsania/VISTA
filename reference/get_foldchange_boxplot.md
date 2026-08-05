@@ -81,7 +81,7 @@ get_foldchange_boxplot(
 
 ## Value
 
-An object returned by this function.
+A `ggplot2` object summarising log2 fold-change distributions.
 
 ## Examples
 

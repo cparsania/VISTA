@@ -32,7 +32,7 @@ the data**.
 ### What you will learn
 
 - How to create a basic enrichment chord diagram with
-  [`get_enrichment_chord()`](../../reference/get_enrichment_chord.md)
+  [`get_enrichment_chord()`](https://cparsania.github.io/VISTA/reference/get_enrichment_chord.md)
 - How to colour chords by pathway membership, regulation direction, or
   continuous fold-change
 - How to isolate **hub genes** – genes shared across multiple pathways
@@ -41,6 +41,7 @@ the data**.
 ## Setup
 
 ``` r
+
 library(VISTA)
 library(ggplot2)
 library(dplyr)
@@ -53,6 +54,7 @@ airway smooth muscle cells treated with dexamethasone. The same dataset
 is used in the main VISTA workflow vignette.
 
 ``` r
+
 library(airway)
 library(org.Hs.eg.db)
 
@@ -78,6 +80,7 @@ sample_info <- sample_metadata %>%
 ### Create VISTA object
 
 ``` r
+
 vista <- create_vista(
   counts       = count_data,
   sample_info  = sample_info,
@@ -104,12 +107,19 @@ vista
 #> class: VISTA 
 #> dim: 17199 8 
 #> metadata(12): de_results de_summary ... design comparison
-#> assays(1): norm_counts
+#> assays(2): norm_counts counts
 #> rownames(17199): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
 #>   ENSG00000273488
 #> rowData names(4): baseMean SYMBOL GENENAME ENTREZID
 #> colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
 #> colData names(11): SampleName cell ... sizeFactor sample_names
+#> -------- VISTA --------
+#> group column: treatment (Untreated, Dexamethasone)
+#> comparisons: Dexamethasone_VS_Untreated
+#> DE source: deseq2
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 ```
 
 ### Run enrichment
@@ -119,6 +129,7 @@ MSigDB Hallmark run on the combined Up+Down gene set is enough to
 demonstrate the full chord workflow while keeping render time lower.
 
 ``` r
+
 comp_name <- names(comparisons(vista))[1]
 
 # Hallmark gene sets (broad biological themes)
@@ -135,6 +146,7 @@ msig_hallmark <- get_msigdb_enrichment(
 Preview what standard enrichment looks like:
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   head(msig_hallmark$enrich@result[, c("Description", "p.adjust", "Count")])
 }
@@ -167,6 +179,7 @@ coloured by its source pathway, making it easy to trace which genes
 belong to which term.
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
@@ -189,10 +202,11 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 
 ### Understanding the output
 
-[`get_enrichment_chord()`](../../reference/get_enrichment_chord.md)
+[`get_enrichment_chord()`](https://cparsania.github.io/VISTA/reference/get_enrichment_chord.md)
 returns data invisibly so you can inspect the results programmatically:
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   result <- get_enrichment_chord(
     msig_hallmark,
@@ -223,6 +237,7 @@ DE results. This requires passing the VISTA object and comparison name.
 ### Continuous fold-change gradient
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
@@ -250,6 +265,7 @@ A categorical alternative – chords coloured as Up (red), Down (green),
 or Other (grey):
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
@@ -271,6 +287,7 @@ You can order the gene side of the chord by fold-change to make the
 strongest drivers appear first.
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
@@ -297,6 +314,7 @@ This example uses the same combined enrichment, colours chords by
 fold-change, and orders gene sectors by fold-change.
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
@@ -322,6 +340,7 @@ to `2` removes all genes that appear in only one pathway, revealing only
 the **hub genes** that bridge multiple enriched terms.
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   hub_result <- get_enrichment_chord(
     msig_hallmark,
@@ -357,6 +376,7 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 For denser enrichments, you can raise the threshold further:
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   hub_strict <- get_enrichment_chord(
     msig_hallmark,
@@ -387,6 +407,7 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 Pass a named colour vector to override the default HCL palette:
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   # Get the top pathway names first
   top_pathways <- head(msig_hallmark$enrich@result$Description, 5)
@@ -414,6 +435,7 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 Fine-tune gap size, label size, and transparency:
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
@@ -434,6 +456,7 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 Instead of top N by p-value, pick pathways by name:
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   available <- msig_hallmark$enrich@result$Description
   # Pick specific pathways of interest (if available)
@@ -469,6 +492,7 @@ VISTA enrichment views on the same data:
 ### Dot plot: *what* is enriched
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_plot(msig_hallmark$enrich, top_n = 8)
 }
@@ -483,6 +507,7 @@ shared.
 ### Pathway heatmap: *expression* of pathway genes
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_pathway_heatmap(
     x      = vista,
@@ -509,6 +534,7 @@ pathways.
 ### Chord diagram: *topology* of gene–pathway relationships
 
 ``` r
+
 if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
   get_enrichment_chord(
     msig_hallmark,
@@ -528,11 +554,11 @@ if (!is.null(msig_hallmark$enrich) && nrow(msig_hallmark$enrich@result) > 0) {
 The chord diagram answers: *which genes bridge which pathways, and are
 they going up or down?*
 
-| View                   | Question it answers                         | Key insight                        |
-|------------------------|---------------------------------------------|------------------------------------|
-| `get_enrichment_plot`  | What pathways are significant?              | Statistical significance and size  |
-| `get_pathway_heatmap`  | How do pathway genes behave across samples? | Expression patterns and clustering |
-| `get_enrichment_chord` | Which genes connect which pathways?         | Hub genes and pathway redundancy   |
+| View | Question it answers | Key insight |
+|----|----|----|
+| `get_enrichment_plot` | What pathways are significant? | Statistical significance and size |
+| `get_pathway_heatmap` | How do pathway genes behave across samples? | Expression patterns and clustering |
+| `get_enrichment_chord` | Which genes connect which pathways? | Hub genes and pathway redundancy |
 
 These three views are **complementary**, not competing. Together they
 form a complete picture of functional enrichment.
@@ -555,7 +581,7 @@ form a complete picture of functional enrichment.
 - As a replacement for dot plots (you still need the dot plot for
   significance)
 - For genome-positional data (use
-  [`get_foldchange_chromosome_plot()`](../../reference/get_foldchange_chromosome_plot.md)
+  [`get_foldchange_chromosome_plot()`](https://cparsania.github.io/VISTA/reference/get_foldchange_chromosome_plot.md)
   instead)
 
 ### Recommended defaults for common scenarios
@@ -571,8 +597,9 @@ form a complete picture of functional enrichment.
 ## Session Information
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.3 (2026-03-11)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -594,66 +621,66 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] org.Hs.eg.db_3.22.0         AnnotationDbi_1.72.0       
-#>  [3] airway_1.30.0               SummarizedExperiment_1.40.0
-#>  [5] Biobase_2.70.0              GenomicRanges_1.62.1       
-#>  [7] Seqinfo_1.0.0               IRanges_2.44.0             
-#>  [9] S4Vectors_0.49.1-1          BiocGenerics_0.56.0        
-#> [11] generics_0.1.4              MatrixGenerics_1.22.0      
+#>  [1] org.Hs.eg.db_3.23.1         AnnotationDbi_1.74.0       
+#>  [3] airway_1.32.0               SummarizedExperiment_1.42.0
+#>  [5] Biobase_2.72.0              GenomicRanges_1.64.0       
+#>  [7] Seqinfo_1.2.0               IRanges_2.46.0             
+#>  [9] S4Vectors_0.50.1            BiocGenerics_0.58.1        
+#> [11] generics_0.1.4              MatrixGenerics_1.24.0      
 #> [13] matrixStats_1.5.0           dplyr_1.2.1                
-#> [15] ggplot2_4.0.2               VISTA_0.99.8               
-#> [17] BiocStyle_2.38.0           
+#> [15] ggplot2_4.0.3               VISTA_1.1.3                
+#> [17] BiocStyle_2.40.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] splines_4.5.3           ggplotify_0.1.3         tibble_3.3.1           
-#>   [4] R.oo_1.27.1             polyclip_1.10-7         lifecycle_1.0.5        
-#>   [7] rstatix_0.7.3           edgeR_4.8.2             doParallel_1.0.17      
-#>  [10] lattice_0.22-9          MASS_7.3-65             backports_1.5.1        
-#>  [13] magrittr_2.0.5          limma_3.66.0            sass_0.4.10            
-#>  [16] rmarkdown_2.31          jquerylib_0.1.4         yaml_2.3.12            
-#>  [19] otel_0.2.0              ggtangle_0.1.1          cowplot_1.2.0          
-#>  [22] DBI_1.3.0               RColorBrewer_1.1-3      abind_1.4-8            
-#>  [25] purrr_1.2.2             R.utils_2.13.0          msigdbr_26.1.0         
+#>   [1] splines_4.6.1           ggplotify_0.1.3         tibble_3.3.1           
+#>   [4] polyclip_1.10-7         enrichit_0.2.1          lifecycle_1.0.5        
+#>   [7] httr2_1.3.0             rstatix_1.1.0           edgeR_4.10.1           
+#>  [10] doParallel_1.0.17       processx_3.9.0          lattice_0.22-9         
+#>  [13] MASS_7.3-65             backports_1.5.1         magrittr_2.0.5         
+#>  [16] limma_3.68.4            sass_0.4.10             rmarkdown_2.31         
+#>  [19] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             
+#>  [22] ggtangle_0.1.2          DBI_1.3.0               RColorBrewer_1.1-3     
+#>  [25] abind_1.4-8             purrr_1.2.2             msigdbr_26.1.0         
 #>  [28] yulab.utils_0.2.4       tweenr_2.0.3            rappdirs_0.3.4         
-#>  [31] gdtools_0.5.0           circlize_0.4.18         enrichplot_1.30.5      
-#>  [34] ggrepel_0.9.8           tidytree_0.4.7          pkgdown_2.2.0          
-#>  [37] codetools_0.2-20        DelayedArray_0.36.1     DOSE_4.4.0             
-#>  [40] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          
-#>  [43] aplot_0.2.9             farver_2.1.2            jsonlite_2.0.0         
-#>  [46] GetoptLong_1.1.1        Formula_1.2-5           iterators_1.0.14       
-#>  [49] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
-#>  [52] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.2             
-#>  [55] Rcpp_1.1.1              glue_1.8.0              SparseArray_1.10.10    
-#>  [58] xfun_0.57               DESeq2_1.50.2           qvalue_2.42.0          
-#>  [61] withr_3.0.2             BiocManager_1.30.27     fastmap_1.2.0          
-#>  [64] GGally_2.4.0            digest_0.6.39           R6_2.6.1               
-#>  [67] gridGraphics_0.5-1      textshaping_1.0.5       colorspace_2.1-2       
-#>  [70] GO.db_3.22.0            RSQLite_2.4.6           R.methodsS3_1.8.2      
-#>  [73] tidyr_1.3.2             fontLiberation_0.1.0    data.table_1.18.2.1    
-#>  [76] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.10.1        
+#>  [31] aisdk_1.4.12            gdtools_0.5.1           circlize_0.4.18        
+#>  [34] enrichplot_1.32.0       ggrepel_0.9.8           tidytree_0.4.8         
+#>  [37] pkgdown_2.2.1           codetools_0.2-20        DelayedArray_0.38.2    
+#>  [40] DOSE_4.6.0              ggforce_0.5.0           tidyselect_1.2.1       
+#>  [43] shape_1.4.6.1           aplot_0.3.1             farver_2.1.2           
+#>  [46] jsonlite_2.0.0          GetoptLong_1.1.1        Formula_1.2-6          
+#>  [49] iterators_1.0.14        systemfonts_1.3.2       foreach_1.5.2          
+#>  [52] tools_4.6.1             ggnewscale_0.5.2        treeio_1.36.1          
+#>  [55] ragg_1.5.2              Rcpp_1.1.2              glue_1.8.1             
+#>  [58] SparseArray_1.12.2      xfun_0.60               DESeq2_1.52.0          
+#>  [61] qvalue_2.44.0           withr_3.0.3             BiocManager_1.30.27    
+#>  [64] fastmap_1.2.0           GGally_2.4.0            callr_3.8.0            
+#>  [67] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     
+#>  [70] textshaping_1.0.5       colorspace_2.1-3        GO.db_3.23.1           
+#>  [73] RSQLite_3.53.3          tidyr_1.3.2             fontLiberation_0.1.0   
+#>  [76] httr_1.4.8              htmlwidgets_1.6.4       S4Arrays_1.12.0        
 #>  [79] scatterpie_0.2.6        ggstats_0.13.0          pkgconfig_2.0.3        
-#>  [82] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
-#>  [85] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
+#>  [82] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.28.0  
+#>  [85] S7_0.2.2                XVector_0.52.0          clusterProfiler_4.20.0 
 #>  [88] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          
-#>  [91] bookdown_0.46           fgsea_1.36.2            clue_0.3-68            
-#>  [94] scales_1.4.0            png_0.1-9               ggfun_0.2.0            
-#>  [97] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
-#> [100] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
-#> [103] GlobalOptions_0.1.4     stringr_1.6.0           parallel_4.5.3         
-#> [106] desc_1.4.3              pillar_1.11.1           grid_4.5.3             
-#> [109] vctrs_0.7.3             ggpubr_0.6.3            car_3.1-5              
-#> [112] tidydr_0.0.6            cluster_2.1.8.2         evaluate_1.0.5         
-#> [115] cli_3.6.6               locfit_1.5-9.12         compiler_4.5.3         
-#> [118] rlang_1.2.0             crayon_1.5.3            ggsignif_0.6.4         
-#> [121] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
-#> [124] fs_2.0.1                ggiraph_0.9.6           stringi_1.8.7          
-#> [127] BiocParallel_1.44.0     assertthat_0.2.1        babelgene_22.9         
-#> [130] Biostrings_2.78.0       lazyeval_0.2.3          GOSemSim_2.36.0        
-#> [133] fontquiver_0.2.1        Matrix_1.7-4            patchwork_1.3.2        
-#> [136] bit64_4.6.0-1           KEGGREST_1.50.0         statmod_1.5.1          
-#> [139] igraph_2.2.3            broom_1.0.12            memoise_2.0.1          
-#> [142] bslib_0.10.0            ggtree_4.0.5            fastmatch_1.1-8        
-#> [145] bit_4.6.0               ape_5.8-1               gson_0.1.0
+#>  [91] bookdown_0.47           clue_0.3-68             scales_1.4.0           
+#>  [94] png_0.1-9               ggfun_0.2.1             knitr_1.51             
+#>  [97] reshape2_1.4.5          rjson_0.2.23            nlme_3.1-169           
+#> [100] curl_7.1.0              cachem_1.1.0            GlobalOptions_0.1.4    
+#> [103] stringr_1.6.0           parallel_4.6.1          desc_1.4.3             
+#> [106] pillar_1.11.1           grid_4.6.1              vctrs_0.7.3            
+#> [109] ggpubr_1.0.0            car_3.1-5               tidydr_0.0.6           
+#> [112] cluster_2.1.8.2         evaluate_1.0.5          cli_3.6.6              
+#> [115] locfit_1.5-9.12         compiler_4.6.1          rlang_1.3.0            
+#> [118] crayon_1.5.3            ggsignif_0.6.4          labeling_0.4.3         
+#> [121] ps_1.9.3                forcats_1.0.1           plyr_1.8.9             
+#> [124] fs_2.1.0                ggiraph_0.9.6           stringi_1.8.9          
+#> [127] BiocParallel_1.46.0     assertthat_0.2.1        babelgene_22.9         
+#> [130] Biostrings_2.80.1       lazyeval_0.2.3          GOSemSim_2.38.3        
+#> [133] fontquiver_0.2.1        Matrix_1.7-5            patchwork_1.3.2        
+#> [136] bit64_4.8.2             KEGGREST_1.52.2         statmod_1.5.2          
+#> [139] igraph_2.3.3            broom_1.0.13            memoise_2.0.1          
+#> [142] bslib_0.12.0            ggtree_4.2.0            bit_4.6.0              
+#> [145] ape_5.8-1               gson_0.2.1
 ```
 
 ## References

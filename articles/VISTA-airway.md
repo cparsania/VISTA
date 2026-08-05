@@ -37,6 +37,7 @@ e99625.
 ## Installation and Setup
 
 ``` r
+
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager")
 }
@@ -46,6 +47,7 @@ install.packages("ggplot2")
 ```
 
 ``` r
+
 # Load required packages
 library(VISTA)
 library(ggplot2)         # For plotting functions
@@ -62,6 +64,7 @@ vignette.
 ### Load the airway dataset
 
 ``` r
+
 # Load the SummarizedExperiment object
 data("airway", package = "airway")
 
@@ -81,6 +84,7 @@ airway
 ### Extract counts and metadata
 
 ``` r
+
 # Extract count matrix
 counts_matrix <- assay(airway, "counts")
 
@@ -127,9 +131,10 @@ sample_metadata$treatment <- ifelse(
 
 VISTA includes helper functions that standardize counts and sample
 metadata before calling
-[`create_vista()`](../reference/create_vista.md):
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md):
 
 ``` r
+
 prepared_counts <- read_vista_counts(
   counts_matrix,
   format = "matrix"
@@ -155,13 +160,14 @@ matched_inputs$counts[1:5, 1:5]
 
 For a more complete guide covering file-derived sample-name repair and
 starter metadata generation with
-[`derive_vista_metadata()`](../reference/derive_vista_metadata.md), see
-the pkgdown article `Preparing Counts and Metadata for VISTA`.
+[`derive_vista_metadata()`](https://cparsania.github.io/VISTA/reference/derive_vista_metadata.md),
+see the pkgdown article `Preparing Counts and Metadata for VISTA`.
 
 The matched sample sheet now has stable `sample_names` aligned to the
 count columns:
 
 ``` r
+
 matched_inputs$sample_info[, c("sample_names", "cell", "treatment", "dex")]
 #>            sample_names    cell     treatment   dex
 #> SRR1039508   SRR1039508  N61311     Untreated untrt
@@ -181,6 +187,7 @@ matched_inputs$sample_info[, c("sample_names", "cell", "treatment", "dex")]
 The primary method for creating a VISTA object:
 
 ``` r
+
 # Create VISTA object with DESeq2 backend
 vista <- create_vista(
   counts = matched_inputs$counts,
@@ -202,12 +209,19 @@ vista
 #> class: VISTA 
 #> dim: 17199 8 
 #> metadata(12): de_results de_summary ... design comparison
-#> assays(1): norm_counts
+#> assays(2): norm_counts counts
 #> rownames(17199): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
 #>   ENSG00000273488
 #> rowData names(1): baseMean
 #> colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
 #> colData names(11): SampleName cell ... sizeFactor sample_names
+#> -------- VISTA --------
+#> group column: treatment (Untreated, Dexamethasone)
+#> comparisons: Dexamethasone_VS_Untreated
+#> DE source: deseq2
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 ```
 
 The VISTA object stores:
@@ -219,17 +233,21 @@ The VISTA object stores:
 
 ### Validate object integrity
 
-[`create_vista()`](../reference/create_vista.md) runs validation by
-default (`validate = TRUE`). You can also run it explicitly:
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md)
+runs validation by default (`validate = TRUE`). You can also run it
+explicitly:
 
 ``` r
+
 validate_vista(vista, level = "full")
 ```
 
 For advanced users importing a pre-built `SummarizedExperiment`, use
-[`as_vista()`](../reference/as_vista.md) and then validate:
+[`as_vista()`](https://cparsania.github.io/VISTA/reference/as_vista.md)
+and then validate:
 
 ``` r
+
 se <- SummarizedExperiment::SummarizedExperiment(
   assays = list(norm_counts = norm_counts(vista)),
   colData = S4Vectors::DataFrame(sample_info(vista), row.names = sample_info(vista)$sample_names),
@@ -242,11 +260,12 @@ validate_vista(vista2, level = "full")
 ### Alternative: Using edgeR backend
 
 ``` r
+
 # Create VISTA object with edgeR backend
 vista_edger <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -257,16 +276,35 @@ vista_edger <- create_vista(
   pval_cutoff = 0.05,
   p_value_type = "padj"
 )
+
+vista_edger
+#> class: VISTA 
+#> dim: 17199 8 
+#> metadata(12): de_results de_summary ... design comparison
+#> assays(2): norm_counts counts
+#> rownames(17199): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
+#>   ENSG00000273488
+#> rowData names(1): baseMean
+#> colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
+#> colData names(10): SampleName cell ... treatment sample_names
+#> -------- VISTA --------
+#> group column: treatment (Untreated, Dexamethasone)
+#> comparisons: Dexamethasone_VS_Untreated
+#> DE source: edger
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 ```
 
 ### Alternative: Using limma-voom backend
 
 ``` r
+
 # Create VISTA object with limma-voom backend
 vista_limma <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -277,16 +315,56 @@ vista_limma <- create_vista(
   pval_cutoff = 0.05,
   p_value_type = "padj"
 )
+
+vista_limma
+#> class: VISTA 
+#> dim: 17199 8 
+#> metadata(12): de_results de_summary ... design comparison
+#> assays(2): norm_counts counts
+#> rownames(17199): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
+#>   ENSG00000273488
+#> rowData names(1): baseMean
+#> colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
+#> colData names(10): SampleName cell ... treatment sample_names
+#> -------- VISTA --------
+#> group column: treatment (Untreated, Dexamethasone)
+#> comparisons: Dexamethasone_VS_Untreated
+#> DE source: limma
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
+```
+
+All three backends share the same filtering rule: a gene is kept when at
+least `min_replicates` samples reach `min_counts`.
+
+``` r
+
+# The three backends model the same feature set
+data.frame(
+  backend = c("deseq2", "edger", "limma"),
+  genes   = c(nrow(vista), nrow(vista_edger), nrow(vista_limma)),
+  DEGs    = c(
+    sum(comparisons(vista)[[1]]$regulation %in% c("Up", "Down")),
+    sum(comparisons(vista_edger)[[1]]$regulation %in% c("Up", "Down")),
+    sum(comparisons(vista_limma)[[1]]$regulation %in% c("Up", "Down"))
+  )
+)
+#>   backend genes DEGs
+#> 1  deseq2 17199  853
+#> 2   edger 17199  892
+#> 3   limma 17199  660
 ```
 
 ### Advanced: covariates, design formula, and consensus mode
 
 ``` r
+
 # Covariate-adjusted model (additive design)
 vista_cov <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -296,9 +374,9 @@ vista_cov <- create_vista(
 
 # Equivalent explicit model formula
 vista_formula <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -308,9 +386,9 @@ vista_formula <- create_vista(
 
 # Run both DESeq2 and edgeR and keep consensus as active source
 vista_both <- create_vista(
-  counts = count_data,
-  sample_info = sample_info,
-  column_geneid = "gene_id",
+  counts = matched_inputs$counts,
+  sample_info = matched_inputs$sample_info,
+  column_geneid = matched_inputs$column_geneid,
   group_column = "treatment",
   group_numerator = "Dexamethasone",
   group_denominator = "Untreated",
@@ -319,13 +397,42 @@ vista_both <- create_vista(
   result_source = "consensus"       # or "deseq2"/"edger"
 )
 
-# Access source-specific outputs
-comparisons(vista_both, source = "consensus")
-comparisons(vista_both, source = "deseq2")
-comparisons(vista_both, source = "edger")
+# Access source-specific outputs. Each returns one table per contrast; count
+# the DEG calls rather than printing 17,000 rows.
+vapply(
+  c("consensus", "deseq2", "edger"),
+  function(src) sum(comparisons(vista_both, source = src)[[1]]$regulation %in% c("Up", "Down")),
+  integer(1)
+)
+#> consensus    deseq2     edger 
+#>       845       867       942
+
+# The consensus table keeps each backend's own estimates alongside the
+# consensus call, plus a `support` column recording which backends agreed.
+table(comparisons(vista_both, source = "consensus")[[1]]$support)
+#> 
+#>        both deseq2_only  edger_only        none 
+#>         845          22          97       17122
 
 # Switch the active source used by plotting functions
 vista_both <- set_de_source(vista_both, "edger")
+vista_both
+#> class: VISTA 
+#> dim: 18086 8 
+#> metadata(12): de_results de_summary ... design comparison
+#> assays(2): norm_counts counts
+#> rownames(18086): ENSG00000000003 ENSG00000000419 ... ENSG00000273487
+#>   ENSG00000273488
+#> rowData names(1): baseMean
+#> colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
+#> colData names(11): SampleName cell ... sizeFactor sample_names
+#> -------- VISTA --------
+#> group column: treatment (Untreated, Dexamethasone)
+#> comparisons: Dexamethasone_VS_Untreated
+#> DE source: edger (of deseq2, edger, consensus)
+#> cutoffs: |log2FC| >= 1, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 ```
 
 ### Add gene annotations
@@ -333,6 +440,7 @@ vista_both <- set_de_source(vista_both, "edger")
 Enhance the object with gene symbols and descriptions:
 
 ``` r
+
 vista <- set_rowdata(
   vista,
   orgdb = org.Hs.eg.db,
@@ -358,6 +466,7 @@ head(rowData(vista))
 ### Access differential expression results
 
 ``` r
+
 # Get comparison names
 comp_names <- names(comparisons(vista))
 comp_names
@@ -428,6 +537,7 @@ cutoffs(vista)
 ### Count significant genes
 
 ``` r
+
 # Extract upregulated genes
 up_genes <- get_genes_by_regulation(
   vista,
@@ -460,6 +570,7 @@ Check sample relationships and potential batch effects.
 #### Basic correlation heatmap
 
 ``` r
+
   get_corr_heatmap(vista, label_size = 18,base_size = 18, viridis_direction = -1)
 ```
 
@@ -468,6 +579,7 @@ Check sample relationships and potential batch effects.
 #### Customize color scheme
 
 ``` r
+
 # Reverse viridis color direction
 get_corr_heatmap(
   vista,
@@ -483,12 +595,13 @@ get_corr_heatmap(
 #### Show correlation values
 
 ``` r
+
 # Display correlation coefficients
 get_corr_heatmap(
   vista,
   viridis_direction = -1,
-  show_corr_values = TRUE,
-  col_corr_values = 'white',
+  label = TRUE,
+  label_color = 'white',
   viridis_option = "mako",
   label_size = 14,
   base_size = 14
@@ -504,6 +617,7 @@ Visualize sample clustering and variation.
 #### Basic PCA with labels
 
 ``` r
+
 get_pca_plot(
   vista,
   label = TRUE,label_size = 5
@@ -515,6 +629,7 @@ get_pca_plot(
 #### PCA colored by different metadata
 
 ``` r
+
 # Shape points by cell line
 get_pca_plot(
   vista,
@@ -529,10 +644,11 @@ get_pca_plot(
 #### PCA with top variable genes
 
 ``` r
+
 # Use top 500 most variable genes
 get_pca_plot(
   vista,
-  top_n_genes = 500,
+  top_n = 500,
   show_clusters = TRUE,
   shape_by = "cell"
 )
@@ -543,6 +659,7 @@ get_pca_plot(
 #### PCA with custom circle size
 
 ``` r
+
 # Larger points for better visibility
 get_pca_plot(
   vista,
@@ -556,6 +673,7 @@ get_pca_plot(
 #### PCA without labels
 
 ``` r
+
 # Clean plot without sample labels
 get_pca_plot(
   vista,
@@ -573,6 +691,7 @@ Alternative dimensionality reduction method.
 #### Basic MDS plot
 
 ``` r
+
 get_mds_plot(
   vista,
   label = TRUE
@@ -584,9 +703,10 @@ get_mds_plot(
 #### MDS with top variable genes
 
 ``` r
+
 get_mds_plot(
   vista,
-  top_n_genes = 500,
+  top_n = 500,
   label = TRUE
 )
 ```
@@ -596,6 +716,7 @@ get_mds_plot(
 #### MDS with custom shapes
 
 ``` r
+
 # Shape points by cell line
 get_mds_plot(
   vista,
@@ -613,6 +734,7 @@ Non-linear sample embedding for exploratory structure.
 #### Basic UMAP plot
 
 ``` r
+
 get_umap_plot(
   vista,
   label = TRUE
@@ -624,6 +746,7 @@ get_umap_plot(
 #### UMAP colored by a user-defined metadata column
 
 ``` r
+
 get_umap_plot(
   vista,
   color_by = "cell",
@@ -641,6 +764,7 @@ get_umap_plot(
 #### Basic count barplot
 
 ``` r
+
 get_deg_count_barplot(vista)
 ```
 
@@ -649,6 +773,7 @@ get_deg_count_barplot(vista)
 #### Faceted by regulation
 
 ``` r
+
 get_deg_count_barplot(
   vista,
   facet_by = "regulation"
@@ -659,11 +784,18 @@ get_deg_count_barplot(
 
 ### Volcano Plot
 
-Classic volcano plot showing log2FC vs -log10(p-value).
+Classic volcano plot showing log2FC against significance. By default the
+axis and thresholds are inherited from the cutoffs the object was built
+with, so the genes coloured here are exactly the ones
+[`deg_summary()`](https://cparsania.github.io/VISTA/reference/VISTA-accessors.md)
+reports. Because this object used `p_value_type = "padj"`, the y-axis is
+-log10(adjusted p-value); pass `p_value_type = "pvalue"` to plot raw
+p-values instead.
 
 #### Basic volcano plot
 
 ``` r
+
 get_volcano_plot(
   vista,
   sample_comparison = comp_names[1]
@@ -675,6 +807,7 @@ get_volcano_plot(
 #### Customize cutoffs and labels
 
 ``` r
+
 get_volcano_plot(
   vista,
   sample_comparison = comp_names[1],
@@ -690,12 +823,12 @@ get_volcano_plot(
 #### Custom colors
 
 ``` r
+
 # Custom colors for up/down regulated genes
 get_volcano_plot(
   vista,
   sample_comparison = comp_names[1],
-  col_up = "red",
-  col_down = "blue",
+  colors = c(Up = "red", Down = "blue", Other = "grey80"),
   display_id = "SYMBOL"
 )
 ```
@@ -709,6 +842,7 @@ Mean expression vs log2 fold-change.
 #### Basic MA plot
 
 ``` r
+
 get_ma_plot(
   vista,
   sample_comparison = comp_names[1]
@@ -720,6 +854,7 @@ get_ma_plot(
 #### Label top genes
 
 ``` r
+
 get_ma_plot(
   vista,
   sample_comparison = comp_names[1],
@@ -734,6 +869,7 @@ get_ma_plot(
 #### Custom cutoffs
 
 ``` r
+
 get_ma_plot(
   vista,
   sample_comparison = comp_names[1],
@@ -751,6 +887,7 @@ get_ma_plot(
 ### Prepare gene sets
 
 ``` r
+
 # Get top 50 DEGs by adjusted p-value
 de_table <- comparisons(vista)[[1]]
 
@@ -801,6 +938,7 @@ print(top_down)
 #### Basic heatmap
 
 ``` r
+
 get_expression_heatmap(vista)
 ```
 
@@ -809,6 +947,7 @@ get_expression_heatmap(vista)
 #### Heatmap with explicit gene set
 
 ``` r
+
 get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
@@ -823,6 +962,7 @@ get_expression_heatmap(
 #### Heatmap with k-means clustering
 
 ``` r
+
 get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
@@ -838,6 +978,7 @@ get_expression_heatmap(
 #### Heatmap with column annotations
 
 ``` r
+
 get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
@@ -845,7 +986,7 @@ get_expression_heatmap(
   show_row_names = TRUE,
   display_id = "SYMBOL",
   kmeans_k = 3,
-  cluster_row_slice = FALSE,
+  cluster_row_slices = FALSE,
   summarise_replicates = FALSE,
   annotate_columns = TRUE
 )
@@ -856,6 +997,7 @@ get_expression_heatmap(
 #### Heatmap with multiple column annotations and `cluster_by`
 
 ``` r
+
 # Use multiple sample-level columns in top annotation.
 # By default, columns are split by the first annotation column.
 
@@ -877,6 +1019,7 @@ get_expression_heatmap(
 #### Heatmap showing each replicate
 
 ``` r
+
 get_expression_heatmap(
   vista,
   sample_group = levels(colData(vista)$treatment),
@@ -896,6 +1039,7 @@ get_expression_heatmap(
 #### Basic barplot
 
 ``` r
+
 get_expression_barplot(
   vista,
   genes = top_up[1:4],
@@ -908,6 +1052,7 @@ get_expression_barplot(
 #### Log-transformed with statistics
 
 ``` r
+
 # Add statistical comparisons between groups
 get_expression_barplot(
   vista,
@@ -923,6 +1068,7 @@ get_expression_barplot(
 #### Per-sample barplot for selected genes
 
 ``` r
+
 get_expression_barplot(
   vista,
   genes = top_up[1:2],
@@ -937,6 +1083,7 @@ get_expression_barplot(
 #### Compare up and down regulated genes
 
 ``` r
+
 # Compare expression of both up- and down-regulated genes
 selected_genes <- c(top_up[1:3], top_down[1:3])
 get_expression_barplot(
@@ -955,6 +1102,7 @@ get_expression_barplot(
 #### Basic boxplot
 
 ``` r
+
 get_expression_boxplot(
   vista,
   genes = top_up[1:4],
@@ -967,6 +1115,7 @@ get_expression_boxplot(
 #### Boxplot without faceting
 
 ``` r
+
 # All genes overlaid on same plot
 get_expression_boxplot(
   vista,
@@ -981,6 +1130,7 @@ get_expression_boxplot(
 #### Boxplot with faceting by gene
 
 ``` r
+
 # Each gene in separate panel - must specify facet_by = "gene"
 get_expression_boxplot(
   vista,
@@ -996,6 +1146,7 @@ get_expression_boxplot(
 #### Boxplot with gene facets AND statistics
 
 ``` r
+
 # Each gene in separate panel WITH statistical comparisons
 get_expression_boxplot(
   vista,
@@ -1014,6 +1165,7 @@ get_expression_boxplot(
 #### Pooled genes with statistics
 
 ``` r
+
 # Pool all genes together for group comparison with statistical test
 get_expression_boxplot(
   vista,
@@ -1032,6 +1184,7 @@ get_expression_boxplot(
 #### Log-transformed with p-values
 
 ``` r
+
 # Show statistical comparisons between treatment groups
 get_expression_boxplot(
   vista,
@@ -1050,6 +1203,7 @@ get_expression_boxplot(
 #### Basic violin plot
 
 ``` r
+
 get_expression_violinplot(
   vista,
   genes = top_up[1:4],
@@ -1062,6 +1216,7 @@ get_expression_violinplot(
 #### Violin with log2 transformation
 
 ``` r
+
 get_expression_violinplot(
   vista,
   genes = top_up[1:4],,
@@ -1075,6 +1230,7 @@ get_expression_violinplot(
 #### Violin with z-score transformation
 
 ``` r
+
 get_expression_violinplot(
   vista,
   genes = top_up[1:4],
@@ -1089,6 +1245,7 @@ get_expression_violinplot(
 #### Density plot
 
 ``` r
+
 get_expression_density(
   vista,
   genes = top_up[1:50],
@@ -1101,6 +1258,7 @@ get_expression_density(
 #### Scatter plot (sample vs sample)
 
 ``` r
+
 # Compare two samples
 samples <- colnames(vista)
 get_expression_scatter(
@@ -1117,6 +1275,7 @@ get_expression_scatter(
 #### Line plot (expression across samples)
 
 ``` r
+
 get_expression_lineplot(
   vista,
   genes = top_up[1:3],
@@ -1131,6 +1290,7 @@ get_expression_lineplot(
 #### Lollipop plot
 
 ``` r
+
 get_expression_lollipop(
   vista,
   genes = top_up[1:4],
@@ -1144,6 +1304,7 @@ get_expression_lollipop(
 #### Per-sample lollipop plot
 
 ``` r
+
 get_expression_lollipop(
   vista,
   genes = top_up[1:2],
@@ -1158,6 +1319,7 @@ get_expression_lollipop(
 #### Joyplot by treatment group
 
 ``` r
+
 # Ridges by treatment group - shows distribution for each group
 get_expression_joyplot(
   vista,
@@ -1173,6 +1335,7 @@ get_expression_joyplot(
 #### Joyplot by sample
 
 ``` r
+
 # Ridges by individual sample - shows distribution for each sample
 get_expression_joyplot(
   vista,
@@ -1188,6 +1351,7 @@ get_expression_joyplot(
 #### Raincloud plot (expression)
 
 ``` r
+
 get_expression_raincloud(
   vista,
   genes = top_up,
@@ -1208,6 +1372,7 @@ get_expression_raincloud(
 #### Hallmark gene sets - Upregulated
 
 ``` r
+
 msig_up <- get_msigdb_enrichment(
   vista,
   sample_comparison = comp_names[1],
@@ -1240,6 +1405,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 #### Hallmark gene sets - Downregulated
 
 ``` r
+
 msig_down <- get_msigdb_enrichment(
   vista,
   sample_comparison = comp_names[1],
@@ -1273,6 +1439,7 @@ if (!is.null(msig_down$enrich) && nrow(msig_down$enrich@result) > 0) {
 #### VISTA dotplot (default)
 
 ``` r
+
 # VISTA's wrapper function
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_enrichment_plot(msig_up$enrich, top_n = 10)
@@ -1284,6 +1451,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 #### Barplot (clusterProfiler native)
 
 ``` r
+
 # Use generic barplot with enrichResult method
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   barplot(msig_up$enrich, showCategory = 10)
@@ -1295,6 +1463,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 #### Dotplot with customization
 
 ``` r
+
 # Customized dotplot with more categories
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   enrichplot::dotplot(msig_up$enrich, showCategory = 20, font.size = 12)
@@ -1306,6 +1475,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 #### Network plot (clusterProfiler native)
 
 ``` r
+
 # Gene-concept network showing gene-pathway relationships
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   enrichplot::cnetplot(msig_up$enrich, showCategory = 5)
@@ -1321,6 +1491,7 @@ pathways and how much redundancy exists across terms. Chords can be
 coloured by fold-change when a VISTA object is supplied.
 
 ``` r
+
 # Pathway-coloured chord diagram (no VISTA object needed)
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_enrichment_chord(
@@ -1335,6 +1506,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ![](VISTA-airway_files/figure-html/enrichment-chord-pathway-1.png)
 
 ``` r
+
 # Fold-change coloured chords
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_enrichment_chord(
@@ -1352,6 +1524,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 ![](VISTA-airway_files/figure-html/enrichment-chord-fc-1.png)
 
 ``` r
+
 # Show only hub genes shared across 2+ pathways
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   chord_result <- get_enrichment_chord(
@@ -1384,6 +1557,7 @@ expression directly.
 #### Extract genes from top pathways
 
 ``` r
+
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   pathway_gene_list <- get_pathway_genes(
     msig_up$enrich,
@@ -1391,8 +1565,10 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
     return_type = "list"
   )
 
-  # Preview first few genes per pathway
-  lapply(pathway_gene_list, head, n = 5)
+  # Preview a few genes per pathway. Pathway membership is a SET -- the order
+  # clusterProfiler returns genes in is not meaningful and is not stable across
+  # R sessions -- so sort before taking a head().
+  lapply(pathway_gene_list, function(g) head(sort(g), 5))
 }
 #> $HALLMARK_TNFA_SIGNALING_VIA_NFKB
 #> [1] "ENSG00000003402" "ENSG00000067082" "ENSG00000099860" "ENSG00000102804"
@@ -1410,6 +1586,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 #### Heatmap of genes from top enriched pathways
 
 ``` r
+
 if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
   get_pathway_heatmap(
     x = vista,
@@ -1434,6 +1611,7 @@ if (!is.null(msig_up$enrich) && nrow(msig_up$enrich@result) > 0) {
 #### Biological Process
 
 ``` r
+
 go_bp <- get_go_enrichment(
   vista,
   sample_comparison = comp_names[1],
@@ -1446,33 +1624,34 @@ go_bp <- get_go_enrichment(
 if (!is.null(go_bp$enrich) && nrow(go_bp$enrich@result) > 0) {
   head(go_bp$enrich@result[, c("Description", "pvalue", "p.adjust", "Count")], n = 10)
 }
-#>                                              Description       pvalue
-#> GO:0030198             extracellular matrix organization 1.060237e-08
-#> GO:0043062          extracellular structure organization 1.116425e-08
-#> GO:0045229 external encapsulating structure organization 1.237228e-08
-#> GO:0060986                   endocrine hormone secretion 2.055554e-06
-#> GO:0045444                      fat cell differentiation 2.395697e-06
-#> GO:0050886                             endocrine process 3.389345e-06
-#> GO:0071375 cellular response to peptide hormone stimulus 4.450874e-06
-#> GO:0071385  cellular response to glucocorticoid stimulus 5.579975e-06
-#> GO:0032970    regulation of actin filament-based process 5.601446e-06
-#> GO:0030728                                     ovulation 6.962331e-06
-#>                p.adjust Count
-#> GO:0030198 1.531276e-05    25
-#> GO:0043062 1.531276e-05    25
-#> GO:0045229 1.531276e-05    25
-#> GO:0060986 1.779044e-03     9
-#> GO:0045444 1.779044e-03    18
-#> GO:0050886 2.097440e-03    11
-#> GO:0071375 2.310908e-03    20
-#> GO:0071385 2.310908e-03     8
-#> GO:0032970 2.310908e-03    22
-#> GO:0030728 2.526439e-03     5
+#>                                                                                    Description
+#> GO:0030198                                                   extracellular matrix organization
+#> GO:0043062                                                extracellular structure organization
+#> GO:0045229                                       external encapsulating structure organization
+#> GO:0060986                                                         endocrine hormone secretion
+#> GO:0032970                                          regulation of actin filament-based process
+#> GO:0071375                                       cellular response to peptide hormone stimulus
+#> GO:0050886                                                                   endocrine process
+#> GO:0003012                                                               muscle system process
+#> GO:0035360 positive regulation of peroxisome proliferator activated receptor signaling pathway
+#> GO:0043500                                                                   muscle adaptation
+#>                  pvalue     p.adjust Count
+#> GO:0030198 3.993655e-07 0.0005015893    20
+#> GO:0043062 4.228448e-07 0.0005015893    20
+#> GO:0045229 4.475811e-07 0.0005015893    20
+#> GO:0060986 3.589831e-06 0.0025081955     8
+#> GO:0032970 4.017769e-06 0.0025081955    22
+#> GO:0071375 4.476256e-06 0.0025081955    20
+#> GO:0050886 7.259704e-06 0.0034867322    10
+#> GO:0003012 1.573717e-05 0.0066135461    24
+#> GO:0035360 2.458483e-05 0.0091838006     4
+#> GO:0043500 3.708999e-05 0.0121426416    10
 ```
 
 #### GO Visualization
 
 ``` r
+
 if (!is.null(go_bp$enrich) && nrow(go_bp$enrich@result) > 0) {
   get_enrichment_plot(go_bp$enrich, top_n = 20)
 }
@@ -1489,7 +1668,9 @@ your differential expression results.
 #### GSEA with MSigDB Hallmark gene sets
 
 ``` r
+
 # Run GSEA using VISTA's native function
+set.seed(20260101)
 gsea_results <- get_gsea(
   vista,
   sample_comparison = comp_names[1],
@@ -1505,24 +1686,36 @@ gsea_results <- get_gsea(
 if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
   head(gsea_results$enrich@result[, c("Description", "NES", "pvalue", "p.adjust")], n = 10)
 }
-#>                                                           Description      NES
-#> HALLMARK_ADIPOGENESIS                           HALLMARK_ADIPOGENESIS 1.998365
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB     HALLMARK_TNFA_SIGNALING_VIA_NFKB 1.614221
-#> HALLMARK_ANDROGEN_RESPONSE                 HALLMARK_ANDROGEN_RESPONSE 1.641697
-#> HALLMARK_XENOBIOTIC_METABOLISM         HALLMARK_XENOBIOTIC_METABOLISM 1.524633
-#> HALLMARK_OXIDATIVE_PHOSPHORYLATION HALLMARK_OXIDATIVE_PHOSPHORYLATION 1.511488
-#>                                          pvalue     p.adjust
-#> HALLMARK_ADIPOGENESIS              3.106429e-08 1.553214e-06
-#> HALLMARK_TNFA_SIGNALING_VIA_NFKB   6.454953e-04 1.613738e-02
-#> HALLMARK_ANDROGEN_RESPONSE         2.151621e-03 3.064754e-02
-#> HALLMARK_XENOBIOTIC_METABOLISM     3.064754e-03 3.064754e-02
-#> HALLMARK_OXIDATIVE_PHOSPHORYLATION 2.575969e-03 3.064754e-02
+#>                                                                       Description
+#> HALLMARK_ADIPOGENESIS                                       HALLMARK_ADIPOGENESIS
+#> HALLMARK_ANDROGEN_RESPONSE                             HALLMARK_ANDROGEN_RESPONSE
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB                 HALLMARK_TNFA_SIGNALING_VIA_NFKB
+#> HALLMARK_XENOBIOTIC_METABOLISM                     HALLMARK_XENOBIOTIC_METABOLISM
+#> HALLMARK_OXIDATIVE_PHOSPHORYLATION             HALLMARK_OXIDATIVE_PHOSPHORYLATION
+#> HALLMARK_REACTIVE_OXYGEN_SPECIES_PATHWAY HALLMARK_REACTIVE_OXYGEN_SPECIES_PATHWAY
+#> HALLMARK_APICAL_JUNCTION                                 HALLMARK_APICAL_JUNCTION
+#> HALLMARK_BILE_ACID_METABOLISM                       HALLMARK_BILE_ACID_METABOLISM
+#> HALLMARK_IL2_STAT5_SIGNALING                         HALLMARK_IL2_STAT5_SIGNALING
+#> HALLMARK_HYPOXIA                                                 HALLMARK_HYPOXIA
+#>                                               NES       pvalue     p.adjust
+#> HALLMARK_ADIPOGENESIS                    2.011813 1.210205e-07 6.051025e-06
+#> HALLMARK_ANDROGEN_RESPONSE               1.654001 1.601434e-03 2.669057e-02
+#> HALLMARK_TNFA_SIGNALING_VIA_NFKB         1.615979 6.403582e-04 1.600895e-02
+#> HALLMARK_XENOBIOTIC_METABOLISM           1.507815 3.901630e-03 3.901630e-02
+#> HALLMARK_OXIDATIVE_PHOSPHORYLATION       1.491037 3.071152e-03 3.838940e-02
+#> HALLMARK_REACTIVE_OXYGEN_SPECIES_PATHWAY 1.483494 4.844167e-02 1.513802e-01
+#> HALLMARK_APICAL_JUNCTION                 1.473142 5.503714e-03 3.931224e-02
+#> HALLMARK_BILE_ACID_METABOLISM            1.457941 2.406557e-02 1.002732e-01
+#> HALLMARK_IL2_STAT5_SIGNALING             1.453587 4.734781e-03 3.931224e-02
+#> HALLMARK_HYPOXIA                         1.450031 1.590027e-02 7.227397e-02
 ```
 
 #### GSEA with GO Biological Process
 
 ``` r
+
 # Run GSEA with GO terms
+set.seed(20260101)
 gsea_go <- get_gsea(
   vista,
   sample_comparison = comp_names[1],
@@ -1537,33 +1730,34 @@ gsea_go <- get_gsea(
 if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
   head(gsea_go$enrich@result[, c("Description", "NES", "pvalue", "p.adjust")], n = 10)
 }
-#>                                                  Description       NES
-#> GO:0071375     cellular response to peptide hormone stimulus  1.808024
-#> GO:0051962 positive regulation of nervous system development -1.804617
-#> GO:0071294                     cellular response to zinc ion  2.041243
-#> GO:0032869             cellular response to insulin stimulus  1.860517
-#> GO:0006006                         glucose metabolic process  1.821010
-#> GO:0032868                               response to insulin  1.807115
-#> GO:0031589                           cell-substrate adhesion  1.711791
-#> GO:0003012                             muscle system process  1.683786
-#> GO:0097501                      stress response to metal ion  1.994020
-#> GO:0010810             regulation of cell-substrate adhesion  1.797353
-#>                  pvalue    p.adjust
-#> GO:0071375 1.065356e-06 0.004144288
-#> GO:0051962 1.518332e-06 0.004144288
-#> GO:0071294 6.069393e-06 0.005262651
-#> GO:0032869 4.035762e-06 0.005262651
-#> GO:0006006 7.439886e-06 0.005262651
-#> GO:0032868 7.712257e-06 0.005262651
-#> GO:0031589 7.193516e-06 0.005262651
-#> GO:0003012 5.540660e-06 0.005262651
-#> GO:0097501 1.429395e-05 0.008670075
-#> GO:0010810 1.786971e-05 0.009755073
+#>                                                                           Description
+#> GO:0014888                                                 striated muscle adaptation
+#> GO:0035357               peroxisome proliferator activated receptor signaling pathway
+#> GO:0071276                                           cellular response to cadmium ion
+#> GO:0071294                                              cellular response to zinc ion
+#> GO:0035358 regulation of peroxisome proliferator activated receptor signaling pathway
+#> GO:0046688                                                     response to copper ion
+#> GO:0044060                                            regulation of endocrine process
+#> GO:0097501                                               stress response to metal ion
+#> GO:0071280                                            cellular response to copper ion
+#> GO:0060986                                                endocrine hormone secretion
+#>                 NES       pvalue    p.adjust
+#> GO:0014888 2.173415 2.226967e-06 0.005564077
+#> GO:0035357 2.105064 6.608012e-05 0.022798908
+#> GO:0071276 2.101350 1.369619e-05 0.009777125
+#> GO:0071294 2.094459 8.048658e-06 0.009727138
+#> GO:0035358 2.039947 4.082184e-04 0.059684360
+#> GO:0046688 2.034456 2.290070e-04 0.049038254
+#> GO:0044060 2.030552 1.839123e-04 0.046606174
+#> GO:0097501 2.012979 7.586127e-06 0.009727138
+#> GO:0071280 2.012772 2.337896e-04 0.049038254
+#> GO:0060986 2.002814 5.223680e-04 0.059684360
 ```
 
 #### GSEA enrichment overview
 
 ``` r
+
 # Show all significant pathways using VISTA's visualization
 if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
   get_enrichment_plot(gsea_results$enrich, top_n = 15)
@@ -1575,6 +1769,7 @@ if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
 #### GSEA plot for top pathway
 
 ``` r
+
 # Show enrichment plot for the top pathway
 if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
   # Create GSEA enrichment plot with running enrichment score
@@ -1592,6 +1787,7 @@ if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
 #### GSEA plot for multiple pathways
 
 ``` r
+
 # Show top 3 pathways together
 if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
   enrichplot::gseaplot2(
@@ -1608,6 +1804,7 @@ if (!is.null(gsea_results$enrich) && nrow(gsea_results$enrich@result) > 0) {
 #### GSEA with GO visualization
 
 ``` r
+
 # Visualize GO GSEA results
 if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
   get_enrichment_plot(gsea_go$enrich, top_n = 15)
@@ -1621,6 +1818,7 @@ if (!is.null(gsea_go$enrich) && nrow(gsea_go$enrich@result) > 0) {
 #### KEGG upregulated genes
 
 ``` r
+
 kegg_up <- get_kegg_enrichment(
   vista,
   sample_comparison = comp_names[1],
@@ -1637,6 +1835,7 @@ if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
 #### KEGG downregulated genes
 
 ``` r
+
 kegg_down <- get_kegg_enrichment(
   vista,
   sample_comparison = comp_names[1],
@@ -1653,6 +1852,7 @@ if (!is.null(kegg_down$enrich) && nrow(kegg_down$enrich@result) > 0) {
 #### KEGG Visualization
 
 ``` r
+
 if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
   get_enrichment_plot(kegg_up$enrich, top_n = 15)
 }
@@ -1665,6 +1865,7 @@ if (!is.null(kegg_up$enrich) && nrow(kegg_up$enrich@result) > 0) {
 Useful for comparing multiple comparisons:
 
 ``` r
+
 fc_matrix <- get_foldchange_matrix(vista)
 head(fc_matrix, n = 10)
 #>                 Dexamethasone_VS_Untreated
@@ -1685,6 +1886,7 @@ head(fc_matrix, n = 10)
 #### Per-gene fold-change barplot
 
 ``` r
+
 get_foldchange_barplot(
   vista,
   genes = top_up[1:3],
@@ -1699,6 +1901,7 @@ get_foldchange_barplot(
 #### Per-gene fold-change lollipop
 
 ``` r
+
 get_foldchange_lollipop(
   vista,
   sample_comparison = comp_names[1],
@@ -1713,6 +1916,7 @@ get_foldchange_lollipop(
 ### Fold-change Raincloud
 
 ``` r
+
 get_foldchange_raincloud(
   vista,
   sample_comparisons = comp_names,
@@ -1729,6 +1933,7 @@ get_foldchange_raincloud(
 #### Basic FC heatmap
 
 ``` r
+
 get_foldchange_heatmap(vista)
 ```
 
@@ -1737,6 +1942,7 @@ get_foldchange_heatmap(vista)
 #### FC heatmap for selected genes
 
 ``` r
+
 # Select genes with large fold-changes
 fc_genes <- rownames(fc_matrix)[abs(fc_matrix[, 1]) > 2][1:30]
 
@@ -1753,6 +1959,7 @@ get_foldchange_heatmap(
 #### FC heatmap with gene names
 
 ``` r
+
 get_foldchange_heatmap(
   vista,
   sample_comparisons = comp_names,
@@ -1767,6 +1974,7 @@ get_foldchange_heatmap(
 #### FC heatmap for specific gene set
 
 ``` r
+
 # Use top upregulated genes
 get_foldchange_heatmap(
   vista,
@@ -1784,6 +1992,7 @@ get_foldchange_heatmap(
 ### Export DE results to file
 
 ``` r
+
 # Export complete DE table with annotations
 de_annotated <- merge(
   comparisons(vista)[[1]],
@@ -1811,6 +2020,7 @@ write.csv(
 ### Save VISTA object
 
 ``` r
+
 # Save the complete VISTA object for later use
 saveRDS(vista, file = "airway_vistaect.rds")
 
@@ -1838,7 +2048,8 @@ In this workflow, we:
 ### Key Features Demonstrated
 
 - **Single-function workflow**:
-  [`create_vista()`](../reference/create_vista.md) handles DE analysis
+  [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md)
+  handles DE analysis
 - **Consistent interface**: All plot functions follow the same pattern
 - **Flexible visualizations**: Easy to customize colors, labels,
   thresholds
@@ -1851,66 +2062,67 @@ In this workflow, we:
 
 #### QC Plots
 
-- [`get_corr_heatmap()`](../reference/get_corr_heatmap.md) - Sample
-  correlation
-- [`get_pca_plot()`](../reference/get_pca_plot.md) - Principal component
-  analysis
-- [`get_mds_plot()`](../reference/get_mds_plot.md) - Multidimensional
-  scaling
-- [`get_umap_plot()`](../reference/get_umap_plot.md) - Nonlinear sample
-  embedding
+- [`get_corr_heatmap()`](https://cparsania.github.io/VISTA/reference/get_corr_heatmap.md) -
+  Sample correlation
+- [`get_pca_plot()`](https://cparsania.github.io/VISTA/reference/get_pca_plot.md) -
+  Principal component analysis
+- [`get_mds_plot()`](https://cparsania.github.io/VISTA/reference/get_mds_plot.md) -
+  Multidimensional scaling
+- [`get_umap_plot()`](https://cparsania.github.io/VISTA/reference/get_umap_plot.md) -
+  Nonlinear sample embedding
 
 #### DE Visualization
 
-- [`get_deg_count_barplot()`](../reference/get_deg_count_barplot.md) -
+- [`get_deg_count_barplot()`](https://cparsania.github.io/VISTA/reference/get_deg_count_barplot.md) -
   DEG summary counts
-- [`get_volcano_plot()`](../reference/get_volcano_plot.md) - Volcano
-  plots
-- [`get_ma_plot()`](../reference/get_ma_plot.md) - MA plots
+- [`get_volcano_plot()`](https://cparsania.github.io/VISTA/reference/get_volcano_plot.md) -
+  Volcano plots
+- [`get_ma_plot()`](https://cparsania.github.io/VISTA/reference/get_ma_plot.md) -
+  MA plots
 
 #### Expression Plots
 
-- [`get_expression_heatmap()`](../reference/get_expression_heatmap.md) -
+- [`get_expression_heatmap()`](https://cparsania.github.io/VISTA/reference/get_expression_heatmap.md) -
   Expression heatmaps
-- [`get_expression_barplot()`](../reference/get_expression_barplot.md) -
+- [`get_expression_barplot()`](https://cparsania.github.io/VISTA/reference/get_expression_barplot.md) -
   Expression barplots
-- [`get_expression_boxplot()`](../reference/get_expression_boxplot.md) -
+- [`get_expression_boxplot()`](https://cparsania.github.io/VISTA/reference/get_expression_boxplot.md) -
   Expression boxplots
-- [`get_expression_violinplot()`](../reference/get_expression_violinplot.md) -
+- [`get_expression_violinplot()`](https://cparsania.github.io/VISTA/reference/get_expression_violinplot.md) -
   Violin plots
-- [`get_expression_density()`](../reference/get_expression_density.md) -
+- [`get_expression_density()`](https://cparsania.github.io/VISTA/reference/get_expression_density.md) -
   Density plots
-- [`get_expression_scatter()`](../reference/get_expression_scatter.md) -
+- [`get_expression_scatter()`](https://cparsania.github.io/VISTA/reference/get_expression_scatter.md) -
   Sample-vs-sample scatter
-- [`get_expression_lineplot()`](../reference/get_expression_lineplot.md) -
+- [`get_expression_lineplot()`](https://cparsania.github.io/VISTA/reference/get_expression_lineplot.md) -
   Expression across samples
-- [`get_expression_lollipop()`](../reference/get_expression_lollipop.md) -
+- [`get_expression_lollipop()`](https://cparsania.github.io/VISTA/reference/get_expression_lollipop.md) -
   Lollipop plots
-- [`get_expression_joyplot()`](../reference/get_expression_joyplot.md) -
+- [`get_expression_joyplot()`](https://cparsania.github.io/VISTA/reference/get_expression_joyplot.md) -
   Ridgeline plots
 
 #### Enrichment Plots
 
-- [`get_enrichment_plot()`](../reference/get_enrichment_plot.md) -
+- [`get_enrichment_plot()`](https://cparsania.github.io/VISTA/reference/get_enrichment_plot.md) -
   Generic enrichment visualization
-- [`get_msigdb_enrichment()`](../reference/get_msigdb_enrichment.md) -
+- [`get_msigdb_enrichment()`](https://cparsania.github.io/VISTA/reference/get_msigdb_enrichment.md) -
   MSigDB enrichment
-- [`get_go_enrichment()`](../reference/get_go_enrichment.md) - GO
-  enrichment
-- [`get_kegg_enrichment()`](../reference/get_kegg_enrichment.md) - KEGG
-  pathway enrichment
-- [`get_pathway_genes()`](../reference/get_pathway_genes.md) - Extract
-  genes driving enriched pathways
-- [`get_pathway_heatmap()`](../reference/get_pathway_heatmap.md) - Plot
-  pathway-derived expression heatmaps
-- [`get_enrichment_chord()`](../reference/get_enrichment_chord.md) -
+- [`get_go_enrichment()`](https://cparsania.github.io/VISTA/reference/get_go_enrichment.md) -
+  GO enrichment
+- [`get_kegg_enrichment()`](https://cparsania.github.io/VISTA/reference/get_kegg_enrichment.md) -
+  KEGG pathway enrichment
+- [`get_pathway_genes()`](https://cparsania.github.io/VISTA/reference/get_pathway_genes.md) -
+  Extract genes driving enriched pathways
+- [`get_pathway_heatmap()`](https://cparsania.github.io/VISTA/reference/get_pathway_heatmap.md) -
+  Plot pathway-derived expression heatmaps
+- [`get_enrichment_chord()`](https://cparsania.github.io/VISTA/reference/get_enrichment_chord.md) -
   Chord diagram of gene-pathway relationships
 
 #### Fold-Change
 
-- [`get_foldchange_matrix()`](../reference/get_foldchange_matrix.md) -
+- [`get_foldchange_matrix()`](https://cparsania.github.io/VISTA/reference/get_foldchange_matrix.md) -
   Extract FC matrix
-- [`get_foldchange_heatmap()`](../reference/get_foldchange_heatmap.md) -
+- [`get_foldchange_heatmap()`](https://cparsania.github.io/VISTA/reference/get_foldchange_heatmap.md) -
   Visualize FC patterns
 
 ### Next Steps
@@ -1921,14 +2133,15 @@ In this workflow, we:
 - Test multiple comparisons simultaneously
 - Customize plots with ggplot2 themes
 - Generate automated reports with
-  [`run_vista_report()`](../reference/run_vista_report.md)
+  [`run_vista_report()`](https://cparsania.github.io/VISTA/reference/run_vista_report.md)
 - Integrate with downstream tools
 
 ## Session Information
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.3 (2026-03-11)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -1950,70 +2163,70 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] magrittr_2.0.5              org.Hs.eg.db_3.22.0        
-#>  [3] AnnotationDbi_1.72.0        airway_1.30.0              
-#>  [5] SummarizedExperiment_1.40.0 Biobase_2.70.0             
-#>  [7] GenomicRanges_1.62.1        Seqinfo_1.0.0              
-#>  [9] IRanges_2.44.0              S4Vectors_0.49.1-1         
-#> [11] BiocGenerics_0.56.0         generics_0.1.4             
-#> [13] MatrixGenerics_1.22.0       matrixStats_1.5.0          
-#> [15] ggplot2_4.0.2               VISTA_0.99.8               
-#> [17] BiocStyle_2.38.0           
+#>  [1] magrittr_2.0.5              org.Hs.eg.db_3.23.1        
+#>  [3] AnnotationDbi_1.74.0        airway_1.32.0              
+#>  [5] SummarizedExperiment_1.42.0 Biobase_2.72.0             
+#>  [7] GenomicRanges_1.64.0        Seqinfo_1.2.0              
+#>  [9] IRanges_2.46.0              S4Vectors_0.50.1           
+#> [11] BiocGenerics_0.58.1         generics_0.1.4             
+#> [13] MatrixGenerics_1.24.0       matrixStats_1.5.0          
+#> [15] ggplot2_4.0.3               VISTA_1.1.3                
+#> [17] BiocStyle_2.40.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] splines_4.5.3           ggplotify_0.1.3         tibble_3.3.1           
-#>   [4] R.oo_1.27.1             ggpp_0.6.0              polyclip_1.10-7        
-#>   [7] lifecycle_1.0.5         rstatix_0.7.3           edgeR_4.8.2            
-#>  [10] doParallel_1.0.17       lattice_0.22-9          MASS_7.3-65            
-#>  [13] backports_1.5.1         limma_3.66.0            sass_0.4.10            
-#>  [16] rmarkdown_2.31          jquerylib_0.1.4         yaml_2.3.12            
-#>  [19] otel_0.2.0              ggtangle_0.1.1          EnhancedVolcano_1.28.2 
-#>  [22] cowplot_1.2.0           DBI_1.3.0               RColorBrewer_1.1-3     
-#>  [25] abind_1.4-8             purrr_1.2.2             R.utils_2.13.0         
+#>   [1] splines_4.6.1           ggplotify_0.1.3         tibble_3.3.1           
+#>   [4] ggpp_0.6.1              polyclip_1.10-7         enrichit_0.2.1         
+#>   [7] lifecycle_1.0.5         httr2_1.3.0             rstatix_1.1.0          
+#>  [10] edgeR_4.10.1            doParallel_1.0.17       processx_3.9.0         
+#>  [13] lattice_0.22-9          MASS_7.3-65             backports_1.5.1        
+#>  [16] limma_3.68.4            sass_0.4.10             rmarkdown_2.31         
+#>  [19] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             
+#>  [22] ggtangle_0.1.2          EnhancedVolcano_1.30.0  DBI_1.3.0              
+#>  [25] RColorBrewer_1.1-3      abind_1.4-8             purrr_1.2.2            
 #>  [28] msigdbr_26.1.0          yulab.utils_0.2.4       tweenr_2.0.3           
-#>  [31] rappdirs_0.3.4          gdtools_0.5.0           circlize_0.4.18        
-#>  [34] enrichplot_1.30.5       ggrepel_0.9.8           tidytree_0.4.7         
-#>  [37] RSpectra_0.16-2         pkgdown_2.2.0           codetools_0.2-20       
-#>  [40] DelayedArray_0.36.1     DOSE_4.4.0              ggforce_0.5.0          
-#>  [43] tidyselect_1.2.1        shape_1.4.6.1           aplot_0.2.9            
-#>  [46] farver_2.1.2            jsonlite_2.0.0          GetoptLong_1.1.1       
-#>  [49] Formula_1.2-5           ggridges_0.5.7          iterators_1.0.14       
-#>  [52] systemfonts_1.3.2       foreach_1.5.2           tools_4.5.3            
-#>  [55] ggnewscale_0.5.2        treeio_1.34.0           ragg_1.5.2             
-#>  [58] Rcpp_1.1.1              glue_1.8.0              gridExtra_2.3          
-#>  [61] SparseArray_1.10.10     xfun_0.57               DESeq2_1.50.2          
-#>  [64] qvalue_2.42.0           dplyr_1.2.1             withr_3.0.2            
-#>  [67] BiocManager_1.30.27     fastmap_1.2.0           GGally_2.4.0           
-#>  [70] ggpointdensity_0.2.1    digest_0.6.39           R6_2.6.1               
-#>  [73] gridGraphics_0.5-1      textshaping_1.0.5       colorspace_2.1-2       
-#>  [76] GO.db_3.22.0            RSQLite_2.4.6           ggrain_0.1.2           
-#>  [79] R.methodsS3_1.8.2       tidyr_1.3.2             fontLiberation_0.1.0   
-#>  [82] data.table_1.18.2.1     FNN_1.1.4.1             httr_1.4.8             
-#>  [85] htmlwidgets_1.6.4       S4Arrays_1.10.1         scatterpie_0.2.6       
+#>  [31] rappdirs_0.3.4          aisdk_1.4.12            gdtools_0.5.1          
+#>  [34] circlize_0.4.18         enrichplot_1.32.0       ggrepel_0.9.8          
+#>  [37] tidytree_0.4.8          RSpectra_0.16-2         pkgdown_2.2.1          
+#>  [40] codetools_0.2-20        DelayedArray_0.38.2     DOSE_4.6.0             
+#>  [43] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          
+#>  [46] aplot_0.3.1             farver_2.1.2            jsonlite_2.0.0         
+#>  [49] GetoptLong_1.1.1        Formula_1.2-6           ggridges_0.5.7         
+#>  [52] iterators_1.0.14        systemfonts_1.3.2       foreach_1.5.2          
+#>  [55] tools_4.6.1             ggnewscale_0.5.2        treeio_1.36.1          
+#>  [58] ragg_1.5.2              Rcpp_1.1.2              glue_1.8.1             
+#>  [61] gridExtra_2.3.1         SparseArray_1.12.2      xfun_0.60              
+#>  [64] DESeq2_1.52.0           qvalue_2.44.0           dplyr_1.2.1            
+#>  [67] withr_3.0.3             BiocManager_1.30.27     fastmap_1.2.0          
+#>  [70] GGally_2.4.0            ggpointdensity_0.2.1    callr_3.8.0            
+#>  [73] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     
+#>  [76] textshaping_1.0.5       colorspace_2.1-3        GO.db_3.23.1           
+#>  [79] RSQLite_3.53.3          ggrain_0.1.2            tidyr_1.3.2            
+#>  [82] fontLiberation_0.1.0    FNN_1.1.4.1             httr_1.4.8             
+#>  [85] htmlwidgets_1.6.4       S4Arrays_1.12.0         scatterpie_0.2.6       
 #>  [88] ggstats_0.13.0          uwot_0.2.4              pkgconfig_2.0.3        
-#>  [91] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.26.1  
-#>  [94] S7_0.2.1                XVector_0.50.0          clusterProfiler_4.18.4 
+#>  [91] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.28.0  
+#>  [94] S7_0.2.2                XVector_0.52.0          clusterProfiler_4.20.0 
 #>  [97] htmltools_0.5.9         carData_3.0-6           fontBitstreamVera_0.1.1
-#> [100] bookdown_0.46           fgsea_1.36.2            clue_0.3-68            
-#> [103] scales_1.4.0            png_0.1-9               ggfun_0.2.0            
-#> [106] knitr_1.51              reshape2_1.4.5          rjson_0.2.23           
-#> [109] nlme_3.1-168            curl_7.0.0              cachem_1.1.0           
-#> [112] GlobalOptions_0.1.4     stringr_1.6.0           parallel_4.5.3         
-#> [115] desc_1.4.3              pillar_1.11.1           grid_4.5.3             
-#> [118] vctrs_0.7.3             ggpubr_0.6.3            car_3.1-5              
-#> [121] tidydr_0.0.6            cluster_2.1.8.2         evaluate_1.0.5         
-#> [124] cli_3.6.6               locfit_1.5-9.12         compiler_4.5.3         
-#> [127] rlang_1.2.0             crayon_1.5.3            ggsignif_0.6.4         
-#> [130] labeling_0.4.3          forcats_1.0.1           plyr_1.8.9             
-#> [133] fs_2.0.1                ggiraph_0.9.6           stringi_1.8.7          
-#> [136] viridisLite_0.4.3       BiocParallel_1.44.0     assertthat_0.2.1       
-#> [139] babelgene_22.9          Biostrings_2.78.0       lazyeval_0.2.3         
-#> [142] GOSemSim_2.36.0         fontquiver_0.2.1        Matrix_1.7-4           
-#> [145] patchwork_1.3.2         bit64_4.6.0-1           KEGGREST_1.50.0        
-#> [148] statmod_1.5.1           broom_1.0.12            igraph_2.2.3           
-#> [151] memoise_2.0.1           bslib_0.10.0            ggtree_4.0.5           
-#> [154] fastmatch_1.1-8         bit_4.6.0               ape_5.8-1              
-#> [157] gson_0.1.0              polynom_1.4-1
+#> [100] bookdown_0.47           clue_0.3-68             scales_1.4.0           
+#> [103] png_0.1-9               ggfun_0.2.1             knitr_1.51             
+#> [106] reshape2_1.4.5          rjson_0.2.23            nlme_3.1-169           
+#> [109] curl_7.1.0              cachem_1.1.0            GlobalOptions_0.1.4    
+#> [112] stringr_1.6.0           parallel_4.6.1          desc_1.4.3             
+#> [115] pillar_1.11.1           grid_4.6.1              vctrs_0.7.3            
+#> [118] ggpubr_1.0.0            car_3.1-5               tidydr_0.0.6           
+#> [121] cluster_2.1.8.2         evaluate_1.0.5          cli_3.6.6              
+#> [124] locfit_1.5-9.12         compiler_4.6.1          rlang_1.3.0            
+#> [127] crayon_1.5.3            ggsignif_0.6.4          labeling_0.4.3         
+#> [130] ps_1.9.3                forcats_1.0.1           plyr_1.8.9             
+#> [133] fs_2.1.0                ggiraph_0.9.6           stringi_1.8.9          
+#> [136] viridisLite_0.4.3       BiocParallel_1.46.0     assertthat_0.2.1       
+#> [139] babelgene_22.9          Biostrings_2.80.1       lazyeval_0.2.3         
+#> [142] GOSemSim_2.38.3         fontquiver_0.2.1        Matrix_1.7-5           
+#> [145] patchwork_1.3.2         bit64_4.8.2             KEGGREST_1.52.2        
+#> [148] statmod_1.5.2           igraph_2.3.3            broom_1.0.13           
+#> [151] memoise_2.0.1           bslib_0.12.0            ggtree_4.2.0           
+#> [154] bit_4.6.0               ape_5.8-1               gson_0.2.1             
+#> [157] polynom_1.4-1
 ```
 
 ## References

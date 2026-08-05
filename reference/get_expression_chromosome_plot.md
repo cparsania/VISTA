@@ -1,8 +1,9 @@
 # Chromosome plot for expression
 
 Convenience wrapper around
-[`get_chromosome_plot()`](get_chromosome_plot.md) for expression-based
-colouring (optional group mean, rowData columns, or assay columns).
+[`get_chromosome_plot()`](https://cparsania.github.io/VISTA/reference/get_chromosome_plot.md)
+for expression-based colouring (optional group mean, rowData columns, or
+assay columns).
 
 ## Usage
 

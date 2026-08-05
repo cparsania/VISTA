@@ -1,11 +1,11 @@
 # Violin plot of expression values
 
 Mirrors the main user-facing arguments of
-[`get_expression_boxplot()`](get_expression_boxplot.md) so the two geoms
-can be swapped with minimal code changes. Violin plots currently keep
-group-based semantics (`by = "group"`) because a violin requires
-replicate-level distributions within groups rather than one value per
-sample.
+[`get_expression_boxplot()`](https://cparsania.github.io/VISTA/reference/get_expression_boxplot.md)
+so the two geoms can be swapped with minimal code changes. Violin plots
+currently keep group-based semantics (`by = "group"`) because a violin
+requires replicate-level distributions within groups rather than one
+value per sample.
 
 ## Usage
 
@@ -24,14 +24,15 @@ get_expression_violinplot(
   facet_ncol = NULL,
   stats_group = FALSE,
   p.label = "p.signif",
-  comparisons = NULL,
+  stat_comparisons = NULL,
   pool_genes = FALSE,
   by = "group",
   facet_by = c("auto", "gene", "none"),
   fill_by = NULL,
   sample_order = c("input", "group", "expression"),
   value_transform = NULL,
-  summarise = FALSE
+  summarise = FALSE,
+  comparisons = NULL
 )
 ```
 
@@ -66,13 +67,13 @@ get_expression_violinplot(
 - display_from:
 
   Optional source ID type for mapping (reserved for compatibility with
-  [`get_expression_boxplot()`](get_expression_boxplot.md)).
+  [`get_expression_boxplot()`](https://cparsania.github.io/VISTA/reference/get_expression_boxplot.md)).
 
 - display_orgdb:
 
   Optional `OrgDb` object used for ID mapping when `display_id` is set
   but not found in `rowData` (reserved for compatibility with
-  [`get_expression_boxplot()`](get_expression_boxplot.md)).
+  [`get_expression_boxplot()`](https://cparsania.github.io/VISTA/reference/get_expression_boxplot.md)).
 
 - facet_scales:
 
@@ -91,10 +92,11 @@ get_expression_violinplot(
   Label format for
   [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
 
-- comparisons:
+- stat_comparisons:
 
-  Optional list of specific group comparisons for
-  `stat_compare_means()`.
+  Optional list of length-2 group pairs passed to
+  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html)
+  for significance brackets.
 
 - pool_genes:
 
@@ -107,15 +109,15 @@ get_expression_violinplot(
 - facet_by:
 
   Faceting mode. Uses the same argument pattern as
-  [`get_expression_boxplot()`](get_expression_boxplot.md), but
-  `pool_genes = TRUE` falls back to `"none"` because pooled violins
+  [`get_expression_boxplot()`](https://cparsania.github.io/VISTA/reference/get_expression_boxplot.md),
+  but `pool_genes = TRUE` falls back to `"none"` because pooled violins
   already aggregate across genes.
 
 - fill_by:
 
   Fill mapping. Uses the same values as
-  [`get_expression_boxplot()`](get_expression_boxplot.md), including
-  discrete sample metadata columns.
+  [`get_expression_boxplot()`](https://cparsania.github.io/VISTA/reference/get_expression_boxplot.md),
+  including discrete sample metadata columns.
 
 - sample_order:
 
@@ -133,6 +135,10 @@ get_expression_violinplot(
   Logical retained for compatibility. Violin plots always use
   replicate-level values, so `summarise = TRUE` is ignored with a
   warning.
+
+- comparisons:
+
+  Deprecated; use `stat_comparisons`.
 
 ## Value
 

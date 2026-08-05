@@ -1,7 +1,8 @@
 # Deep validation of VISTA differential-expression fidelity
 
-This validator combines [`validate_vista()`](validate_vista.md) with
-backend-to-backend numerical equivalence checks against standalone
+This validator combines
+[`validate_vista()`](https://cparsania.github.io/VISTA/reference/validate_vista.md)
+with backend-to-backend numerical equivalence checks against standalone
 DESeq2, edgeR, and limma runs.
 
 ## Usage
@@ -125,6 +126,8 @@ report <- validate_vista_deep(
   min_replicates = 1,
   error = FALSE
 )
+#> calcNormFactors has been renamed to normLibSizes
+#> calcNormFactors has been renamed to normLibSizes
 
 report$valid
 #> [1] TRUE
@@ -160,5 +163,7 @@ validate_vista_deep(
 #> mean-dispersion relationship
 #> final dispersion estimates
 #> fitting model and testing
+#> calcNormFactors has been renamed to normLibSizes
+#> calcNormFactors has been renamed to normLibSizes
 # }
 ```

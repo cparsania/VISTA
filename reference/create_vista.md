@@ -37,6 +37,7 @@ create_vista(
   result_source = NULL,
   group_palette = "Dark 2",
   comparison_palette = "Dark 3",
+  keep_raw_counts = TRUE,
   validate = TRUE
 )
 ```
@@ -76,11 +77,15 @@ create_vista(
 
 - min_counts:
 
-  Minimum total counts per gene to retain (default: 10).
+  Minimum per-sample count a gene must reach to count as detected in
+  that sample; also applied as a minimum row total in an initial
+  pre-filter (default: 10).
 
 - min_replicates:
 
-  Minimum samples per group meeting `min_counts` (default: 1).
+  Minimum number of samples in which a gene must reach `min_counts` to
+  enter the model. Counted across the whole experiment, not within each
+  group (default: 1).
 
 - log2fc_cutoff:
 
@@ -136,11 +141,19 @@ create_vista(
   Qualitative palette name used to assign colors per comparison (stored
   in `metadata(v)$comparison$colors`). Defaults to `"Dark 3"`.
 
+- keep_raw_counts:
+
+  Logical; if `TRUE` (default), the filtered raw count matrix is
+  retained as a second assay named `"counts"`, reachable with
+  `counts(v)` and required by
+  [`as_deseq_dataset()`](https://cparsania.github.io/VISTA/reference/as_deseq_dataset.md).
+  This roughly doubles the assay footprint; set `FALSE` to omit it.
+
 - validate:
 
   Logical; if `TRUE` (default), run full
-  [`validate_vista()`](validate_vista.md) checks before returning the
-  object.
+  [`validate_vista()`](https://cparsania.github.io/VISTA/reference/validate_vista.md)
+  checks before returning the object.
 
 ## Value
 
@@ -164,9 +177,20 @@ have rownames identical to the final `norm_counts` rownames. When
 `metadata(v)$de_summary_by_method`, and the active source is tracked in
 `metadata(v)$de_active_source`.
 
+In the consensus table, `log2fc` follows `consensus_log2fc` (with
+single-backend calls taking the contributing backend's estimate), while
+`pvalue` and `padj` carry the less-significant of the two backends so
+the columns remain continuous and usable for volcano/MA plots and
+ranking. Per-backend values are always preserved alongside them in
+`log2fc_deseq2`, `log2fc_edger`, `pvalue_deseq2`, `pvalue_edger`,
+`padj_deseq2`, and `padj_edger`, and the `support` column records which
+backends called each gene (`"both"`, `"deseq2_only"`, `"edger_only"`,
+`"discordant"`, or `"none"`).
+
 ## See also
 
-[as_vista](as_vista.md), [VISTA-class](VISTA-class.md),
+[as_vista](https://cparsania.github.io/VISTA/reference/as_vista.md),
+[VISTA-class](https://cparsania.github.io/VISTA/reference/VISTA-class.md),
 [qualitative_hcl](https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html)
 
 ## Examples
@@ -196,15 +220,22 @@ vista <- create_vista(
 
 # Examine the VISTA object
 vista
-#> class: SummarizedExperiment 
+#> class: VISTA 
 #> dim: 85 6 
 #> metadata(12): de_results de_summary ... design comparison
-#> assays(1): norm_counts
+#> assays(2): norm_counts counts
 #> rownames(85): ENSG00000000003 ENSG00000000419 ... ENSG00000005469
 #>   ENSG00000005471
 #> rowData names(1): baseMean
 #> colnames(6): SRR1039508 SRR1039509 ... SRR1039516 SRR1039517
 #> colData names(14): SampleName cell ... sizeFactor sample_names
+#> -------- VISTA --------
+#> group column: cond_long (control, treatment1)
+#> comparisons: treatment1_VS_control
+#> DE source: deseq2
+#> cutoffs: |log2FC| >= 0.6, padj <= 0.05
+#> raw counts: available via counts()
+#> schema: 1.1.0
 
 # Access comparisons
 names(comparisons(vista))
@@ -268,5 +299,6 @@ vista_multi <- create_vista(
   log2fc_cutoff = 1.0,
   pval_cutoff = 0.01
 )
+#> calcNormFactors has been renamed to normLibSizes
 # }
 ```

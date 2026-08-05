@@ -12,13 +12,13 @@
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Visualization and Integrated System for Transcriptomic Analysis">
 <meta name="description" content="The VISTA (Visualization and Integrated System for Transcriptomic Analysis) platform streamlines differential expression workflows by wrapping DESeq2 and edgeR into a SummarizedExperiment-based container with consistent metadata. The package includes visualization utilities, MSigDB enrichment helpers, and optional deconvolution support to simplify interactive exploration of RNA-seq experiments.">
 <meta property="og:description" content="The VISTA (Visualization and Integrated System for Transcriptomic Analysis) platform streamlines differential expression workflows by wrapping DESeq2 and edgeR into a SummarizedExperiment-based container with consistent metadata. The package includes visualization utilities, MSigDB enrichment helpers, and optional deconvolution support to simplify interactive exploration of RNA-seq experiments.">
-<meta property="og:image" content="/logo.png">
+<meta property="og:image" content="https://cparsania.github.io/VISTA/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,149 +74,154 @@
 </blockquote>
 <!-- badges: start -->
 
+
 <!-- badges: end -->
-<div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h2>
-<p>VISTA is a Bioconductor-oriented framework for RNA-seq differential expression analysis that keeps data, statistics, annotations, and visualization in a single <code>SummarizedExperiment</code>-based object. It is designed for analysts who want a reproducible workflow without rebuilding the same plotting and result-handling code for every project.</p>
-<p>VISTA provides:</p>
+<p>VISTA is a Bioconductor framework for RNA-seq differential expression that keeps counts, statistics, annotations, and figures in a single validated <code>SummarizedExperiment</code>-based object — so you can go from raw counts to a publication-ready narrative without rebuilding the same glue code each project.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"VISTA"</span><span class="op">)</span></span></code></pre></div>
 <ul>
-<li>A single entry point for <code>DESeq2</code>, <code>edgeR</code>, <code>limma-voom</code>, and a DESeq2/edgeR consensus workflow.</li>
-<li>Design-aware modeling through covariates or an explicit design formula.</li>
-<li>Publication-ready visualizations for QC, differential expression, expression patterns, fold-change structure, pathway enrichment, and deconvolution.</li>
-<li>Consistent color management across comparisons and groups.</li>
-<li>Export helpers and a YAML-driven Quarto reporting workflow for shareable analyses.</li>
+<li>📦 <strong>One object, one grammar</strong> — <code>DESeq2</code>, <code>edgeR</code>, <code>limma-voom</code>, and a DESeq2/edgeR consensus behind a single entry point.</li>
+<li>🎨 <strong>40+ publication-ready plots</strong> — QC, differential expression, expression patterns, fold-change structure, enrichment, and deconvolution.</li>
+<li>🧬 <strong>Bioconductor-native</strong> — extends <code>SummarizedExperiment</code>, so <code>assay()</code>, <code>rowData()</code>, <code>colData()</code>, and <code>[</code> all work as expected.</li>
+<li>📄 <strong>Reproducible reporting</strong> — export helpers plus a YAML-driven Quarto workflow.</li>
 </ul>
-</div>
+<hr>
 <div class="section level2">
-<h2 id="why-vista">Why VISTA<a class="anchor" aria-label="anchor" href="#why-vista"></a>
+<h2 id="contents">Contents<a class="anchor" aria-label="anchor" href="#contents"></a>
 </h2>
-<p>Most RNA-seq projects repeat the same sequence of steps: normalize counts, fit differential models, extract contrasts, make QC plots, label genes, summarize pathways, and assemble figures for collaborators. The friction is usually not the statistics alone; it is the repeated glue code that connects them.</p>
-<p>VISTA addresses that by organizing the workflow around one validated object:</p>
-<ul>
-<li>
-<code>assay(x)</code> stores normalized expression data.</li>
-<li>
-<code>rowData(x)</code> stores feature annotations.</li>
-<li>
-<code>colData(x)</code> stores sample metadata.</li>
-<li>
-<code>comparisons(x)</code> stores differential expression tables.</li>
-<li>VISTA accessors and plotting functions operate directly on that object.</li>
-</ul>
-<p>That design makes it easier to move from raw counts to a consistent analysis narrative without switching data structures between each step.</p>
+<p><a href="#installation">Installation</a> · <a href="#quick-start">Quick start</a> · <a href="#why-vista">Why VISTA</a> · <a href="#core-workflow">Core workflow</a> · <a href="#plot-catalogue">Plot catalogue</a> · <a href="#bioconductor-compatible-object-design">Object design</a> · <a href="#documentation">Documentation</a> · <a href="#citation">Citation</a></p>
+<hr>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<div class="section level3">
-<h3 id="bioconductor">Bioconductor<a class="anchor" aria-label="anchor" href="#bioconductor"></a>
-</h3>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<p><strong>Release</strong> — from Bioconductor:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"VISTA"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="development-version">Development version<a class="anchor" aria-label="anchor" href="#development-version"></a>
-</h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p><strong>Development version</strong> (GitHub):</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pak"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"cparsania/VISTA"</span><span class="op">)</span></span></code></pre></div>
 </div>
-</div>
 <div class="section level2">
-<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cparsania/VISTA" class="external-link">VISTA</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Example data shipped with the package</span></span>
-<span><span class="co"># count_data: gene-by-sample count matrix</span></span>
-<span><span class="co"># sample_metadata: sample annotations</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"count_data"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span>        <span class="co"># gene-by-sample counts</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sample_metadata"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span>   <span class="co"># sample annotations</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"count_data"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sample_metadata"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">prepared_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_counts.html">read_vista_counts</a></span><span class="op">(</span></span>
-<span>  <span class="va">count_data</span>,</span>
-<span>  format <span class="op">=</span> <span class="st">"matrix"</span>,</span>
-<span>  gene_id_column <span class="op">=</span> <span class="st">"gene_id"</span></span>
-<span><span class="op">)</span></span>
+<span><span class="va">prepared_counts</span>  <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_counts.html">read_vista_counts</a></span><span class="op">(</span><span class="va">count_data</span>, format <span class="op">=</span> <span class="st">"matrix"</span>, gene_id_column <span class="op">=</span> <span class="st">"gene_id"</span><span class="op">)</span></span>
 <span><span class="va">prepared_samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_metadata.html">read_vista_metadata</a></span><span class="op">(</span><span class="va">sample_metadata</span><span class="op">)</span></span>
-<span><span class="va">matched_inputs</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/match_vista_inputs.html">match_vista_inputs</a></span><span class="op">(</span><span class="va">prepared_counts</span>, <span class="va">prepared_samples</span><span class="op">)</span></span>
+<span><span class="va">matched_inputs</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/match_vista_inputs.html">match_vista_inputs</a></span><span class="op">(</span><span class="va">prepared_counts</span>, <span class="va">prepared_samples</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
-<span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
+<span>  counts          <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
+<span>  sample_info     <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
+<span>  column_geneid   <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
+<span>  group_column    <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
 <span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"deseq2"</span>,</span>
-<span>  log2fc_cutoff <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  pval_cutoff <span class="op">=</span> <span class="fl">0.05</span></span>
+<span>  method          <span class="op">=</span> <span class="st">"deseq2"</span>,</span>
+<span>  log2fc_cutoff   <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  pval_cutoff     <span class="op">=</span> <span class="fl">0.05</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="reference/VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Inspect the object and the first differential comparison</span></span>
-<span><span class="va">vista</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[[</span><span class="va">comp</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"log2fc"</span>, <span class="st">"padj"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># QC</span></span>
+<span><span class="va">vista</span>                                                    <span class="co"># object summary</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[[</span><span class="va">comp</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene_id"</span>, <span class="st">"log2fc"</span>, <span class="st">"padj"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p>Already have a <code>SummarizedExperiment</code>? Skip the import step:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as_vista.html">as_vista</a></span><span class="op">(</span><span class="va">se</span>, group_column <span class="op">=</span> <span class="st">"cond_long"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="explore-it">Explore it<a class="anchor" aria-label="anchor" href="#explore-it"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Quality control</span></span>
 <span><span class="fu"><a href="reference/get_pca_plot.html">get_pca_plot</a></span><span class="op">(</span><span class="va">vista</span>, label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_mds_plot.html">get_mds_plot</a></span><span class="op">(</span><span class="va">vista</span>, use_group_colors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_corr_heatmap.html">get_corr_heatmap</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
-<span><span class="co"># Optional nonlinear view (requires uwot)</span></span>
-<span><span class="co"># get_umap_plot(vista, color_by = "cell", use_group_colors = FALSE, palette = "Set 2")</span></span>
 <span></span>
 <span><span class="co"># Differential expression</span></span>
 <span><span class="fu"><a href="reference/get_volcano_plot.html">get_volcano_plot</a></span><span class="op">(</span><span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_ma_plot.html">get_ma_plot</a></span><span class="op">(</span><span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_deg_count_barplot.html">get_deg_count_barplot</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/get_deg_count_donutplot.html">get_deg_count_donutplot</a></span><span class="op">(</span><span class="va">vista</span>, show_other <span class="op">=</span> <span class="cn">TRUE</span>, text_color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Expression-focused views</span></span>
+<span><span class="co"># Expression and fold-change views</span></span>
 <span><span class="va">up_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_genes_by_regulation.html">get_genes_by_regulation</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista</span>,</span>
-<span>  sample_comparisons <span class="op">=</span> <span class="va">comp</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
-<span>  top_n <span class="op">=</span> <span class="fl">40</span></span>
+<span>  <span class="va">vista</span>, sample_comparisons <span class="op">=</span> <span class="va">comp</span>, regulation <span class="op">=</span> <span class="st">"Up"</span>, top_n <span class="op">=</span> <span class="fl">40</span></span>
 <span><span class="op">)</span><span class="op">[[</span><span class="va">comp</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span><span class="va">vista</span>, sample_group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="reference/VISTA-accessors.html">sample_info</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">$</span><span class="va">cond_long</span><span class="op">)</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">]</span>, kmeans_k <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_expression_heatmap.html">get_expression_heatmap</a></span><span class="op">(</span><span class="va">vista</span>, genes <span class="op">=</span> <span class="va">up_genes</span>, kmeans_k <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_expression_barplot.html">get_expression_barplot</a></span><span class="op">(</span><span class="va">vista</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, by <span class="op">=</span> <span class="st">"sample"</span>, facet_by <span class="op">=</span> <span class="st">"gene"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/get_expression_lollipop.html">get_expression_lollipop</a></span><span class="op">(</span><span class="va">vista</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, by <span class="op">=</span> <span class="st">"sample"</span>, facet_by <span class="op">=</span> <span class="st">"gene"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Fold-change views</span></span>
 <span><span class="fu"><a href="reference/get_foldchange_heatmap.html">get_foldchange_heatmap</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/get_foldchange_barplot.html">get_foldchange_barplot</a></span><span class="op">(</span><span class="va">vista</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>, sample_comparisons <span class="op">=</span> <span class="va">comp</span>, facet_by <span class="op">=</span> <span class="st">"gene"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/get_foldchange_lollipop.html">get_foldchange_lollipop</a></span><span class="op">(</span><span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp</span>, genes <span class="op">=</span> <span class="va">up_genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>, facet_by <span class="op">=</span> <span class="st">"gene"</span><span class="op">)</span></span></code></pre></div>
 </div>
+</div>
 <div class="section level2">
-<h2 id="core-workflow">Core Workflow<a class="anchor" aria-label="anchor" href="#core-workflow"></a>
+<h2 id="why-vista">Why VISTA<a class="anchor" aria-label="anchor" href="#why-vista"></a>
+</h2>
+<p>Most RNA-seq projects repeat the same sequence: normalize counts, fit models, extract contrasts, plot QC, label genes, summarize pathways, assemble figures. The friction is rarely the statistics — it is the glue code between them.</p>
+<p>VISTA organizes that work around one validated object:</p>
+<table class="table">
+<thead><tr>
+<th>Component</th>
+<th>Accessor</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Normalized expression</td>
+<td>
+<code>assay(x)</code> / <code>norm_counts(x)</code>
+</td>
+</tr>
+<tr>
+<td>Raw filtered counts</td>
+<td><code>counts(x)</code></td>
+</tr>
+<tr>
+<td>Feature annotations</td>
+<td><code>rowData(x)</code></td>
+</tr>
+<tr>
+<td>Sample metadata</td>
+<td>
+<code>colData(x)</code> / <code>sample_info(x)</code>
+</td>
+</tr>
+<tr>
+<td>Differential expression tables</td>
+<td><code>comparisons(x)</code></td>
+</tr>
+<tr>
+<td>Analysis parameters</td>
+<td><code>cutoffs(x)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Every accessor and plotting function reads that same object, so you move from raw counts to a consistent analysis narrative without switching data structures between steps.</p>
+</div>
+<div class="section level2">
+<h2 id="core-workflow">Core workflow<a class="anchor" aria-label="anchor" href="#core-workflow"></a>
 </h2>
 <div class="section level3">
 <h3 id="id_1-prepare-counts-and-metadata">1. Prepare counts and metadata<a class="anchor" aria-label="anchor" href="#id_1-prepare-counts-and-metadata"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">prepared_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_counts.html">read_vista_counts</a></span><span class="op">(</span></span>
-<span>  <span class="va">count_data</span>,</span>
-<span>  format <span class="op">=</span> <span class="st">"matrix"</span>,</span>
-<span>  gene_id_column <span class="op">=</span> <span class="st">"gene_id"</span></span>
-<span><span class="op">)</span></span>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prepared_counts</span>  <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_counts.html">read_vista_counts</a></span><span class="op">(</span><span class="va">count_data</span>, format <span class="op">=</span> <span class="st">"matrix"</span>, gene_id_column <span class="op">=</span> <span class="st">"gene_id"</span><span class="op">)</span></span>
 <span><span class="va">prepared_samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vista_metadata.html">read_vista_metadata</a></span><span class="op">(</span><span class="va">sample_metadata</span><span class="op">)</span></span>
-<span><span class="va">matched_inputs</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/match_vista_inputs.html">match_vista_inputs</a></span><span class="op">(</span><span class="va">prepared_counts</span>, <span class="va">prepared_samples</span><span class="op">)</span></span></code></pre></div>
-<p>These helpers preserve the existing <code><a href="reference/create_vista.html">create_vista()</a></code> API while making it easier to import common count formats such as plain matrices/data frames, featureCounts, STAR gene counts, HTSeq-count, tximport-like inputs, and RSEM gene result files.</p>
-<p>If you do not yet have a metadata sheet, you can bootstrap one from the count sample names:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<span><span class="va">matched_inputs</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/match_vista_inputs.html">match_vista_inputs</a></span><span class="op">(</span><span class="va">prepared_counts</span>, <span class="va">prepared_samples</span><span class="op">)</span></span></code></pre></div>
+<p>These helpers import plain matrices and data frames, featureCounts, STAR gene counts, HTSeq-count, tximport-like inputs, and RSEM gene results. No metadata sheet yet? Bootstrap one from the count sample names:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">starter_metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/derive_vista_metadata.html">derive_vista_metadata</a></span><span class="op">(</span></span>
 <span>  <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
 <span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
@@ -226,7 +231,7 @@
 <div class="section level3">
 <h3 id="id_2-build-the-analysis-object">2. Build the analysis object<a class="anchor" aria-label="anchor" href="#id_2-build-the-analysis-object"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
 <span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
 <span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
@@ -234,73 +239,48 @@
 <span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
 <span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"limma"</span>  <span class="co"># or "deseq2", "edger", "both"</span></span>
+<span>  method <span class="op">=</span> <span class="st">"limma"</span>                       <span class="co"># or "deseq2", "edger", "both"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Use <code>method = "both"</code> when you want a DESeq2/edgeR consensus workflow:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>Use <code>method = "both"</code> for a DESeq2/edgeR consensus:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vista_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
-<span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
-<span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
-<span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
+<span>  <span class="va">...</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"both"</span>,</span>
 <span>  result_source <span class="op">=</span> <span class="st">"consensus"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Switch the active DE table if needed</span></span>
-<span><span class="va">vista_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_de_source.html">set_de_source</a></span><span class="op">(</span><span class="va">vista_consensus</span>, <span class="st">"edger"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">vista_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_de_source.html">set_de_source</a></span><span class="op">(</span><span class="va">vista_consensus</span>, <span class="st">"edger"</span><span class="op">)</span>   <span class="co"># switch the active table</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="id_3-add-covariates-or-an-explicit-design">3. Add covariates or an explicit design<a class="anchor" aria-label="anchor" href="#id_3-add-covariates-or-an-explicit-design"></a>
+<h3 id="id_3-adjust-the-model">3. Adjust the model<a class="anchor" aria-label="anchor" href="#id_3-adjust-the-model"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Add sample-level covariates to adjust the DE model</span></span>
-<span><span class="va">vista_cov</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
-<span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
-<span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
-<span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
-<span>  covariates <span class="op">=</span> <span class="st">"cell"</span></span>
-<span><span class="op">)</span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Sample-level covariates</span></span>
+<span><span class="va">vista_cov</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span><span class="va">...</span>, covariates <span class="op">=</span> <span class="st">"cell"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Or provide a full design formula</span></span>
-<span><span class="va">vista_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
-<span>  counts <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">counts</span>,</span>
-<span>  sample_info <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">sample_info</span>,</span>
-<span>  column_geneid <span class="op">=</span> <span class="va">matched_inputs</span><span class="op">$</span><span class="va">column_geneid</span>,</span>
-<span>  group_column <span class="op">=</span> <span class="st">"cond_long"</span>,</span>
-<span>  group_numerator <span class="op">=</span> <span class="st">"treatment1"</span>,</span>
-<span>  group_denominator <span class="op">=</span> <span class="st">"control"</span>,</span>
-<span>  design_formula <span class="op">=</span> <span class="op">~</span> <span class="va">cell</span> <span class="op">+</span> <span class="va">cond_long</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Or a full design formula</span></span>
+<span><span class="va">vista_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_vista.html">create_vista</a></span><span class="op">(</span><span class="va">...</span>, design_formula <span class="op">=</span> <span class="op">~</span> <span class="va">cell</span> <span class="op">+</span> <span class="va">cond_long</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="id_4-add-feature-annotations">4. Add feature annotations<a class="anchor" aria-label="anchor" href="#id_4-add-feature-annotations"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example for human data</span></span>
-<span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_rowdata.html">set_rowdata</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_rowdata.html">set_rowdata</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  orgdb <span class="op">=</span> <span class="va">org.Hs.eg.db</span>,</span>
 <span>  columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SYMBOL"</span>, <span class="st">"GENENAME"</span>, <span class="st">"ENTREZID"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="id_5-explore-export-and-report">5. Explore, export, and report<a class="anchor" aria-label="anchor" href="#id_5-explore-export-and-report"></a>
+<h3 id="id_5-export-and-report">5. Export and report<a class="anchor" aria-label="anchor" href="#id_5-export-and-report"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Export selected tables / matrices / plots</span></span>
-<span><span class="fu"><a href="reference/export_vista_assets.html">export_vista_assets</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/export_vista_assets.html">export_vista_assets</a></span><span class="op">(</span></span>
 <span>  <span class="va">vista</span>,</span>
 <span>  out_dir <span class="op">=</span> <span class="st">"vista_assets"</span>,</span>
 <span>  include_data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"comparison"</span>, <span class="st">"norm_counts"</span>, <span class="st">"sample_info"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Render a parameterized HTML report from YAML</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"reports"</span>, <span class="st">"vista-report-template.yml"</span>, package <span class="op">=</span> <span class="st">"VISTA"</span><span class="op">)</span>,</span>
 <span>  <span class="st">"vista-report.yml"</span></span>
@@ -309,184 +289,101 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="visualization-coverage">Visualization Coverage<a class="anchor" aria-label="anchor" href="#visualization-coverage"></a>
+<h2 id="plot-catalogue">Plot catalogue<a class="anchor" aria-label="anchor" href="#plot-catalogue"></a>
 </h2>
-<div class="section level3">
-<h3 id="quality-control-and-sample-structure">Quality control and sample structure<a class="anchor" aria-label="anchor" href="#quality-control-and-sample-structure"></a>
-</h3>
-<ul>
-<li><code><a href="reference/get_pca_plot.html">get_pca_plot()</a></code></li>
-<li><code><a href="reference/get_mds_plot.html">get_mds_plot()</a></code></li>
-<li><code><a href="reference/get_umap_plot.html">get_umap_plot()</a></code></li>
-<li><code><a href="reference/get_corr_heatmap.html">get_corr_heatmap()</a></code></li>
-<li><code><a href="reference/get_pairwise_corr_plot.html">get_pairwise_corr_plot()</a></code></li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="differential-expression-summaries">Differential expression summaries<a class="anchor" aria-label="anchor" href="#differential-expression-summaries"></a>
-</h3>
-<ul>
-<li><code><a href="reference/get_volcano_plot.html">get_volcano_plot()</a></code></li>
-<li><code><a href="reference/get_ma_plot.html">get_ma_plot()</a></code></li>
-<li><code><a href="reference/get_deg_count_barplot.html">get_deg_count_barplot()</a></code></li>
-<li><code><a href="reference/get_deg_count_pieplot.html">get_deg_count_pieplot()</a></code></li>
-<li><code><a href="reference/get_deg_count_donutplot.html">get_deg_count_donutplot()</a></code></li>
-<li><code><a href="reference/get_deg_venn_diagram.html">get_deg_venn_diagram()</a></code></li>
-<li><code><a href="reference/get_deg_alluvial.html">get_deg_alluvial()</a></code></li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="expression-patterns">Expression patterns<a class="anchor" aria-label="anchor" href="#expression-patterns"></a>
-</h3>
-<ul>
-<li><code><a href="reference/get_expression_heatmap.html">get_expression_heatmap()</a></code></li>
-<li><code><a href="reference/get_expression_boxplot.html">get_expression_boxplot()</a></code></li>
-<li><code><a href="reference/get_expression_violinplot.html">get_expression_violinplot()</a></code></li>
-<li><code><a href="reference/get_expression_barplot.html">get_expression_barplot()</a></code></li>
-<li><code><a href="reference/get_expression_lollipop.html">get_expression_lollipop()</a></code></li>
-<li><code><a href="reference/get_expression_scatter.html">get_expression_scatter()</a></code></li>
-<li><code><a href="reference/get_expression_lineplot.html">get_expression_lineplot()</a></code></li>
-<li><code><a href="reference/get_expression_density.html">get_expression_density()</a></code></li>
-<li><code><a href="reference/get_expression_joyplot.html">get_expression_joyplot()</a></code></li>
-<li><code><a href="reference/get_expression_raincloud.html">get_expression_raincloud()</a></code></li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="fold-change-structure">Fold-change structure<a class="anchor" aria-label="anchor" href="#fold-change-structure"></a>
-</h3>
-<ul>
-<li><code><a href="reference/get_foldchange_scatter.html">get_foldchange_scatter()</a></code></li>
-<li><code><a href="reference/get_foldchange_barplot.html">get_foldchange_barplot()</a></code></li>
-<li><code><a href="reference/get_foldchange_lollipop.html">get_foldchange_lollipop()</a></code></li>
-<li><code><a href="reference/get_foldchange_boxplot.html">get_foldchange_boxplot()</a></code></li>
-<li><code><a href="reference/get_foldchange_lineplot.html">get_foldchange_lineplot()</a></code></li>
-<li><code><a href="reference/get_foldchange_heatmap.html">get_foldchange_heatmap()</a></code></li>
-<li><code><a href="reference/get_foldchange_matrix.html">get_foldchange_matrix()</a></code></li>
-<li><code><a href="reference/get_foldchange_chromosome_plot.html">get_foldchange_chromosome_plot()</a></code></li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="pathway-and-enrichment-views">Pathway and enrichment views<a class="anchor" aria-label="anchor" href="#pathway-and-enrichment-views"></a>
-</h3>
-<ul>
-<li><code><a href="reference/get_msigdb_enrichment.html">get_msigdb_enrichment()</a></code></li>
-<li><code><a href="reference/get_go_enrichment.html">get_go_enrichment()</a></code></li>
-<li><code><a href="reference/get_kegg_enrichment.html">get_kegg_enrichment()</a></code></li>
-<li><code><a href="reference/get_gsea.html">get_gsea()</a></code></li>
-<li><code><a href="reference/get_enrichment_plot.html">get_enrichment_plot()</a></code></li>
-<li><code><a href="reference/get_enrichment_chord.html">get_enrichment_chord()</a></code></li>
-<li><code>get_enrichment_network()</code></li>
-<li><code><a href="reference/get_pathway_genes.html">get_pathway_genes()</a></code></li>
-<li><code><a href="reference/get_pathway_heatmap.html">get_pathway_heatmap()</a></code></li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="deconvolution-optional-workflow">Deconvolution (optional workflow)<a class="anchor" aria-label="anchor" href="#deconvolution-optional-workflow"></a>
-</h3>
-<ul>
-<li><code><a href="reference/run_cell_deconvolution.html">run_cell_deconvolution()</a></code></li>
-<li><code><a href="reference/get_celltype_barplot.html">get_celltype_barplot()</a></code></li>
-<li><code><a href="reference/get_celltype_group_dotplot.html">get_celltype_group_dotplot()</a></code></li>
-<li><code><a href="reference/get_celltype_heatmap.html">get_celltype_heatmap()</a></code></li>
-</ul>
-</div>
+<details open><summary><b>Quality control and sample structure</b>
+</summary><p><code><a href="reference/get_pca_plot.html">get_pca_plot()</a></code> · <code><a href="reference/get_mds_plot.html">get_mds_plot()</a></code> · <code><a href="reference/get_umap_plot.html">get_umap_plot()</a></code> · <code><a href="reference/get_corr_heatmap.html">get_corr_heatmap()</a></code> · <code><a href="reference/get_pairwise_corr_plot.html">get_pairwise_corr_plot()</a></code></p>
+</details><details><summary><b>Differential expression summaries</b>
+</summary><p><code><a href="reference/get_volcano_plot.html">get_volcano_plot()</a></code> · <code><a href="reference/get_ma_plot.html">get_ma_plot()</a></code> · <code><a href="reference/get_deg_count_barplot.html">get_deg_count_barplot()</a></code> · <code><a href="reference/get_deg_count_pieplot.html">get_deg_count_pieplot()</a></code> · <code><a href="reference/get_deg_count_donutplot.html">get_deg_count_donutplot()</a></code> · <code><a href="reference/get_deg_venn_diagram.html">get_deg_venn_diagram()</a></code> · <code><a href="reference/get_deg_alluvial.html">get_deg_alluvial()</a></code></p>
+</details><details><summary><b>Expression patterns</b>
+</summary><p><code><a href="reference/get_expression_heatmap.html">get_expression_heatmap()</a></code> · <code><a href="reference/get_expression_boxplot.html">get_expression_boxplot()</a></code> · <code><a href="reference/get_expression_violinplot.html">get_expression_violinplot()</a></code> · <code><a href="reference/get_expression_barplot.html">get_expression_barplot()</a></code> · <code><a href="reference/get_expression_lollipop.html">get_expression_lollipop()</a></code> · <code><a href="reference/get_expression_scatter.html">get_expression_scatter()</a></code> · <code><a href="reference/get_expression_lineplot.html">get_expression_lineplot()</a></code> · <code><a href="reference/get_expression_density.html">get_expression_density()</a></code> · <code><a href="reference/get_expression_joyplot.html">get_expression_joyplot()</a></code> · <code><a href="reference/get_expression_raincloud.html">get_expression_raincloud()</a></code> · <code><a href="reference/get_expression_chromosome_plot.html">get_expression_chromosome_plot()</a></code> · <code><a href="reference/get_expression_matrix.html">get_expression_matrix()</a></code></p>
+</details><details><summary><b>Fold-change structure</b>
+</summary><p><code><a href="reference/get_foldchange_scatter.html">get_foldchange_scatter()</a></code> · <code><a href="reference/get_foldchange_barplot.html">get_foldchange_barplot()</a></code> · <code><a href="reference/get_foldchange_lollipop.html">get_foldchange_lollipop()</a></code> · <code><a href="reference/get_foldchange_boxplot.html">get_foldchange_boxplot()</a></code> · <code><a href="reference/get_foldchange_lineplot.html">get_foldchange_lineplot()</a></code> · <code><a href="reference/get_foldchange_heatmap.html">get_foldchange_heatmap()</a></code> · <code><a href="reference/get_foldchange_matrix.html">get_foldchange_matrix()</a></code> · <code><a href="reference/get_foldchange_chromosome_plot.html">get_foldchange_chromosome_plot()</a></code></p>
+</details><details><summary><b>Pathway and enrichment</b>
+</summary><p><code><a href="reference/get_msigdb_enrichment.html">get_msigdb_enrichment()</a></code> · <code><a href="reference/get_go_enrichment.html">get_go_enrichment()</a></code> · <code><a href="reference/get_kegg_enrichment.html">get_kegg_enrichment()</a></code> · <code><a href="reference/get_gsea.html">get_gsea()</a></code> · <code><a href="reference/get_enrichment_plot.html">get_enrichment_plot()</a></code> · <code><a href="reference/get_enrichment_chord.html">get_enrichment_chord()</a></code> · <code><a href="reference/get_pathway_genes.html">get_pathway_genes()</a></code> · <code><a href="reference/get_pathway_heatmap.html">get_pathway_heatmap()</a></code></p>
+</details><details><summary><b>Deconvolution (optional)</b>
+</summary><p><code><a href="reference/run_cell_deconvolution.html">run_cell_deconvolution()</a></code> · <code><a href="reference/get_celltype_barplot.html">get_celltype_barplot()</a></code> · <code><a href="reference/get_celltype_group_dotplot.html">get_celltype_group_dotplot()</a></code> · <code><a href="reference/get_celltype_heatmap.html">get_celltype_heatmap()</a></code></p>
+</details>
 </div>
 <div class="section level2">
-<h2 id="harmonized-plot-api">Harmonized Plot API<a class="anchor" aria-label="anchor" href="#harmonized-plot-api"></a>
+<h2 id="harmonized-plot-api">Harmonized plot API<a class="anchor" aria-label="anchor" href="#harmonized-plot-api"></a>
 </h2>
-<p>VISTA plotting functions are converging on a shared argument grammar so that the same concepts use the same names across plot families.</p>
-<ul>
-<li>
-<code>sample_group</code> and <code>group_column</code> control sample filtering and grouping.</li>
-<li>
-<code>sample_comparison</code> is used for one contrast; <code>sample_comparisons</code> is used for multiple contrasts.</li>
-<li>
-<code>by</code> controls the plotting unit when a plot can switch between group-level and sample-level views.</li>
-<li>
-<code>facet_by</code> controls layout when a plot can switch between gene, group, comparison, or no faceting.</li>
-<li>
-<code>sample_order</code> controls sample sequencing for per-sample plots.</li>
-<li>
-<code>display_id</code> controls user-facing gene labels when feature annotations are available.</li>
-<li>
-<code>color_by</code>, <code>palette</code>, and <code>colors</code> are available on sample-embedding and selected distribution plots for more explicit color control.</li>
-</ul>
-<p>This keeps older code working while making new plots easier to predict.</p>
+<p>VISTA plotting functions share one argument grammar, so the same concept always uses the same name across plot families:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Argument</th>
+<th>Controls</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+<code>sample_group</code>, <code>group_column</code>
+</td>
+<td>Sample filtering and grouping</td>
+</tr>
+<tr>
+<td>
+<code>sample_comparison</code> / <code>sample_comparisons</code>
+</td>
+<td>One contrast / several contrasts</td>
+</tr>
+<tr>
+<td>
+<code>genes</code>, <code>top_n</code>
+</td>
+<td>Which features to show, and how many</td>
+</tr>
+<tr>
+<td><code>by</code></td>
+<td>Group-level vs sample-level view</td>
+</tr>
+<tr>
+<td><code>facet_by</code></td>
+<td>Layout by gene, group, comparison, or none</td>
+</tr>
+<tr>
+<td><code>sample_order</code></td>
+<td>Sample sequencing for per-sample plots</td>
+</tr>
+<tr>
+<td><code>display_id</code></td>
+<td>User-facing gene labels</td>
+</tr>
+<tr>
+<td><code>summarise</code></td>
+<td>Collapse replicates to group means</td>
+</tr>
+<tr>
+<td>
+<code>color_by</code>, <code>palette</code>, <code>colors</code>
+</td>
+<td>Colour control</td>
+</tr>
+<tr>
+<td><code>return_type</code></td>
+<td>
+<code>"plot"</code>, <code>"data"</code>, or <code>"both"</code>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Older argument names keep working and warn with the release in which they become defunct — see <code><a href="reference/VISTA-deprecated.html">?"VISTA-deprecated"</a></code>.</p>
 </div>
 <div class="section level2">
-<h2 id="example-analyses">Example Analyses<a class="anchor" aria-label="anchor" href="#example-analyses"></a>
+<h2 id="bioconductor-compatible-object-design">Bioconductor-compatible object design<a class="anchor" aria-label="anchor" href="#bioconductor-compatible-object-design"></a>
 </h2>
-<div class="section level3">
-<h3 id="enrichment-from-a-vista-comparison">Enrichment from a VISTA comparison<a class="anchor" aria-label="anchor" href="#enrichment-from-a-vista-comparison"></a>
-</h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Human example: requires org.Hs.eg.db</span></span>
-<span><span class="va">msig</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_msigdb_enrichment.html">get_msigdb_enrichment</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista</span>,</span>
-<span>  sample_comparison <span class="op">=</span> <span class="va">comp</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
-<span>  orgdb <span class="op">=</span> <span class="va">org.Hs.eg.db</span>,</span>
-<span>  species <span class="op">=</span> <span class="st">"Homo sapiens"</span>,</span>
-<span>  msigdb_category <span class="op">=</span> <span class="st">"H"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">go_bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_go_enrichment.html">get_go_enrichment</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista</span>,</span>
-<span>  sample_comparison <span class="op">=</span> <span class="va">comp</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
-<span>  ont <span class="op">=</span> <span class="st">"BP"</span>,</span>
-<span>  orgdb <span class="op">=</span> <span class="va">org.Hs.eg.db</span>,</span>
-<span>  species <span class="op">=</span> <span class="st">"Homo sapiens"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">kegg</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_kegg_enrichment.html">get_kegg_enrichment</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista</span>,</span>
-<span>  sample_comparison <span class="op">=</span> <span class="va">comp</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
-<span>  orgdb <span class="op">=</span> <span class="va">org.Hs.eg.db</span>,</span>
-<span>  species <span class="op">=</span> <span class="st">"Homo sapiens"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/get_enrichment_plot.html">get_enrichment_plot</a></span><span class="op">(</span><span class="va">msig</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="multi-comparison-overlap">Multi-comparison overlap<a class="anchor" aria-label="anchor" href="#multi-comparison-overlap"></a>
-</h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example only when your VISTA object contains multiple contrasts</span></span>
-<span><span class="fu"><a href="reference/get_deg_venn_diagram.html">get_deg_venn_diagram</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista_consensus</span>,</span>
-<span>  sample_comparisons <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"treatment1_VS_control"</span>, <span class="st">"control_VS_treatment1"</span><span class="op">)</span>,</span>
-<span>  regulation <span class="op">=</span> <span class="st">"Up"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="consistent-color-control">Consistent color control<a class="anchor" aria-label="anchor" href="#consistent-color-control"></a>
-</h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/VISTA-accessors.html">group_colors</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
-<span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_vista_group_colors.html">set_vista_group_colors</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>control <span class="op">=</span> <span class="st">"#264653"</span>, treatment1 <span class="op">=</span> <span class="st">"#E76F51"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># For multi-comparison objects</span></span>
-<span><span class="va">vista_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_vista_comparison_colors.html">set_vista_comparison_colors</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista_consensus</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>treatment1_VS_control <span class="op">=</span> <span class="st">"#6C5CE7"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="bioconductor-compatible-object-design">Bioconductor-Compatible Object Design<a class="anchor" aria-label="anchor" href="#bioconductor-compatible-object-design"></a>
-</h2>
-<p>VISTA extends <code>SummarizedExperiment</code>, so standard Bioconductor workflows remain available.</p>
+<p>VISTA extends <code>SummarizedExperiment</code>, so standard Bioconductor workflows apply.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Standard access</span></span>
+<code class="sourceCode R"><span><span class="co"># Standard Bioconductor access</span></span>
 <span><span class="fu">assay</span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
 <span><span class="fu">rowData</span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="fu">colData</span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="fu">metadata</span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
+<span><span class="va">vista</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span>, <span class="op">]</span>                      <span class="co"># subsetting keeps DE tables aligned</span></span>
 <span></span>
 <span><span class="co"># VISTA accessors</span></span>
 <span><span class="fu"><a href="reference/VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
@@ -494,33 +391,116 @@
 <span><span class="fu"><a href="reference/VISTA-accessors.html">cutoffs</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/VISTA-accessors.html">norm_counts</a></span><span class="op">(</span><span class="va">vista</span>, summarise <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Validation helpers</span></span>
+<span><span class="co"># Validation</span></span>
 <span><span class="fu"><a href="reference/validate_vista.html">validate_vista</a></span><span class="op">(</span><span class="va">vista</span>, level <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span></span></code></pre></div>
-<p>Advanced users can also coerce an existing <code>SummarizedExperiment</code>:</p>
+<p>Raw filtered counts are retained alongside the normalized assay, so an object can go straight back into DESeq2:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># se &lt;- your existing SummarizedExperiment</span></span>
-<span><span class="co"># vista_from_se &lt;- as_vista(se, group_column = "cond_long")</span></span>
-<span><span class="co"># validate_vista(vista_from_se)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/counts.html">counts</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span>                                     <span class="co"># integer counts</span></span>
+<span><span class="va">dds</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as_deseq_dataset.html">as_deseq_dataset</a></span><span class="op">(</span><span class="va">vista</span>, design <span class="op">=</span> <span class="op">~</span> <span class="va">cond_long</span><span class="op">)</span></span></code></pre></div>
+<blockquote>
+<p><strong>Note</strong> <code><a href="reference/counts.html">counts()</a></code>, <code><a href="reference/as_deseq_dataset.html">as_deseq_dataset()</a></code>, and <code>[</code> are available in the development version and are scheduled for the next Bioconductor release.</p>
+</blockquote>
+</div>
+<div class="section level2">
+<h2 id="example-analyses">Example analyses<a class="anchor" aria-label="anchor" href="#example-analyses"></a>
+</h2>
+<div class="section level3">
+<h3 id="enrichment-from-a-comparison">Enrichment from a comparison<a class="anchor" aria-label="anchor" href="#enrichment-from-a-comparison"></a>
+</h3>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">msig</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_msigdb_enrichment.html">get_msigdb_enrichment</a></span><span class="op">(</span></span>
+<span>  <span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp</span>, regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
+<span>  orgdb <span class="op">=</span> <span class="va">org.Hs.eg.db</span>, species <span class="op">=</span> <span class="st">"Homo sapiens"</span>, msigdb_category <span class="op">=</span> <span class="st">"H"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">go_bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_go_enrichment.html">get_go_enrichment</a></span><span class="op">(</span></span>
+<span>  <span class="va">vista</span>, sample_comparison <span class="op">=</span> <span class="va">comp</span>, regulation <span class="op">=</span> <span class="st">"Up"</span>,</span>
+<span>  ont <span class="op">=</span> <span class="st">"BP"</span>, orgdb <span class="op">=</span> <span class="va">org.Hs.eg.db</span>, species <span class="op">=</span> <span class="st">"Homo sapiens"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/get_enrichment_plot.html">get_enrichment_plot</a></span><span class="op">(</span><span class="va">msig</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="consistent-colour-control">Consistent colour control<a class="anchor" aria-label="anchor" href="#consistent-colour-control"></a>
+</h3>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/VISTA-accessors.html">group_colors</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">vista</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_vista_group_colors.html">set_vista_group_colors</a></span><span class="op">(</span></span>
+<span>  <span class="va">vista</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>control <span class="op">=</span> <span class="st">"#264653"</span>, treatment1 <span class="op">=</span> <span class="st">"#E76F51"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">vista_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/set_vista_comparison_colors.html">set_vista_comparison_colors</a></span><span class="op">(</span></span>
+<span>  <span class="va">vista_consensus</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>treatment1_VS_control <span class="op">=</span> <span class="st">"#6C5CE7"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
-<ul>
-<li>Package website: <a href="https://cparsania.github.io/VISTA/" class="external-link uri">https://cparsania.github.io/VISTA/</a>
-</li>
-<li>Introduction article: <a href="https://cparsania.github.io/VISTA/articles/VISTA-airway.html" class="external-link uri">https://cparsania.github.io/VISTA/articles/VISTA-airway.html</a>
-</li>
-<li>Comparison workflow: <a href="https://cparsania.github.io/VISTA/articles/VISTA-comparison.html" class="external-link uri">https://cparsania.github.io/VISTA/articles/VISTA-comparison.html</a>
-</li>
-<li>Color management: <a href="https://cparsania.github.io/VISTA/articles/VISTA-colors.html" class="external-link uri">https://cparsania.github.io/VISTA/articles/VISTA-colors.html</a>
-</li>
-<li>Function reference article: <a href="https://cparsania.github.io/VISTA/articles/VISTA-reference.html" class="external-link uri">https://cparsania.github.io/VISTA/articles/VISTA-reference.html</a>
-</li>
-<li>Deconvolution article: <a href="https://cparsania.github.io/VISTA/articles/VISTA-deconvolution.html" class="external-link uri">https://cparsania.github.io/VISTA/articles/VISTA-deconvolution.html</a>
-</li>
-</ul>
-<p>Local help remains available through standard R documentation, for example:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>📖 <strong><a href="https://cparsania.github.io/VISTA/">Package website</a></strong> · <strong><a href="https://cparsania.github.io/VISTA/reference/index.html">Function reference</a></strong></p>
+<p><strong>Workflows</strong></p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Article</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><a href="https://cparsania.github.io/VISTA/articles/VISTA-airway.html">Complete RNA-seq workflow</a></td>
+<td>End-to-end analysis of the <code>airway</code> dataset</td>
+</tr>
+<tr>
+<td><a href="https://cparsania.github.io/VISTA/articles/workflows/VISTA-comparison.html">DESeq2 vs edgeR</a></td>
+<td>Comparing backends and building a consensus</td>
+</tr>
+<tr>
+<td><a href="https://cparsania.github.io/VISTA/articles/workflows/VISTA-code-economy.html">Code economy</a></td>
+<td>VISTA against a standard R workflow</td>
+</tr>
+<tr>
+<td><a href="https://cparsania.github.io/VISTA/articles/workflows/VISTA-deconvolution.html">Cell-type deconvolution</a></td>
+<td>Optional deconvolution workflow</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Visualization guides</strong></p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Guide</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><a href="https://cparsania.github.io/VISTA/articles/guides/VISTA-input-preparation.html">Preparing counts and metadata</a></td>
+<td>Importing common count formats</td>
+</tr>
+<tr>
+<td><a href="https://cparsania.github.io/VISTA/articles/guides/VISTA-colors.html">Colour and palette design</a></td>
+<td>Consistent colours across comparisons</td>
+</tr>
+<tr>
+<td><a href="https://cparsania.github.io/VISTA/articles/guides/VISTA-chord.html">Enrichment chord diagrams</a></td>
+<td>Pathway–gene chord plots</td>
+</tr>
+<tr>
+<td><a href="https://cparsania.github.io/VISTA/articles/guides/VISTA-raincloud.html">Raincloud plots</a></td>
+<td>Distribution views</td>
+</tr>
+</tbody>
+</table>
+<p>Local help works as usual:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">?</span><span class="va">create_vista</span></span>
 <span><span class="op">?</span><span class="va">get_expression_heatmap</span></span>
 <span><span class="op">?</span><span class="va">get_go_enrichment</span></span>
@@ -529,25 +509,26 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If you use VISTA in published work, cite the package release used in your analysis.</p>
+<p>If you use VISTA in published work, cite the release used in your analysis:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"VISTA"</span><span class="op">)</span></span></code></pre></div>
 <pre class="text"><code>Parsania C (2026). VISTA: Visualization and Integrated System for Transcriptomic Analysis.
-R package version 0.99.0.</code></pre>
+doi:10.18129/B9.bioc.VISTA, https://bioconductor.org/packages/VISTA/</code></pre>
 </div>
 <div class="section level2">
 <h2 id="support">Support<a class="anchor" aria-label="anchor" href="#support"></a>
 </h2>
 <ul>
-<li>Issues: <a href="https://github.com/cparsania/VISTA/issues" class="external-link uri">https://github.com/cparsania/VISTA/issues</a>
+<li>🐛 <a href="https://github.com/cparsania/VISTA/issues" class="external-link">Report an issue</a>
 </li>
-<li>Bioconductor Support: <a href="https://support.bioconductor.org" class="external-link uri">https://support.bioconductor.org</a>
+<li>💬 <a href="https://support.bioconductor.org/tag/VISTA/" class="external-link">Bioconductor Support</a>
 </li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h2>
-<p>Contributions should preserve reproducibility and backward compatibility.</p>
-<p>Before opening a pull request:</p>
+<p>Contributions should preserve reproducibility and backward compatibility. Before opening a pull request:</p>
 <ul>
 <li>Add or update tests for functional changes.</li>
 <li>Run <code>devtools::document()</code> if roxygen comments changed.</li>
@@ -558,12 +539,13 @@ R package version 0.99.0.</code></pre>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>GPL-3</p>
+<p><a href="https://www.gnu.org/licenses/gpl-3.0" class="external-link">GPL-3</a></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://www.bioconductor.org/packages/VISTA" class="external-link">View on Bioconductor</a></li>
 <li><a href="https://github.com/cparsania/VISTA/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/cparsania/VISTA/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -587,17 +569,25 @@ R package version 0.99.0.</code></pre>
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Chirag Parsania <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Chirag Parsania <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0003-4873-2385" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#maturing" class="external-link"><img src="https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg" alt="Lifecycle: maturing"></a></li>
+<li><a href="https://bioconductor.org/packages/VISTA/" class="external-link"><img src="https://img.shields.io/badge/Bioconductor-VISTA-1f65b7.svg" alt="Bioconductor"></a></li>
+<li><a href="https://bioconductor.org/checkResults/release/bioc-LATEST/VISTA/" class="external-link"><img src="https://bioconductor.org/shields/build/release/bioc/VISTA.svg" alt="Build (release)"></a></li>
+<li><a href="https://bioconductor.org/checkResults/devel/bioc-LATEST/VISTA/" class="external-link"><img src="https://bioconductor.org/shields/build/devel/bioc/VISTA.svg" alt="Build (devel)"></a></li>
+<li><a href="https://bioconductor.org/packages/release/bioc/html/VISTA.html#archives" class="external-link"><img src="https://bioconductor.org/shields/availability/release/VISTA.svg" alt="Platforms"></a></li>
+<li><a href="https://bioconductor.org/packages/stats/bioc/VISTA/" class="external-link"><img src="https://bioconductor.org/shields/downloads/release/VISTA.svg" alt="Download rank"></a></li>
+<li><a href="https://bioconductor.org/packages/release/bioc/html/VISTA.html" class="external-link"><img src="https://bioconductor.org/shields/years-in-bioc/VISTA.svg" alt="In Bioconductor since"></a></li>
 <li><a href="https://github.com/cparsania/VISTA/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/cparsania/VISTA/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/gh/cparsania/VISTA" class="external-link"><img src="https://codecov.io/gh/cparsania/VISTA/graph/badge.svg" alt="codecov"></a></li>
-<li><a href="https://cparsania.github.io/VISTA/" class="external-link"><img src="https://img.shields.io/badge/pkgdown-site-blue" alt="pkgdown site"></a></li>
+<li><a href="https://app.codecov.io/gh/cparsania/VISTA" class="external-link"><img src="https://codecov.io/gh/cparsania/VISTA/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://github.com/cparsania/VISTA/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/cparsania/VISTA/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#maturing" class="external-link"><img src="https://lifecycle.r-lib.org/articles/figures/lifecycle-maturing.svg" alt="Lifecycle: maturing"></a></li>
+<li><a href="https://www.gnu.org/licenses/gpl-3.0" class="external-link"><img src="https://img.shields.io/badge/license-GPL--3-blue.svg" alt="License: GPL-3"></a></li>
+<li><a href="https://cparsania.github.io/VISTA/"><img src="https://img.shields.io/badge/docs-pkgdown-blue.svg" alt="Docs"></a></li>
 </ul>
 </div>
 
@@ -610,7 +600,7 @@ R package version 0.99.0.</code></pre>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

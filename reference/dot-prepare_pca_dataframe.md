@@ -19,7 +19,7 @@ ggplot2. Includes PC1 and PC2 scores and merges with sample metadata.
 - meta:
 
   A sample metadata data frame, typically from
-  [`.prepare_sample_metadata()`](dot-prepare_sample_metadata.md).
+  `.prepare_sample_metadata()`.
 
 ## Value
 

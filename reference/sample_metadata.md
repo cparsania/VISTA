@@ -72,4 +72,4 @@ Derived from the `airway` Bioconductor dataset.
 
 ## See also
 
-[count_data](count_data.md)
+[count_data](https://cparsania.github.io/VISTA/reference/count_data.md)

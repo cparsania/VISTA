@@ -8,7 +8,7 @@ Pie chart of DEG counts (Up/Down) across comparisons
 get_deg_count_pieplot(
   x,
   sample_comparisons = NULL,
-  label = c("both", "count", "percent", "none"),
+  label_type = c("both", "count", "percent", "none"),
   label_digits = 1,
   base_size = 12,
   colors = c(Up = "red4", Down = "blue4"),
@@ -16,7 +16,8 @@ get_deg_count_pieplot(
   other_color = "grey70",
   text_color = "black",
   facet_by = c("comparison", "none"),
-  ncol = NULL
+  ncol = NULL,
+  label = NULL
 )
 ```
 
@@ -30,9 +31,9 @@ get_deg_count_pieplot(
 
   Optional character vector of comparison names to display.
 
-- label:
+- label_type:
 
-  Label mode: `"both"` (default), `"count"`, `"percent"`, or `"none"`.
+  Label content: `"both"`, `"count"`, `"percent"` or `"none"`.
 
 - label_digits:
 
@@ -70,9 +71,13 @@ get_deg_count_pieplot(
 
   Optional number of columns when faceting.
 
+- label:
+
+  Deprecated; use `label_type`. `TRUE`/`FALSE` map to `"both"`/`"none"`.
+
 ## Value
 
-An object returned by this function.
+A `ggplot2` object drawing DEG counts as a pie chart.
 
 ## Examples
 

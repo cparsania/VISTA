@@ -1,9 +1,10 @@
 # Read and standardize sample metadata for VISTA
 
 `read_vista_metadata()` standardizes a sample sheet for use as
-`sample_info` in [`create_vista()`](create_vista.md). It infers or
-creates the required `sample_names` column using the same conventions
-VISTA already accepts in the constructor.
+`sample_info` in
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
+It infers or creates the required `sample_names` column using the same
+conventions VISTA already accepts in the constructor.
 
 ## Usage
 
@@ -52,7 +53,7 @@ read_vista_metadata(
 ## Value
 
 A data frame suitable for use as `sample_info` in
-[`create_vista()`](create_vista.md).
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
 
 ## Examples
 

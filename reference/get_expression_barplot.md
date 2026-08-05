@@ -19,14 +19,16 @@ get_expression_barplot(
   facet_nrow = NULL,
   facet_ncol = NULL,
   p.label = "p.signif",
-  comparisons = NULL,
+  stat_comparisons = NULL,
   display_id = NULL,
   display_from = NULL,
   display_orgdb = NULL,
   by = c("group", "sample"),
   sample_order = c("input", "group", "expression"),
   fill_by = NULL,
-  facet_by = c("auto", "gene", "none")
+  facet_by = c("auto", "gene", "none"),
+  max_genes = 25,
+  comparisons = NULL
 )
 ```
 
@@ -74,10 +76,11 @@ get_expression_barplot(
   Label format for
   [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html).
 
-- comparisons:
+- stat_comparisons:
 
-  Optional list of specific group comparisons for
-  `stat_compare_means()`.
+  Optional list of length-2 group pairs passed to
+  [`ggpubr::stat_compare_means()`](https://rpkgs.datanovia.com/ggpubr/reference/stat_compare_means.html)
+  for significance brackets.
 
 - display_id:
 
@@ -120,6 +123,15 @@ get_expression_barplot(
   Faceting mode: `"auto"` (default; facet by gene when more than one
   gene is requested), `"gene"`, or `"none"`. For multiple genes,
   `"none"` falls back to `"gene"` to preserve readability.
+
+- max_genes:
+
+  Maximum number of genes accepted in one call (default 25). Previously
+  an undocumented hard cap.
+
+- comparisons:
+
+  Deprecated; use `stat_comparisons`.
 
 ## Value
 

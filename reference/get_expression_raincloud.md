@@ -77,15 +77,15 @@ get_expression_raincloud(
 - facet_by:
 
   Faceting mode. Uses the same argument pattern as
-  [`get_expression_boxplot()`](get_expression_boxplot.md), but
-  `pool_genes = TRUE` falls back to `"none"` because pooled violins
+  [`get_expression_boxplot()`](https://cparsania.github.io/VISTA/reference/get_expression_boxplot.md),
+  but `pool_genes = TRUE` falls back to `"none"` because pooled violins
   already aggregate across genes.
 
 - fill_by:
 
   Fill mapping. Uses the same values as
-  [`get_expression_boxplot()`](get_expression_boxplot.md), including
-  discrete sample metadata columns.
+  [`get_expression_boxplot()`](https://cparsania.github.io/VISTA/reference/get_expression_boxplot.md),
+  including discrete sample metadata columns.
 
 - facet_nrow, facet_ncol:
 

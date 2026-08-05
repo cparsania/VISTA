@@ -24,7 +24,8 @@ get_foldchange_lineplot(
   summary_color = NULL,
   summary_linewidth = 1,
   summary_fun = c("median", "mean"),
-  base_size = 14
+  base_size = 14,
+  return_type = c("both", "plot", "data")
 )
 ```
 
@@ -107,12 +108,21 @@ get_foldchange_lineplot(
 
   Numeric base theme size.
 
+- return_type:
+
+  One of `"both"` (default), `"plot"` or `"data"`. The default is
+  `"both"` rather than `"plot"` because this function has always
+  returned the list; pass `"plot"` for a bare `ggplot2` object.
+
 ## Value
 
-An object returned by this function.
+A list with `plot` (a `ggplot2` object) and `clustered_data` (the long
+data frame behind it, including any k-means cluster assignment).
 
-A list with `plot` (the `ggplot2` object) and `clustered_data`
-(gene-to-cluster assignments).
+With `return_type = "both"` (the default), a list with `plot` (the
+`ggplot2` object) and `clustered_data` (gene-to-cluster assignments);
+with `"plot"` the `ggplot2` object alone; with `"data"` the cluster
+table alone.
 
 ## Examples
 

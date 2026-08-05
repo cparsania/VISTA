@@ -11,7 +11,7 @@ get_pca_plot(
   sample_group = NULL,
   group_column = NULL,
   genes = NULL,
-  top_n_genes = NULL,
+  top_n = NULL,
   label = FALSE,
   label_size = 3,
   point_size = 10,
@@ -23,7 +23,9 @@ get_pca_plot(
   use_vista_colors = NULL,
   palette = NULL,
   colors = NULL,
-  use_group_colors = TRUE
+  use_group_colors = TRUE,
+  top_n_genes = NULL,
+  max_genes = 20
 )
 ```
 
@@ -50,7 +52,7 @@ get_pca_plot(
   Optional character vector of gene identifiers to restrict the PCA
   input matrix. When `NULL`, all genes are used.
 
-- top_n_genes:
+- top_n:
 
   Optional integer selecting the top most variable genes to include.
   Ignored when `genes` is supplied.
@@ -111,6 +113,14 @@ get_pca_plot(
   Logical; when `TRUE`, prefer the stored VISTA group colours when
   colouring by the grouping column.
 
+- top_n_genes:
+
+  Deprecated; use `top_n`.
+
+- max_genes:
+
+  Maximum number of genes accepted in `genes` (default 20).
+
 ## Value
 
 A ggplot object showing the first two PCs.
@@ -147,6 +157,8 @@ get_pca_plot(vista, label = TRUE)
 
 # Using top variable genes
 get_pca_plot(vista, top_n_genes = 100)
+#> Warning: `top_n_genes` in `get_pca_plot()` is deprecated. Use `top_n` instead. It becomes defunct in VISTA 1.4.0.
+#> This warning is displayed once every 8 hours.
 
 
 # With confidence ellipses

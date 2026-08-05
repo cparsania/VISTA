@@ -7,8 +7,9 @@ normalization, model fitting, differential testing, DEG classification
 (`"Up"`, `"Down"`, `"Other"`), and result formatting.
 
 Both methods return output in a harmonized structure ready for
-downstream use in [create_vista](create_vista.md) or standalone DEG
-summaries.
+downstream use in
+[create_vista](https://cparsania.github.io/VISTA/reference/create_vista.md)
+or standalone DEG summaries.
 
 ## Usage
 
@@ -106,13 +107,15 @@ run_limma_analysis(
 
 - min_counts:
 
-  Minimum total read count across all samples to retain a gene. Default:
-  `10`.
+  Minimum per-sample read count a gene must reach to count as detected
+  in that sample. Also applied as a minimum row total across all samples
+  in an initial pre-filter. Default: `10`.
 
 - min_replicates:
 
-  Minimum number of replicates within each group that must exceed
-  `min_counts`. Default: `1`.
+  Minimum number of samples in which a gene must reach `min_counts` for
+  that gene to enter the model. Counted across the whole experiment, not
+  within each group. Default: `1`.
 
 - log2fc_cutoff:
 
@@ -165,18 +168,23 @@ visualization and analysis.
   [voom](https://rdrr.io/pkg/limma/man/voom.html), and testing uses
   [eBayes](https://rdrr.io/pkg/limma/man/ebayes.html).
 
-Low-abundance filtering is applied before model fitting. Gene regulation
-status is determined via
-[`.categorize_deg_results()`](dot-categorize_deg_results.md) based on
-user thresholds.
+Low-abundance filtering is applied before model fitting, and for the
+edgeR/limma backends before
+[calcNormFactors](https://rdrr.io/pkg/edgeR/man/calcNormFactors.html) so
+that normalization factors are not estimated from genes that will be
+discarded. All three backends use the same filtering predicate: a gene
+is retained when at least `min_replicates` samples reach `min_counts`.
+Gene regulation status is determined via
+[`.categorize_deg_results()`](https://cparsania.github.io/VISTA/reference/dot-categorize_deg_results.md)
+based on user thresholds.
 
 All output comparison results are internally standardized via
-[`.tidy_de_results()`](dot-tidy_de_results.md) to ensure a uniform
-column schema compatible with VISTA plotting tools.
+[`.tidy_de_results()`](https://cparsania.github.io/VISTA/reference/dot-tidy_de_results.md)
+to ensure a uniform column schema compatible with VISTA plotting tools.
 
 ## See also
 
-[create_vista](create_vista.md),
+[create_vista](https://cparsania.github.io/VISTA/reference/create_vista.md),
 [DESeq](https://rdrr.io/pkg/DESeq2/man/DESeq.html),
 [glmLRT](https://rdrr.io/pkg/edgeR/man/glmLRT.html),
 [voom](https://rdrr.io/pkg/limma/man/voom.html)
@@ -198,6 +206,7 @@ limma_results <- run_limma_analysis(
   min_counts = 5,
   min_replicates = 1
 )
+#> calcNormFactors has been renamed to normLibSizes
 names(limma_results$comparisons)
 #> [1] "treatment1_VS_control"
 ```
