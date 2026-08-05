@@ -384,7 +384,6 @@ vista_consensus <- set_vista_comparison_colors(
 | [Colour and palette design](https://cparsania.github.io/VISTA/articles/guides/VISTA-colors.html) | Consistent colours across comparisons |
 | [Enrichment chord diagrams](https://cparsania.github.io/VISTA/articles/guides/VISTA-chord.html) | Pathway–gene chord plots |
 | [Raincloud plots](https://cparsania.github.io/VISTA/articles/guides/VISTA-raincloud.html) | Distribution views |
-| [Function reference](https://cparsania.github.io/VISTA/articles/guides/VISTA-reference.html) | Narrative tour of the API |
 
 Local help works as usual:
 
