@@ -26,7 +26,8 @@ get_enrichment_chord(
   transparency = 0.4,
   gap_degree = 2,
   label_cex = 0.7,
-  title = NULL
+  title = NULL,
+  return_type = c("data", "plot", "both")
 )
 }
 \arguments{
@@ -93,9 +94,14 @@ When \code{NULL}, colours are generated from an HCL palette.}
 \item{label_cex}{Text size for sector labels (default \code{0.7}).}
 
 \item{title}{Optional plot title.}
+
+\item{return_type}{One of \code{"data"} (default), \code{"plot"} or \code{"both"}. The
+default is \code{"data"} because this function draws to the active device and
+has always returned its table invisibly. \code{"plot"} returns a recorded plot
+that \code{\link[=save_vista_plot]{save_vista_plot()}} can write to a file.}
 }
 \value{
-Invisibly returns a list with:
+With \code{return_type = "data"} (the default), invisibly a list with:
 \describe{
 \item{gene_data}{Tibble of genes with pathway membership and (optionally)
 fold-change values.}

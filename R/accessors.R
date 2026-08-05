@@ -119,7 +119,8 @@ NULL
 }
 
 #' @export
-setGeneric("comparisons", function(object, source = "active") methods::standardGeneric("comparisons"))
+setGeneric("comparisons", function(object, source = "active") standardGeneric("comparisons"),
+           signature = "object")
 #' @rdname VISTA-accessors
 #' @export
 setMethod("comparisons", "VISTA", function(object, source = "active") {
@@ -128,7 +129,8 @@ setMethod("comparisons", "VISTA", function(object, source = "active") {
 
 
 #' @export
-setGeneric("deg_summary", function(object, source = "active") methods::standardGeneric("deg_summary"))
+setGeneric("deg_summary", function(object, source = "active") standardGeneric("deg_summary"),
+           signature = "object")
 #' @rdname VISTA-accessors
 #' @export
 setMethod("deg_summary", "VISTA", function(object, source = "active") {
@@ -137,7 +139,8 @@ setMethod("deg_summary", "VISTA", function(object, source = "active") {
 
 
 #' @export
-setGeneric("cutoffs", function(object) methods::standardGeneric("cutoffs"))
+setGeneric("cutoffs", function(object) standardGeneric("cutoffs"),
+           signature = "object")
 #' @rdname VISTA-accessors
 #' @export
 setMethod("cutoffs", "VISTA", function(object) {
@@ -147,7 +150,8 @@ setMethod("cutoffs", "VISTA", function(object) {
 
 
 #' @export
-setGeneric("norm_counts", function(object, summarise = FALSE) methods::standardGeneric("norm_counts"))
+setGeneric("norm_counts", function(object, summarise = FALSE) standardGeneric("norm_counts"),
+           signature = "object")
 #' @rdname VISTA-accessors
 #' @export
 setMethod("norm_counts", "VISTA", function(object, summarise = FALSE) {
@@ -166,7 +170,10 @@ setMethod("norm_counts", "VISTA", function(object, summarise = FALSE) {
   }
 
   si$sample <- rownames(si)
-  group_map <- split(si$sample, si[[group_column]])
+  # droplevels(): a factor grouping column can retain levels with no remaining
+  # samples (for example after subsetting the object). split() would then emit an
+  # empty group whose rowMeans is NaN for every gene.
+  group_map <- split(si$sample, droplevels(as.factor(si[[group_column]])))
   summarized <- vapply(group_map, function(samples) {
     rowMeans(mat[, samples, drop = FALSE])
   }, FUN.VALUE = numeric(nrow(mat)))
@@ -177,21 +184,24 @@ setMethod("norm_counts", "VISTA", function(object, summarise = FALSE) {
 
 
 #' @export
-setGeneric("sample_info", function(object) methods::standardGeneric("sample_info"))
+setGeneric("sample_info", function(object) standardGeneric("sample_info"),
+           signature = "object")
 #' @rdname VISTA-accessors
 #' @export
 setMethod("sample_info", "VISTA", function(object) colData(object))
 
 
 #' @export
-setGeneric("row_data", function(object) methods::standardGeneric("row_data"))
+setGeneric("row_data", function(object) standardGeneric("row_data"),
+           signature = "object")
 #' @rdname VISTA-accessors
 #' @export
 setMethod("row_data", "VISTA", function(object) rowData(object))
 
 
 #' @export
-setGeneric("group_colors", function(object) methods::standardGeneric("group_colors"))
+setGeneric("group_colors", function(object) standardGeneric("group_colors"),
+           signature = "object")
 #' @rdname VISTA-accessors
 #' @export
 setMethod("group_colors", "VISTA", function(object) {
@@ -205,7 +215,8 @@ setMethod("group_colors", "VISTA", function(object) {
 
 
 #' @export
-setGeneric("group_palette", function(object) methods::standardGeneric("group_palette"))
+setGeneric("group_palette", function(object) standardGeneric("group_palette"),
+           signature = "object")
 #' @rdname VISTA-accessors
 #' @export
 setMethod("group_palette", "VISTA", function(object) {

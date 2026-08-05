@@ -11,7 +11,7 @@ get_corr_heatmap(
   genes = NULL,
   corr_method = "pearson",
   triangle = c("full", "lower", "upper"),
-  cluster_by = c("correlation", "group", "input", "none"),
+  order_by = c("correlation", "group", "input", "none"),
   show_diagonal = TRUE,
   label = TRUE,
   show_corr_values = NULL,
@@ -23,7 +23,8 @@ get_corr_heatmap(
   viridis_option = "viridis",
   viridis_direction = 1,
   viridis_begin = 0,
-  viridis_end = 1
+  viridis_end = 1,
+  cluster_by = NULL
 )
 }
 \arguments{
@@ -39,7 +40,7 @@ get_corr_heatmap(
 
 \item{triangle}{Either \code{"full"}, \code{"lower"}, or \code{"upper"} to control which triangle is drawn.}
 
-\item{cluster_by}{Ordering strategy for samples: \code{"correlation"} (default),
+\item{order_by}{Ordering strategy for samples: \code{"correlation"} (default),
 \code{"group"}, \code{"input"}, or \code{"none"}.}
 
 \item{show_diagonal}{Logical; include the correlation diagonal when \code{TRUE}.}
@@ -66,9 +67,11 @@ color scale.}
 \item{viridis_direction}{Integer (1 or -1) controlling palette direction.}
 
 \item{viridis_begin, viridis_end}{Palette endpoints between 0 and 1.}
+
+\item{cluster_by}{Deprecated; use \code{order_by}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object showing the sample-by-sample correlation heatmap.
 }
 \description{
 Plots sample-sample correlation matrix derived from normalized counts with

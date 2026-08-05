@@ -1,3 +1,8 @@
+# Deprecation warnings are throttled for users (see .vista_deprecate_arg), which
+# would make them invisible to the second and later assertions in a run. Tests
+# must see every occurrence.
+options(vista.deprecation_frequency = "always")
+
 make_small_vista <- function() {
   example_vista()
 }

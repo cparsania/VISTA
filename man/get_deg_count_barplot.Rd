@@ -31,7 +31,7 @@ Use \code{"none"} for a single panel.}
 \item{facet_scales}{Scale option passed to \code{facet_wrap()} when faceting.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object with one bar per regulation class.
 }
 \description{
 Barplot of DEG counts (Up/Down) across comparisons

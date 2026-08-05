@@ -106,11 +106,15 @@ test_that("run_deseq_analysis returns the harmonized standalone structure", {
 
   expect_named(
     res,
-    c("norm_counts", "sample_info", "row_data", "comparisons", "deg_summary")
+    c("norm_counts", "raw_counts", "sample_info", "row_data", "comparisons", "deg_summary")
   )
   expect_identical(names(res$comparisons), "treatment1_VS_control")
   expect_true(all(c("gene_id", "regulation") %in% colnames(res$comparisons[[1]])))
   expect_identical(colnames(res$norm_counts), si$sample_names)
+
+  # Raw counts travel with the normalized matrix so create_vista() can store them.
+  expect_identical(dim(res$raw_counts), dim(res$norm_counts))
+  expect_true(all(res$raw_counts == round(res$raw_counts)))
 })
 
 test_that("run_edger_analysis and run_limma_analysis share the same schema", {
@@ -136,7 +140,7 @@ test_that("run_edger_analysis and run_limma_analysis share the same schema", {
   for (res in list(res_edger, res_limma)) {
     expect_named(
       res,
-      c("norm_counts", "sample_info", "row_data", "comparisons", "deg_summary")
+      c("norm_counts", "raw_counts", "sample_info", "row_data", "comparisons", "deg_summary")
     )
     expect_identical(names(res$comparisons), "treatment1_VS_control")
     expect_true(all(c("gene_id", "regulation") %in% colnames(res$comparisons[[1]])))

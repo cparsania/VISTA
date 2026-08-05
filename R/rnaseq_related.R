@@ -45,6 +45,10 @@
 #'   Default: \code{"Dark 2"}.
 #' @param comparison_palette Qualitative palette name used to assign colors per
 #'   comparison (stored in \code{metadata(v)$comparison$colors}). Defaults to \code{"Dark 3"}.
+#' @param keep_raw_counts Logical; if \code{TRUE} (default), the filtered raw
+#'   count matrix is retained as a second assay named \code{"counts"}, reachable
+#'   with \code{counts(v)} and required by \code{as_deseq_dataset()}. This
+#'   roughly doubles the assay footprint; set \code{FALSE} to omit it.
 #' @param validate Logical; if \code{TRUE} (default), run full \code{validate_vista()}
 #'   checks before returning the object.
 #'
@@ -144,6 +148,7 @@ create_vista <- function(counts,
                          result_source = NULL,
                          group_palette = "Dark 2",
                          comparison_palette = "Dark 3",
+                         keep_raw_counts = TRUE,
                          validate = TRUE) {
 
   method <- match.arg(method)
@@ -385,6 +390,7 @@ create_vista <- function(counts,
     ),
     group_column  = group_column,
     group_palette = group_palette,
+    raw_counts    = if (isTRUE(keep_raw_counts)) de_results_base$raw_counts else NULL,
     validate      = FALSE
   )
 
@@ -464,6 +470,10 @@ get_expression_matrix <- function(x,
   if (!is.null(genes)) {
     mat <- mat[intersect(rownames(mat), genes), , drop = FALSE]
   }
+  # Row identity after this point is whatever the assay order produced, NOT the
+  # order `genes` was supplied in. Keep it so the summarise branch below cannot
+  # relabel rows with someone else's identifiers.
+  gene_ids <- rownames(mat)
 
   # subset samples or summarise by group
   meta <- as.data.frame(SummarizedExperiment::colData(x))
@@ -477,11 +487,13 @@ get_expression_matrix <- function(x,
       # treat sample_names as group labels when summarising
       meta <- meta[meta[[group_col]] %in% sample_names, , drop = FALSE]
     }
-    group_map <- split(meta$sample, meta[[group_col]])
+    # droplevels(): see norm_counts() -- a retained-but-empty factor level would
+    # otherwise produce an all-NaN column.
+    group_map <- split(meta$sample, droplevels(as.factor(meta[[group_col]])))
     mat <- vapply(group_map, function(samps) rowMeans(mat[, samps, drop = FALSE]),
                   FUN.VALUE = numeric(nrow(mat)))
     mat <- as.matrix(mat)
-    rownames(mat) <- if (!is.null(genes)) genes[genes %in% rownames(mat)] else rownames(mat)
+    rownames(mat) <- gene_ids
   } else {
     if (!is.null(sample_names)) {
       keep <- intersect(colnames(mat), sample_names)

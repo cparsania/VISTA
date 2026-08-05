@@ -521,3 +521,67 @@ test_that("faceted expression plots validate facet layout inputs", {
     "positive integer"
   )
 })
+
+test_that("get_expression_lollipop resolves genes supplied as display labels (B7)", {
+  v <- make_small_vista()
+  SummarizedExperiment::rowData(v)$SYMBOL <- paste0("SYM", seq_len(nrow(v)))
+
+  ids <- rownames(v)[seq_len(3)]
+  syms <- SummarizedExperiment::rowData(v)$SYMBOL[seq_len(3)]
+
+  by_id <- get_expression_lollipop(v, genes = ids)
+  by_sym <- get_expression_lollipop(v, genes = syms, display_id = "SYMBOL")
+
+  expect_s3_class(by_sym, "ggplot")
+
+  # The `gene` column carries display labels once display_id is set, so compare
+  # the underlying data: symbols must select the same genes as raw identifiers.
+  expect_identical(nrow(by_sym$data), nrow(by_id$data))
+  expect_setequal(unique(as.character(by_sym$data$gene)), syms)
+
+  num_col <- intersect(c("value", "expression", "mean_expression"), colnames(by_id$data))[[1]]
+  expect_equal(
+    sort(by_sym$data[[num_col]]), sort(by_id$data[[num_col]])
+  )
+
+  # Passing symbols WITHOUT display_id cannot resolve them, and must not
+  # silently fall through to plotting something else.
+  expect_error(get_expression_lollipop(v, genes = syms), "None of the specified")
+})
+
+test_that("get_expression_lollipop still accepts raw identifiers without display_id", {
+  v <- make_small_vista()
+  ids <- rownames(v)[seq_len(2)]
+  p <- get_expression_lollipop(v, genes = ids)
+  expect_s3_class(p, "ggplot")
+  expect_setequal(unique(as.character(p$data$gene)), ids)
+})
+
+test_that("get_expression_lollipop maps symbols through an OrgDb when rowData lacks them (B7)", {
+  skip_if_not_installed("org.Hs.eg.db")
+  v <- make_small_vista()
+
+  # No SYMBOL column in rowData, so resolution has to go through the OrgDb
+  # branch -- the one that previously called .map_gene_ids() with identical
+  # source and target types, making it a no-op.
+  expect_false("SYMBOL" %in% colnames(SummarizedExperiment::rowData(v)))
+
+  ids <- c("ENSG00000000003", "ENSG00000000419")
+  syms <- c("TSPAN6", "DPM1")
+  skip_if_not(all(ids %in% rownames(v)))
+
+  p <- get_expression_lollipop(
+    v,
+    genes = syms,
+    display_id = "SYMBOL",
+    display_from = "ENSEMBL",
+    display_orgdb = org.Hs.eg.db::org.Hs.eg.db
+  )
+  expect_s3_class(p, "ggplot")
+
+  by_id <- get_expression_lollipop(v, genes = ids)
+  expect_identical(nrow(p$data), nrow(by_id$data))
+
+  num_col <- intersect(c("value", "expression", "mean_expression"), colnames(by_id$data))[[1]]
+  expect_equal(sort(p$data[[num_col]]), sort(by_id$data[[num_col]]))
+})

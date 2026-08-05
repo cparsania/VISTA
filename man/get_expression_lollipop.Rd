@@ -17,12 +17,15 @@ get_expression_lollipop(
   facet_nrow = NULL,
   facet_ncol = NULL,
   point_size = 6,
-  line_size = 1.2,
+  linewidth = 1.2,
   label = TRUE,
   label_digits = 1,
   display_id = NULL,
   display_from = NULL,
-  display_orgdb = NULL
+  display_orgdb = NULL,
+  facet_scales = facet_scale,
+  max_genes = 15,
+  line_size = NULL
 )
 }
 \arguments{
@@ -48,13 +51,13 @@ than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes
 
 \item{log_transform}{Logical; log2-transform expression before plotting.}
 
-\item{facet_scale}{Scaling option passed to \code{facet_wrap()} when plotting multiple genes.}
+\item{facet_scale}{Deprecated; use \code{facet_scales}.}
 
 \item{facet_nrow, facet_ncol}{Optional layout passed to \code{facet_wrap()} when faceting.}
 
 \item{point_size}{Numeric size of the dots.}
 
-\item{line_size}{Numeric size of the stems.}
+\item{linewidth}{Numeric width of the stems.}
 
 \item{label}{Logical; draw numeric labels above the dots.}
 
@@ -69,9 +72,16 @@ is not found in \code{rowData}).}
 
 \item{display_orgdb}{Optional \code{OrgDb} object used for ID mapping when
 \code{display_id} is set but not found in \code{rowData}.}
+
+\item{facet_scales}{Scaling option passed to \code{facet_wrap()} when plotting multiple genes.}
+
+\item{max_genes}{Maximum number of genes accepted in one call (default 15).
+Previously an undocumented hard cap.}
+
+\item{line_size}{Deprecated; use \code{linewidth}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object drawing expression as lollipops.
 
 A \code{ggplot2} object.
 }

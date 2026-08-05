@@ -326,3 +326,163 @@ test_that("derive_vista_metadata template adds placeholder columns", {
   expect_true(all(is.na(meta$group)))
   expect_true(all(is.na(meta$batch)))
 })
+
+# --- B6: multi-file importers must bind by gene identifier, not by position ---
+
+test_that("STAR files with shuffled gene order are matched by identifier", {
+  star_file <- function(genes, values) {
+    lines <- c(
+      "N_unmapped\t1\t1\t1",
+      "N_multimapping\t2\t2\t2",
+      "N_noFeature\t3\t3\t3",
+      "N_ambiguous\t4\t4\t4",
+      paste(genes, values, values, values, sep = "\t")
+    )
+    f <- tempfile(fileext = ".ReadsPerGene.out.tab")
+    writeLines(lines, f)
+    f
+  }
+
+  genes <- c("geneA", "geneB", "geneC")
+  f1 <- star_file(genes, c(10, 20, 30))
+  # Same genes, different row order, distinct values.
+  f2 <- star_file(rev(genes), c(300, 200, 100))
+  on.exit(unlink(c(f1, f2)), add = TRUE)
+
+  cnt <- read_vista_counts(
+    c(f1, f2), format = "star", sample_names = c("s1", "s2"), verbose = FALSE
+  )
+
+  expect_identical(cnt$counts$gene_id, genes)
+  expect_equal(cnt$counts$s1, c(10, 20, 30))
+  # Positional binding would have produced 300, 200, 100 here.
+  expect_equal(cnt$counts$s2, c(100, 200, 300))
+})
+
+test_that("HTSeq files with shuffled gene order are matched by identifier", {
+  htseq_file <- function(genes, values) {
+    f <- tempfile(fileext = ".txt")
+    writeLines(c(paste(genes, values, sep = "\t"), "__no_feature\t99"), f)
+    f
+  }
+
+  genes <- c("geneA", "geneB", "geneC")
+  f1 <- htseq_file(genes, c(1, 2, 3))
+  f2 <- htseq_file(rev(genes), c(30, 20, 10))
+  on.exit(unlink(c(f1, f2)), add = TRUE)
+
+  cnt <- read_vista_counts(
+    c(f1, f2), format = "htseq", sample_names = c("s1", "s2"), verbose = FALSE
+  )
+
+  expect_identical(cnt$counts$gene_id, genes)
+  expect_equal(cnt$counts$s1, c(1, 2, 3))
+  expect_equal(cnt$counts$s2, c(10, 20, 30))
+})
+
+test_that("RSEM files with shuffled gene order are matched by identifier", {
+  rsem_file <- function(genes, values) {
+    f <- tempfile(fileext = ".genes.results")
+    utils::write.table(
+      data.frame(
+        gene_id = genes, transcript_id = paste0("tx_", genes),
+        expected_count = values, stringsAsFactors = FALSE
+      ),
+      file = f, sep = "\t", quote = FALSE, row.names = FALSE
+    )
+    f
+  }
+
+  genes <- c("geneA", "geneB", "geneC")
+  f1 <- rsem_file(genes, c(5, 6, 7))
+  f2 <- rsem_file(rev(genes), c(70, 60, 50))
+  on.exit(unlink(c(f1, f2)), add = TRUE)
+
+  cnt <- read_vista_counts(
+    c(f1, f2), format = "rsem", sample_names = c("s1", "s2"), verbose = FALSE
+  )
+
+  expect_identical(cnt$counts$gene_id, genes)
+  expect_equal(cnt$counts$s1, c(5, 6, 7))
+  expect_equal(cnt$counts$s2, c(50, 60, 70))
+  # row_data is taken from the first file and must stay aligned.
+  expect_identical(as.character(cnt$row_data$gene_id), genes)
+})
+
+test_that("a file that does not cover the reference gene set is an error", {
+  htseq_file <- function(genes, values) {
+    f <- tempfile(fileext = ".txt")
+    writeLines(paste(genes, values, sep = "\t"), f)
+    f
+  }
+
+  f1 <- htseq_file(c("geneA", "geneB", "geneC"), c(1, 2, 3))
+  f2 <- htseq_file(c("geneA", "geneB", "geneZ"), c(1, 2, 3))
+  on.exit(unlink(c(f1, f2)), add = TRUE)
+
+  # Equal row counts, so the old positional bind accepted this silently.
+  expect_error(
+    read_vista_counts(
+      c(f1, f2), format = "htseq", sample_names = c("s1", "s2"), verbose = FALSE
+    ),
+    "do not cover the reference gene set"
+  )
+
+  msg <- tryCatch(
+    read_vista_counts(
+      c(f1, f2), format = "htseq", sample_names = c("s1", "s2"), verbose = FALSE
+    ),
+    error = function(e) conditionMessage(e)
+  )
+  expect_match(msg, basename(f2), fixed = TRUE)
+  expect_match(msg, "geneC", fixed = TRUE)
+})
+
+test_that("extra identifiers in a later file are dropped with a message", {
+  htseq_file <- function(genes, values) {
+    f <- tempfile(fileext = ".txt")
+    writeLines(paste(genes, values, sep = "\t"), f)
+    f
+  }
+
+  f1 <- htseq_file(c("geneA", "geneB"), c(1, 2))
+  f2 <- htseq_file(c("geneB", "geneA", "geneEXTRA"), c(20, 10, 999))
+  on.exit(unlink(c(f1, f2)), add = TRUE)
+
+  expect_message(
+    cnt <- read_vista_counts(
+      c(f1, f2), format = "htseq", sample_names = c("s1", "s2"), verbose = FALSE
+    ),
+    "Dropped 1 identifier"
+  )
+  expect_identical(cnt$counts$gene_id, c("geneA", "geneB"))
+  expect_equal(cnt$counts$s2, c(10, 20))
+})
+
+test_that("identically ordered files still bind positionally", {
+  # Fast path: identical id vectors, including repeated identifiers, must work
+  # without requiring uniqueness.
+  tabs <- list(
+    data.frame(id = c("g1", "g1", "g2"), n = c(1, 2, 3), stringsAsFactors = FALSE),
+    data.frame(id = c("g1", "g1", "g2"), n = c(4, 5, 6), stringsAsFactors = FALSE)
+  )
+  out <- VISTA:::.bind_count_files(
+    tabs, id_col = "id", value_col = "n", sample_names = c("a", "b")
+  )
+  expect_identical(out$gene_id, c("g1", "g1", "g2"))
+  expect_equal(out$a, c(1, 2, 3))
+  expect_equal(out$b, c(4, 5, 6))
+})
+
+test_that("duplicated identifiers with differing order are rejected", {
+  tabs <- list(
+    data.frame(id = c("g1", "g1", "g2"), n = c(1, 2, 3), stringsAsFactors = FALSE),
+    data.frame(id = c("g2", "g1", "g1"), n = c(3, 1, 2), stringsAsFactors = FALSE)
+  )
+  expect_error(
+    VISTA:::.bind_count_files(
+      tabs, id_col = "id", value_col = "n", sample_names = c("a", "b")
+    ),
+    "duplicated gene identifiers"
+  )
+})

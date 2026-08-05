@@ -95,6 +95,23 @@ validate_vista <- function(x, level = c("core", "full"), error = TRUE) {
 
   if (!is.character(md$vista_schema_version) || length(md$vista_schema_version) != 1L || !nzchar(md$vista_schema_version)) {
     issues <- c(issues, "metadata(x)$vista_schema_version must be a non-empty character scalar.")
+  } else {
+    schema_state <- .vista_schema_compare(x)
+    current_schema <- .VISTA_SCHEMA_VERSION
+    stored_schema <- md$vista_schema_version
+    if (identical(schema_state, "newer")) {
+      # A newer layout may carry semantics this version would misread, so this
+      # is an issue rather than a note.
+      issues <- c(issues, sprintf(
+        "metadata(x)$vista_schema_version ('%s') is newer than this version of VISTA supports ('%s'); upgrade the package.",
+        md$vista_schema_version, .VISTA_SCHEMA_VERSION
+      ))
+    } else if (identical(schema_state, "older")) {
+      cli::cli_inform(c(
+        "This VISTA object uses schema {.val {stored_schema}}; the current schema is {.val {current_schema}}.",
+        "i" = "Run {.code updateObject(x)} to migrate it."
+      ))
+    }
   }
 
   if (is.list(md$de_cutoffs)) {
@@ -103,7 +120,38 @@ validate_vista <- function(x, level = c("core", "full"), error = TRUE) {
     }
   }
 
+  # The DE tables must describe the genes actually present. This lived only in
+  # .validate_vista_full(), so a stale-metadata object -- the state row
+  # subsetting used to produce -- passed a core check. It stays out of
+  # setValidity(), which runs on every new() and slot assignment and must remain
+  # cheap and structural.
+  issues <- c(issues, .validate_de_rownames(md$de_results, rownames(mat), "metadata(x)$de_results"))
+  if (!is.null(md$de_results_by_method) && is.list(md$de_results_by_method)) {
+    for (src in names(md$de_results_by_method)) {
+      issues <- c(issues, .validate_de_rownames(
+        md$de_results_by_method[[src]], rownames(mat),
+        sprintf("metadata(x)$de_results_by_method[['%s']]", src)
+      ))
+    }
+  }
+
   unique(issues)
+}
+
+#' @keywords internal
+.validate_de_rownames <- function(tbls, rn, label) {
+  if (is.null(tbls)) return(character())
+  if (inherits(tbls, "SimpleList")) tbls <- as.list(tbls)
+  if (!is.list(tbls)) return(character())
+
+  out <- character()
+  for (nm in names(tbls)) {
+    trn <- rownames(as.data.frame(tbls[[nm]], stringsAsFactors = FALSE))
+    if (is.null(trn) || !identical(trn, rn)) {
+      out <- c(out, sprintf("%s[['%s']] rownames must match rownames(norm_counts).", label, nm))
+    }
+  }
+  out
 }
 
 #' @keywords internal

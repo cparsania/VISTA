@@ -25,7 +25,7 @@ NULL
 #' @name get_corr_heatmap
 #' @param show_corr_values Deprecated alias for `label`. When supplied, it overrides `label`.
 #' @param col_corr_values Deprecated alias for `label_color`. When supplied, it overrides `label_color`.
-#' @return An object returned by this function.
+#' @return A `ggplot2` object showing the sample-by-sample correlation heatmap.
 #' @examples
 #' v <- example_vista()
 #' p <- get_corr_heatmap(v)
@@ -33,7 +33,7 @@ NULL
 NULL
 
 #' @name get_deg_count_barplot
-#' @return An object returned by this function.
+#' @return A `ggplot2` object with one bar per regulation class.
 #' @examples
 #' v <- example_vista()
 #' p <- get_deg_count_barplot(v)
@@ -41,7 +41,7 @@ NULL
 NULL
 
 #' @name get_deg_count_donutplot
-#' @return An object returned by this function.
+#' @return A `ggplot2` object drawing DEG counts as a donut chart.
 #' @examples
 #' v <- example_vista()
 #' p <- get_deg_count_donutplot(v)
@@ -49,7 +49,7 @@ NULL
 NULL
 
 #' @name get_deg_count_pieplot
-#' @return An object returned by this function.
+#' @return A `ggplot2` object drawing DEG counts as a pie chart.
 #' @examples
 #' v <- example_vista()
 #' p <- get_deg_count_pieplot(v)
@@ -57,7 +57,7 @@ NULL
 NULL
 
 #' @name get_deg_venn_diagram
-#' @return An object returned by this function.
+#' @return A `ggplot2` object showing the overlap of DEG sets across comparisons.
 #' @examples
 #' v <- example_vista()
 #' comps <- names(comparisons(v))
@@ -80,7 +80,7 @@ NULL
 NULL
 
 #' @name get_expression_boxplot
-#' @return An object returned by this function.
+#' @return A `ggplot2` object with one box per group (or per sample).
 #' @examples
 #' v <- example_vista()
 #' genes <- head(rownames(v), 3)
@@ -104,7 +104,8 @@ NULL
 NULL
 
 #' @name get_expression_heatmap
-#' @return An object returned by this function.
+#' @return A `ComplexHeatmap::Heatmap` object, a tibble of k-means cluster
+#'   assignments, or a list of both, depending on `return_type`.
 #' @examples
 #' v <- example_vista()
 #' genes <- head(rownames(v), 20)
@@ -129,7 +130,7 @@ NULL
 NULL
 
 #' @name get_expression_lineplot
-#' @return An object returned by this function.
+#' @return A `ggplot2` object connecting expression values across groups or samples.
 #' @examples
 #' v <- example_vista()
 #' genes <- head(rownames(v), 3)
@@ -138,7 +139,7 @@ NULL
 NULL
 
 #' @name get_expression_lollipop
-#' @return An object returned by this function.
+#' @return A `ggplot2` object drawing expression as lollipops.
 #' @examples
 #' v <- example_vista()
 #' genes <- head(rownames(v), 5)
@@ -184,7 +185,7 @@ NULL
 NULL
 
 #' @name get_foldchange_barplot
-#' @return An object returned by this function.
+#' @return A `ggplot2` object with one bar per gene showing log2 fold change.
 #' @examples
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
@@ -194,7 +195,7 @@ NULL
 NULL
 
 #' @name get_foldchange_boxplot
-#' @return An object returned by this function.
+#' @return A `ggplot2` object summarising log2 fold-change distributions.
 #' @examples
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
@@ -211,7 +212,8 @@ NULL
 NULL
 
 #' @name get_foldchange_heatmap
-#' @return An object returned by this function.
+#' @return A `ComplexHeatmap::Heatmap` object, a tibble of k-means cluster
+#'   assignments, or a list of both, depending on `return_type`.
 #' @examples
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
@@ -229,7 +231,8 @@ NULL
 NULL
 
 #' @name get_foldchange_lineplot
-#' @return An object returned by this function.
+#' @return A list with `plot` (a `ggplot2` object) and `clustered_data`
+#'   (the long data frame behind it, including any k-means cluster assignment).
 #' @examples
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
@@ -239,7 +242,7 @@ NULL
 NULL
 
 #' @name get_foldchange_lollipop
-#' @return An object returned by this function.
+#' @return A `ggplot2` object drawing log2 fold change as lollipops.
 #' @examples
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
@@ -303,7 +306,8 @@ NULL
 NULL
 
 #' @name get_gsea
-#' @return An object returned by this function.
+#' @return A list with a single element `enrich`, holding the `gseaResult`
+#'   returned by the selected clusterProfiler GSEA function.
 #' @examples
 #' \dontrun{
 #' v <- example_vista()
@@ -316,7 +320,8 @@ NULL
 NULL
 
 #' @name get_kegg_enrichment
-#' @return An object returned by this function.
+#' @return A list with a single element `enrich`, holding the `enrichResult`
+#'   returned by `clusterProfiler::enrichKEGG()`.
 #' @examples
 #' v <- example_vista()
 #' comp <- names(comparisons(v))[1]
@@ -334,7 +339,7 @@ NULL
 NULL
 
 #' @name get_mds_plot
-#' @return An object returned by this function.
+#' @return A `ggplot2` object showing the first two MDS dimensions.
 #' @examples
 #' v <- example_vista()
 #' p <- get_mds_plot(v)
@@ -342,7 +347,7 @@ NULL
 NULL
 
 #' @name get_pairwise_corr_plot
-#' @return An object returned by this function.
+#' @return A `GGally::ggmatrix` object of pairwise sample scatter plots.
 #' @examples
 #' v <- example_vista()
 #' p <- get_pairwise_corr_plot(v)
@@ -373,13 +378,6 @@ NULL
 #' }
 NULL
 
-#' @name print.VISTA
-#' @aliases print.vista
-#' @return The input object `x`, returned invisibly.
-#' @examples
-#' v <- example_vista()
-#' print(v)
-NULL
 
 #' @name run_cell_deconvolution
 #' @examples

@@ -16,8 +16,9 @@ save_vista_plot(
 )
 }
 \arguments{
-\item{plot}{A plot object. Typically \code{ggplot}, \code{patchwork}, \code{Heatmap}, or
-\code{HeatmapList}.}
+\item{plot}{A plot object. Typically \code{ggplot}, \code{patchwork}, \code{Heatmap},
+\code{HeatmapList}, or a \code{recordedplot} (as returned by
+\code{get_enrichment_chord(return_type = "plot")}).}
 
 \item{file}{Output file path.}
 

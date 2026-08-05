@@ -71,8 +71,8 @@ setGeneric("enrichMsigDB", function(x,
                                     col_genetype = "GENETYPE",
                                     feature_type = "protein-coding",
                                     ...) {
-  methods::standardGeneric("enrichMsigDB")
-})
+  standardGeneric("enrichMsigDB")
+}, signature = "x")
 
 setMethod(
   "enrichMsigDB", "VISTA",
@@ -352,6 +352,8 @@ get_pathway_genes <- function(x,
                               return_type = c("long", "list", "vector")) {
   pathway_column <- match.arg(pathway_column)
   gene_column <- match.arg(gene_column)
+  # Not the plot-vs-data vocabulary: this selects the SHAPE of a purely tabular
+  # result, so it is deliberately left alone.
   return_type <- match.arg(return_type)
 
   if (is.list(x) && !inherits(x, c("enrichResult", "gseaResult")) && "enrich" %in% names(x)) {
@@ -496,7 +498,8 @@ get_pathway_genes <- function(x,
 #'   enrichment genes back to VISTA rownames (e.g., `"SYMBOL"` or `"ENTREZID"`).
 #'   Leave `NULL` when enrichment genes already match VISTA rownames.
 #' @param max_genes Optional cap on the number of genes passed to the heatmap.
-#' @param return_type One of `"heatmap"` (default), `"both"`, or `"genes"`.
+#' @param return_type One of `"plot"` (default), `"data"`, or `"both"`. The
+#'   legacy values `"heatmap"` and `"genes"` are still accepted and warn.
 #' @param ... Additional arguments passed to [get_expression_heatmap()].
 #'
 #' @return
@@ -522,7 +525,7 @@ get_pathway_genes <- function(x,
 #'     enrichment = msig,
 #'     sample_group = c("control", "treatment1"),
 #'     top_n = 3,
-#'     return_type = "genes"
+#'     return_type = "data"
 #'   )
 #'   head(genes)
 #' }
@@ -571,11 +574,14 @@ get_pathway_heatmap <- function(x,
                                 gene_mode = c("union", "intersection"),
                                 gene_id_column = NULL,
                                 max_genes = NULL,
-                                return_type = c("heatmap", "both", "genes"),
+                                return_type = c("plot", "data", "both"),
                                 ...) {
   stopifnot(inherits(x, "VISTA"))
   gene_mode <- match.arg(gene_mode)
-  return_type <- match.arg(return_type)
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_pathway_heatmap",
+    legacy = c(heatmap = "plot", genes = "data")
+  )
 
   dots <- list(...)
   blocked <- intersect(c("genes", "sample_group"), names(dots))
@@ -635,11 +641,20 @@ get_pathway_heatmap <- function(x,
       cli::cli_abort("{.arg max_genes} must be a single positive number.")
     }
     if (length(genes_in_object) > max_genes) {
-      genes_in_object <- genes_in_object[seq_len(max_genes)]
+      # Pathway membership is a SET. clusterProfiler's gene order is arbitrary
+      # and is not stable across R sessions, so taking the positional head would
+      # make the plotted genes differ between runs of the same analysis. Rank by
+      # expression variance -- the most informative rows for a heatmap -- and
+      # break ties on the identifier so the selection is fully deterministic.
+      mat <- SummarizedExperiment::assay(x, "norm_counts")[genes_in_object, , drop = FALSE]
+      score <- matrixStats::rowVars(mat)
+      score[!is.finite(score)] <- -Inf
+      ord <- order(-score, genes_in_object)
+      genes_in_object <- genes_in_object[utils::head(ord, max_genes)]
     }
   }
 
-  if (return_type == "genes") {
+  if (return_type == "data") {
     return(genes_in_object)
   }
 
@@ -655,7 +670,7 @@ get_pathway_heatmap <- function(x,
     )
   )
 
-  if (return_type == "heatmap") {
+  if (return_type == "plot") {
     return(heatmap_obj)
   }
 
@@ -784,6 +799,25 @@ get_msigdb_enrichment <- function(x,
 # GO / KEGG / GSEA helpers
 # ──────────────────────────────────────────────────────────────────────────────
 
+#' Detect the identifier type of a set of gene IDs
+#'
+#' Used to choose `from_type` for enrichment when the caller has not said.
+#' Deliberately separate from `display_id`, which names a rowData column used
+#' for labels and says nothing about what the identifiers themselves are --
+#' conflating the two made Ensembl-identified objects claim to hold symbols and
+#' silently returned empty enrichment.
+#'
+#' @param ids Character vector of gene identifiers.
+#' @return `"ENSEMBL"` or `"SYMBOL"`.
+#' @keywords internal
+#' @noRd
+.vista_detect_id_type <- function(ids) {
+  ids <- as.character(ids)
+  ids <- ids[!is.na(ids) & nzchar(ids)]
+  if (!length(ids)) return("SYMBOL")
+  if (mean(grepl("^ENS[A-Z]*G[0-9]", ids)) >= 0.5) "ENSEMBL" else "SYMBOL"
+}
+
 .vista_default_orgdb <- function(species) {
   if (missing(species) || is.null(species)) species <- "Mus musculus"
   if (species %in% c("Mus musculus", "mouse", "mus musculus")) {
@@ -793,6 +827,123 @@ get_msigdb_enrichment <- function(x,
   } else {
     NULL
   }
+}
+
+#' Map identifiers preserving length and position
+#'
+#' Unlike `.vista_convert_ids()`, which de-duplicates and drops unmapped
+#' identifiers because its callers want a gene *set*, this returns a vector the
+#' same length as `ids` with `NA` where no mapping exists. That property is
+#' essential anywhere identifiers are used as keys against a parallel vector of
+#' values.
+#'
+#' It also differs from `.map_gene_ids()`, which falls back to the *input*
+#' identifier when a mapping is missing. That is right for display labels and
+#' wrong for keys -- handing an unmapped SYMBOL to a function expecting ENTREZ
+#' IDs trades a visible gap for a silent mismatch.
+#'
+#' @param ids Character vector of identifiers.
+#' @param from_type,to_type Key types understood by the supplied `orgdb`.
+#' @param orgdb An `OrgDb` object.
+#' @param id_map Optional named character vector used instead of `orgdb`,
+#'   primarily so the behaviour can be unit-tested without an annotation package.
+#'
+#' @return A character vector the same length as `ids`, with `NA` for unmapped
+#'   entries.
+#' @keywords internal
+#' @noRd
+.vista_map_ids_strict <- function(ids, from_type, to_type, orgdb = NULL, id_map = NULL) {
+  ids <- as.character(ids)
+  if (identical(toupper(from_type), toupper(to_type))) {
+    return(ids)
+  }
+  if (toupper(from_type) == "ENSEMBL") ids <- sub("\\..*$", "", ids)
+
+  if (!is.null(id_map)) {
+    return(unname(id_map[ids]))
+  }
+  if (is.null(orgdb)) {
+    cli::cli_abort("An {.arg orgdb} is required to map {.val {from_type}} to {.val {to_type}}.")
+  }
+
+  keytype <- toupper(from_type)
+  target <- toupper(to_type)
+  res <- tryCatch(
+    suppressMessages(
+      AnnotationDbi::select(orgdb, keys = unique(ids), keytype = keytype, columns = target)
+    ),
+    error = function(e) NULL
+  )
+  if (is.null(res) || !nrow(res)) {
+    return(rep(NA_character_, length(ids)))
+  }
+  res <- res[!duplicated(res[[keytype]]), , drop = FALSE]
+  map <- stats::setNames(as.character(res[[target]]), res[[keytype]])
+  out <- unname(map[ids])
+  out[!nzchar(out) | is.na(out)] <- NA_character_
+  out
+}
+
+#' Build a GSEA ranked vector with names that stay attached to their scores
+#'
+#' Maps `ids`, drops entries that fail to map (removing name and score
+#' together), resolves many-to-one collisions by keeping the largest absolute
+#' score, and returns a decreasing-sorted named numeric vector.
+#'
+#' @param scores Numeric vector of ranking statistics (typically log2FC).
+#' @param ids Character vector of identifiers, parallel to `scores`.
+#' @inheritParams .vista_map_ids_strict
+#' @param verbose Logical; report dropped and collapsed counts.
+#'
+#' @return A named numeric vector sorted in decreasing order.
+#' @keywords internal
+#' @noRd
+.vista_build_rank_vector <- function(scores, ids, from_type, to_type,
+                                     orgdb = NULL, id_map = NULL, verbose = TRUE) {
+  stopifnot(length(scores) == length(ids))
+
+  keep <- is.finite(scores)
+  scores <- scores[keep]
+  ids <- as.character(ids)[keep]
+
+  mapped <- .vista_map_ids_strict(
+    ids, from_type = from_type, to_type = to_type, orgdb = orgdb, id_map = id_map
+  )
+
+  # Drop name and score together. Assigning a shorter vector to names() would
+  # pad with NA and slide every remaining score onto the wrong identifier.
+  ok <- !is.na(mapped) & nzchar(mapped)
+  n_dropped <- sum(!ok)
+  mapped <- mapped[ok]
+  scores <- scores[ok]
+
+  if (!length(mapped)) {
+    cli::cli_abort(
+      "No gene identifiers could be mapped from {.val {from_type}} to {.val {to_type}}."
+    )
+  }
+
+  # Many-to-one mappings: keep the most extreme score for each target ID.
+  n_collapsed <- 0L
+  if (anyDuplicated(mapped)) {
+    ord <- order(abs(scores), decreasing = TRUE)
+    mapped_ord <- mapped[ord]
+    scores_ord <- scores[ord]
+    first <- !duplicated(mapped_ord)
+    n_collapsed <- sum(!first)
+    mapped <- mapped_ord[first]
+    scores <- scores_ord[first]
+  }
+
+  if (isTRUE(verbose) && (n_dropped > 0L || n_collapsed > 0L)) {
+    cli::cli_inform(c(
+      "Prepared {length(scores)} ranked gene{?s} for GSEA.",
+      if (n_dropped > 0L) "i" = "Dropped {n_dropped} gene{?s} with no {.val {to_type}} mapping.",
+      if (n_collapsed > 0L) "i" = "Collapsed {n_collapsed} duplicate {.val {to_type}} mapping{?s}, keeping the largest absolute score."
+    ))
+  }
+
+  sort(stats::setNames(scores, mapped), decreasing = TRUE)
 }
 
 .vista_convert_ids <- function(ids, from_type, to_type, orgdb) {
@@ -849,6 +1000,11 @@ get_go_enrichment <- function(x,
     bg_ids <- .vista_convert_ids(background, from_type = from_type, to_type = from_type, orgdb = orgdb)
   }
 
+  .vista_check_dots(
+    list(...), fun = "get_go_enrichment",
+    allowed = names(formals(clusterProfiler::enrichGO)),
+    blocked = c("gene", "OrgDb", "keyType", "ont", "universe")
+  )
   res <- clusterProfiler::enrichGO(gene          = gene_ids,
                                    OrgDb         = orgdb,
                                    keyType       = toupper(from_type),
@@ -891,6 +1047,11 @@ get_kegg_enrichment <- function(x,
     bg_ids <- .vista_convert_ids(background, from_type = from_type, to_type = "ENTREZID", orgdb = orgdb)
   }
 
+  .vista_check_dots(
+    list(...), fun = "get_kegg_enrichment",
+    allowed = names(formals(clusterProfiler::enrichKEGG)),
+    blocked = c("gene", "organism", "universe")
+  )
   res <- clusterProfiler::enrichKEGG(gene = gene_ids,
                                      organism = kegg_species,
                                      universe = bg_ids,
@@ -932,9 +1093,7 @@ get_gsea <- function(x,
   rn <- tbl$gene_id %||% rownames(tbl)
   if (is.null(rn)) cli::cli_abort("DE table needs gene IDs for GSEA.")
 
-  rank_vec <- stats::setNames(fc, rn)
-  rank_vec <- rank_vec[!is.na(rank_vec)]
-  rank_vec <- sort(rank_vec, decreasing = TRUE)
+  fc <- suppressWarnings(as.numeric(fc))
 
   if (set_type == "msigdb") {
     msig_df <- .vista_msigdbr(
@@ -949,21 +1108,29 @@ get_gsea <- function(x,
                          "gene_symbol")
     msig_t2g <- msig_df[, c("gs_name", gene_field)]
     colnames(msig_t2g) <- c("term", "gene")
-    gene_ids <- .vista_convert_ids(names(rank_vec), from_type = from_type, to_type = toupper(from_type), orgdb = orgdb)
-    names(rank_vec) <- gene_ids
+    rank_vec <- .vista_build_rank_vector(
+      scores = fc, ids = rn,
+      from_type = from_type, to_type = toupper(from_type), orgdb = orgdb
+    )
     res <- clusterProfiler::GSEA(geneList = rank_vec,
                                  TERM2GENE = msig_t2g,
                                  ...)
   } else if (set_type == "go") {
     keytype <- toupper(from_type)
+    rank_vec <- .vista_build_rank_vector(
+      scores = fc, ids = rn,
+      from_type = from_type, to_type = keytype, orgdb = orgdb
+    )
     res <- clusterProfiler::gseGO(geneList = rank_vec,
                                   OrgDb = orgdb,
                                   keyType = keytype,
                                   ...)
   } else {
     org_code <- if (species %in% c("Homo sapiens", "human", "homo sapiens")) "hsa" else "mmu"
-    entrez_ids <- .vista_convert_ids(names(rank_vec), from_type = from_type, to_type = "ENTREZID", orgdb = orgdb)
-    names(rank_vec) <- entrez_ids
+    rank_vec <- .vista_build_rank_vector(
+      scores = fc, ids = rn,
+      from_type = from_type, to_type = "ENTREZID", orgdb = orgdb
+    )
     res <- clusterProfiler::gseKEGG(geneList = rank_vec,
                                     organism = org_code,
                                     ...)
@@ -1029,8 +1196,12 @@ get_gsea <- function(x,
 #' @param gap_degree Gap between sectors in degrees (default `2`).
 #' @param label_cex Text size for sector labels (default `0.7`).
 #' @param title Optional plot title.
+#' @param return_type One of `"data"` (default), `"plot"` or `"both"`. The
+#'   default is `"data"` because this function draws to the active device and
+#'   has always returned its table invisibly. `"plot"` returns a recorded plot
+#'   that [save_vista_plot()] can write to a file.
 #'
-#' @return Invisibly returns a list with:
+#' @return With `return_type = "data"` (the default), invisibly a list with:
 #'   \describe{
 #'     \item{gene_data}{Tibble of genes with pathway membership and (optionally)
 #'       fold-change values.}
@@ -1108,7 +1279,22 @@ get_enrichment_chord <- function(x,
                                  transparency    = 0.4,
                                  gap_degree      = 2,
                                  label_cex       = 0.7,
-                                 title           = NULL) {
+                                 title           = NULL,
+                                 return_type     = c("data", "plot", "both")) {
+
+  # Default is "data" rather than "plot" because this function has always drawn
+  # to the active device and returned its table invisibly; changing that would
+  # break existing code.
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_enrichment_chord", default = "data"
+  )
+  want_plot <- return_type %in% c("plot", "both")
+  if (want_plot) {
+    # Off-screen devices (png, pdf) keep their display list off by default, so
+    # recordPlot() would return an empty recording that silently saves nothing.
+    # This has to happen before circlize draws.
+    .vista_enable_display_list()
+  }
 
   if (!requireNamespace("circlize", quietly = TRUE)) {
     cli::cli_abort(
@@ -1161,8 +1347,16 @@ get_enrichment_chord <- function(x,
 
   # --- cap gene count for readability ----------------------------------------
   if (length(keep_genes) > max_genes) {
-    hub_first  <- intersect(hub_genes, keep_genes)
-    non_hub    <- setdiff(keep_genes, hub_first)
+    # Within each tier, order by how many pathways a gene participates in and
+    # then by identifier. Without this the cap keeps whichever genes happened to
+    # come first in clusterProfiler's arbitrary ordering, which is not stable
+    # across R sessions, so the same call could draw different genes.
+    rank_tier <- function(g) {
+      if (!length(g)) return(g)
+      g[order(-as.integer(gene_counts[g]), g)]
+    }
+    hub_first  <- rank_tier(intersect(hub_genes, keep_genes))
+    non_hub    <- rank_tier(setdiff(keep_genes, hub_first))
     keep_genes <- c(hub_first, non_hub)[seq_len(max_genes)]
     long_tbl   <- long_tbl[long_tbl$gene %in% keep_genes, , drop = FALSE]
     cli::cli_warn(
@@ -1415,8 +1609,30 @@ get_enrichment_chord <- function(x,
     gene_data$gene <- as.character(gene_data$gene)
   }
 
-  invisible(list(
-    gene_data = gene_data,
-    hub_genes = hub_genes
-  ))
+  # circlize draws to the active device rather than returning an object, so
+  # capture the result to let save_vista_plot() handle it like any other plot.
+  recorded <- if (want_plot) .vista_record_plot() else NULL
+
+  if (identical(return_type, "plot")) {
+    if (is.null(recorded)) {
+      cli::cli_abort(c(
+        "Could not capture the chord diagram from the active graphics device.",
+        "i" = "The device recorded an empty display list. Open a device before calling, e.g. {.code png(f); get_enrichment_chord(..., return_type = \"plot\"); dev.off()}."
+      ))
+    }
+    return(recorded)
+  }
+
+  out <- list(gene_data = gene_data, hub_genes = hub_genes)
+  if (identical(return_type, "both")) {
+    if (is.null(recorded)) {
+      cli::cli_warn(c(
+        "Could not capture the chord diagram; {.field plot} will be NULL.",
+        "i" = "Open a device before calling if you need the recorded plot."
+      ))
+    }
+    out$plot <- recorded
+    return(out)
+  }
+  invisible(out)
 }

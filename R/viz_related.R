@@ -67,6 +67,9 @@ NULL
   if (!is.null(cols) && !is.null(comparisons_present)) {
     comps <- unique(as.character(comparisons_present))
     cols <- cols[intersect(comps, names(cols))]
+    # Callers test `is.null(cols)` to decide whether to generate a palette, so an
+    # empty intersection has to collapse to NULL rather than character(0).
+    if (!length(cols)) cols <- NULL
   }
   if (is.null(cols) && !is.null(comparisons_present)) {
     pal_name <- info$palette %||% "Dark 3"
@@ -80,21 +83,31 @@ NULL
   deg_summary(x)
 }
 
-.resolve_plot_label_flag <- function(label = NULL,
-                                     legacy = FALSE,
-                                     legacy_arg = "label_replicates") {
-  if (is.null(label)) {
-    return(isTRUE(legacy))
+# Resolve a logical `label` argument against a deprecated alias.
+#
+# Precedence is "legacy wins, always warn", matching what the call sites that
+# hand-rolled this already did. (Until 1.2.0 this helper had no callers and used
+# the opposite rule -- new wins, warn only on disagreement -- so adopting it
+# as-written would have silently flipped behaviour for anyone passing both.)
+.resolve_plot_label_flag <- function(label = TRUE,
+                                     legacy = NULL,
+                                     legacy_arg = "show_corr_values",
+                                     fun = NULL) {
+  check_flag <- function(value, arg) {
+    if (!is.logical(value) || length(value) != 1L || is.na(value)) {
+      cli::cli_abort("{.arg {arg}} must be TRUE or FALSE.")
+    }
+    isTRUE(value)
   }
-  if (!is.logical(label) || length(label) != 1L || is.na(label)) {
-    cli::cli_abort("{.arg label} must be TRUE or FALSE.")
+
+  if (!is.null(legacy)) {
+    legacy <- check_flag(legacy, legacy_arg)
+    return(.vista_deprecate_arg(
+      old = legacy_arg, new = "label", value = legacy, fun = fun %||% "this function"
+    ))
   }
-  if (!identical(isTRUE(label), isTRUE(legacy))) {
-    cli::cli_warn(
-      "{.arg label} overrides the legacy {.arg {legacy_arg}} argument."
-    )
-  }
-  isTRUE(label)
+
+  check_flag(label, "label")
 }
 
 .resolve_plot_color_column <- function(meta,
@@ -359,19 +372,21 @@ NULL
 }
 
 # Keep only requested genes or the top-N variable genes; return matrix
-.filter_genes <- function(mat, genes = NULL, top_n_genes = NULL) {
+.filter_genes <- function(mat, genes = NULL, top_n = NULL, max_genes = 20) {
   if (!is.null(genes)) {
-    if (length(genes) > 20) {
-      cli::cli_abort("Maximum 20 genes can be plotted at once.")
+    if (length(genes) > max_genes) {
+      cli::cli_abort(
+        "At most {max_genes} gene{?s} can be plotted at once; {length(genes)} were supplied. Raise {.arg max_genes} to override."
+      )
     }
     keep <- intersect(genes, rownames(mat))
     if (!length(keep)) cli::cli_abort("None of the specified {.arg genes} were found in the data.")
     mat <- mat[keep, , drop = FALSE]
   }
-  if (!is.null(top_n_genes)) {
+  if (!is.null(top_n)) {
     v <- matrixStats::rowVars(mat)
     ord <- order(v, decreasing = TRUE)
-    n <- min(top_n_genes, nrow(mat))
+    n <- min(top_n, nrow(mat))
     mat <- mat[ord[seq_len(n)], , drop = FALSE]
   }
   mat
@@ -390,9 +405,11 @@ NULL
 #'   `NULL` to include all samples.
 #' @param genes Optional character vector of gene identifiers to restrict the PCA input matrix.
 #'   When `NULL`, all genes are used.
-#' @param top_n_genes Optional integer selecting the top most variable genes to include. Ignored
+#' @param top_n Optional integer selecting the top most variable genes to include. Ignored
 #'   when `genes` is supplied.
 #' @param label Logical; if `TRUE`, sample names are drawn next to the points.
+#' @param top_n_genes Deprecated; use `top_n`.
+#' @param max_genes Maximum number of genes accepted in `genes` (default 20).
 #' @param label_size Numeric size of sample labels when `label = TRUE`.
 #' @param point_size Numeric size of the plotted points.
 #' @param shape_by Optional column name in `sample_info` used to map point shape. When `NULL`,
@@ -446,7 +463,7 @@ get_pca_plot <- function(x,
                          sample_group = NULL,
                          group_column = NULL,
                          genes = NULL,
-                         top_n_genes = NULL,
+                         top_n = NULL,
                          label = FALSE,
                          label_size = 3,
                          point_size = 10,
@@ -458,15 +475,25 @@ get_pca_plot <- function(x,
                          use_vista_colors = NULL,
                          palette = NULL,
                          colors = NULL,
-                         use_group_colors = TRUE) {
+                         use_group_colors = TRUE,
+                         top_n_genes = NULL,
+                         max_genes = 20) {
 
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(top_n_genes)) {
+    top_n <- .vista_deprecate_arg(
+      old = "top_n_genes", new = "top_n", value = top_n_genes, fun = "get_pca_plot"
+    )
+  }
   use_group_colors <- .resolve_group_color_preference(
     use_group_colors = use_group_colors,
     use_vista_colors = use_vista_colors
   )
+  if (!missing(sample.seed)) {
+    .vista_deprecate_arg(old = "sample.seed", value = sample.seed, fun = "get_pca_plot")
+  }
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   color_col <- .resolve_plot_color_column(meta, group_col, color_by)
@@ -478,7 +505,7 @@ get_pca_plot <- function(x,
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
   }
 
-  mat <- .filter_genes(mat, genes, top_n_genes)
+  mat <- .filter_genes(mat, genes, top_n, max_genes = max_genes)
   mat <- mat[matrixStats::rowVars(mat) > 0, , drop = FALSE]
 
   pca <- stats::prcomp(t(mat), center = TRUE, scale. = TRUE)
@@ -588,7 +615,9 @@ get_pca_plot <- function(x,
 #' @param x A `VISTA` object.
 #' @param sample_group Optional character vector of groups to include (based on the column specified by `group_column`).
 #' @param genes Optional character vector of gene identifiers to restrict the matrix.
-#' @param top_n_genes Optional integer selecting the top variable genes to include.
+#' @param top_n Optional integer selecting the top variable genes to include.
+#' @param top_n_genes Deprecated; use `top_n`.
+#' @param max_genes Maximum number of genes accepted in `genes` (default 20).
 #' @param label Logical; draw sample labels when `TRUE`.
 #' @param label_size Numeric size of sample labels when `label = TRUE`.
 #' @param point_size Numeric size for points.
@@ -613,7 +642,7 @@ get_mds_plot <- function(x,
                          sample_group = NULL,
                          group_column = NULL,
                          genes = NULL,
-                         top_n_genes = NULL,
+                         top_n = NULL,
                          label = FALSE,
                          label_size = 3,
                          point_size = 10,
@@ -623,15 +652,22 @@ get_mds_plot <- function(x,
                          use_vista_colors = NULL,
                          palette = NULL,
                          colors = NULL,
-                         use_group_colors = TRUE) {
+                         use_group_colors = TRUE,
+                         top_n_genes = NULL,
+                         max_genes = 20) {
 
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(top_n_genes)) {
+    top_n <- .vista_deprecate_arg(
+      old = "top_n_genes", new = "top_n", value = top_n_genes, fun = "get_mds_plot"
+    )
+  }
   use_group_colors <- .resolve_group_color_preference(
     use_group_colors = use_group_colors,
     use_vista_colors = use_vista_colors
   )
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   color_col <- .resolve_plot_color_column(meta, group_col, color_by)
@@ -643,7 +679,7 @@ get_mds_plot <- function(x,
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
   }
 
-  mat <- .filter_genes(mat, genes, top_n_genes)
+  mat <- .filter_genes(mat, genes, top_n, max_genes = max_genes)
   mat <- mat[matrixStats::rowVars(mat) > 0, , drop = FALSE]
 
   dist_matrix <- stats::dist(t(mat), method = "euclidean")
@@ -745,7 +781,9 @@ get_mds_plot <- function(x,
 #' @param color_by Optional column name in `sample_info` used for point color.
 #'   Defaults to `group_column`.
 #' @param genes Optional character vector of gene identifiers to restrict the matrix.
-#' @param top_n_genes Optional integer selecting top variable genes to include.
+#' @param top_n Optional integer selecting top variable genes to include.
+#' @param top_n_genes Deprecated; use `top_n`.
+#' @param max_genes Maximum number of genes accepted in `genes` (default 20).
 #' @param label Logical; draw sample labels when `TRUE`.
 #' @param label_size Numeric label size when `label = TRUE`.
 #' @param point_size Numeric point size.
@@ -778,7 +816,7 @@ get_umap_plot <- function(x,
                           group_column = NULL,
                           color_by = NULL,
                           genes = NULL,
-                          top_n_genes = NULL,
+                          top_n = NULL,
                           label = FALSE,
                           label_size = 3,
                           point_size = 10,
@@ -791,9 +829,16 @@ get_umap_plot <- function(x,
                           use_vista_colors = NULL,
                           palette = NULL,
                           colors = NULL,
-                          use_group_colors = TRUE) {
+                          use_group_colors = TRUE,
+                         top_n_genes = NULL,
+                         max_genes = 20) {
 
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(top_n_genes)) {
+    top_n <- .vista_deprecate_arg(
+      old = "top_n_genes", new = "top_n", value = top_n_genes, fun = "get_umap_plot"
+    )
+  }
   if (!requireNamespace("uwot", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg uwot} must be installed to compute UMAP.")
   }
@@ -802,7 +847,7 @@ get_umap_plot <- function(x,
     use_vista_colors = use_vista_colors
   )
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   color_col <- .resolve_plot_color_column(meta, group_col, color_by)
@@ -814,7 +859,7 @@ get_umap_plot <- function(x,
     cli::cli_abort("Column {.val {shape_by}} not found in sample_info; cannot map shapes.")
   }
 
-  mat <- .filter_genes(mat, genes, top_n_genes)
+  mat <- .filter_genes(mat, genes, top_n, max_genes = max_genes)
   mat <- mat[matrixStats::rowVars(mat) > 0, , drop = FALSE]
 
   n_samples <- ncol(mat)
@@ -1041,22 +1086,24 @@ get_volcano_plot <- function(x,
     cli::cli_abort("{.arg colors} must be a named vector with entries for {.val Up}, {.val Down}, and {.val Other}.")
   }
 
-  # Backward-compatible color aliases passed through `...`
-  if ("col_up" %in% names(dots)) {
-    colors[["Up"]] <- as.character(dots$col_up)[1]
-    dots$col_up <- NULL
+  # Backward-compatible color aliases passed through `...`. These used to be
+  # applied silently; they now warn on the standard deprecation timeline.
+  for (alias in c("col_up", "col_down", "col_other", "col_others")) {
+    if (alias %in% names(dots)) {
+      slot <- switch(alias, col_up = "Up", col_down = "Down", "Other")
+      colors[[slot]] <- .vista_deprecate_arg(
+        old = alias, new = "colors", value = as.character(dots[[alias]])[1],
+        fun = "get_volcano_plot"
+      )
+      dots[[alias]] <- NULL
+    }
   }
-  if ("col_down" %in% names(dots)) {
-    colors[["Down"]] <- as.character(dots$col_down)[1]
-    dots$col_down <- NULL
-  }
-  if ("col_other" %in% names(dots)) {
-    colors[["Other"]] <- as.character(dots$col_other)[1]
-    dots$col_other <- NULL
-  }
-  if ("col_others" %in% names(dots)) {
-    colors[["Other"]] <- as.character(dots$col_others)[1]
-    dots$col_others <- NULL
+  if ("lab_size" %in% names(dots)) {
+    label_size <- .vista_deprecate_arg(
+      old = "lab_size", new = "label_size", value = dots$lab_size,
+      fun = "get_volcano_plot"
+    )
+    dots$lab_size <- NULL
   }
 
   volcano_data <- comps[[sample_comparison]]
@@ -1112,6 +1159,15 @@ get_volcano_plot <- function(x,
     }
   }
 
+  .vista_check_dots(
+    dots, fun = "get_volcano_plot",
+    allowed = c(
+      names(formals(EnhancedVolcano::EnhancedVolcano)),
+      names(formals(.EnhancedVolcano2))
+    ),
+    blocked = c("toptable", "lab", "x", "y")
+  )
+
   vol_args <- c(
     list(
       toptable = volcano_data,
@@ -1164,7 +1220,7 @@ get_pairwise_corr_plot <- function(x,
   sample_order <- match.arg(sample_order)
   value_transform <- match.arg(value_transform)
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   if (sample_order == "group" && group_col %in% colnames(meta)) {
@@ -1202,7 +1258,8 @@ get_pairwise_corr_plot <- function(x,
 #' @param genes Optional character vector of gene IDs to limit the matrix.
 #' @param corr_method Correlation method passed to `stats::cor()` (e.g., `"pearson"`).
 #' @param triangle Either `"full"`, `"lower"`, or `"upper"` to control which triangle is drawn.
-#' @param cluster_by Ordering strategy for samples: `"correlation"` (default),
+#' @param cluster_by Deprecated; use `order_by`.
+#' @param order_by Ordering strategy for samples: `"correlation"` (default),
 #'   `"group"`, `"input"`, or `"none"`.
 #' @param show_diagonal Logical; include the correlation diagonal when `TRUE`.
 #' @param label Logical; overlay correlation coefficients as text.
@@ -1228,7 +1285,7 @@ get_corr_heatmap <- function(x,
                              genes = NULL,
                              corr_method = "pearson",
                              triangle = c("full", "lower", "upper"),
-                             cluster_by = c("correlation", "group", "input", "none"),
+                             order_by = c("correlation", "group", "input", "none"),
                              show_diagonal = TRUE,
                              label = TRUE,
                              show_corr_values = NULL,
@@ -1241,19 +1298,31 @@ get_corr_heatmap <- function(x,
                              viridis_option = "viridis",  # "magma","plasma","inferno","cividis","turbo"
                              viridis_direction = 1,       # 1 or -1
                              viridis_begin = 0,           # 0–1; raise to ~0.6 for more contrast near 1
-                             viridis_end = 1) {
+                             viridis_end = 1,
+                             cluster_by = NULL) {
 
   stopifnot(inherits(x, "VISTA"))
   triangle <- match.arg(triangle)
-  cluster_by <- match.arg(cluster_by)
-  if (!is.null(show_corr_values)) {
-    label <- isTRUE(show_corr_values)
+  order_by <- match.arg(order_by)
+  if (!is.null(cluster_by)) {
+    order_by <- .vista_deprecate_arg(
+      old = "cluster_by", new = "order_by",
+      value = match.arg(cluster_by, c("correlation", "group", "input", "none")),
+      fun = "get_corr_heatmap"
+    )
   }
+  label <- .resolve_plot_label_flag(
+    label = label, legacy = show_corr_values,
+    legacy_arg = "show_corr_values", fun = "get_corr_heatmap"
+  )
   if (!is.null(col_corr_values)) {
-    label_color <- col_corr_values
+    label_color <- .vista_deprecate_arg(
+      old = "col_corr_values", new = "label_color",
+      value = col_corr_values, fun = "get_corr_heatmap"
+    )
   }
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -1272,17 +1341,14 @@ get_corr_heatmap <- function(x,
   df <- as.data.frame(as.table(cor_mat))
   colnames(df) <- c("Var1", "Var2", "value")
 
-  if (!show_diagonal) df <- dplyr::filter(df, Var1 != Var2)
-  if (triangle == "lower") {
-    df <- dplyr::filter(df, as.integer(Var1) >= as.integer(Var2))
-  } else if (triangle == "upper") {
-    df <- dplyr::filter(df, as.integer(Var1) <= as.integer(Var2))
-  }
-
-  if (cluster_by == "correlation") {
+  # Resolve the axis order FIRST. The triangle mask below compares factor codes,
+  # so it has to run against the levels the plot will actually be drawn with --
+  # otherwise the retained cells describe the input order while the axes show the
+  # clustered order, and the "triangle" renders as a jagged staircase.
+  if (order_by == "correlation") {
     ord <- hclust(as.dist(1 - cor_mat))$order
     sample_levels <- rownames(cor_mat)[ord]
-  } else if (cluster_by == "group" && group_col %in% colnames(meta)) {
+  } else if (order_by == "group" && group_col %in% colnames(meta)) {
     sample_levels <- meta |>
       dplyr::arrange(.data[[group_col]], .data$sample) |>
       dplyr::pull(.data$sample) |>
@@ -1292,6 +1358,13 @@ get_corr_heatmap <- function(x,
   }
   df$Var1 <- factor(df$Var1, levels = sample_levels)
   df$Var2 <- factor(df$Var2, levels = sample_levels)
+
+  if (!show_diagonal) df <- dplyr::filter(df, Var1 != Var2)
+  if (triangle == "lower") {
+    df <- dplyr::filter(df, as.integer(Var1) >= as.integer(Var2))
+  } else if (triangle == "upper") {
+    df <- dplyr::filter(df, as.integer(Var1) <= as.integer(Var2))
+  }
 
   p <- ggplot2::ggplot(df, ggplot2::aes(Var1, Var2, fill = value)) +
     ggplot2::geom_tile() +
@@ -1347,7 +1420,9 @@ get_corr_heatmap <- function(x,
 #' @param stats_group Logical; add statistical comparisons between groups when
 #'   `TRUE`. Only supported when `by = "group"`.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
-#' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
+#' @param stat_comparisons Optional list of length-2 group pairs passed to
+#'   `ggpubr::stat_compare_means()` for significance brackets.
+#' @param comparisons Deprecated; use `stat_comparisons`.
 #' @param pool_genes Logical; when `TRUE`, pool selected genes into one
 #'   distribution per x-axis category (scenario 1).
 #' @param by When `pool_genes = TRUE`, either `"group"` or `"sample"` (x-axis
@@ -1376,13 +1451,15 @@ get_expression_boxplot <- function(x,
                                    facet_ncol = NULL,
                                    stats_group = FALSE,
                                    p.label = "p.signif",
-                                   comparisons = NULL,
+                                   stat_comparisons = NULL,
                                    pool_genes = FALSE,
                                    by = "group",
                                    facet_by = "auto",
                                    fill_by = NULL,
-                                   sample_order = c("input", "group", "expression")) {
+                                   sample_order = c("input", "group", "expression"),
+                                   comparisons = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  stat_comparisons <- .resolve_stat_comparisons(stat_comparisons, comparisons, "get_expression_boxplot")
   sample_order <- match.arg(sample_order)
   allowed_by <- if (pool_genes) c("group", "sample") else c("group", "gene")
   if (!is.null(by) && !by %in% allowed_by) {
@@ -1406,7 +1483,7 @@ get_expression_boxplot <- function(x,
     facet_by <- if (pool_genes) "group" else if (!is.null(genes) && length(genes) > 1) "gene" else "none"
   }
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -1517,7 +1594,7 @@ get_expression_boxplot <- function(x,
     } else {
       plt <- plt + ggpubr::stat_compare_means(
         ggplot2::aes(group = .data[[x_var]]),
-        comparisons = comparisons,
+        comparisons = stat_comparisons,
         method = "t.test",
         label = p.label,
         label.x.npc = "center"
@@ -1630,9 +1707,6 @@ get_chromosome_plot <- function(x,
   scale_mode <- match.arg(scale_mode)
   if (!requireNamespace("AnnotationDbi", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg AnnotationDbi} is required for TxDb queries.")
-  }
-  if (!requireNamespace("viridis", quietly = TRUE)) {
-    cli::cli_abort("Package {.pkg viridis} is required for colouring.")
   }
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
@@ -2485,7 +2559,7 @@ get_expression_density <- function(x,
   color_by <- match.arg(color_by)
   facet_by <- match.arg(facet_by)
   sample_order <- match.arg(sample_order)
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -2598,7 +2672,7 @@ get_expression_joyplot <- function(x,
   color_by <- match.arg(color_by)
   sample_order <- match.arg(sample_order)
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -2700,7 +2774,7 @@ get_expression_scatter <- function(x,
   by <- match.arg(by)
   method <- match.arg(method)
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group = NULL, group_column = group_column)
   group_col <- attr(meta, "group_column")
 
@@ -2828,10 +2902,14 @@ get_expression_scatter <- function(x,
 #'   than one gene is requested), `"gene"`, or `"none"`. For multiple genes,
 #'   `"none"` falls back to `"gene"` to avoid unreadable combined panels.
 #' @param log_transform Logical; log2-transform expression before plotting.
-#' @param facet_scale Scaling option passed to `facet_wrap()` when plotting multiple genes.
+#' @param facet_scale Deprecated; use `facet_scales`.
+#' @param facet_scales Scaling option passed to `facet_wrap()` when plotting multiple genes.
+#' @param max_genes Maximum number of genes accepted in one call (default 15).
+#'   Previously an undocumented hard cap.
 #' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param point_size Numeric size of the dots.
-#' @param line_size Numeric size of the stems.
+#' @param linewidth Numeric width of the stems.
+#' @param line_size Deprecated; use `linewidth`.
 #' @param label Logical; draw numeric labels above the dots.
 #' @param label_digits Integer; digits to show in labels when `label = TRUE`.
 #' @param display_id Optional ID/column name to use for labels/facets. If supplied
@@ -2873,14 +2951,32 @@ get_expression_lollipop <- function(x,
                                     facet_nrow = NULL,
                                     facet_ncol = NULL,
                                     point_size = 6,
-                                    line_size = 1.2,
+                                    linewidth = 1.2,
                                     label = TRUE,
                                     label_digits = 1,
                                     display_id = NULL,
                                     display_from = NULL,
-                                    display_orgdb = NULL) {
+                                    display_orgdb = NULL,
+                                    facet_scales = facet_scale,
+                                    max_genes = 15,
+                                    line_size = NULL) {
   stopifnot(inherits(x, "VISTA"))
-  if (length(genes) > 15) cli::cli_abort("Maximum 15 genes can be plotted at once.")
+  if (!is.null(line_size)) {
+    linewidth <- .vista_deprecate_arg(
+      old = "line_size", new = "linewidth", value = line_size, fun = "get_expression_lollipop"
+    )
+  }
+  if (length(genes) > max_genes) {
+    cli::cli_abort(
+      "At most {max_genes} gene{?s} can be plotted at once; {length(genes)} were supplied. Raise {.arg max_genes} to override."
+    )
+  }
+  if (!missing(facet_scale)) {
+    facet_scales <- .vista_deprecate_arg(
+      old = "facet_scale", new = "facet_scales", value = facet_scale,
+      fun = "get_expression_lollipop"
+    )
+  }
   by <- match.arg(by)
   sample_order <- match.arg(sample_order)
 
@@ -2891,20 +2987,23 @@ get_expression_lollipop <- function(x,
   }
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
-  mat <- SummarizedExperiment::assay(x)[, meta$sample, drop = FALSE]
+  mat <- SummarizedExperiment::assay(x, "norm_counts")[, meta$sample, drop = FALSE]
   if (ncol(mat) == 0) {
     cli::cli_abort("No expression columns available after subsetting samples.")
   }
 
   underlying_ids <- rownames(mat)
-  if (!is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-    map <- rd[[display_id]]
-    names(map) <- rownames(x)
-    gene_ids <- names(map)[match(genes, map)]
-    gene_ids <- gene_ids[!is.na(gene_ids)]
-  } else {
-    gene_ids <- .map_gene_ids(genes, from_type = display_from, to_type = display_from, orgdb = display_orgdb)
-  }
+  # Shared resolver: `genes` may be display labels (SYMBOLs), so it maps back to
+  # the object's own identifiers. The previous inline OrgDb branch called
+  # .map_gene_ids(from_type = display_from, to_type = display_from) -- source and
+  # target identical, which is a no-op, so symbols never resolved.
+  gene_ids <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
   if (!length(gene_ids)) gene_ids <- genes
 
   missing_genes <- setdiff(gene_ids, underlying_ids)
@@ -2955,7 +3054,7 @@ get_expression_lollipop <- function(x,
   ) +
     ggplot2::geom_segment(
       ggplot2::aes(xend = .data[[x_var]], y = 0, yend = expression),
-      linewidth = line_size,
+      linewidth = linewidth,
       lineend = "round"
     ) +
     ggplot2::geom_point(size = point_size) +
@@ -2979,7 +3078,7 @@ get_expression_lollipop <- function(x,
     plt <- .add_expression_facet_wrap(
       plot = plt,
       facet_formula = ~gene,
-      scales = facet_scale,
+      scales = facet_scales,
       facet_nrow = facet_nrow,
       facet_ncol = facet_ncol
     )
@@ -3009,7 +3108,10 @@ get_expression_lollipop <- function(x,
 #'   are not currently added by `get_expression_lineplot()`.
 #' @param p.label Label format retained for API consistency with other
 #'   expression plots.
-#' @param comparisons Optional list of comparisons retained for API consistency.
+#' @param stat_comparisons Optional list of group pairs, retained for API
+#'   consistency with the other expression plots; this plot does not draw
+#'   significance brackets.
+#' @param comparisons Deprecated; use `stat_comparisons`.
 #' @param pool_genes Logical; when `TRUE`, average the selected genes into a
 #'   single trajectory.
 #' @param by Plot unit: `"sample"` (default) or `"group"` to average
@@ -3041,7 +3143,7 @@ get_expression_lineplot <- function(x,
                                     facet_ncol = NULL,
                                     stats_group = FALSE,
                                     p.label = "p.signif",
-                                    comparisons = NULL,
+                                    stat_comparisons = NULL,
                                     pool_genes = FALSE,
                                     by = c("sample", "group"),
                                     facet_by = c("auto", "group", "gene", "none"),
@@ -3052,14 +3154,20 @@ get_expression_lineplot <- function(x,
                                     colors = NULL,
                                     line_width = 1,
                                     point_size = 2,
-                                    base_size = 12) {
+                                    base_size = 12,
+                                   comparisons = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  stat_comparisons <- .resolve_stat_comparisons(stat_comparisons, comparisons, "get_expression_lineplot")
   by <- match.arg(by)
   facet_by <- match.arg(facet_by)
   sample_order <- match.arg(sample_order)
 
   if (!is.null(value_transform)) {
-    value_transform <- match.arg(value_transform, c("log2", "zscore", "none"))
+    value_transform <- .vista_deprecate_arg(
+      old = "value_transform", new = "log_transform",
+      value = match.arg(value_transform, c("log2", "zscore", "none")),
+      fun = "get_expression_lineplot"
+    )
     if (value_transform == "log2") {
       log_transform <- TRUE
     } else if (value_transform == "none") {
@@ -3082,7 +3190,7 @@ get_expression_lineplot <- function(x,
   }
 
   summarise <- identical(by, "group")
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
   genes_use <- genes
   if (!is.null(genes_use) && !is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
@@ -3191,7 +3299,7 @@ get_expression_lineplot <- function(x,
   value_transform <- match.arg(value_transform)
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
-  mat <- SummarizedExperiment::assay(x)[, meta$sample, drop = FALSE]
+  mat <- SummarizedExperiment::assay(x, "norm_counts")[, meta$sample, drop = FALSE]
   if (!is.null(genes)) {
     missing_genes <- setdiff(genes, rownames(mat))
     if (length(missing_genes) == length(genes)) {
@@ -3370,7 +3478,9 @@ get_expression_lineplot <- function(x,
 #' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
-#' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
+#' @param stat_comparisons Optional list of length-2 group pairs passed to
+#'   `ggpubr::stat_compare_means()` for significance brackets.
+#' @param comparisons Deprecated; use `stat_comparisons`.
 #' @param pool_genes Logical; pool all selected genes into one violin per group.
 #' @param by Plot unit. Violin plots currently support only `"group"`.
 #' @param facet_by Faceting mode. Uses the same argument pattern as
@@ -3401,15 +3511,17 @@ get_expression_violinplot <- function(x,
                                       facet_ncol = NULL,
                                       stats_group = FALSE,
                                       p.label = "p.signif",
-                                      comparisons = NULL,
+                                      stat_comparisons = NULL,
                                       pool_genes = FALSE,
                                       by = "group",
                                       facet_by = c("auto", "gene", "none"),
                                       fill_by = NULL,
                                       sample_order = c("input", "group", "expression"),
                                       value_transform = NULL,
-                                      summarise = FALSE) {
+                                      summarise = FALSE,
+                                   comparisons = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  stat_comparisons <- .resolve_stat_comparisons(stat_comparisons, comparisons, "get_expression_violinplot")
   if (!identical(by, "group")) {
     cli::cli_abort(
       "{.fun get_expression_violinplot} currently supports only {.code by = 'group'} because violins require replicate distributions within groups."
@@ -3417,7 +3529,11 @@ get_expression_violinplot <- function(x,
   }
   sample_order <- match.arg(sample_order)
   if (!is.null(value_transform)) {
-    value_transform <- match.arg(value_transform, c("log2", "zscore", "none"))
+    value_transform <- .vista_deprecate_arg(
+      old = "value_transform", new = "log_transform",
+      value = match.arg(value_transform, c("log2", "zscore", "none")),
+      fun = "get_expression_violinplot"
+    )
     if (value_transform == "log2") {
       log_transform <- TRUE
     } else if (value_transform == "none") {
@@ -3436,7 +3552,7 @@ get_expression_violinplot <- function(x,
     )
   }
 
-  mat <- SummarizedExperiment::assay(x)
+  mat <- SummarizedExperiment::assay(x, "norm_counts")
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
   mat <- mat[, meta$sample, drop = FALSE]
@@ -3557,7 +3673,7 @@ get_expression_violinplot <- function(x,
     } else {
       plt <- plt + ggpubr::stat_compare_means(
         ggplot2::aes(group = .data[[group_col]]),
-        comparisons = comparisons,
+        comparisons = stat_comparisons,
         method = "t.test",
         label = p.label,
         label.x.npc = "center"
@@ -4379,10 +4495,14 @@ get_foldchange_scatter <- function(x,
 #' @param log_transform Logical; log2-transform expression before plotting.
 #' @param stats_group Logical; add statistical comparisons between groups when `TRUE`.
 #' @param facet_scale Scaling option passed to `facet_wrap()` (deprecated; use `facet_scales`).
+#' @param max_genes Maximum number of genes accepted in one call (default 25).
+#'   Previously an undocumented hard cap.
 #' @param facet_scales Facet scales argument passed to `facet_wrap()` when faceting by gene.
 #' @param facet_nrow,facet_ncol Optional layout passed to `facet_wrap()` when faceting.
 #' @param p.label Label format for `ggpubr::stat_compare_means()`.
-#' @param comparisons Optional list of specific group comparisons for `stat_compare_means()`.
+#' @param stat_comparisons Optional list of length-2 group pairs passed to
+#'   `ggpubr::stat_compare_means()` for significance brackets.
+#' @param comparisons Deprecated; use `stat_comparisons`.
 #' @param group_column Optional column name in `sample_info` to use for grouping samples.
 #' @param display_id Optional ID/column name to use for labels/facets. If supplied
 #'   and present in `rowData(x)`, those values are used; otherwise falls back to
@@ -4443,18 +4563,31 @@ get_expression_barplot <- function(x,
                                    facet_nrow = NULL,
                                    facet_ncol = NULL,
                                    p.label = "p.signif",
-                                   comparisons = NULL,
+                                   stat_comparisons = NULL,
                                    display_id = NULL,
                                    display_from = NULL,
                                    display_orgdb = NULL,
                                    by = c("group", "sample"),
                                    sample_order = c("input", "group", "expression"),
                                    fill_by = NULL,
-                                   facet_by = c("auto", "gene", "none")) {
+                                   facet_by = c("auto", "gene", "none"),
+                                   max_genes = 25,
+                                   comparisons = NULL) {
   stopifnot(inherits(x, "VISTA"))
-  if (length(genes) > 25) cli::cli_abort("Maximum 25 genes can be plotted at once.")
+  stat_comparisons <- .resolve_stat_comparisons(stat_comparisons, comparisons, "get_expression_barplot")
+  if (length(genes) > max_genes) {
+    cli::cli_abort(
+      "At most {max_genes} gene{?s} can be plotted at once; {length(genes)} were supplied. Raise {.arg max_genes} to override."
+    )
+  }
   by <- match.arg(by)
   sample_order <- match.arg(sample_order)
+  if (!missing(facet_scale)) {
+    facet_scales <- .vista_deprecate_arg(
+      old = "facet_scale", new = "facet_scales", value = facet_scale,
+      fun = "get_expression_barplot"
+    )
+  }
 
   meta <- .prepare_sample_metadata(x, sample_group, group_column)
   group_col <- attr(meta, "group_column")
@@ -4467,7 +4600,7 @@ get_expression_barplot <- function(x,
   }
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
-  mat <- SummarizedExperiment::assay(x)[, meta$sample, drop = FALSE]
+  mat <- SummarizedExperiment::assay(x, "norm_counts")[, meta$sample, drop = FALSE]
 
   # Map input genes to underlying IDs if possible
   underlying_ids <- rownames(mat)
@@ -4577,7 +4710,7 @@ get_expression_barplot <- function(x,
     }
     plt <- plt + ggpubr::stat_compare_means(
       ggplot2::aes(group = .data[[group_col]]),
-      comparisons = comparisons,
+      comparisons = stat_comparisons,
       method = "t.test",
       label = p.label,
       label.x.npc = "center"
@@ -4639,7 +4772,8 @@ get_expression_barplot <- function(x,
 #'   sign). For two comparisons, a named or unnamed vector of colors with one
 #'   entry per comparison (defaults to a qualitative palette).
 #' @param point_size Numeric size of dots.
-#' @param line_size Numeric size of stems (linewidth).
+#' @param linewidth Numeric width of the stems.
+#' @param line_size Deprecated; use `linewidth`.
 #' @param label Logical; draw numeric labels next to the dots.
 #' @param label_digits Integer; digits to show in labels when `label = TRUE`.
 #' @param display_id Optional column in `rowData(x)` used to interpret `genes`
@@ -4670,7 +4804,7 @@ get_foldchange_lollipop <- function(x,
                                     sort_by = c("input", "log2fc", "abs_log2fc"),
                                     palette = NULL,
                                     point_size = 6,
-                                    line_size = 1.2,
+                                    linewidth = 1.2,
                                     label = TRUE,
                                     label_digits = 2,
                                     display_id = NULL,
@@ -4680,8 +4814,14 @@ get_foldchange_lollipop <- function(x,
                                     facet_scales = "free_y",
                                     facet_nrow = NULL,
                                     facet_ncol = NULL,
-                                    facet_by = c("auto", "gene", "comparison", "none")) {
+                                    facet_by = c("auto", "gene", "comparison", "none"),
+                                    line_size = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  if (!is.null(line_size)) {
+    linewidth <- .vista_deprecate_arg(
+      old = "line_size", new = "linewidth", value = line_size, fun = "get_foldchange_lollipop"
+    )
+  }
   sort_by <- match.arg(sort_by)
 
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
@@ -4777,7 +4917,7 @@ get_foldchange_lollipop <- function(x,
         ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
         ggplot2::geom_segment(
           ggplot2::aes(xend = comparison, y = 0, yend = log2fc),
-          linewidth = line_size,
+          linewidth = linewidth,
           lineend = "round"
         ) +
         ggplot2::geom_point(size = point_size) +
@@ -4819,7 +4959,7 @@ get_foldchange_lollipop <- function(x,
         ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
         ggplot2::geom_segment(
           ggplot2::aes(xend = comparison, y = 0, yend = log2fc),
-          linewidth = line_size,
+          linewidth = linewidth,
           lineend = "round"
         ) +
         ggplot2::geom_point(size = point_size) +
@@ -4883,7 +5023,7 @@ get_foldchange_lollipop <- function(x,
     plt <- base_plot +
       ggplot2::geom_segment(
         ggplot2::aes(xend = gene_id, y = 0, yend = log2fc, color = fc_dir),
-        linewidth = line_size,
+        linewidth = linewidth,
         lineend = "round",
         data = df
       ) +
@@ -4933,7 +5073,7 @@ get_foldchange_lollipop <- function(x,
         ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
         ggplot2::geom_segment(
           ggplot2::aes(xend = gene_id, y = 0, yend = log2fc),
-          linewidth = line_size,
+          linewidth = linewidth,
           lineend = "round"
         ) +
         ggplot2::geom_point(size = point_size) +
@@ -4970,7 +5110,7 @@ get_foldchange_lollipop <- function(x,
         ggplot2::geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
         ggplot2::geom_segment(
           ggplot2::aes(xend = x_dodge, y = 0, yend = log2fc),
-          linewidth = line_size,
+          linewidth = linewidth,
           lineend = "round"
         ) +
         ggplot2::geom_point(size = point_size) +
@@ -5037,6 +5177,11 @@ get_deg_venn_diagram <- function(x,
   if (!requireNamespace("ggvenn", quietly = TRUE)) {
     cli::cli_abort("Package {.pkg ggvenn} must be installed to use `get_deg_venn_diagram()`.")
   }
+  .vista_check_dots(
+    list(...), fun = "get_deg_venn_diagram",
+    allowed = names(formals(ggvenn::ggvenn)),
+    blocked = c("data", "columns")
+  )
   if (length(sample_comparisons) < 2 || length(sample_comparisons) > 4) {
     cli::cli_abort("{.arg sample_comparisons} must contain 2 to 4 comparison names.")
   }
@@ -5228,6 +5373,35 @@ get_deg_venn_diagram <- function(x,
   paste0(pct_lab, "%")
 }
 
+# `label` is logical across the rest of VISTA but was a character enum on the
+# circular DEG plots, so label = TRUE silently failed there. The enum moved to
+# `label_type`; `label` is accepted for one deprecation cycle and TRUE/FALSE are
+# translated to the enum values a user would have meant.
+# `comparisons` collided with the comparisons() accessor and with the
+# sample_comparisons argument meaning DE contrasts. On these plots it means
+# group pairs for ggpubr significance brackets, so it moved to
+# `stat_comparisons`.
+.resolve_stat_comparisons <- function(stat_comparisons, comparisons, fun) {
+  if (is.null(comparisons)) return(stat_comparisons)
+  .vista_deprecate_arg(
+    old = "comparisons", new = "stat_comparisons", value = comparisons, fun = fun
+  )
+}
+
+.resolve_deg_label_type <- function(label_type, label, fun) {
+  label_type <- match.arg(label_type, c("both", "count", "percent", "none"))
+  if (is.null(label)) return(label_type)
+
+  translated <- if (is.logical(label) && length(label) == 1L && !is.na(label)) {
+    if (isTRUE(label)) "both" else "none"
+  } else {
+    match.arg(as.character(label), c("both", "count", "percent", "none"))
+  }
+  .vista_deprecate_arg(
+    old = "label", new = "label_type", value = translated, fun = fun
+  )
+}
+
 .plot_deg_count_circular <- function(df,
                                      label = c("both", "count", "percent", "none"),
                                      label_digits = 1,
@@ -5364,6 +5538,9 @@ get_deg_count_barplot <- function(x,
 #' @param x A `VISTA` object containing DEG summaries.
 #' @param sample_comparisons Optional character vector of comparison names to display.
 #' @param label Label mode: `"both"` (default), `"count"`, `"percent"`, or `"none"`.
+#' @param label_type Label content: `"both"`, `"count"`, `"percent"` or `"none"`.
+#' @param label Deprecated; use `label_type`. `TRUE`/`FALSE` map to
+#'   `"both"`/`"none"`.
 #' @param label_digits Integer number of decimals used for percentage labels.
 #' @param base_size Numeric base font size for the plot.
 #' @param colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
@@ -5379,7 +5556,7 @@ get_deg_count_barplot <- function(x,
 #' @export
 get_deg_count_pieplot <- function(x,
                                   sample_comparisons = NULL,
-                                  label = c("both", "count", "percent", "none"),
+                                  label_type = c("both", "count", "percent", "none"),
                                   label_digits = 1,
                                   base_size = 12,
                                   colors = c(Up = "red4", Down = "blue4"),
@@ -5387,8 +5564,10 @@ get_deg_count_pieplot <- function(x,
                                   other_color = "grey70",
                                   text_color = "black",
                                   facet_by = c("comparison", "none"),
-                                  ncol = NULL) {
+                                  ncol = NULL,
+                                  label = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  label_type <- .resolve_deg_label_type(label_type, label, "get_deg_count_pieplot")
   df <- .collect_deg_count_data(
     x = x,
     sample_comparisons = sample_comparisons,
@@ -5402,7 +5581,7 @@ get_deg_count_pieplot <- function(x,
   )
   .plot_deg_count_circular(
     df = df,
-    label = label,
+    label = label_type,
     label_digits = label_digits,
     base_size = base_size,
     colors = colors,
@@ -5417,6 +5596,9 @@ get_deg_count_pieplot <- function(x,
 #' @param x A `VISTA` object containing DEG summaries.
 #' @param sample_comparisons Optional character vector of comparison names to display.
 #' @param label Label mode: `"both"` (default), `"count"`, `"percent"`, or `"none"`.
+#' @param label_type Label content: `"both"`, `"count"`, `"percent"` or `"none"`.
+#' @param label Deprecated; use `label_type`. `TRUE`/`FALSE` map to
+#'   `"both"`/`"none"`.
 #' @param label_digits Integer number of decimals used for percentage labels.
 #' @param base_size Numeric base font size for the plot.
 #' @param colors Named vector giving fill colors for `"Up"` and `"Down"` slices.
@@ -5432,7 +5614,7 @@ get_deg_count_pieplot <- function(x,
 #' @export
 get_deg_count_donutplot <- function(x,
                                     sample_comparisons = NULL,
-                                    label = c("both", "count", "percent", "none"),
+                                    label_type = c("both", "count", "percent", "none"),
                                     label_digits = 1,
                                     base_size = 12,
                                     colors = c(Up = "red4", Down = "blue4"),
@@ -5440,8 +5622,10 @@ get_deg_count_donutplot <- function(x,
                                     other_color = "grey70",
                                     text_color = "black",
                                     facet_by = c("comparison", "none"),
-                                    ncol = NULL) {
+                                    ncol = NULL,
+                                    label = NULL) {
   stopifnot(inherits(x, "VISTA"))
+  label_type <- .resolve_deg_label_type(label_type, label, "get_deg_count_donutplot")
   df <- .collect_deg_count_data(
     x = x,
     sample_comparisons = sample_comparisons,
@@ -5455,7 +5639,7 @@ get_deg_count_donutplot <- function(x,
   )
   .plot_deg_count_circular(
     df = df,
-    label = label,
+    label = label_type,
     label_digits = label_digits,
     base_size = base_size,
     colors = colors,
@@ -5590,7 +5774,7 @@ get_ma_plot <- function(x,
     bm_df <- rd_df[, c("gene_id","baseMean"), drop = FALSE]
     bm_df$baseMean <- to_num(bm_df$baseMean)
   } else {
-    a <- SummarizedExperiment::assay(x)
+    a <- SummarizedExperiment::assay(x, "norm_counts")
     bm_df <- data.frame(gene_id = rownames(a), baseMean = rowMeans(a, na.rm = TRUE), stringsAsFactors = FALSE)
   }
 
@@ -5684,8 +5868,12 @@ get_ma_plot <- function(x,
 #' @param summary_linewidth Numeric line width for the summary line.
 #' @param summary_fun Character string selecting `"median"` or `"mean"` for the summary statistic.
 #' @param base_size Numeric base theme size.
-#' @return A list with `plot` (the `ggplot2` object) and `clustered_data`
-#'   (gene-to-cluster assignments).
+#' @param return_type One of `"both"` (default), `"plot"` or `"data"`. The
+#'   default is `"both"` rather than `"plot"` because this function has always
+#'   returned the list; pass `"plot"` for a bare `ggplot2` object.
+#' @return With `return_type = "both"` (the default), a list with `plot` (the
+#'   `ggplot2` object) and `clustered_data` (gene-to-cluster assignments); with
+#'   `"plot"` the `ggplot2` object alone; with `"data"` the cluster table alone.
 # ──────────────────────────────────────────────────────────────────────────────
 
 #' @export
@@ -5706,10 +5894,16 @@ get_foldchange_lineplot <- function(x,
                                     summary_color = NULL,
                                     summary_linewidth = 1,
                                     summary_fun = c("median", "mean"),
-                                    base_size = 14) {
+                                    base_size = 14,
+                                    return_type = c("both", "plot", "data")) {
 
   stopifnot(inherits(x, "VISTA"))
   stopifnot(is.character(sample_comparisons))
+  # Default is "both" here, unlike its siblings, because this function has
+  # always returned the list and changing that would break existing code.
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_foldchange_lineplot", default = "both"
+  )
   facet_by <- match.arg(facet_by)
   summary_fun <- match.arg(summary_fun)
 
@@ -5807,12 +6001,14 @@ get_foldchange_lineplot <- function(x,
     p$facet$params$labeller <- ggplot2::labeller(cluster = cluster_counts)
   }
 
-  list(
-    plot = p,
-    clustered_data = res |>
-      dplyr::select(dplyr::all_of(gene_id_col), display_gene, cluster) |>
-      dplyr::distinct()
-  )
+  if (identical(return_type, "plot")) return(p)
+
+  clustered_data <- res |>
+    dplyr::select(dplyr::all_of(gene_id_col), display_gene, cluster) |>
+    dplyr::distinct()
+  if (identical(return_type, "data")) return(clustered_data)
+
+  list(plot = p, clustered_data = clustered_data)
 }
 
 
@@ -5980,7 +6176,7 @@ get_deg_alluvial <- function(x,
     cli::cli_abort("{.arg top_n} must be a positive integer when {.arg genes} is omitted.")
   }
 
-  mat <- SummarizedExperiment::assay(x)[, sample_ids, drop = FALSE]
+  mat <- SummarizedExperiment::assay(x, "norm_counts")[, sample_ids, drop = FALSE]
   vars <- matrixStats::rowVars(as.matrix(mat), na.rm = TRUE)
   means <- rowMeans(mat, na.rm = TRUE)
   ord <- order(vars, means, decreasing = TRUE, na.last = NA)
@@ -6152,14 +6348,15 @@ get_deg_alluvial <- function(x,
 #' @param col Optional `circlize::colorRamp2` function used when `color_default = FALSE`.
 #' @param heatmap_name Optional legend title.
 #' @param show_heatmap_legend Logical; display the heatmap legend.
-#' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned object.
+#' @param return_type One of `"plot"` (default), `"data"`, or `"both"`. The
+#'   legacy values `"heatmap"` and `"clusters"` are still accepted and warn.
 #' @return A `ComplexHeatmap` object, a cluster data frame, or a list containing
 #'   both depending on `return_type`.
 #' @examples
 #' v <- example_vista()
 #' if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
 #'     requireNamespace("circlize", quietly = TRUE)) {
-#'   hm <- get_expression_heatmap(v, return_type = "heatmap")
+#'   hm <- get_expression_heatmap(v, return_type = "plot")
 #'   ComplexHeatmap::draw(hm)
 #' }
 #' @param ... Additional arguments passed to `ComplexHeatmap::Heatmap()`.
@@ -6194,7 +6391,7 @@ get_expression_heatmap <- function(x,
                                    col = NULL,
                                    heatmap_name = NULL,
                                    show_heatmap_legend = TRUE,
-                                   return_type = c("heatmap", "clusters", "both"),
+                                   return_type = c("plot", "data", "both"),
                                    ...) {
 
   stopifnot(inherits(x, "VISTA"))
@@ -6204,11 +6401,20 @@ get_expression_heatmap <- function(x,
   }
   value_transform <- match.arg(value_transform)
   summarise_method <- match.arg(summarise_method)
-  return_type <- match.arg(return_type)
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_expression_heatmap",
+    legacy = c(heatmap = "plot", clusters = "data")
+  )
 
   group_col <- group_column %||% .vista_group_col(x)
 
-  expr <- SummarizedExperiment::assay(x) |>
+  .vista_check_dots(
+    list(...), fun = "get_expression_heatmap",
+    allowed = names(formals(ComplexHeatmap::Heatmap)),
+    blocked = c("matrix", "name", "col")
+  )
+
+  expr <- SummarizedExperiment::assay(x, "norm_counts") |>
     as.data.frame() |>
     tibble::rownames_to_column("gene_id")
 
@@ -6487,18 +6693,18 @@ get_expression_heatmap <- function(x,
 
   if (!is.null(row_anno)) ht <-  ht + row_anno
 
-  if (!is.null(kmeans_k) && return_type != "heatmap") {
+  if (!is.null(kmeans_k) && return_type != "plot") {
     drawn <- ComplexHeatmap::draw(ht)
     clusters <- ComplexHeatmap::row_order(drawn)
     row_names <- rownames(mat)
     row_clusters <- rep(NA_integer_, length(row_names))
     for (k in seq_along(clusters)) row_clusters[clusters[[k]]] <- k
     cluster_df <- tibble::tibble(gene = row_names, cluster = row_clusters)
-    if (return_type == "clusters") return(cluster_df)
+    if (return_type == "data") return(cluster_df)
     return(list(heatmap = ht, clusters = cluster_df))
   }
 
-  if (return_type == "heatmap") return(ht)
+  if (return_type == "plot") return(ht)
   list(heatmap = ht, clusters = NULL)
 }
 
@@ -6719,14 +6925,15 @@ get_foldchange_barplot <- function(x,
 #' @param col Optional `circlize::colorRamp2` color function used when `color_default = FALSE`.
 #' @param heatmap_name Optional legend title.
 #' @param show_heatmap_legend Logical; display the heatmap legend.
-#' @param return_type `"heatmap"`, `"clusters"`, or `"both"` selecting the returned value.
+#' @param return_type One of `"plot"` (default), `"data"`, or `"both"`. The
+#'   legacy values `"heatmap"` and `"clusters"` are still accepted and warn.
 #' @return A `ComplexHeatmap` object, a cluster data frame, or a list containing
 #'   both depending on `return_type`.
 #' @examples
 #' v <- example_vista()
 #' if (requireNamespace("ComplexHeatmap", quietly = TRUE) &&
 #'     requireNamespace("circlize", quietly = TRUE)) {
-#'   hm <- get_foldchange_heatmap(v, return_type = "heatmap")
+#'   hm <- get_foldchange_heatmap(v, return_type = "plot")
 #'   ComplexHeatmap::draw(hm)
 #' }
 #' @param ... Additional arguments forwarded to `ComplexHeatmap::Heatmap()`.
@@ -6754,7 +6961,7 @@ get_foldchange_heatmap <- function(x,
                                    col = NULL,
                                    heatmap_name = NULL,
                                    show_heatmap_legend = TRUE,
-                                   return_type = c("heatmap", "clusters", "both"),
+                                   return_type = c("plot", "data", "both"),
                                    ...) {
 
   stopifnot(inherits(x, "VISTA"))
@@ -6762,7 +6969,16 @@ get_foldchange_heatmap <- function(x,
       !requireNamespace("circlize", quietly = TRUE)) {
     cli::cli_abort("Packages {.pkg ComplexHeatmap} and {.pkg circlize} must be installed to draw heatmaps.")
   }
-  return_type <- match.arg(return_type)
+  return_type <- .vista_resolve_return_type(
+    return_type, fun = "get_foldchange_heatmap",
+    legacy = c(heatmap = "plot", clusters = "data")
+  )
+
+  .vista_check_dots(
+    list(...), fun = "get_foldchange_heatmap",
+    allowed = names(formals(ComplexHeatmap::Heatmap)),
+    blocked = c("matrix", "name", "col")
+  )
 
   comps <- .vista_comparisons(x)
   if (!length(comps)) {
@@ -6886,18 +7102,18 @@ get_foldchange_heatmap <- function(x,
 
   if (!is.null(row_anno)) ht <- ht + row_anno
 
-  if (!is.null(kmeans_k) && return_type != "heatmap") {
+  if (!is.null(kmeans_k) && return_type != "plot") {
     drawn <- ComplexHeatmap::draw(ht)
     clusters <- ComplexHeatmap::row_order(drawn)
     row_names <- rownames(fc_mat)
     row_clusters <- rep(NA_integer_, length(row_names))
     for (k in seq_along(clusters)) row_clusters[clusters[[k]]] <- k
     cluster_df <- tibble::tibble(gene = row_names, cluster = row_clusters)
-    if (return_type == "clusters") return(cluster_df)
+    if (return_type == "data") return(cluster_df)
     return(list(heatmap = ht, clusters = cluster_df))
   }
 
-  if (return_type == "heatmap") return(ht)
+  if (return_type == "plot") return(ht)
   list(heatmap = ht, clusters = NULL)
 }
 

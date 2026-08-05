@@ -38,7 +38,8 @@ inferred from \code{species}.}
 \item{...}{Passed to \code{clusterProfiler::enrichGO()}.}
 }
 \value{
-An object returned by this function.
+A list with a single element \code{enrich}, holding the \code{enrichResult}
+returned by \code{clusterProfiler::enrichKEGG()}.
 }
 \description{
 Run KEGG enrichment directly from a VISTA comparison

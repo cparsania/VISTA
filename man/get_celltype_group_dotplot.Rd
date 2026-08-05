@@ -10,10 +10,11 @@ get_celltype_group_dotplot(
   cell_types = NULL,
   top_n = 12,
   summary_fun = c("mean", "median"),
-  error = c("se", "sd", "none"),
+  errorbar = c("se", "sd", "none"),
   add_points = TRUE,
   point_size = 2.5,
-  base_size = 12
+  base_size = 12,
+  error = NULL
 )
 }
 \arguments{
@@ -28,13 +29,15 @@ If \code{NULL}, uses the active VISTA group column when available.}
 
 \item{summary_fun}{One of \code{"mean"} or \code{"median"} for group summary.}
 
-\item{error}{Error-bar type: \code{"se"}, \code{"sd"}, or \code{"none"}.}
+\item{errorbar}{Error-bar type: \code{"se"}, \code{"sd"}, or \code{"none"}.}
 
 \item{add_points}{Logical; overlay sample-level jittered points.}
 
 \item{point_size}{Point size for summary points.}
 
 \item{base_size}{Base font size.}
+
+\item{error}{Deprecated; use \code{errorbar}.}
 }
 \value{
 A ggplot object.

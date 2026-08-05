@@ -1,9 +1,10 @@
 Package: VISTA
 Type: Package
 Title: Visualization and Integrated System for Transcriptomic Analysis
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: c(
-    person(given = "Chirag", family = "Parsania", email = "chirag.parsania@gmail.com", role = c("aut", "cre"))
+    person(given = "Chirag", family = "Parsania", email = "chirag.parsania@gmail.com",
+           role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4873-2385"))
   )
 Description: The VISTA (Visualization and Integrated System for Transcriptomic Analysis) platform streamlines
     differential expression workflows by wrapping DESeq2 and edgeR into a
@@ -13,9 +14,10 @@ Description: The VISTA (Visualization and Integrated System for Transcriptomic A
     experiments.
 License: GPL-3
 Encoding: UTF-8
-Depends: R (>= 4.3)
+Depends: R (>= 4.6.0)
 Imports:
     AnnotationDbi,
+    BiocGenerics,
     cli,
     clusterProfiler,
     colorspace,
@@ -27,6 +29,8 @@ Imports:
     ggrepel,
     GGally,
     ggpubr,
+    grDevices,
+    graphics,
     grid,
     matrixStats,
     methods,
@@ -36,12 +40,14 @@ Imports:
     rlang,
     S4Vectors,
     scales,
+    stats,
     stringr,
     SummarizedExperiment,
     tibble,
     tidyr,
     tidyselect,
-    viridis
+    tools,
+    utils
 Suggests:
     airway,
     BiocStyle,

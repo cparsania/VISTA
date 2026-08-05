@@ -10,7 +10,7 @@ get_umap_plot(
   group_column = NULL,
   color_by = NULL,
   genes = NULL,
-  top_n_genes = NULL,
+  top_n = NULL,
   label = FALSE,
   label_size = 3,
   point_size = 10,
@@ -23,7 +23,9 @@ get_umap_plot(
   use_vista_colors = NULL,
   palette = NULL,
   colors = NULL,
-  use_group_colors = TRUE
+  use_group_colors = TRUE,
+  top_n_genes = NULL,
+  max_genes = 20
 )
 }
 \arguments{
@@ -40,7 +42,7 @@ Defaults to \code{group_column}.}
 
 \item{genes}{Optional character vector of gene identifiers to restrict the matrix.}
 
-\item{top_n_genes}{Optional integer selecting top variable genes to include.}
+\item{top_n}{Optional integer selecting top variable genes to include.}
 
 \item{label}{Logical; draw sample labels when \code{TRUE}.}
 
@@ -72,6 +74,10 @@ both \code{palette} and stored VISTA colours.}
 
 \item{use_group_colors}{Logical; when \code{TRUE}, prefer the stored VISTA group
 colours when colouring by the grouping column.}
+
+\item{top_n_genes}{Deprecated; use \code{top_n}.}
+
+\item{max_genes}{Maximum number of genes accepted in \code{genes} (default 20).}
 }
 \value{
 A ggplot object with UMAP1/UMAP2 coordinates.

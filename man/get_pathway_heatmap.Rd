@@ -16,7 +16,7 @@ get_pathway_heatmap(
   gene_mode = c("union", "intersection"),
   gene_id_column = NULL,
   max_genes = NULL,
-  return_type = c("heatmap", "both", "genes"),
+  return_type = c("plot", "data", "both"),
   ...
 )
 }
@@ -50,7 +50,8 @@ Leave \code{NULL} when enrichment genes already match VISTA rownames.}
 
 \item{max_genes}{Optional cap on the number of genes passed to the heatmap.}
 
-\item{return_type}{One of \code{"heatmap"} (default), \code{"both"}, or \code{"genes"}.}
+\item{return_type}{One of \code{"plot"} (default), \code{"data"}, or \code{"both"}. The
+legacy values \code{"heatmap"} and \code{"genes"} are still accepted and warn.}
 
 \item{...}{Additional arguments passed to \code{\link[=get_expression_heatmap]{get_expression_heatmap()}}.}
 }
@@ -82,7 +83,7 @@ if (requireNamespace("msigdbr", quietly = TRUE)) {
     enrichment = msig,
     sample_group = c("control", "treatment1"),
     top_n = 3,
-    return_type = "genes"
+    return_type = "data"
   )
   head(genes)
 }

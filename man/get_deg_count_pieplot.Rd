@@ -7,7 +7,7 @@
 get_deg_count_pieplot(
   x,
   sample_comparisons = NULL,
-  label = c("both", "count", "percent", "none"),
+  label_type = c("both", "count", "percent", "none"),
   label_digits = 1,
   base_size = 12,
   colors = c(Up = "red4", Down = "blue4"),
@@ -15,7 +15,8 @@ get_deg_count_pieplot(
   other_color = "grey70",
   text_color = "black",
   facet_by = c("comparison", "none"),
-  ncol = NULL
+  ncol = NULL,
+  label = NULL
 )
 }
 \arguments{
@@ -23,7 +24,7 @@ get_deg_count_pieplot(
 
 \item{sample_comparisons}{Optional character vector of comparison names to display.}
 
-\item{label}{Label mode: \code{"both"} (default), \code{"count"}, \code{"percent"}, or \code{"none"}.}
+\item{label_type}{Label content: \code{"both"}, \code{"count"}, \code{"percent"} or \code{"none"}.}
 
 \item{label_digits}{Integer number of decimals used for percentage labels.}
 
@@ -44,9 +45,12 @@ slice using \code{other_color} unless overridden in \code{colors}.}
 or \code{"none"} for a single pie.}
 
 \item{ncol}{Optional number of columns when faceting.}
+
+\item{label}{Deprecated; use \code{label_type}. \code{TRUE}/\code{FALSE} map to
+\code{"both"}/\code{"none"}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object drawing DEG counts as a pie chart.
 }
 \description{
 Pie chart of DEG counts (Up/Down) across comparisons

@@ -50,7 +50,7 @@ not present in \code{rowData(x)}.}
 \item{stats_method}{Statistical method passed to \code{ggpubr::stat_compare_means()}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object summarising log2 fold-change distributions.
 }
 \description{
 Builds boxplots of log2 fold changes for selected genes and comparisons,

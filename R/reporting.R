@@ -120,6 +120,8 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     }
   }
 
+  cfg_supplied <- names(if (is.character(config)) cfg else config)
+
   if (!is.null(cfg$vista_rds)) {
     vista_obj <- readRDS(cfg$vista_rds)
   } else {
@@ -160,6 +162,37 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
   comps <- names(comparisons(vista_obj))
   if (!length(comps)) cli::cli_abort("No differential comparisons found in the VISTA object.")
 
+  # The object is the authority on how it was actually analysed. When a
+  # prebuilt object is supplied via `vista_rds`, the DE settings in the config
+  # were never used to produce anything -- reporting them would describe an
+  # analysis that did not happen.
+  obj_cuts <- cutoffs(vista_obj)
+  param_source <- c(
+    de_method = "config", log2fc_cutoff = "config",
+    pval_cutoff = "config", p_value_type = "config"
+  )
+  if (length(obj_cuts)) {
+    reconcile_map <- list(
+      de_method = "method",
+      log2fc_cutoff = "log2fc",
+      pval_cutoff = "pval",
+      p_value_type = "p_value_type"
+    )
+    for (cfg_key in names(reconcile_map)) {
+      stored <- obj_cuts[[reconcile_map[[cfg_key]]]]
+      if (is.null(stored)) next
+      if (cfg_key %in% cfg_supplied &&
+          !identical(as.character(cfg[[cfg_key]]), as.character(stored))) {
+        cli::cli_warn(c(
+          "Config {.field {cfg_key}} ({.val {cfg[[cfg_key]]}}) disagrees with the supplied VISTA object ({.val {stored}}).",
+          "i" = "Reporting the object's value; the config setting did not produce these results."
+        ))
+      }
+      cfg[[cfg_key]] <- stored
+      param_source[[cfg_key]] <- "object"
+    }
+  }
+
   primary_comp <- cfg$primary_comparison %||% comps[[1]]
   if (!primary_comp %in% comps) {
     cli::cli_abort(
@@ -167,11 +200,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     )
   }
 
-  sanitize_name <- function(x) {
-    out <- gsub("[^A-Za-z0-9_\\-]+", "_", as.character(x))
-    out <- gsub("^_+|_+$", "", out)
-    if (!nzchar(out)) "item" else out
-  }
+  sanitize_name <- function(x) .vista_sanitize_name(x, fallback = "item")
   comp_tag <- sanitize_name(primary_comp)
 
   assets_rel <- cfg$assets_dir
@@ -292,6 +321,13 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
       as.character(cfg$pval_cutoff),
       as.character(cfg$p_value_type)
     ),
+    source = c(
+      rep("report", 7L),
+      param_source[["de_method"]],
+      param_source[["log2fc_cutoff"]],
+      param_source[["pval_cutoff"]],
+      param_source[["p_value_type"]]
+    ),
     stringsAsFactors = FALSE
   )
 
@@ -386,7 +422,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
   }, width = 12, height = 7)
 
   cluster_tbl <- NULL
-  hm_return_type <- if (!is.na(cfg$heatmap_kmeans) && cfg$heatmap_kmeans >= 2) "both" else "heatmap"
+  hm_return_type <- if (!is.na(cfg$heatmap_kmeans) && cfg$heatmap_kmeans >= 2) "both" else "plot"
   hm_annotate <- if (cfg$summarise_replicates) FALSE else cfg$annotate_columns
   if (length(heatmap_genes) >= 2) {
     hm_out <- tryCatch(
@@ -431,7 +467,17 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
     register_download("plot", paste("Plot:", nm), plot_paths[[nm]])
   }
 
-  enrich_from <- cfg$from_type %||% cfg$display_id %||% if (any(grepl("^ENS", de_tbl$gene_id))) "ENSEMBL" else "SYMBOL"
+  # `display_id` names a rowData column used for LABELS; `from_type` describes
+  # what the gene_ids themselves ARE. Falling back from one to the other made
+  # the common pairing of Ensembl identifiers with `display_id: SYMBOL` claim
+  # the IDs were symbols, so every lookup failed and the enrichment section came
+  # back empty while looking like a real biological result.
+  enrich_from <- cfg$from_type %||% .vista_detect_id_type(de_tbl$gene_id)
+  if (is.null(cfg$from_type)) {
+    cli::cli_inform(
+      "Detected gene identifier type {.val {enrich_from}} for enrichment. Set {.field from_type} in the config to override."
+    )
+  }
 
   collect_enrichment <- function(kind, enrich_fun, file_stub) {
     out <- tryCatch(enrich_fun(), error = function(e) {
@@ -606,7 +652,7 @@ run_vista_report <- function(config, output_file = "vista-report.html") {
   saveRDS(bundle, data_rds)
   data_rds <- normalizePath(data_rds, winslash = "/", mustWork = FALSE)
 
-  esc_yaml <- function(x) gsub("\"", "\\\\\"", as.character(x), fixed = TRUE)
+  esc_yaml <- .vista_escape_yaml
   fmt_lines <- if (cfg$output_format %in% c("html", "html-default", "html4")) {
     Filter(Negate(is.null), c(
       "format:",

@@ -16,14 +16,16 @@ get_expression_barplot(
   facet_nrow = NULL,
   facet_ncol = NULL,
   p.label = "p.signif",
-  comparisons = NULL,
+  stat_comparisons = NULL,
   display_id = NULL,
   display_from = NULL,
   display_orgdb = NULL,
   by = c("group", "sample"),
   sample_order = c("input", "group", "expression"),
   fill_by = NULL,
-  facet_by = c("auto", "gene", "none")
+  facet_by = c("auto", "gene", "none"),
+  max_genes = 25,
+  comparisons = NULL
 )
 }
 \arguments{
@@ -47,7 +49,8 @@ get_expression_barplot(
 
 \item{p.label}{Label format for \code{ggpubr::stat_compare_means()}.}
 
-\item{comparisons}{Optional list of specific group comparisons for \code{stat_compare_means()}.}
+\item{stat_comparisons}{Optional list of length-2 group pairs passed to
+\code{ggpubr::stat_compare_means()} for significance brackets.}
 
 \item{display_id}{Optional ID/column name to use for labels/facets. If supplied
 and present in \code{rowData(x)}, those values are used; otherwise falls back to
@@ -76,6 +79,11 @@ represents an aggregated group mean.}
 \item{facet_by}{Faceting mode: \code{"auto"} (default; facet by gene when more
 than one gene is requested), \code{"gene"}, or \code{"none"}. For multiple genes,
 \code{"none"} falls back to \code{"gene"} to preserve readability.}
+
+\item{max_genes}{Maximum number of genes accepted in one call (default 25).
+Previously an undocumented hard cap.}
+
+\item{comparisons}{Deprecated; use \code{stat_comparisons}.}
 }
 \value{
 A \code{ggplot2} object.

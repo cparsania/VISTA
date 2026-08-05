@@ -427,6 +427,7 @@ run_deseq_analysis <- function(
   # put all deseq related stuff required for vista in a list
 
   deseq_results <- list(norm_counts = norm_counts,
+                        raw_counts = DESeq2::counts(dds, normalized = FALSE),
                         sample_info = sample_annot,
                         row_data = row_data,
                         comparisons = deseq_comps$comparisons,
@@ -570,6 +571,7 @@ run_edger_analysis <- function(
 
   list(
     norm_counts = norm_counts,
+    raw_counts = as.matrix(dge$counts),
     sample_info = sample_annot,
     row_data = row_data,
     comparisons = comps,
@@ -700,6 +702,7 @@ run_limma_analysis <- function(
 
   list(
     norm_counts = norm_counts,
+    raw_counts = as.matrix(dge$counts),
     sample_info = col_data,
     row_data = S4Vectors::DataFrame(
       baseMean = rowMeans(norm_counts),
@@ -1231,7 +1234,32 @@ run_limma_analysis <- function(
   if (!is.data.frame(df)) {
     cli::cli_abort("{.arg df} must be a data.frame/tibble or S4Vectors::DataFrame.")
   }
+  # This function aligns by rownames, but a tibble silently ignores
+  # `rownames<-`, so every gene would look absent and be replaced by an NA row:
+  # correct labels, no data. Demote to a plain data.frame before touching them.
+  if (!identical(class(df), "data.frame")) {
+    df <- as.data.frame(df, stringsAsFactors = FALSE)
+  }
   ref_rn <- as.character(ref_rn)
+
+  # The reference identifiers become the returned rownames. If they repeat,
+  # `df[ref_rn, ]` silently de-duplicates them ("g2" -> "g2.1"), leaving the
+  # rownames disagreeing with the gene_id column they were built from -- the
+  # same label/value split that produced the 1.0.0 defect.
+  if (!length(ref_rn)) {
+    cli::cli_abort("{.arg ref_rn} must contain at least one gene identifier.")
+  }
+  if (anyNA(ref_rn) || any(!nzchar(ref_rn))) {
+    cli::cli_abort("{.arg ref_rn} must not contain NA or empty gene identifiers.")
+  }
+  if (anyDuplicated(ref_rn)) {
+    dups <- unique(ref_rn[duplicated(ref_rn)])
+    cli::cli_abort(c(
+      "{.arg ref_rn} must be unique.",
+      "x" = "Duplicated: {.val {utils::head(dups, 5)}}",
+      "i" = "Aligning to repeated identifiers would produce rownames that disagree with the {.field gene_id} column."
+    ))
+  }
 
   # ---- resolve / create canonical gene_id column -----------------------------
   pick <- NULL
@@ -1322,6 +1350,17 @@ run_limma_analysis <- function(
 
   # ---- final alignment to ref order (drops extra genes) ----------------------
   df <- df[ref_rn, , drop = FALSE]
+
+  # Post-condition. This function exists to guarantee that a DE table lines up
+  # with the counts matrix, so assert it rather than trusting the steps above:
+  # every downstream plot and summary reads these two in parallel.
+  if (!identical(rownames(df), ref_rn) ||
+      !identical(as.character(df$gene_id), ref_rn)) {
+    cli::cli_abort(c(
+      "Internal error: aligned DE table does not match the reference gene order.",
+      "i" = "Please report this at {.url https://github.com/cparsania/VISTA/issues}."
+    ))
+  }
 
   df
 }

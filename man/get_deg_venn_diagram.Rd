@@ -30,7 +30,7 @@ get_deg_venn_diagram(
 \item{...}{Additional arguments forwarded to \code{ggvenn::ggvenn()}.}
 }
 \value{
-An object returned by this function.
+A \code{ggplot2} object showing the overlap of DEG sets across comparisons.
 }
 \description{
 Visualizes overlaps between DEG sets for two to four comparisons.

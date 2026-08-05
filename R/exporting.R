@@ -1,3 +1,35 @@
+# Base-graphics capture ------------------------------------------------------
+#
+# Some VISTA plots (the circlize chord diagram) draw to the active device rather
+# than returning an object. Capturing them needs the device's display list,
+# which off-screen devices such as png() and pdf() leave disabled by default --
+# recordPlot() would otherwise return an empty recording that saves nothing.
+
+#' @keywords internal
+#' @noRd
+.vista_enable_display_list <- function() {
+  if (grDevices::dev.cur() == 1L) {
+    # No device open yet; the plotting call will open the default one, and this
+    # cannot be enabled in advance. Callers verify the recording afterwards.
+    return(invisible(FALSE))
+  }
+  ok <- tryCatch({
+    grDevices::dev.control("enable")
+    TRUE
+  }, error = function(e) FALSE)
+  invisible(ok)
+}
+
+#' @keywords internal
+#' @noRd
+.vista_record_plot <- function() {
+  rp <- tryCatch(grDevices::recordPlot(), error = function(e) NULL)
+  if (is.null(rp)) return(NULL)
+  # An empty display list records successfully but replays to nothing.
+  if (length(rp) < 1L || length(rp[[1]]) == 0L) return(NULL)
+  rp
+}
+
 #' Save a VISTA plot object to disk
 #'
 #' Saves plot objects returned by VISTA plotting functions to file. Supports
@@ -5,8 +37,9 @@
 #' `ComplexHeatmap` objects (`Heatmap` / `HeatmapList`) saved via graphics
 #' devices.
 #'
-#' @param plot A plot object. Typically `ggplot`, `patchwork`, `Heatmap`, or
-#'   `HeatmapList`.
+#' @param plot A plot object. Typically `ggplot`, `patchwork`, `Heatmap`,
+#'   `HeatmapList`, or a `recordedplot` (as returned by
+#'   `get_enrichment_chord(return_type = "plot")`).
 #' @param file Output file path.
 #' @param width Plot width.
 #' @param height Plot height.
@@ -71,7 +104,7 @@ save_vista_plot <- function(plot,
     )
   }
 
-  save_heatmap <- function(hm, dev_name) {
+  open_device <- function(dev_name) {
     if (dev_name %in% c("png", "jpeg", "tiff", "bmp")) {
       dev_fun <- switch(
         dev_name,
@@ -90,18 +123,37 @@ save_vista_plot <- function(plot,
     } else {
       cli::cli_abort(
         c(
-          "Unsupported device {.val {dev_name}} for ComplexHeatmap objects.",
+          "Unsupported device {.val {dev_name}} for base-graphics output.",
           "i" = "Use one of: {.val png}, {.val jpeg}, {.val tiff}, {.val bmp}, {.val pdf}."
         )
       )
     }
+  }
+
+  # get_enrichment_chord(return_type = "plot") returns a recorded base-graphics
+  # plot, which has no ggsave path and must be replayed onto a device.
+  save_recorded <- function(rp, dev_name) {
+    open_device(dev_name)
+    on.exit(grDevices::dev.off(), add = TRUE)
+    grDevices::replayPlot(rp)
+  }
+
+  save_heatmap <- function(hm, dev_name) {
+    open_device(dev_name)
     on.exit(grDevices::dev.off(), add = TRUE)
     ComplexHeatmap::draw(hm)
   }
 
-  if (inherits(plot, c("Heatmap", "HeatmapList"))) {
+  if (inherits(plot, "recordedplot")) {
+    save_recorded(plot, dev)
+  } else if (inherits(plot, c("Heatmap", "HeatmapList"))) {
     save_heatmap(plot, dev)
   } else {
+    .vista_check_dots(
+      list(...), fun = "save_vista_plot",
+      allowed = names(formals(ggplot2::ggsave)),
+      blocked = c("filename", "plot", "device")
+    )
     ggplot2::ggsave(
       filename = file,
       plot = plot,
@@ -433,11 +485,7 @@ export_vista_assets <- function(x,
     )
   }
 
-  sanitize_name <- function(txt) {
-    out <- gsub("[^A-Za-z0-9_\\-]+", "_", txt)
-    out <- gsub("^_+|_+$", "", out)
-    if (!nzchar(out)) "comparison" else out
-  }
+  sanitize_name <- function(txt) .vista_sanitize_name(txt, fallback = "comparison")
   comp_tag <- sanitize_name(comp_name)
 
   plots_dir <- file.path(out_dir, "plots")

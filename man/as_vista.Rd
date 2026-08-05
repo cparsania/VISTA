@@ -12,6 +12,7 @@ as_vista(
   deg_summary = list(),
   cutoffs = list(),
   group_palette = "Dark 3",
+  raw_counts = NULL,
   validate = TRUE
 )
 }
@@ -29,6 +30,10 @@ as_vista(
 \item{cutoffs}{Optional named list of threshold metadata.}
 
 \item{group_palette}{Palette name for group colors.}
+
+\item{raw_counts}{Optional matrix of raw (unnormalized) counts covering the
+same genes and samples as \code{assay_name}. Stored as a second assay named
+\code{"counts"} and reachable with \code{counts()}.}
 
 \item{validate}{Logical; run object validation before returning.}
 }

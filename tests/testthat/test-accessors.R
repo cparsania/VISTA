@@ -237,3 +237,57 @@ test_that("set_vista_comparison_colors validates complete mapping", {
     "Missing comparison color"
   )
 })
+
+test_that("group summarisation drops empty factor levels instead of emitting NaN", {
+  v <- make_small_vista()
+  group_col <- S4Vectors::metadata(v)$group$column
+
+  # Force the grouping column to a factor that retains a level with no samples,
+  # which is what subsetting an object produces.
+  cd <- SummarizedExperiment::colData(v)
+  cd[[group_col]] <- factor(
+    as.character(cd[[group_col]]),
+    levels = c(unique(as.character(cd[[group_col]])), "ghost_group")
+  )
+  SummarizedExperiment::colData(v) <- cd
+
+  nc <- norm_counts(v, summarise = TRUE)
+  expect_false(anyNA(nc))
+  expect_false("ghost_group" %in% colnames(nc))
+  expect_setequal(colnames(nc), unique(as.character(cd[[group_col]])))
+
+  em <- get_expression_matrix(v, summarise = TRUE)
+  expect_false(anyNA(em))
+  expect_false("ghost_group" %in% colnames(em))
+
+  # The surviving groups still carry the right values.
+  ctrl <- rownames(cd)[as.character(cd[[group_col]]) == "control"]
+  expect_equal(
+    unname(nc[, "control"]),
+    unname(rowMeans(SummarizedExperiment::assay(v, "norm_counts")[, ctrl, drop = FALSE]))
+  )
+})
+
+test_that("accessor generics dispatch only on the object (2e)", {
+  for (g in c("comparisons", "deg_summary", "cutoffs", "norm_counts",
+              "sample_info", "row_data", "group_colors", "group_palette")) {
+    expect_identical(
+      methods::getGeneric(g)@signature, "object",
+      info = g
+    )
+  }
+  expect_identical(methods::getGeneric("enrichMsigDB")@signature, "x")
+})
+
+test_that("non-class arguments are no longer forced at dispatch", {
+  v <- make_small_vista()
+
+  # Every formal used to join the dispatch signature, so `summarise` was
+  # evaluated before the method body ran.
+  expect_silent(nc <- norm_counts(v))
+  expect_true(is.matrix(nc))
+
+  # A lazy default that would error if forced at dispatch is fine now.
+  f <- function(obj, s = stop("forced at dispatch")) norm_counts(obj)
+  expect_true(is.matrix(f(v)))
+})
