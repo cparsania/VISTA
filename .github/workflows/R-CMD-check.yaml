@@ -29,3 +29,41 @@ jobs:
       - name: Check
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning")
         shell: Rscript {0}
+
+  # Only vignettes/*.Rmd are package vignettes, so R CMD check never sees the
+  # articles under vignettes/guides/ and vignettes/workflows/. Without this the
+  # only signal that one is broken is the pkgdown build, which fails late.
+  articles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rmarkdown, any::BiocStyle, local::.
+
+      # One process per article, matching how pkgdown renders them: a package
+      # attached by one article must not decide whether the next one passes.
+      # Keeps going after a failure so every broken article is reported at once.
+      - name: Render pkgdown-only articles
+        shell: bash
+        run: |
+          status=0
+          shopt -s nullglob
+          for f in vignettes/guides/*.Rmd vignettes/workflows/*.Rmd; do
+            echo "::group::$f"
+            if Rscript -e "rmarkdown::render('$f', output_dir = tempdir(), quiet = TRUE, envir = new.env(parent = globalenv()))"; then
+              echo "ok: $f"
+            else
+              echo "::error file=$f::Article failed to render"
+              status=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $status

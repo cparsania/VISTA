@@ -36,6 +36,13 @@ jobs:
           extra-packages: any::pkgdown, local::.
           needs: website
 
+      # Fails in seconds on an unindexed man page or article, rather than
+      # after the full site build. Runs against the checked-out tree, so it
+      # also catches an index entry pointing at a file that is not committed.
+      - name: Validate pkgdown config
+        run: pkgdown::check_pkgdown()
+        shell: Rscript {0}
+
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
