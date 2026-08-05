@@ -1,3 +1,29 @@
+# VISTA 1.1.3
+
+## Bug fixes
+
+- **Statistical annotations failed under ggpubr 1.0.0.** Passing
+  `stats_group = TRUE` produced a plot that constructed normally and then
+  died when drawn, with `could not find function "create_p_label"`. ggpubr
+  1.0.0 builds `p.label = "p.format"` into an expression calling that
+  package-internal helper, which is not visible from the environment of the
+  mapping VISTA supplies, so the annotation layer could not be evaluated.
+  VISTA now names the statistic's own computed columns via
+  `ggplot2::after_stat()`. The rendered label text is unchanged on every
+  ggpubr version, and an unrecognised `p.label` still falls through to
+  ggpubr rather than silently dropping the annotation.
+
+  Affects `get_expression_boxplot()`, `get_expression_violinplot()`,
+  `get_expression_barplot()`, `get_expression_raincloud()`,
+  `get_foldchange_boxplot()` and `get_foldchange_raincloud()` — anywhere
+  `stats_group = TRUE` was combined with the default `p.label = "p.format"`.
+  Users on ggpubr < 1.0.0 were unaffected.
+
+## Documentation
+
+- Figure cropping is disabled (`crop = NULL`). BiocStyle's crop hook shells
+  out to `magick`; without it every figure emitted a warning.
+
 # VISTA 1.1.2
 
 Targeted at Bioconductor 3.24 (VISTA 1.2.0). This release fixes several

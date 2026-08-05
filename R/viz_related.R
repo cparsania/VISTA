@@ -83,6 +83,41 @@ NULL
   deg_summary(x)
 }
 
+# Build the p-value label mapping for ggpubr::stat_compare_means().
+#
+# Passing `label = "p.format"` lets ggpubr construct the mapping itself. From
+# ggpubr 1.0.0 that expression calls the package-internal create_p_label(),
+# which is not visible from the environment of a mapping supplied by the
+# caller -- so a plot built here fails at draw time with
+# `could not find function "create_p_label"`. Naming the stat's own computed
+# columns keeps the rendered text identical on every ggpubr version.
+#
+# Returns NULL for labels we do not recognise, so the caller falls back to
+# ggpubr's own handling rather than silently dropping the annotation.
+.vista_pvalue_label_aes <- function(p.label) {
+  if (!is.character(p.label) || length(p.label) != 1L) return(NULL)
+  switch(
+    p.label,
+    "p.format" = ggplot2::aes(
+      label = ggplot2::after_stat(paste0("p = ", .data$p.format))
+    ),
+    "p.signif" = ggplot2::aes(label = ggplot2::after_stat(.data$p.signif)),
+    "p.adj"    = ggplot2::aes(label = ggplot2::after_stat(.data$p.adj)),
+    "p"        = ggplot2::aes(label = ggplot2::after_stat(.data$p)),
+    NULL
+  )
+}
+
+# Merge the label mapping into a caller-supplied aes(), returning both the
+# mapping and whether ggpubr still needs its own `label` argument.
+.vista_compare_means_args <- function(mapping, p.label) {
+  lab <- .vista_pvalue_label_aes(p.label)
+  if (is.null(lab)) {
+    return(list(mapping = mapping, label = p.label))
+  }
+  list(mapping = utils::modifyList(mapping, lab), label = NULL)
+}
+
 # Resolve a logical `label` argument against a deprecated alias.
 #
 # Precedence is "legacy wins, always warn", matching what the call sites that
@@ -1592,11 +1627,14 @@ get_expression_boxplot <- function(x,
     if (by == "group" && length(unique(df[[group_col]])) < 2) {
       cli::cli_warn("At least two groups are needed for statistical testing.")
     } else {
+      cm <- .vista_compare_means_args(
+        ggplot2::aes(group = .data[[x_var]]), p.label
+      )
       plt <- plt + ggpubr::stat_compare_means(
-        ggplot2::aes(group = .data[[x_var]]),
+        cm$mapping,
         comparisons = stat_comparisons,
         method = "t.test",
-        label = p.label,
+        label = cm$label,
         label.x.npc = "center"
       )
     }
@@ -3671,11 +3709,14 @@ get_expression_violinplot <- function(x,
     if (length(unique(df[[group_col]])) < 2) {
       cli::cli_warn("At least two groups are needed for statistical testing.")
     } else {
+      cm <- .vista_compare_means_args(
+        ggplot2::aes(group = .data[[group_col]]), p.label
+      )
       plt <- plt + ggpubr::stat_compare_means(
-        ggplot2::aes(group = .data[[group_col]]),
+        cm$mapping,
         comparisons = stat_comparisons,
         method = "t.test",
-        label = p.label,
+        label = cm$label,
         label.x.npc = "center"
       )
     }
@@ -3921,10 +3962,13 @@ get_expression_raincloud <- function(x,
     } else if (length(unique(df[[group_col]])) < 2) {
       cli::cli_warn("At least two groups are required for statistical testing.")
     } else {
+      cm <- .vista_compare_means_args(
+        ggplot2::aes(group = .data[[group_col]]), p.label
+      )
       plt <- plt + ggpubr::stat_compare_means(
-        ggplot2::aes(group = .data[[group_col]]),
+        cm$mapping,
         method = stats_method,
-        label = p.label
+        label = cm$label
       )
     }
   }
@@ -4051,10 +4095,13 @@ get_foldchange_boxplot <- function(x,
     } else if (length(unique(df$comparison)) < 2) {
       cli::cli_warn("At least two comparisons are required for statistical testing.")
     } else {
+      cm <- .vista_compare_means_args(
+        ggplot2::aes(group = comparison), p.label
+      )
       plt <- plt + ggpubr::stat_compare_means(
-        ggplot2::aes(group = comparison),
+        cm$mapping,
         method = stats_method,
-        label = p.label
+        label = cm$label
       )
     }
   }
@@ -4280,10 +4327,13 @@ get_foldchange_raincloud <- function(x,
     } else if (length(unique(df$comparison)) < 2) {
       cli::cli_warn("At least two comparisons are required for statistical testing.")
     } else {
+      cm <- .vista_compare_means_args(
+        ggplot2::aes(group = comparison), p.label
+      )
       plt <- plt + ggpubr::stat_compare_means(
-        ggplot2::aes(group = comparison),
+        cm$mapping,
         method = stats_method,
-        label = p.label
+        label = cm$label
       )
     }
   }
@@ -4708,11 +4758,14 @@ get_expression_barplot <- function(x,
     if (!requireNamespace("ggpubr", quietly = TRUE)) {
       cli::cli_abort("Package {.pkg ggpubr} must be installed for `stats_group = TRUE`.")
     }
+    cm <- .vista_compare_means_args(
+      ggplot2::aes(group = .data[[group_col]]), p.label
+    )
     plt <- plt + ggpubr::stat_compare_means(
-      ggplot2::aes(group = .data[[group_col]]),
+      cm$mapping,
       comparisons = stat_comparisons,
       method = "t.test",
-      label = p.label,
+      label = cm$label,
       label.x.npc = "center"
     )
   }
