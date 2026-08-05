@@ -1,4 +1,4 @@
-url: ~
+url: https://cparsania.github.io/VISTA/
 template:
   bootstrap: 5
 
@@ -21,6 +21,9 @@ articles:
       - guides/VISTA-chord
       - guides/VISTA-raincloud
       - guides/VISTA-colors
+  - title: Reference
+    contents:
+      - guides/VISTA-reference
 reference:
   - title: "VISTA Class & Constructors"
     desc: >
@@ -35,6 +38,16 @@ reference:
       - set_rowdata
       - print.VISTA
 
+  - title: "Object Methods"
+    desc: >
+      Bioconductor methods a VISTA object supports: display, subsetting,
+      schema migration, and hand-off to DESeq2.
+    contents:
+      - VISTA-show
+      - VISTA-subset
+      - updateObject,VISTA-method
+      - as_deseq_dataset
+
   - title: "Accessor Functions"
     desc: >
       Extract components from a VISTA object.
@@ -44,6 +57,7 @@ reference:
       - deg_summary
       - cutoffs
       - norm_counts
+      - counts
       - row_data
       - group_colors
       - group_palette
@@ -167,3 +181,9 @@ reference:
       - example_vista
       - count_data
       - sample_metadata
+
+  - title: "Deprecated"
+    desc: >
+      Renamed arguments that still work, and the release each becomes defunct in.
+    contents:
+      - VISTA-deprecated
