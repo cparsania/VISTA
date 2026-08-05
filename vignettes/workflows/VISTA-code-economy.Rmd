@@ -15,6 +15,9 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
+  # BiocStyle crops figures via magick; skip it so a runner
+  # without magick does not emit a warning per figure.
+  crop = NULL,
   collapse = TRUE,
   comment = "#>",
   message = FALSE,
