@@ -19,7 +19,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Chirag Parsania \email{chirag.parsania@gmail.com}
+\strong{Maintainer}: Chirag Parsania \email{chirag.parsania@gmail.com} (\href{https://orcid.org/0000-0003-4873-2385}{ORCID})
 
 }
 \keyword{internal}
