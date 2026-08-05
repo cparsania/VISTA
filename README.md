@@ -4,8 +4,19 @@
 
 <!-- badges: start -->
 
+<!--
+  The two Bioc version badges query Bioconductor's per-release package index,
+  which is only published under a numbered path (there is no `release`/`devel`
+  alias). Bump 3.23 -> 3.24 and 3.24 -> 3.25 at each Bioconductor release, or
+  they will keep reporting the previous cycle's versions.
+-->
+
+**Version**
+[![Bioc release](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fbioconductor.org%2Fpackages%2Fjson%2F3.23%2Fbioc%2Fpackages.json&query=%24.VISTA.Version&label=Bioc%20release&color=1f65b7)](https://bioconductor.org/packages/release/bioc/html/VISTA.html)
+[![Bioc devel](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fbioconductor.org%2Fpackages%2Fjson%2F3.24%2Fbioc%2Fpackages.json&query=%24.VISTA.Version&label=Bioc%20devel&color=1f65b7)](https://bioconductor.org/packages/devel/bioc/html/VISTA.html)
+[![GitHub devel](https://img.shields.io/github/r-package/v/cparsania/VISTA?label=GitHub%20devel&color=24292e)](https://github.com/cparsania/VISTA)
+
 **Bioconductor**
-[![Bioconductor](https://img.shields.io/badge/Bioconductor-VISTA-1f65b7.svg)](https://bioconductor.org/packages/VISTA/)
 [![Build (release)](https://bioconductor.org/shields/build/release/bioc/VISTA.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/VISTA/)
 [![Build (devel)](https://bioconductor.org/shields/build/devel/bioc/VISTA.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/VISTA/)
 [![Platforms](https://bioconductor.org/shields/availability/release/VISTA.svg)](https://bioconductor.org/packages/release/bioc/html/VISTA.html#archives)
