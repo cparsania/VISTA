@@ -211,6 +211,7 @@ are now the `max_genes` argument, with the existing values as defaults.
 - `Depends: R (>= 4.6.0)`; `viridis` dropped from Imports (unused);
   `BiocGenerics` added. `grDevices`, `graphics`, `stats`, `tools` and `utils`
   are now declared — all five were already used via `::` without being listed.
+  The maintainer's ORCID iD is recorded in `Authors@R`.
 - `print.vista` removed — no object could carry that class.
 - Plot layer data is pinned by snapshot tests so API renames cannot silently
   change output.
