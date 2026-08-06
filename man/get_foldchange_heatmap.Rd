@@ -24,6 +24,7 @@ get_foldchange_heatmap(
   kmeans_k = NULL,
   annotate_columns = FALSE,
   column_anno_palette = "Set2",
+  column_anno_colors = NULL,
   color_default = TRUE,
   col = NULL,
   heatmap_name = NULL,
@@ -72,9 +73,16 @@ turns labels on automatically for auto-selected genes.}
 
 \item{kmeans_k}{Optional integer specifying the number of k-means clusters for rows.}
 
-\item{annotate_columns}{Logical; add annotation bars keyed to the sample grouping column.}
+\item{annotate_columns}{Logical; add an annotation bar identifying each
+column's comparison. Columns of a fold-change heatmap are comparisons, so
+the bar is keyed to the comparison rather than to sample metadata.}
 
 \item{column_anno_palette}{Qualitative palette name used for column annotations.}
+
+\item{column_anno_colors}{Optional named list of colour vectors overriding
+\code{column_anno_palette} per annotation level, matching
+\code{\link[=get_expression_heatmap]{get_expression_heatmap()}}. Defaults to the object's comparison colours,
+so the heatmap agrees with the other comparison-coloured plots.}
 
 \item{color_default}{Logical; use the default diverging palette when \code{TRUE}. Set to \code{FALSE} to supply \code{col}.}
 

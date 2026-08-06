@@ -1537,7 +1537,13 @@ run_limma_analysis <- function(
                           orgdb = NULL,
                           id_map = NULL) {
   ids <- as.character(ids)
-  if (is.null(to_type) || to_type %in% c("", "none") || to_type == from_type) return(ids)
+  # `to_type == from_type` returns NA when from_type is NA and logical(0) when
+  # it is NULL, and `||` can evaluate neither -- a display_id supplied without a
+  # display_from failed with "missing value where TRUE/FALSE needed" instead of
+  # saying what was missing. identical() is safe for both.
+  if (is.null(to_type) || !length(to_type) || anyNA(to_type)) return(ids)
+  if (any(to_type %in% c("", "none"))) return(ids)
+  if (identical(as.character(to_type), as.character(from_type))) return(ids)
 
   if (!is.null(id_map)) {
     hit <- id_map[ids]

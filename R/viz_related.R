@@ -1514,8 +1514,18 @@ get_expression_boxplot <- function(x,
   } else {
     match.arg(facet_by %||% "auto", c("auto", "gene", "none"))
   }
-  if (identical(facet_by, "auto")) {
-    facet_by <- if (pool_genes) "group" else if (!is.null(genes) && length(genes) > 1) "gene" else "none"
+  facet_by <- if (pool_genes) {
+    # Pooling collapses genes, so the only split left is by group. The shared
+    # resolver has no notion of pooling and would answer "gene" or "none".
+    if (identical(facet_by, "auto")) "group" else facet_by
+  } else {
+    # Count the genes the caller asked for, not the genes that end up plotted:
+    # with `genes = NULL` this plot draws every gene, and faceting all of them
+    # is never what "auto" meant here.
+    .resolve_expression_plot_facet(
+      facet_by,
+      n_genes = if (is.null(genes)) 1L else length(genes)
+    )
   }
 
   mat <- SummarizedExperiment::assay(x, "norm_counts")
@@ -3230,14 +3240,15 @@ get_expression_lineplot <- function(x,
   summarise <- identical(by, "group")
   mat <- SummarizedExperiment::assay(x, "norm_counts")
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
-  genes_use <- genes
-  if (!is.null(genes_use) && !is.null(display_id) && !is.null(rd) && display_id %in% colnames(rd)) {
-    map <- as.character(rd[[display_id]])
-    names(map) <- rownames(x)
-    mapped <- names(map)[match(genes_use, map)]
-    mapped <- mapped[!is.na(mapped)]
-    if (length(mapped)) genes_use <- mapped
-  }
+  # Shared with the other gene-taking plots. This previously handled only the
+  # rowData path, so display_from/display_orgdb were accepted and ignored.
+  genes_use <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
   if (is.null(genes_use)) {
     if (pool_genes) {
       genes_use <- rownames(mat)
@@ -3827,23 +3838,17 @@ get_expression_raincloud <- function(x,
   rd <- tryCatch(SummarizedExperiment::rowData(x), error = function(e) NULL)
   sample_order <- match.arg(sample_order)
 
-  genes_use <- genes
-  if (!is.null(genes) && !is.null(display_id)) {
-    if (!is.null(rd) && display_id %in% colnames(rd)) {
-      map <- rd[[display_id]]
-      names(map) <- rownames(x)
-      mapped <- names(map)[match(genes, map)]
-      mapped <- unique(mapped[!is.na(mapped)])
-      if (length(mapped)) genes_use <- mapped
-    } else if (!is.null(display_from) && !is.null(display_orgdb)) {
-      genes_use <- .map_gene_ids(
-        ids = genes,
-        from_type = display_id,
-        to_type = display_from,
-        orgdb = display_orgdb
-      )
-    }
-  }
+  # Shared with the other gene-taking plots. The inline copies this replaces
+  # kept NA entries from .map_gene_ids() and could error on a display_id naming
+  # a column that does not exist; the resolver drops unmapped ids and falls back
+  # to the identifiers as given.
+  genes_use <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
 
   prep <- .vista_expression_long(
     x, genes_use, sample_group, group_column, value_transform, summarise,
@@ -4208,23 +4213,17 @@ get_foldchange_raincloud <- function(x,
   }
 
   all_genes <- unique(unlist(lapply(comps[sample_comparisons], \(d) d$gene_id)))
-  genes_use <- genes
-  if (!is.null(genes) && !is.null(display_id)) {
-    if (!is.null(rd) && display_id %in% colnames(rd)) {
-      map <- rd[[display_id]]
-      names(map) <- rownames(x)
-      mapped <- names(map)[match(genes, map)]
-      mapped <- unique(mapped[!is.na(mapped)])
-      if (length(mapped)) genes_use <- mapped
-    } else if (!is.null(display_from) && !is.null(display_orgdb)) {
-      genes_use <- .map_gene_ids(
-        ids = genes,
-        from_type = display_id,
-        to_type = display_from,
-        orgdb = display_orgdb
-      )
-    }
-  }
+  # Shared with the other gene-taking plots. The inline copies this replaces
+  # kept NA entries from .map_gene_ids() and could error on a display_id naming
+  # a column that does not exist; the resolver drops unmapped ids and falls back
+  # to the identifiers as given.
+  genes_use <- .resolve_foldchange_gene_ids(
+    x = x,
+    genes = genes,
+    display_id = display_id,
+    display_from = display_from,
+    display_orgdb = display_orgdb
+  )
   if (!is.null(genes_use)) all_genes <- intersect(all_genes, genes_use)
   if (!length(all_genes)) cli::cli_abort("No genes found for the requested comparisons.")
 
@@ -6972,8 +6971,14 @@ get_foldchange_barplot <- function(x,
 #' @param show_row_dend Logical; display the row dendrogram.
 #' @param cluster_columns Logical; cluster columns.
 #' @param kmeans_k Optional integer specifying the number of k-means clusters for rows.
-#' @param annotate_columns Logical; add annotation bars keyed to the sample grouping column.
+#' @param annotate_columns Logical; add an annotation bar identifying each
+#'   column's comparison. Columns of a fold-change heatmap are comparisons, so
+#'   the bar is keyed to the comparison rather than to sample metadata.
 #' @param column_anno_palette Qualitative palette name used for column annotations.
+#' @param column_anno_colors Optional named list of colour vectors overriding
+#'   `column_anno_palette` per annotation level, matching
+#'   [get_expression_heatmap()]. Defaults to the object's comparison colours,
+#'   so the heatmap agrees with the other comparison-coloured plots.
 #' @param color_default Logical; use the default diverging palette when `TRUE`. Set to `FALSE` to supply `col`.
 #' @param col Optional `circlize::colorRamp2` color function used when `color_default = FALSE`.
 #' @param heatmap_name Optional legend title.
@@ -7010,6 +7015,7 @@ get_foldchange_heatmap <- function(x,
                                    kmeans_k = NULL,
                                    annotate_columns = FALSE,
                                    column_anno_palette = "Set2",
+                                   column_anno_colors = NULL,
                                    color_default = TRUE,
                                    col = NULL,
                                    heatmap_name = NULL,
@@ -7119,22 +7125,37 @@ get_foldchange_heatmap <- function(x,
 
   col_anno <- NULL
   if (annotate_columns) {
-    group_col <- .vista_group_col(x)
-    col_df <- SummarizedExperiment::colData(x) |>
-      as.data.frame() |>
-      tibble::rownames_to_column("sample") |>
-      dplyr::filter(sample %in% colnames(fc_mat)) |>
-      dplyr::select(sample, !!group_col)
+    # The columns of a fold-change heatmap are comparisons, not samples. This
+    # previously filtered colData by `sample %in% colnames(fc_mat)`, which can
+    # never match, so the annotation was built from an empty frame and drew a
+    # track with no levels and no colours -- documented but inert.
+    col_df <- data.frame(
+      comparison = colnames(fc_mat),
+      row.names = colnames(fc_mat),
+      stringsAsFactors = FALSE
+    )
 
-    rownames(col_df) <- col_df$sample
-    col_df[[group_col]] <- factor(col_df[[group_col]])
-    group_levels <- levels(col_df[[group_col]])
-    group_colors <- colorspace::qualitative_hcl(length(group_levels), palette = column_anno_palette)
-    names(group_colors) <- group_levels
+    # Seed from the object's comparison palette so the heatmap agrees with every
+    # other plot, and let column_anno_colors override per level.
+    seeded <- .vista_comparison_colors(x, comparisons_present = colnames(fc_mat))
+    user_cols <- column_anno_colors
+    if (is.null(user_cols)) user_cols <- list()
+    if (!is.list(user_cols)) {
+      cli::cli_abort("{.arg column_anno_colors} must be NULL or a named list of colour vectors.")
+    }
+    if (is.null(user_cols$comparison) && !is.null(seeded)) {
+      user_cols$comparison <- seeded
+    }
+
+    anno_res <- .resolve_heatmap_annotation_colors(
+      col_df = col_df,
+      column_anno_palette = column_anno_palette,
+      column_anno_colors = user_cols
+    )
 
     col_anno <- ComplexHeatmap::HeatmapAnnotation(
-      df = as.data.frame(col_df[, group_col, drop = FALSE]),
-      col = setNames(list(group_colors), group_col)
+      df = anno_res$col_df,
+      col = anno_res$anno_colors
     )
   }
 
