@@ -4,17 +4,39 @@
 \alias{get_foldchange_matrix}
 \title{Extract a log2 fold-change matrix}
 \usage{
-get_foldchange_matrix(x, sample_comparisons = NULL, genes = NULL)
+get_foldchange_matrix(
+  x,
+  sample_comparisons = NULL,
+  genes = NULL,
+  display_id = NULL,
+  display_from = NULL,
+  display_orgdb = NULL
+)
 }
 \arguments{
 \item{x}{A VISTA object containing differential expression results.}
 
 \item{sample_comparisons}{Optional character vector of comparison names. Defaults to all available comparisons.}
 
-\item{genes}{Optional character vector of gene identifiers. When omitted, all genes present in \code{row_data(x)} are returned.}
+\item{genes}{Optional character vector of gene identifiers. When omitted, all genes present in \code{row_data(x)} are returned.
+May be given as display labels when \code{display_id} is set.}
+
+\item{display_id}{Optional \code{rowData()} column (or annotation key) naming the
+labels to work in, matching \code{\link[=get_foldchange_heatmap]{get_foldchange_heatmap()}}. When supplied,
+\code{genes} is accepted in those labels and the returned matrix is labelled
+with them. Identifiers with no label keep their original value.}
+
+\item{display_from}{Identifier type \code{rownames(x)} are in, used only when
+\code{display_id} is not a \code{rowData()} column and the mapping goes through an
+annotation package.}
+
+\item{display_orgdb}{An \code{OrgDb} used for that mapping.}
 }
 \value{
 A numeric matrix with genes in rows and comparisons in columns.
+Rows keep the object's gene identifiers unless \code{display_id} is supplied.
+Because display labels need not be unique, duplicates are made unique with
+a warning so that every row stays addressable by name.
 }
 \description{
 Returns a gene-by-comparison matrix of log2 fold changes stored in a VISTA object.

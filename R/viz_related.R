@@ -7197,12 +7197,27 @@ get_foldchange_heatmap <- function(x,
 #' @param x A VISTA object containing differential expression results.
 #' @param sample_comparisons Optional character vector of comparison names. Defaults to all available comparisons.
 #' @param genes Optional character vector of gene identifiers. When omitted, all genes present in `row_data(x)` are returned.
+#'   May be given as display labels when `display_id` is set.
+#' @param display_id Optional `rowData()` column (or annotation key) naming the
+#'   labels to work in, matching [get_foldchange_heatmap()]. When supplied,
+#'   `genes` is accepted in those labels and the returned matrix is labelled
+#'   with them. Identifiers with no label keep their original value.
+#' @param display_from Identifier type `rownames(x)` are in, used only when
+#'   `display_id` is not a `rowData()` column and the mapping goes through an
+#'   annotation package.
+#' @param display_orgdb An `OrgDb` used for that mapping.
 #'
 #' @return A numeric matrix with genes in rows and comparisons in columns.
+#'   Rows keep the object's gene identifiers unless `display_id` is supplied.
+#'   Because display labels need not be unique, duplicates are made unique with
+#'   a warning so that every row stays addressable by name.
 #' @export
 get_foldchange_matrix <- function(x,
                                    sample_comparisons = NULL,
-                                   genes = NULL) {
+                                   genes = NULL,
+                                   display_id = NULL,
+                                   display_from = NULL,
+                                   display_orgdb = NULL) {
 
   stopifnot(inherits(x, "VISTA"))
 
@@ -7213,6 +7228,18 @@ get_foldchange_matrix <- function(x,
 
   if (is.null(sample_comparisons)) {
     sample_comparisons <- names(comps)
+  }
+
+  # Accept display labels in `genes` on the same terms as the fold-change
+  # plots, so a caller working in symbols does not have to convert first.
+  if (!is.null(display_id)) {
+    genes <- .resolve_foldchange_gene_ids(
+      x = x,
+      genes = genes,
+      display_id = display_id,
+      display_from = display_from,
+      display_orgdb = display_orgdb
+    )
   }
 
   .validate_fc_inputs(x, sample_comparisons, genes)
@@ -7262,6 +7289,29 @@ get_foldchange_matrix <- function(x,
 
   rownames(fc_mat) <- norm_genes
   colnames(fc_mat) <- sample_comparisons
+
+  if (!is.null(display_id)) {
+    labels <- .resolve_heatmap_row_labels(
+      x = x,
+      gene_ids = norm_genes,
+      display_id = display_id,
+      display_from = display_from,
+      display_orgdb = display_orgdb
+    )
+    # Symbols are not unique: two genes can share one. Duplicated rownames
+    # would make `m["SYM", ]` return whichever row R found first and silently
+    # hide the other, so disambiguate and say so rather than let a lookup lie.
+    if (anyDuplicated(labels)) {
+      dups <- unique(labels[duplicated(labels)])
+      cli::cli_warn(c(
+        "{length(dups)} display label{?s} {?maps/map} to more than one gene.",
+        "x" = "Duplicated: {.val {utils::head(dups, 5)}}",
+        "i" = "Made unique so every row stays addressable; the row order is unchanged."
+      ))
+      labels <- make.unique(labels)
+    }
+    rownames(fc_mat) <- labels
+  }
 
   fc_mat
 }

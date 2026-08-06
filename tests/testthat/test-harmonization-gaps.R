@@ -107,3 +107,84 @@ test_that("every gene-taking plot resolves identifiers through one helper", {
   # and the resolver really is the single point of resolution
   expect_gt(sum(grepl("\\.resolve_foldchange_gene_ids\\(", src)), 5L)
 })
+
+# --- get_foldchange_matrix gains display_id -----------------------------------
+
+with_symbols <- function(v, collide = integer()) {
+  rd <- SummarizedExperiment::rowData(v)
+  sym <- paste0("SYM", seq_len(nrow(v)))
+  for (i in collide) sym[[i]] <- sym[[i - 1L]]
+  rd$SYMBOL <- sym
+  SummarizedExperiment::rowData(v) <- rd
+  v
+}
+
+test_that("get_foldchange_matrix labels rows only when asked", {
+  v <- with_symbols(make_small_vista())
+  g <- rownames(v)[1:4]
+
+  plain <- get_foldchange_matrix(v, genes = g)
+  expect_identical(rownames(plain), g)          # unchanged without display_id
+
+  labelled <- get_foldchange_matrix(v, genes = g, display_id = "SYMBOL")
+  expect_identical(rownames(labelled), paste0("SYM", 1:4))
+  # relabelling must move no numbers
+  expect_equal(unname(labelled), unname(plain))
+})
+
+test_that("get_foldchange_matrix accepts genes given as display labels", {
+  v <- with_symbols(make_small_vista())
+
+  by_label <- get_foldchange_matrix(v, genes = c("SYM3", "SYM4"), display_id = "SYMBOL")
+  by_id <- get_foldchange_matrix(v, genes = rownames(v)[3:4])
+
+  expect_equal(unname(by_label), unname(by_id))
+  expect_identical(rownames(by_label), c("SYM3", "SYM4"))
+})
+
+test_that("duplicate display labels are disambiguated, not silently collapsed", {
+  # Symbols are not unique. Duplicated rownames would make m["SYM", ] return
+  # whichever row came first and hide the other -- the failure mode this whole
+  # audit is about.
+  v <- with_symbols(make_small_vista(), collide = 2L)
+  g <- rownames(v)[1:4]
+
+  expect_warning(
+    m <- get_foldchange_matrix(v, genes = g, display_id = "SYMBOL"),
+    "more than one gene"
+  )
+  expect_false(anyDuplicated(rownames(m)) > 0)
+  expect_identical(nrow(m), 4L)                 # no row dropped
+  expect_equal(unname(m), unname(get_foldchange_matrix(v, genes = g)))
+
+  # every row is still reachable by its own name
+  for (r in rownames(m)) expect_length(m[r, , drop = FALSE], ncol(m))
+})
+
+test_that("an unresolvable display_id errors the same way as the heatmap does", {
+  # No SYMBOL column and no OrgDb to map through. Quietly returning the
+  # identifiers would hide that the requested relabelling never happened, so
+  # this reports the missing argument -- and must agree with the rest of the
+  # fold-change family rather than inventing its own behaviour.
+  v <- make_small_vista()
+  g <- rownames(v)[1:3]
+
+  expect_error(get_foldchange_matrix(v, genes = g, display_id = "SYMBOL"), "display_orgdb")
+  expect_error(get_foldchange_heatmap(v, genes = g, display_id = "SYMBOL"), "display_orgdb")
+})
+
+test_that("identifiers absent from the label column keep their own value", {
+  # Partial coverage is different from no coverage: a gene with no symbol keeps
+  # its identifier rather than becoming NA.
+  v <- make_small_vista()
+  rd <- SummarizedExperiment::rowData(v)
+  sym <- paste0("SYM", seq_len(nrow(v)))
+  sym[[2]] <- NA_character_
+  rd$SYMBOL <- sym
+  SummarizedExperiment::rowData(v) <- rd
+
+  g <- rownames(v)[1:3]
+  m <- get_foldchange_matrix(v, genes = g, display_id = "SYMBOL")
+  expect_identical(rownames(m), c("SYM1", g[[2]], "SYM3"))
+  expect_false(anyNA(rownames(m)))
+})
