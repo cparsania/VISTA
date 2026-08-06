@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,13 @@
       <small>Source: <a href="https://github.com/cparsania/VISTA/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.4" id="vista-114">VISTA 1.1.4<a class="anchor" aria-label="anchor" href="#vista-114"></a></h2>
+<div class="section level3">
+<h3 id="internal-1-1-4">Internal<a class="anchor" aria-label="anchor" href="#internal-1-1-4"></a></h3>
+<ul><li>Plot-stability snapshots for PCA and MDS no longer depend on eigenvector sign. <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp()</a></code> and <code><a href="https://rdrr.io/r/stats/cmdscale.html" class="external-link">cmdscale()</a></code> may return an axis or its negation for identical input, decided by the LAPACK/BLAS build, so the snapshots could fail on one machine and pass on another with nothing in the package changed. Each axis is now canonicalised before comparison. No user-visible behaviour changes; only the test suite is affected.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.3" id="vista-113">VISTA 1.1.3<a class="anchor" aria-label="anchor" href="#vista-113"></a></h2>
 <div class="section level3">

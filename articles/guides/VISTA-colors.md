@@ -409,7 +409,7 @@ sessionInfo()
 #> 
 #> other attached packages:
 #> [1] colorspace_2.1-3 tibble_3.3.1     dplyr_1.2.1      ggplot2_4.0.3   
-#> [5] VISTA_1.1.3      BiocStyle_2.40.0
+#> [5] VISTA_1.1.4      BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             

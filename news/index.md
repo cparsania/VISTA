@@ -1,5 +1,18 @@
 # Changelog
 
+## VISTA 1.1.4
+
+### Internal
+
+- Plot-stability snapshots for PCA and MDS no longer depend on
+  eigenvector sign. [`prcomp()`](https://rdrr.io/r/stats/prcomp.html)
+  and [`cmdscale()`](https://rdrr.io/r/stats/cmdscale.html) may return
+  an axis or its negation for identical input, decided by the
+  LAPACK/BLAS build, so the snapshots could fail on one machine and pass
+  on another with nothing in the package changed. Each axis is now
+  canonicalised before comparison. No user-visible behaviour changes;
+  only the test suite is affected.
+
 ## VISTA 1.1.3
 
 ### Bug fixes
