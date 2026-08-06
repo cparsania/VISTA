@@ -32,6 +32,51 @@ test_that("the deprecation registry is well formed", {
   ))
 })
 
+test_that("the promised timeline is a valid Bioconductor deprecation cycle", {
+  reg <- VISTA:::.vista_deprecations()
+  # unclass() first: indexing a numeric_version yields another version object,
+  # which has no arithmetic.
+  y <- function(v) vapply(unclass(package_version(v)), function(p) p[[2]], numeric(1))
+
+  # Bioconductor releases carry an even y; devel is odd. A cycle promised at an
+  # odd y would name a release that never ships.
+  for (col in c("deprecated_in", "defunct_in", "removed_in")) {
+    expect_true(all(y(reg[[col]]) %% 2 == 0), info = col)
+  }
+
+  # Bioconductor requires warn -> defunct -> remove across *consecutive*
+  # releases, i.e. y steps of exactly 2. A wider gap silently grants users an
+  # extra cycle the warnings do not mention; a narrower one is impossible.
+  expect_true(all(y(reg$defunct_in) - y(reg$deprecated_in) == 2))
+  expect_true(all(y(reg$removed_in) - y(reg$defunct_in) == 2))
+})
+
+test_that("the devel version is still on track to become the promised release", {
+  # Every shipped warning names `deprecated_in` as the release the rename lands
+  # in. That promise only holds while this devel series is the one that becomes
+  # that release: devel 1.1.z -> release 1.2.0. If devel is bumped past it
+  # without shipping, the warnings already in users' hands become wrong, and the
+  # fix is to update the registry rather than to let it drift.
+  reg <- VISTA:::.vista_deprecations()
+  target <- unique(package_version(reg$deprecated_in))
+  expect_length(target, 1L)
+
+  devel <- package_version(as.character(utils::packageVersion("VISTA")))
+
+  # `<=` rather than "exactly one cycle before": on the release branch the
+  # version *is* the promised one, which fulfils the promise rather than
+  # breaking it. What must never happen is the version moving past the promised
+  # release while the registry still names it -- at that point every warning
+  # already in users' hands cites a release that has been and gone.
+  expect_lte(
+    devel, target,
+    label = paste0(
+      "devel ", as.character(devel), " has passed the promised ",
+      as.character(target), "; ship it or re-date the registry"
+    )
+  )
+})
+
 test_that("every registered function is exported and still has the old formal", {
   reg <- VISTA:::.vista_deprecations()
   exported <- getNamespaceExports("VISTA")

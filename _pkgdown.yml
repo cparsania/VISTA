@@ -28,6 +28,9 @@ articles:
       - guides/VISTA-chord
       - guides/VISTA-raincloud
       - guides/VISTA-colors
+  - title: Reference
+    contents:
+      - guides/VISTA-reference
 reference:
   - title: "VISTA Class & Constructors"
     desc: >
