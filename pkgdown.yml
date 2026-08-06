@@ -10,7 +10,7 @@ articles:
   workflows/VISTA-deconvolution: workflows/VISTA-deconvolution.html
   guides/VISTA-input-preparation: guides/VISTA-input-preparation.html
   guides/VISTA-raincloud: guides/VISTA-raincloud.html
-last_built: 2026-08-05T23:43Z
+last_built: 2026-08-06T00:53Z
 urls:
   reference: https://cparsania.github.io/VISTA/reference
   article: https://cparsania.github.io/VISTA/articles
