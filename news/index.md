@@ -1,5 +1,39 @@
 # Changelog
 
+## VISTA 1.1.5
+
+### New features
+
+- [`get_foldchange_matrix()`](https://cparsania.github.io/VISTA/reference/get_foldchange_matrix.md)
+  gains `display_id`, `display_from` and `display_orgdb`, matching
+  \[get_foldchange_heatmap()\]. `genes` may now be given as display
+  labels, and the returned matrix is labelled with them. Because symbols
+  are not unique, duplicated labels are made unique with a warning
+  rather than left to collide – duplicated rownames would make
+  `m["SYM", ]` return whichever row came first and silently hide the
+  other. Rows keep the object’s identifiers unless `display_id` is
+  supplied, so existing calls are unaffected.
+
+### Bug fixes
+
+- **`get_foldchange_heatmap(annotate_columns = TRUE)` annotated
+  nothing.** The columns of a fold-change heatmap are comparisons, but
+  the annotation was built by filtering `colData` for samples named in
+  those columns – an intersection that is always empty – so the track
+  carried no levels and no colours. It now annotates by comparison,
+  coloured from the object’s comparison palette, and accepts
+  `column_anno_colors` like the expression heatmap.
+- **A `display_id` supplied without a `display_orgdb` failed with
+  `missing value where TRUE/FALSE needed`.** The internal comparison
+  `to_type == from_type` is `NA` when `from_type` is `NA` and
+  `logical(0)` when it is `NULL`, and `||` can evaluate neither. It now
+  names the missing argument.
+- **[`get_expression_lineplot()`](https://cparsania.github.io/VISTA/reference/get_expression_lineplot.md)
+  accepted `display_from`/`display_orgdb` and ignored them** – its
+  private copy of the identifier mapping handled only the
+  [`rowData()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
+  path. All gene-taking plots now share one resolver.
+
 ## VISTA 1.1.4
 
 ### Internal

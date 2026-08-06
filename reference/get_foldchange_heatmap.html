@@ -13,7 +13,7 @@ comparisons."><meta property="og:image" content="https://cparsania.github.io/VIS
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,6 +85,7 @@ comparisons.</p>
 <span>  kmeans_k <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  annotate_columns <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  column_anno_palette <span class="op">=</span> <span class="st">"Set2"</span>,</span>
+<span>  column_anno_colors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  color_default <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  heatmap_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -172,11 +173,20 @@ turns labels on automatically for auto-selected genes.</p></dd>
 
 
 <dt id="arg-annotate-columns">annotate_columns<a class="anchor" aria-label="anchor" href="#arg-annotate-columns"></a></dt>
-<dd><p>Logical; add annotation bars keyed to the sample grouping column.</p></dd>
+<dd><p>Logical; add an annotation bar identifying each
+column's comparison. Columns of a fold-change heatmap are comparisons, so
+the bar is keyed to the comparison rather than to sample metadata.</p></dd>
 
 
 <dt id="arg-column-anno-palette">column_anno_palette<a class="anchor" aria-label="anchor" href="#arg-column-anno-palette"></a></dt>
 <dd><p>Qualitative palette name used for column annotations.</p></dd>
+
+
+<dt id="arg-column-anno-colors">column_anno_colors<a class="anchor" aria-label="anchor" href="#arg-column-anno-colors"></a></dt>
+<dd><p>Optional named list of colour vectors overriding
+<code>column_anno_palette</code> per annotation level, matching
+<code><a href="get_expression_heatmap.html">get_expression_heatmap()</a></code>. Defaults to the object's comparison colours,
+so the heatmap agrees with the other comparison-coloured plots.</p></dd>
 
 
 <dt id="arg-color-default">color_default<a class="anchor" aria-label="anchor" href="#arg-color-default"></a></dt>

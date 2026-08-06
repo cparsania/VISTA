@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,14 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_foldchange_matrix</span><span class="op">(</span><span class="va">x</span>, sample_comparisons <span class="op">=</span> <span class="cn">NULL</span>, genes <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_foldchange_matrix</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  sample_comparisons <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_from <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  display_orgdb <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,12 +79,33 @@
 
 
 <dt id="arg-genes">genes<a class="anchor" aria-label="anchor" href="#arg-genes"></a></dt>
-<dd><p>Optional character vector of gene identifiers. When omitted, all genes present in <code>row_data(x)</code> are returned.</p></dd>
+<dd><p>Optional character vector of gene identifiers. When omitted, all genes present in <code>row_data(x)</code> are returned.
+May be given as display labels when <code>display_id</code> is set.</p></dd>
+
+
+<dt id="arg-display-id">display_id<a class="anchor" aria-label="anchor" href="#arg-display-id"></a></dt>
+<dd><p>Optional <code>rowData()</code> column (or annotation key) naming the
+labels to work in, matching <code><a href="get_foldchange_heatmap.html">get_foldchange_heatmap()</a></code>. When supplied,
+<code>genes</code> is accepted in those labels and the returned matrix is labelled
+with them. Identifiers with no label keep their original value.</p></dd>
+
+
+<dt id="arg-display-from">display_from<a class="anchor" aria-label="anchor" href="#arg-display-from"></a></dt>
+<dd><p>Identifier type <code>rownames(x)</code> are in, used only when
+<code>display_id</code> is not a <code>rowData()</code> column and the mapping goes through an
+annotation package.</p></dd>
+
+
+<dt id="arg-display-orgdb">display_orgdb<a class="anchor" aria-label="anchor" href="#arg-display-orgdb"></a></dt>
+<dd><p>An <code>OrgDb</code> used for that mapping.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A numeric matrix with genes in rows and comparisons in columns.</p>
+    <p>A numeric matrix with genes in rows and comparisons in columns.
+Rows keep the object's gene identifiers unless <code>display_id</code> is supplied.
+Because display labels need not be unique, duplicates are made unique with
+a warning so that every row stays addressable by name.</p>
     </div>
 
     <div class="section level2">

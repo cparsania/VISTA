@@ -21,3 +21,8 @@
   VISTA](https://cparsania.github.io/VISTA/articles/guides/VISTA-raincloud.md):
 - [Color and Palette Design with
   VISTA](https://cparsania.github.io/VISTA/articles/guides/VISTA-colors.md):
+
+### Reference
+
+- [VISTA Function
+  Reference](https://cparsania.github.io/VISTA/articles/guides/VISTA-reference.md):

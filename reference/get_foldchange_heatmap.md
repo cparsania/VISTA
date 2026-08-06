@@ -28,6 +28,7 @@ get_foldchange_heatmap(
   kmeans_k = NULL,
   annotate_columns = FALSE,
   column_anno_palette = "Set2",
+  column_anno_colors = NULL,
   color_default = TRUE,
   col = NULL,
   heatmap_name = NULL,
@@ -115,11 +116,21 @@ get_foldchange_heatmap(
 
 - annotate_columns:
 
-  Logical; add annotation bars keyed to the sample grouping column.
+  Logical; add an annotation bar identifying each column's comparison.
+  Columns of a fold-change heatmap are comparisons, so the bar is keyed
+  to the comparison rather than to sample metadata.
 
 - column_anno_palette:
 
   Qualitative palette name used for column annotations.
+
+- column_anno_colors:
+
+  Optional named list of colour vectors overriding `column_anno_palette`
+  per annotation level, matching
+  [`get_expression_heatmap()`](https://cparsania.github.io/VISTA/reference/get_expression_heatmap.md).
+  Defaults to the object's comparison colours, so the heatmap agrees
+  with the other comparison-coloured plots.
 
 - color_default:
 

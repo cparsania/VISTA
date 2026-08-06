@@ -752,7 +752,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] patchwork_1.3.2  dplyr_1.2.1      ggplot2_4.0.3    VISTA_1.1.4     
+#> [1] patchwork_1.3.2  dplyr_1.2.1      ggplot2_4.0.3    VISTA_1.1.5     
 #> [5] BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):

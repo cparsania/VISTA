@@ -628,7 +628,7 @@ sessionInfo()
 #>  [9] S4Vectors_0.50.1            BiocGenerics_0.58.1        
 #> [11] generics_0.1.4              MatrixGenerics_1.24.0      
 #> [13] matrixStats_1.5.0           dplyr_1.2.1                
-#> [15] ggplot2_4.0.3               VISTA_1.1.4                
+#> [15] ggplot2_4.0.3               VISTA_1.1.5                
 #> [17] BiocStyle_2.40.0           
 #> 
 #> loaded via a namespace (and not attached):

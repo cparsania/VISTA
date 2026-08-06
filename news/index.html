@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,23 @@
       <small>Source: <a href="https://github.com/cparsania/VISTA/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.5" id="vista-115">VISTA 1.1.5<a class="anchor" aria-label="anchor" href="#vista-115"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-1-5">New features<a class="anchor" aria-label="anchor" href="#new-features-1-1-5"></a></h3>
+<ul><li>
+<code><a href="../reference/get_foldchange_matrix.html">get_foldchange_matrix()</a></code> gains <code>display_id</code>, <code>display_from</code> and <code>display_orgdb</code>, matching [get_foldchange_heatmap()]. <code>genes</code> may now be given as display labels, and the returned matrix is labelled with them. Because symbols are not unique, duplicated labels are made unique with a warning rather than left to collide – duplicated rownames would make <code>m["SYM", ]</code> return whichever row came first and silently hide the other. Rows keep the object’s identifiers unless <code>display_id</code> is supplied, so existing calls are unaffected.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-1-1-5">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-1-5"></a></h3>
+<ul><li>
+<strong><code>get_foldchange_heatmap(annotate_columns = TRUE)</code> annotated nothing.</strong> The columns of a fold-change heatmap are comparisons, but the annotation was built by filtering <code>colData</code> for samples named in those columns – an intersection that is always empty – so the track carried no levels and no colours. It now annotates by comparison, coloured from the object’s comparison palette, and accepts <code>column_anno_colors</code> like the expression heatmap.</li>
+<li>
+<strong>A <code>display_id</code> supplied without a <code>display_orgdb</code> failed with <code>missing value where TRUE/FALSE needed</code>.</strong> The internal comparison <code>to_type == from_type</code> is <code>NA</code> when <code>from_type</code> is <code>NA</code> and <code>logical(0)</code> when it is <code>NULL</code>, and <code>||</code> can evaluate neither. It now names the missing argument.</li>
+<li>
+<strong><code><a href="../reference/get_expression_lineplot.html">get_expression_lineplot()</a></code> accepted <code>display_from</code>/<code>display_orgdb</code> and ignored them</strong> – its private copy of the identifier mapping handled only the <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData()</a></code> path. All gene-taking plots now share one resolver.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.4" id="vista-114">VISTA 1.1.4<a class="anchor" aria-label="anchor" href="#vista-114"></a></h2>
 <div class="section level3">
