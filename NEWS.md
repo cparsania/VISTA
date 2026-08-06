@@ -1,4 +1,4 @@
-# VISTA 1.1.4
+# VISTA 1.1.5
 
 ## New features
 
@@ -28,6 +28,8 @@
 - **`get_expression_lineplot()` accepted `display_from`/`display_orgdb` and
   ignored them** -- its private copy of the identifier mapping handled only the
   `rowData()` path. All gene-taking plots now share one resolver.
+
+# VISTA 1.1.4
 
 ## Internal
 
