@@ -287,7 +287,7 @@ get_celltype_heatmap(
 sessionInfo()
 #> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.4 LTS
+#> Running under: Ubuntu 24.04.5 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -313,70 +313,70 @@ sessionInfo()
 #>  [7] airway_1.32.0               SummarizedExperiment_1.42.0
 #>  [9] Biobase_2.72.0              GenomicRanges_1.64.0       
 #> [11] Seqinfo_1.2.0               IRanges_2.46.0             
-#> [13] S4Vectors_0.50.1            BiocGenerics_0.58.1        
+#> [13] S4Vectors_0.50.3            BiocGenerics_0.58.1        
 #> [15] generics_0.1.4              MatrixGenerics_1.24.0      
-#> [17] matrixStats_1.5.0           VISTA_1.1.5                
+#> [17] matrixStats_1.5.0           VISTA_1.1.6                
 #> [19] BiocStyle_2.40.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] splines_4.6.1               filelock_1.0.3             
-#>   [3] ggplotify_0.1.3             polyclip_1.10-7            
+#>   [3] ggplotify_0.1.4             polyclip_1.10-7            
 #>   [5] graph_1.90.0                minpack.lm_1.2-4           
-#>   [7] enrichit_0.2.1              XML_3.99-0.23              
+#>   [7] enrichit_0.2.6              XML_3.99-0.25              
 #>   [9] lifecycle_1.0.5             httr2_1.3.0                
-#>  [11] rstatix_1.1.0               edgeR_4.10.1               
+#>  [11] rstatix_1.1.0               edgeR_4.10.6               
 #>  [13] processx_3.9.0              lattice_0.22-9             
 #>  [15] MASS_7.3-65                 backports_1.5.1            
-#>  [17] magrittr_2.0.5              limma_3.68.4               
-#>  [19] sass_0.4.10                 rmarkdown_2.31             
+#>  [17] magrittr_2.0.5              limma_3.68.5               
+#>  [19] sass_0.4.10                 rmarkdown_2.32             
 #>  [21] jquerylib_0.1.4             yaml_2.3.12                
-#>  [23] otel_0.2.0                  ggtangle_0.1.2             
+#>  [23] otel_0.2.0                  ggtangle_0.1.4             
 #>  [25] DBI_1.3.0                   RColorBrewer_1.1-3         
 #>  [27] abind_1.4-8                 quadprog_1.5-8             
-#>  [29] purrr_1.2.2                 msigdbr_26.1.0             
-#>  [31] pracma_2.4.6                yulab.utils_0.2.4          
+#>  [29] purrr_1.2.2                 msigdbr_26.1.1             
+#>  [31] pracma_2.4.6                yulab.utils_0.2.5          
 #>  [33] tweenr_2.0.3                rappdirs_0.3.4             
-#>  [35] aisdk_1.4.12                gdtools_0.5.1              
-#>  [37] enrichplot_1.32.0           ggrepel_0.9.8              
+#>  [35] aisdk_1.4.12                gdtools_0.5.2              
+#>  [37] enrichplot_1.32.1           ggrepel_0.9.8              
 #>  [39] tidytree_0.4.8              annotate_1.90.0            
 #>  [41] pkgdown_2.2.1               codetools_0.2-20           
 #>  [43] DelayedArray_0.38.2         DOSE_4.6.0                 
 #>  [45] ggforce_0.5.0               tidyselect_1.2.1           
-#>  [47] aplot_0.3.1                 farver_2.1.2               
+#>  [47] aplot_0.3.2                 farver_2.1.2               
 #>  [49] BiocFileCache_3.2.0         jsonlite_2.0.0             
 #>  [51] Formula_1.2-6               systemfonts_1.3.2          
 #>  [53] progress_1.2.3              tools_4.6.1                
 #>  [55] ggnewscale_0.5.2            treeio_1.36.1              
 #>  [57] xCell2_1.4.0                ragg_1.5.2                 
 #>  [59] Rcpp_1.1.2                  glue_1.8.1                 
-#>  [61] SparseArray_1.12.2          xfun_0.60                  
+#>  [61] SparseArray_1.12.3          xfun_0.62                  
 #>  [63] DESeq2_1.52.0               qvalue_2.44.0              
 #>  [65] withr_3.0.3                 BiocManager_1.30.27        
 #>  [67] fastmap_1.2.0               GGally_2.4.0               
 #>  [69] callr_3.8.0                 digest_0.6.39              
 #>  [71] R6_2.6.1                    gridGraphics_0.5-1         
-#>  [73] textshaping_1.0.5           colorspace_2.1-3           
+#>  [73] textshaping_1.0.5           colorspace_2.1-4           
 #>  [75] GO.db_3.23.1                RSQLite_3.53.3             
 #>  [77] fontLiberation_0.1.0        prettyunits_1.2.0          
-#>  [79] httr_1.4.8                  htmlwidgets_1.6.4          
-#>  [81] S4Arrays_1.12.0             ontologyIndex_2.12         
-#>  [83] scatterpie_0.2.6            ggstats_0.13.0             
+#>  [79] httr_1.4.9                  htmlwidgets_1.6.4          
+#>  [81] S4Arrays_1.12.1             ontologyIndex_2.12         
+#>  [83] scatterpie_0.2.6            ggstats_0.14.0             
 #>  [85] pkgconfig_2.0.3             gtable_0.3.6               
 #>  [87] blob_1.3.0                  S7_0.2.2                   
 #>  [89] SingleCellExperiment_1.34.0 XVector_0.52.0             
-#>  [91] clusterProfiler_4.20.0      htmltools_0.5.9            
+#>  [91] clusterProfiler_4.20.2      htmltools_0.5.9            
 #>  [93] fontBitstreamVera_0.1.1     carData_3.0-6              
-#>  [95] bookdown_0.47               zigg_0.0.2                 
+#>  [95] bookdown_0.48               zigg_0.0.2                 
 #>  [97] GSEABase_1.74.0             scales_1.4.0               
-#>  [99] png_0.1-9                   ggfun_0.2.1                
-#> [101] knitr_1.51                  tzdb_0.5.0                 
+#>  [99] png_0.1-9                   ggfun_0.2.2                
+#> [101] knitr_1.52                  tzdb_0.5.0                 
 #> [103] reshape2_1.4.5              nlme_3.1-169               
-#> [105] curl_7.1.0                  cachem_1.1.0               
+#> [105] curl_8.1.0                  cachem_1.1.0               
 #> [107] stringr_1.6.0               BiocVersion_3.23.1         
 #> [109] parallel_4.6.1              desc_1.4.3                 
 #> [111] pillar_1.11.1               grid_4.6.1                 
 #> [113] vctrs_0.7.3                 ggpubr_1.0.0               
-#> [115] car_3.1-5                   tidydr_0.0.6               
+#> [115] car_3.1-5                   tidydr_0.0.7               
 #> [117] dbplyr_2.6.0                xtable_1.8-8               
 #> [119] cluster_2.1.8.2             singscore_1.32.0           
 #> [121] evaluate_1.0.5              readr_2.2.0                
@@ -387,16 +387,15 @@ sessionInfo()
 #> [131] plyr_1.8.9                  fs_2.1.0                   
 #> [133] ggiraph_0.9.6               stringi_1.8.9              
 #> [135] viridisLite_0.4.3           BiocParallel_1.46.0        
-#> [137] assertthat_0.2.1            babelgene_22.9             
-#> [139] Biostrings_2.80.1           lazyeval_0.2.3             
-#> [141] GOSemSim_2.38.3             fontquiver_0.2.1           
-#> [143] Matrix_1.7-5                hms_1.1.4                  
-#> [145] patchwork_1.3.2             bit64_4.8.2                
-#> [147] KEGGREST_1.52.2             statmod_1.5.2              
-#> [149] AnnotationHub_4.2.2         Rfast_2.1.5.2              
-#> [151] igraph_2.3.3                broom_1.0.13               
-#> [153] memoise_2.0.1               RcppParallel_6.2.0         
-#> [155] bslib_0.12.0                ggtree_4.2.0               
-#> [157] bit_4.6.0                   ape_5.8-1                  
-#> [159] gson_0.2.1
+#> [137] assertthat_0.2.1            Biostrings_2.80.2          
+#> [139] lazyeval_0.2.3              GOSemSim_2.38.3            
+#> [141] fontquiver_0.2.1            Matrix_1.7-5               
+#> [143] hms_1.1.4                   patchwork_1.3.2            
+#> [145] bit64_4.8.6                 KEGGREST_1.52.2            
+#> [147] statmod_1.5.2               AnnotationHub_4.2.2        
+#> [149] Rfast_2.1.5.2               igraph_2.3.4               
+#> [151] broom_1.0.13                memoise_2.0.1              
+#> [153] RcppParallel_6.2.1          bslib_0.12.0               
+#> [155] ggtree_4.2.0                bit_4.6.0                  
+#> [157] ape_5.8-1                   gson_0.2.2
 ```

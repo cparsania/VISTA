@@ -190,6 +190,7 @@ msig <- get_msigdb_enrichment(
 #> 
 #> Using human MSigDB with ortholog mapping to mouse. Use `db_species = "MM"` for mouse-native gene sets.
 #> This message is displayed once per session.
+#> Downloading gene sets (first use only, may take a few minutes)...
 #> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
 get_enrichment_chord(msig, top_n = 5)
 #> Warning: `vista` and `sample_comparison` are required for "foldchange" colouring.

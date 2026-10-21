@@ -19,7 +19,7 @@ in create_vista or standalone DEG summaries.'><meta property="og:image" content=
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,7 +103,8 @@ in <a href="create_vista.html">create_vista</a> or standalone DEG summaries.</p>
 <span>  min_replicates <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  log2fc_cutoff <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  pval_cutoff <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  p_value_type <span class="op">=</span> <span class="st">"FDR"</span></span>
+<span>  p_value_type <span class="op">=</span> <span class="st">"FDR"</span>,</span>
+<span>  edger_test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LRT"</span>, <span class="st">"QL"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">run_limma_analysis</span><span class="op">(</span></span>
@@ -188,6 +189,16 @@ experiment, not within each group. Default: <code>1</code>.</p></dd>
 <dd><p>For DESeq2: one of <code>"padj"</code> or <code>"pvalue"</code>.
 For edgeR/limma: one of <code>"FDR"</code> or <code>"PValue"</code>.</p></dd>
 
+
+<dt id="arg-edger-test">edger_test<a class="anchor" aria-label="anchor" href="#arg-edger-test"></a></dt>
+<dd><p>edgeR only: <code>"LRT"</code> (likelihood-ratio test,
+<a href="https://rdrr.io/pkg/edgeR/man/glmfit.html" class="external-link">glmFit</a> and <a href="https://rdrr.io/pkg/edgeR/man/glmLRT.html" class="external-link">glmLRT</a>; the default) or <code>"QL"</code>
+(quasi-likelihood F-test, <a href="https://rdrr.io/pkg/edgeR/man/glmQLFit.html" class="external-link">glmQLFit</a> and
+<a href="https://rdrr.io/pkg/edgeR/man/glmQLFTest.html" class="external-link">glmQLFTest</a>, as the edgeR authors recommend for bulk RNA-seq).
+The default changes to <code>"QL"</code> in VISTA 1.4.0; until then, leaving it
+unset (or <code>NULL</code>) prints a notice. Set it explicitly to keep results
+stable.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -206,14 +217,22 @@ using DESeq2, edgeR, or limma-voom. These functions process raw count data,
 normalize it, execute pairwise group-level tests, and return standardized DEG outputs
 compatible with <code>VISTA</code>-based visualization and analysis.</p>
 <ul><li><p>For DESeq2, normalization is performed via <a href="https://rdrr.io/pkg/DESeq2/man/DESeq.html" class="external-link">DESeq</a>, and DE testing uses <a href="https://rdrr.io/pkg/DESeq2/man/results.html" class="external-link">results</a>.</p></li>
-<li><p>For edgeR, normalization uses <a href="https://rdrr.io/pkg/edgeR/man/calcNormFactors.html" class="external-link">calcNormFactors</a>, and testing uses <a href="https://rdrr.io/pkg/edgeR/man/glmLRT.html" class="external-link">glmLRT</a>.</p></li>
+<li><p>For edgeR, normalization uses <a href="https://rdrr.io/pkg/edgeR/man/calcNormFactors.html" class="external-link">calcNormFactors</a>, and testing uses
+<a href="https://rdrr.io/pkg/edgeR/man/glmLRT.html" class="external-link">glmLRT</a> or, with <code>edger_test = "QL"</code>, <a href="https://rdrr.io/pkg/edgeR/man/glmQLFTest.html" class="external-link">glmQLFTest</a>.</p></li>
 <li><p>For limma, normalization uses <a href="https://rdrr.io/pkg/edgeR/man/calcNormFactors.html" class="external-link">calcNormFactors</a> + <a href="https://rdrr.io/pkg/limma/man/voom.html" class="external-link">voom</a>,
 and testing uses <a href="https://rdrr.io/pkg/limma/man/ebayes.html" class="external-link">eBayes</a>.</p></li>
 </ul><p>Low-abundance filtering is applied before model fitting, and for the
 edgeR/limma backends before <a href="https://rdrr.io/pkg/edgeR/man/calcNormFactors.html" class="external-link">calcNormFactors</a> so that
 normalization factors are not estimated from genes that will be discarded.
 All three backends use the same filtering predicate: a gene is retained when
-at least <code>min_replicates</code> samples reach <code>min_counts</code>.
+at least <code>min_replicates</code> samples reach <code>min_counts</code>. Filtering is
+applied to the counts as given; DESeq2 then receives non-integer (estimated)
+counts rounded to the nearest integer, as <code>DESeqDataSetFromTximport()</code>
+does, with a message. Every backend refuses negative values and warns about
+non-integer values with an unmistakable sign of not being counts (every
+sample summing to exactly one million, or small, almost all fractional
+values). VISTA cannot otherwise verify that its input is counts: supply raw
+or estimated counts, not normalised values.
 Gene regulation status is determined via <code><a href="dot-categorize_deg_results.html">.categorize_deg_results()</a></code> based on user thresholds.</p>
 <p>All output comparison results are internally standardized via <code><a href="dot-tidy_de_results.html">.tidy_de_results()</a></code> to ensure
 a uniform column schema compatible with VISTA plotting tools.</p>

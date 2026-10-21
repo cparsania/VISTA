@@ -13,7 +13,7 @@ HTSeq-count outputs, tximport-like lists, and RSEM gene result files."><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,9 @@ HTSeq-count outputs, tximport-like lists, and RSEM gene result files.</p>
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>Count input. Supported values depend on <code>format</code> and include a
 matrix, data frame, single file path, vector of file paths, or a
-tximport-like list with <code>counts</code>, <code>abundance</code>, and/or <code>length</code>.</p></dd>
+tximport-like list with a <code>counts</code> matrix (required) and, optionally,
+<code>abundance</code> and <code>length</code> matrices and <code>countsFromAbundance</code>, which VISTA
+uses to derive length-scaled counts when needed.</p></dd>
 
 
 <dt id="arg-format">format<a class="anchor" aria-label="anchor" href="#arg-format"></a></dt>
@@ -124,7 +126,11 @@ returned <code>row_data</code>.</p></dd>
 <dd><p>Optional count column selector for formats that expose
 multiple count choices. For STAR, use one of <code>"unstranded"</code>,
 <code>"stranded_first"</code>, or <code>"stranded_second"</code>. For RSEM, this defaults to
-<code>"expected_count"</code>.</p></dd>
+<code>"expected_count"</code>. Where it selects the values read from RSEM output, only
+<code>"expected_count"</code> and <code>"posterior_mean_count"</code> are accepted, since RSEM's
+other columns (TPM, FPKM, lengths and their posterior summaries) are not
+counts; a merged table whose sample columns are named in <code>sample_names</code> is
+read as given.</p></dd>
 
 
 <dt id="arg-tx-gene">tx2gene<a class="anchor" aria-label="anchor" href="#arg-tx-gene"></a></dt>
@@ -134,8 +140,20 @@ IDs and the second column gene IDs.</p></dd>
 
 
 <dt id="arg-counts-from">counts_from<a class="anchor" aria-label="anchor" href="#arg-counts-from"></a></dt>
-<dd><p>Which matrix to extract from a tximport-like input:
-<code>"counts"</code>, <code>"abundance"</code>, or <code>"length"</code>.</p></dd>
+<dd><p>Which matrix of a tximport-like input to use. Only
+<code>"counts"</code> is accepted: <code>"abundance"</code> (TPM) and <code>"length"</code> are not counts
+and now raise an error. When the counts are not length-scaled
+(tximport's default <code>countsFromAbundance = "no"</code>) and the input carries
+<code>abundance</code> and <code>length</code>, VISTA converts them to length-scaled TPM counts,
+tximport's recommendation for DE methods that do not use length offsets.
+Scaled gene-level counts (<code>"scaledTPM"</code>, <code>"lengthScaledTPM"</code>) are used as
+they are. With <code>tx2gene</code>, transcript-level input is summarised to genes as
+tximport's <code>summarizeToGene()</code> does: when <code>abundance</code> and <code>length</code> are
+present, gene counts are rebuilt from them (<code>"scaledTPM"</code> input stays
+scaledTPM; all other input becomes lengthScaledTPM), because summing
+lengthScaledTPM transcript counts would undo the gene-level length
+correction. An unrecognised <code>countsFromAbundance</code> value is an error.
+<code>abundance</code> and <code>length</code> are matched to <code>counts</code> by row and column names.</p></dd>
 
 
 <dt id="arg-drop-technical">drop_technical<a class="anchor" aria-label="anchor" href="#arg-drop-technical"></a></dt>

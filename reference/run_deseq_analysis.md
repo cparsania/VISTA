@@ -43,7 +43,8 @@ run_edger_analysis(
   min_replicates = 1,
   log2fc_cutoff = 1,
   pval_cutoff = 0.05,
-  p_value_type = "FDR"
+  p_value_type = "FDR",
+  edger_test = c("LRT", "QL")
 )
 
 run_limma_analysis(
@@ -130,6 +131,18 @@ run_limma_analysis(
   For DESeq2: one of `"padj"` or `"pvalue"`. For edgeR/limma: one of
   `"FDR"` or `"PValue"`.
 
+- edger_test:
+
+  edgeR only: `"LRT"` (likelihood-ratio test,
+  [glmFit](https://rdrr.io/pkg/edgeR/man/glmfit.html) and
+  [glmLRT](https://rdrr.io/pkg/edgeR/man/glmLRT.html); the default) or
+  `"QL"` (quasi-likelihood F-test,
+  [glmQLFit](https://rdrr.io/pkg/edgeR/man/glmQLFit.html) and
+  [glmQLFTest](https://rdrr.io/pkg/edgeR/man/glmQLFTest.html), as the
+  edgeR authors recommend for bulk RNA-seq). The default changes to
+  `"QL"` in VISTA 1.4.0; until then, leaving it unset (or `NULL`) prints
+  a notice. Set it explicitly to keep results stable.
+
 ## Value
 
 A named list with components:
@@ -161,7 +174,9 @@ visualization and analysis.
 
 - For edgeR, normalization uses
   [calcNormFactors](https://rdrr.io/pkg/edgeR/man/calcNormFactors.html),
-  and testing uses [glmLRT](https://rdrr.io/pkg/edgeR/man/glmLRT.html).
+  and testing uses [glmLRT](https://rdrr.io/pkg/edgeR/man/glmLRT.html)
+  or, with `edger_test = "QL"`,
+  [glmQLFTest](https://rdrr.io/pkg/edgeR/man/glmQLFTest.html).
 
 - For limma, normalization uses
   [calcNormFactors](https://rdrr.io/pkg/edgeR/man/calcNormFactors.html) +
@@ -174,7 +189,14 @@ edgeR/limma backends before
 that normalization factors are not estimated from genes that will be
 discarded. All three backends use the same filtering predicate: a gene
 is retained when at least `min_replicates` samples reach `min_counts`.
-Gene regulation status is determined via
+Filtering is applied to the counts as given; DESeq2 then receives
+non-integer (estimated) counts rounded to the nearest integer, as
+`DESeqDataSetFromTximport()` does, with a message. Every backend refuses
+negative values and warns about non-integer values with an unmistakable
+sign of not being counts (every sample summing to exactly one million,
+or small, almost all fractional values). VISTA cannot otherwise verify
+that its input is counts: supply raw or estimated counts, not normalised
+values. Gene regulation status is determined via
 [`.categorize_deg_results()`](https://cparsania.github.io/VISTA/reference/dot-categorize_deg_results.md)
 based on user thresholds.
 

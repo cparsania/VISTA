@@ -11,7 +11,7 @@ the metadata() slot of the object."><meta property="og:image" content="https://c
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,10 @@ the <code>metadata()</code> slot of the object.</p>
 <li><p><code>$de_summary</code>: named <code>SimpleList</code> of DEG summary tables.</p></li>
 <li><p><code>$de_cutoffs</code>: named list of thresholds (log2FC, p-value type/cutoff, method settings).</p></li>
 <li><p><code>$group</code>: list with <code>column</code>, <code>palette</code>, <code>colors</code> describing the grouping/fill scheme.</p></li>
-<li><p><code>$provenance</code>: list with constructor version, timestamp, session info.</p></li>
+<li><p><code>$provenance</code>: list with the constructor, a timestamp
+(<code>created_at</code>), the VISTA and R versions, and the installed DESeq2,
+edgeR and limma versions (<code>engine_versions</code>); subsetting and
+<code>updateObject()</code> append <code>subset_history</code> and <code>updates</code>.</p></li>
 <li><p><code>$vista_schema_version</code>: metadata schema tag used for compatibility checks.</p></li>
 </ul><p>Feature-level annotations live in <code>rowData(v)</code>, sample metadata in
 <code>colData(v)</code>, and normalized counts (and any additional assays) in

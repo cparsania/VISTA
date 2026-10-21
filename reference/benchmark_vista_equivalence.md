@@ -1,9 +1,9 @@
 # Benchmark VISTA against standalone differential-expression backends
 
-Run VISTA and direct DESeq2, edgeR, and limma pipelines with matched
-preprocessing, contrast definitions, and DEG thresholds, then compare
-the resulting tables, DEG calls, normalized matrices, and critical plot
-inputs.
+Run VISTA and independent DESeq2, edgeR, and limma pipelines with the
+same filtering, design, contrast definitions, and DEG thresholds, then
+compare the retained genes, normalized matrices, every numeric column
+the engine reports, DEG calls, and critical plot inputs.
 
 ## Usage
 
@@ -24,7 +24,8 @@ benchmark_vista_equivalence(
   covariates = NULL,
   design_formula = NULL,
   tolerance = 1e-08,
-  return_plots = FALSE
+  return_plots = FALSE,
+  edger_test = c("LRT", "QL")
 )
 ```
 
@@ -62,11 +63,13 @@ benchmark_vista_equivalence(
 
 - min_counts:
 
-  Minimum total counts per gene to retain.
+  Minimum count a gene must reach in a sample to count as detected
+  there; also the minimum row total.
 
 - min_replicates:
 
-  Minimum samples per group meeting filtering criteria.
+  Minimum number of samples, across the whole experiment, in which a
+  gene must reach `min_counts`.
 
 - log2fc_cutoff:
 
@@ -97,12 +100,75 @@ benchmark_vista_equivalence(
   Logical; if `TRUE`, return paired VISTA/reference plots for MA,
   volcano, DEG count, and PCA views.
 
+- edger_test:
+
+  The edgeR test, `"LRT"` (the default until VISTA 1.4.0) or `"QL"`; see
+  [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
+  VISTA and the reference both use it.
+
 ## Value
 
 A list with fields `valid`, `comparison_summary`, `visual_summary`, and
-`methods`. Each element of `methods` contains the VISTA object, direct
-backend results, structural validation output, self-consistency checks,
-and optional plot objects.
+`methods`. `comparison_summary` has one row per method and comparison
+recording whether the retained gene set, normalized counts, every
+numeric column the engine reports (`columns_compared`), regulation calls
+and DEG sets agree, with the largest absolute difference for the main
+columns. A `*_within_tolerance` field is `NA` when the engine does not
+report that column (edgeR reports `logCPM`, not `baseMean`). Each
+element of `methods` contains the VISTA object, the reference results,
+structural validation output, self-consistency checks, and optional plot
+objects.
+
+## Details
+
+The reference pipelines are written independently of the code they
+check. They call only base R, stats and the engines' own functions –
+never VISTA's internal helpers – and re-implement VISTA's documented
+contract from scratch:
+
+- **Samples** are matched to count columns by a `sample_names` column,
+  else by non-default rownames, else by the first of `sample_name`,
+  `sample`, `sample_id`, `Run`, `run`, `Sample` and `SampleName` whose
+  values name count columns (the rule documented for `sample_info` in
+  [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md)).
+
+- **Filtering** treats missing counts as zero and keeps genes whose
+  total reaches `min_counts` and that reach `min_counts` in at least
+  `min_replicates` samples. For DESeq2, non-integer counts (estimated
+  counts from tximport or RSEM) are then rounded, as DESeq2 requires.
+
+- **Tests** are DESeq2's Wald test via `results()`, edgeR's `glmLRT()`
+  or, with `edger_test = "QL"`, `glmQLFit()` and `glmQLFTest()`, and
+  limma's `eBayes()` after `voom()`.
+
+- **Design** is `~ covariates + group` for DESeq2 and the same terms
+  without an intercept for edgeR and limma-voom, or `design_formula`
+  when supplied.
+
+- **Contrasts** for edgeR and limma are the difference between the
+  design rows of two samples that differ only in group, so they do not
+  depend on how design columns are named or which level is the
+  reference.
+
+- **DEG calls** are `Up` when log2FC \>= `log2fc_cutoff` and the
+  selected p-value \<= `pval_cutoff`, `Down` symmetrically, and `Other`
+  otherwise, including when the engine reports no p-value.
+
+VISTA's DE tables and normalized counts are read through its exported
+accessors
+([`comparisons()`](https://cparsania.github.io/VISTA/reference/VISTA-accessors.md),
+[`norm_counts()`](https://cparsania.github.io/VISTA/reference/VISTA-accessors.md)).
+The MA, PCA and DEG-count checks read the data
+[`get_ma_plot()`](https://cparsania.github.io/VISTA/reference/get_ma_plot.md),
+[`get_pca_plot()`](https://cparsania.github.io/VISTA/reference/get_pca_plot.md)
+and the DEG-count plots draw; the volcano check rebuilds its inputs from
+the stored table. Rows are matched by gene identifier, not position, and
+the set of comparisons must agree as well. A defect in sample matching,
+design construction, contrast signs, DEG calling or row alignment
+therefore shows up as a mismatch instead of being reproduced on both
+sides. The two sides share only the engines and the contract above: the
+benchmark checks that VISTA runs DESeq2, edgeR and limma faithfully, not
+that those packages are correct.
 
 ## Examples
 
@@ -127,17 +193,17 @@ bm <- benchmark_vista_equivalence(
 #> calcNormFactors has been renamed to normLibSizes
 
 bm$comparison_summary
-#> # A tibble: 1 × 20
-#>   method comparison            n_genes up_genes_identical down_genes_identical
-#>   <chr>  <chr>                   <int> <lgl>              <lgl>               
-#> 1 limma  treatment1_VS_control     423 TRUE               TRUE                
-#> # ℹ 15 more variables: deg_sets_identical <lgl>, regulation_identical <lgl>,
-#> #   norm_counts_identical <lgl>, baseMean_within_tolerance <lgl>,
-#> #   log2fc_within_tolerance <lgl>, pvalue_within_tolerance <lgl>,
-#> #   padj_within_tolerance <lgl>, max_abs_norm_counts_diff <dbl>,
-#> #   max_abs_baseMean_diff <dbl>, max_abs_log2fc_diff <dbl>,
-#> #   max_abs_pvalue_diff <dbl>, max_abs_padj_diff <dbl>, all_checks_pass <lgl>,
-#> #   structural_valid <lgl>, self_consistency_valid <lgl>
+#> # A tibble: 1 × 25
+#>   method comparison            n_genes gene_sets_identical up_genes_identical
+#>   <chr>  <chr>                   <int> <lgl>               <lgl>             
+#> 1 limma  treatment1_VS_control     423 TRUE                TRUE              
+#> # ℹ 20 more variables: down_genes_identical <lgl>, deg_sets_identical <lgl>,
+#> #   regulation_identical <lgl>, norm_counts_identical <lgl>,
+#> #   baseMean_within_tolerance <lgl>, log2fc_within_tolerance <lgl>,
+#> #   pvalue_within_tolerance <lgl>, padj_within_tolerance <lgl>,
+#> #   all_columns_within_tolerance <lgl>, columns_compared <chr>,
+#> #   columns_not_in_reference <chr>, max_abs_norm_counts_diff <dbl>,
+#> #   max_abs_baseMean_diff <dbl>, max_abs_log2fc_diff <dbl>, …
 
 # \donttest{
 data("count_data", package = "VISTA")
@@ -158,34 +224,31 @@ bm <- benchmark_vista_equivalence(
   min_counts = 5,
   min_replicates = 1
 )
+#> The default `edger_test` in `benchmark_vista_equivalence()` changes from "LRT" to "QL" in VISTA 1.4.0. Set `edger_test = "LRT"` to keep the current results, or `edger_test = "QL"` to use the new default now. The edgeR authors recommend the quasi-likelihood F-test for bulk RNA-seq; the likelihood-ratio test is liberal with few replicates.
+#> This message is displayed once every 8 hours.
 #> estimating size factors
 #> estimating dispersions
 #> gene-wise dispersion estimates
 #> mean-dispersion relationship
 #> final dispersion estimates
 #> fitting model and testing
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
+#> converting counts to integer mode
 #> calcNormFactors has been renamed to normLibSizes
 #> calcNormFactors has been renamed to normLibSizes
 
 bm$comparison_summary
-#> # A tibble: 2 × 20
-#>   method comparison            n_genes up_genes_identical down_genes_identical
-#>   <chr>  <chr>                   <int> <lgl>              <lgl>               
-#> 1 deseq2 treatment1_VS_control     123 TRUE               TRUE                
-#> 2 edger  treatment1_VS_control     123 TRUE               TRUE                
-#> # ℹ 15 more variables: deg_sets_identical <lgl>, regulation_identical <lgl>,
-#> #   norm_counts_identical <lgl>, baseMean_within_tolerance <lgl>,
-#> #   log2fc_within_tolerance <lgl>, pvalue_within_tolerance <lgl>,
-#> #   padj_within_tolerance <lgl>, max_abs_norm_counts_diff <dbl>,
-#> #   max_abs_baseMean_diff <dbl>, max_abs_log2fc_diff <dbl>,
-#> #   max_abs_pvalue_diff <dbl>, max_abs_padj_diff <dbl>, all_checks_pass <lgl>,
-#> #   structural_valid <lgl>, self_consistency_valid <lgl>
+#> # A tibble: 2 × 25
+#>   method comparison            n_genes gene_sets_identical up_genes_identical
+#>   <chr>  <chr>                   <int> <lgl>               <lgl>             
+#> 1 deseq2 treatment1_VS_control     123 TRUE                TRUE              
+#> 2 edger  treatment1_VS_control     123 TRUE                TRUE              
+#> # ℹ 20 more variables: down_genes_identical <lgl>, deg_sets_identical <lgl>,
+#> #   regulation_identical <lgl>, norm_counts_identical <lgl>,
+#> #   baseMean_within_tolerance <lgl>, log2fc_within_tolerance <lgl>,
+#> #   pvalue_within_tolerance <lgl>, padj_within_tolerance <lgl>,
+#> #   all_columns_within_tolerance <lgl>, columns_compared <chr>,
+#> #   columns_not_in_reference <chr>, max_abs_norm_counts_diff <dbl>,
+#> #   max_abs_baseMean_diff <dbl>, max_abs_log2fc_diff <dbl>, …
 bm$visual_summary
 #> # A tibble: 8 × 7
 #>   method comparison  visual pass  detail structural_valid self_consistency_valid

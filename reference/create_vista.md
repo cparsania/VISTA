@@ -38,7 +38,8 @@ create_vista(
   group_palette = "Dark 2",
   comparison_palette = "Dark 3",
   keep_raw_counts = TRUE,
-  validate = TRUE
+  validate = TRUE,
+  edger_test = c("LRT", "QL")
 )
 ```
 
@@ -47,12 +48,25 @@ create_vista(
 - counts:
 
   Raw counts (matrix/data.frame) with a gene-id column and sample
-  columns.
+  columns. Estimated (non-integer) counts, e.g. from tximport or RSEM
+  via
+  [`read_vista_counts()`](https://cparsania.github.io/VISTA/reference/read_vista_counts.md),
+  are accepted and rounded for DESeq2 after filtering. Negative values
+  are refused, and non-integer values summing to exactly one million per
+  sample (TPM/CPM) or small and almost all fractional (log scale) draw a
+  warning. VISTA cannot otherwise tell normalised values from counts, so
+  supply raw or estimated counts.
 
 - sample_info:
 
-  Data frame with sample metadata. Must contain `sample_names` (or have
-  rownames equal to sample columns in `counts`) and the `group_column`.
+  Data frame with sample metadata, including the `group_column`. Samples
+  are matched to count columns by a `sample_names` column. Without one,
+  the rownames are used if they are unique and are not the default
+  `1, 2, ...`; they are then used as they are and must name count
+  columns, so reset the rownames of a row-subsetted sheet with
+  `rownames(x) <- NULL`. If neither is available, the first of
+  `sample_name`, `sample`, `sample_id`, `Run`, `run`, `Sample` and
+  `SampleName` whose values name count columns is used.
 
 - column_geneid:
 
@@ -131,7 +145,7 @@ create_vista(
 - group_palette:
 
   Qualitative palette name for
-  [`colorspace::qualitative_hcl()`](https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html).
+  [`colorspace::qualitative_hcl()`](https://zeileis.codeberg.page/colorspace/reference/hcl_palettes.html).
   One of
   `c("Pastel 1","Dark 2","Dark 3","Set 2","Set 3","Warm","Cold","Harmonic","Dynamic")`.
   Default: `"Dark 2"`.
@@ -147,6 +161,7 @@ create_vista(
   retained as a second assay named `"counts"`, reachable with
   `counts(v)` and required by
   [`as_deseq_dataset()`](https://cparsania.github.io/VISTA/reference/as_deseq_dataset.md).
+  For the DESeq2 backend these are the rounded counts DESeq2 analysed.
   This roughly doubles the assay footprint; set `FALSE` to omit it.
 
 - validate:
@@ -154,6 +169,16 @@ create_vista(
   Logical; if `TRUE` (default), run full
   [`validate_vista()`](https://cparsania.github.io/VISTA/reference/validate_vista.md)
   checks before returning the object.
+
+- edger_test:
+
+  For `method = "edger"` or `"both"`, the edgeR test: `"LRT"`
+  (likelihood-ratio test; the default) or `"QL"` (quasi-likelihood
+  F-test, which the edgeR authors recommend for bulk RNA-seq and which
+  is less liberal with few replicates). The default changes to `"QL"` in
+  VISTA 1.4.0; until then, a call that runs edgeR without setting it (or
+  with `NULL`) prints a notice. The test used is recorded in
+  `cutoffs(v)$edger_test`.
 
 ## Value
 
@@ -177,11 +202,17 @@ have rownames identical to the final `norm_counts` rownames. When
 `metadata(v)$de_summary_by_method`, and the active source is tracked in
 `metadata(v)$de_active_source`.
 
-In the consensus table, `log2fc` follows `consensus_log2fc` (with
-single-backend calls taking the contributing backend's estimate), while
-`pvalue` and `padj` carry the less-significant of the two backends so
-the columns remain continuous and usable for volcano/MA plots and
-ranking. Per-backend values are always preserved alongside them in
+In the consensus table, `log2fc` follows `consensus_log2fc`, while
+`pvalue` and `padj` carry the less-significant of the two backends (a
+gene a backend did not test counts as `p = 1`) so the columns remain
+continuous and usable for volcano/MA plots and ranking. With
+`consensus_mode = "union"`, genes called by a single backend take that
+backend's estimate and p-values instead, so every called gene's columns
+agree with its call. The merged `padj` is a conservative ranking score,
+not an FDR-adjusted p-value of the consensus, and `regulation` is the
+call: in simulations the intersection lowered, but did not control, the
+false discovery rate of the single backends, and the union raised it.
+Per-backend values are always preserved alongside them in
 `log2fc_deseq2`, `log2fc_edger`, `pvalue_deseq2`, `pvalue_edger`,
 `padj_deseq2`, and `padj_edger`, and the `support` column records which
 backends called each gene (`"both"`, `"deseq2_only"`, `"edger_only"`,
@@ -191,7 +222,7 @@ backends called each gene (`"both"`, `"deseq2_only"`, `"edger_only"`,
 
 [as_vista](https://cparsania.github.io/VISTA/reference/as_vista.md),
 [VISTA-class](https://cparsania.github.io/VISTA/reference/VISTA-class.md),
-[qualitative_hcl](https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html)
+[qualitative_hcl](https://zeileis.codeberg.page/colorspace/reference/hcl_palettes.html)
 
 ## Examples
 
@@ -280,6 +311,9 @@ cutoffs(vista)
 #> NULL
 #> 
 #> $consensus_log2fc
+#> NULL
+#> 
+#> $edger_test
 #> NULL
 #> 
 #> $active_source

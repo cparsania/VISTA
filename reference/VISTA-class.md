@@ -22,7 +22,10 @@ Core elements stored in `metadata(v)`:
 - `$group`: list with `column`, `palette`, `colors` describing the
   grouping/fill scheme.
 
-- `$provenance`: list with constructor version, timestamp, session info.
+- `$provenance`: list with the constructor, a timestamp (`created_at`),
+  the VISTA and R versions, and the installed DESeq2, edgeR and limma
+  versions (`engine_versions`); subsetting and `updateObject()` append
+  `subset_history` and `updates`.
 
 - `$vista_schema_version`: metadata schema tag used for compatibility
   checks.

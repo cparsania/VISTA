@@ -7,14 +7,18 @@ they warn.
 
 ## Value
 
-Not applicable; this page documents argument deprecations only.
+Not applicable; this page documents deprecations and default changes
+only.
 
 ## Details
 
 The table below is generated from the package's internal registry, so it
 is always in sync with the code. Warnings are classed
-`c("vista_deprecated_arg", "deprecatedWarning")` and are emitted at most
-once per session per argument, so they will not flood a loop.
+`c("vista_deprecated_arg", "deprecatedWarning")` and are throttled so
+they will not flood a loop: by default each is shown at most once every
+eight hours per argument. Set
+`options(vista.deprecation_frequency = "once")` for once per session, or
+`"always"` to see every occurrence.
 
 To silence them while you migrate:
 
@@ -32,6 +36,23 @@ to errors:
 The authoritative list lives in the package itself rather than being
 duplicated here, so it cannot drift out of date. Print it with the
 example below, or filter it to the function you are migrating.
+
+## Defaults that will change
+
+A default that is going to change is announced one release ahead, so
+results do not move without warning. The old default stays in force
+until the release named in `changes_in`; until then, a call that relies
+on it (by not setting the argument, or passing `NULL`) prints a message
+classed `vista_default_change`, throttled like the warnings above.
+Setting the argument explicitly, to either value, keeps results stable
+across the change and silences the message. In VISTA 1.2.0 this applies
+to `edger_test`, which moves from `"LRT"` (likelihood-ratio test) to
+`"QL"` (quasi-likelihood F-test) in VISTA 1.4.0, in
+[`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md),
+[`run_edger_analysis()`](https://cparsania.github.io/VISTA/reference/run_deseq_analysis.md),
+[`benchmark_vista_equivalence()`](https://cparsania.github.io/VISTA/reference/benchmark_vista_equivalence.md)
+and
+[`validate_vista_deep()`](https://cparsania.github.io/VISTA/reference/validate_vista_deep.md).
 
 ## Examples
 
@@ -75,4 +96,12 @@ reg[reg$fun == "get_corr_heatmap", c("old_arg", "new_arg", "defunct_in")]
 #> 1  show_corr_values       label      1.4.0
 #> 2   col_corr_values label_color      1.4.0
 #> 14       cluster_by    order_by      1.4.0
+
+# Defaults that will change, and when
+VISTA:::.vista_default_changes()[, c("fun", "arg", "old_default", "new_default", "changes_in")]
+#>                           fun        arg old_default new_default changes_in
+#> 1                create_vista edger_test         LRT          QL      1.4.0
+#> 2          run_edger_analysis edger_test         LRT          QL      1.4.0
+#> 3 benchmark_vista_equivalence edger_test         LRT          QL      1.4.0
+#> 4         validate_vista_deep edger_test         LRT          QL      1.4.0
 ```

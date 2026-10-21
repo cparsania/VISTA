@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -350,6 +350,13 @@ validate:</p>
 <div class="section level3">
 <h3 id="alternative-using-edger-backend">Alternative: Using edgeR backend<a class="anchor" aria-label="anchor" href="#alternative-using-edger-backend"></a>
 </h3>
+<p>edgeR can test with the likelihood-ratio test
+(<code>edger_test = "LRT"</code>, the current default) or the
+quasi-likelihood F-test (<code>edger_test = "QL"</code>), which the
+edgeR authors recommend for bulk RNA-seq. The default becomes
+<code>"QL"</code> in VISTA 1.4.0, so set it explicitly to keep results
+stable; see <code><a href="../reference/VISTA-deprecated.html">?`VISTA-deprecated`</a></code>. The test used is recorded
+in <code><a href="../reference/VISTA-accessors.html">cutoffs()</a></code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create VISTA object with edgeR backend</span></span>
 <span><span class="va">vista_edger</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_vista.html">create_vista</a></span><span class="op">(</span></span>
@@ -360,6 +367,7 @@ validate:</p>
 <span>  group_numerator <span class="op">=</span> <span class="st">"Dexamethasone"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"Untreated"</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"edger"</span>,  <span class="co"># Use edgeR instead of DESeq2</span></span>
+<span>  edger_test <span class="op">=</span> <span class="st">"QL"</span>, <span class="co"># quasi-likelihood F-test</span></span>
 <span>  min_counts <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  min_replicates <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  log2fc_cutoff <span class="op">=</span> <span class="fl">1.0</span>,</span>
@@ -383,7 +391,9 @@ validate:</p>
 <span><span class="co">#&gt; DE source: edger</span></span>
 <span><span class="co">#&gt; cutoffs: |log2FC| &gt;= 1, padj &lt;= 0.05</span></span>
 <span><span class="co">#&gt; raw counts: available via counts()</span></span>
-<span><span class="co">#&gt; schema: 1.1.0</span></span></code></pre></div>
+<span><span class="co">#&gt; schema: 1.1.0</span></span>
+<span><span class="fu"><a href="../reference/VISTA-accessors.html">cutoffs</a></span><span class="op">(</span><span class="va">vista_edger</span><span class="op">)</span><span class="op">$</span><span class="va">edger_test</span></span>
+<span><span class="co">#&gt; [1] "QL"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="alternative-using-limma-voom-backend">Alternative: Using limma-voom backend<a class="anchor" aria-label="anchor" href="#alternative-using-limma-voom-backend"></a>
@@ -438,7 +448,7 @@ at least <code>min_replicates</code> samples reach
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;   backend genes DEGs</span></span>
 <span><span class="co">#&gt; 1  deseq2 17199  853</span></span>
-<span><span class="co">#&gt; 2   edger 17199  892</span></span>
+<span><span class="co">#&gt; 2   edger 17199  752</span></span>
 <span><span class="co">#&gt; 3   limma 17199  660</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -478,6 +488,7 @@ at least <code>min_replicates</code> samples reach
 <span>  group_numerator <span class="op">=</span> <span class="st">"Dexamethasone"</span>,</span>
 <span>  group_denominator <span class="op">=</span> <span class="st">"Untreated"</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"both"</span>,</span>
+<span>  edger_test <span class="op">=</span> <span class="st">"QL"</span>,</span>
 <span>  consensus_mode <span class="op">=</span> <span class="st">"intersection"</span>,  <span class="co"># or "union"</span></span>
 <span>  result_source <span class="op">=</span> <span class="st">"consensus"</span>       <span class="co"># or "deseq2"/"edger"</span></span>
 <span><span class="op">)</span></span>
@@ -490,14 +501,14 @@ at least <code>min_replicates</code> samples reach
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; consensus    deseq2     edger </span></span>
-<span><span class="co">#&gt;       845       867       942</span></span>
+<span><span class="co">#&gt;       730       867       771</span></span>
 <span></span>
 <span><span class="co"># The consensus table keeps each backend's own estimates alongside the</span></span>
 <span><span class="co"># consensus call, plus a `support` column recording which backends agreed.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista_both</span>, source <span class="op">=</span> <span class="st">"consensus"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">support</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;        both deseq2_only  edger_only        none </span></span>
-<span><span class="co">#&gt;         845          22          97       17122</span></span>
+<span><span class="co">#&gt;         730         137          41       17178</span></span>
 <span></span>
 <span><span class="co"># Switch the active source used by plotting functions</span></span>
 <span><span class="va">vista_both</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/set_de_source.html">set_de_source</a></span><span class="op">(</span><span class="va">vista_both</span>, <span class="st">"edger"</span><span class="op">)</span></span>
@@ -612,6 +623,9 @@ at least <code>min_replicates</code> samples reach
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $consensus_log2fc</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $edger_test</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $active_source</span></span>
@@ -1678,28 +1692,22 @@ from your differential expression results.</p>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gsea_results</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Description"</span>, <span class="st">"NES"</span>, <span class="st">"pvalue"</span>, <span class="st">"p.adjust"</span><span class="op">)</span><span class="op">]</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt;                                                                       Description</span></span>
-<span><span class="co">#&gt; HALLMARK_ADIPOGENESIS                                       HALLMARK_ADIPOGENESIS</span></span>
-<span><span class="co">#&gt; HALLMARK_ANDROGEN_RESPONSE                             HALLMARK_ANDROGEN_RESPONSE</span></span>
-<span><span class="co">#&gt; HALLMARK_TNFA_SIGNALING_VIA_NFKB                 HALLMARK_TNFA_SIGNALING_VIA_NFKB</span></span>
-<span><span class="co">#&gt; HALLMARK_XENOBIOTIC_METABOLISM                     HALLMARK_XENOBIOTIC_METABOLISM</span></span>
-<span><span class="co">#&gt; HALLMARK_OXIDATIVE_PHOSPHORYLATION             HALLMARK_OXIDATIVE_PHOSPHORYLATION</span></span>
-<span><span class="co">#&gt; HALLMARK_REACTIVE_OXYGEN_SPECIES_PATHWAY HALLMARK_REACTIVE_OXYGEN_SPECIES_PATHWAY</span></span>
-<span><span class="co">#&gt; HALLMARK_APICAL_JUNCTION                                 HALLMARK_APICAL_JUNCTION</span></span>
-<span><span class="co">#&gt; HALLMARK_BILE_ACID_METABOLISM                       HALLMARK_BILE_ACID_METABOLISM</span></span>
-<span><span class="co">#&gt; HALLMARK_IL2_STAT5_SIGNALING                         HALLMARK_IL2_STAT5_SIGNALING</span></span>
-<span><span class="co">#&gt; HALLMARK_HYPOXIA                                                 HALLMARK_HYPOXIA</span></span>
-<span><span class="co">#&gt;                                               NES       pvalue     p.adjust</span></span>
-<span><span class="co">#&gt; HALLMARK_ADIPOGENESIS                    2.011813 1.210205e-07 6.051025e-06</span></span>
-<span><span class="co">#&gt; HALLMARK_ANDROGEN_RESPONSE               1.654001 1.601434e-03 2.669057e-02</span></span>
-<span><span class="co">#&gt; HALLMARK_TNFA_SIGNALING_VIA_NFKB         1.615979 6.403582e-04 1.600895e-02</span></span>
-<span><span class="co">#&gt; HALLMARK_XENOBIOTIC_METABOLISM           1.507815 3.901630e-03 3.901630e-02</span></span>
-<span><span class="co">#&gt; HALLMARK_OXIDATIVE_PHOSPHORYLATION       1.491037 3.071152e-03 3.838940e-02</span></span>
-<span><span class="co">#&gt; HALLMARK_REACTIVE_OXYGEN_SPECIES_PATHWAY 1.483494 4.844167e-02 1.513802e-01</span></span>
-<span><span class="co">#&gt; HALLMARK_APICAL_JUNCTION                 1.473142 5.503714e-03 3.931224e-02</span></span>
-<span><span class="co">#&gt; HALLMARK_BILE_ACID_METABOLISM            1.457941 2.406557e-02 1.002732e-01</span></span>
-<span><span class="co">#&gt; HALLMARK_IL2_STAT5_SIGNALING             1.453587 4.734781e-03 3.931224e-02</span></span>
-<span><span class="co">#&gt; HALLMARK_HYPOXIA                         1.450031 1.590027e-02 7.227397e-02</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                           Description      NES</span></span>
+<span><span class="co">#&gt; HALLMARK_ADIPOGENESIS                           HALLMARK_ADIPOGENESIS 2.011813</span></span>
+<span><span class="co">#&gt; HALLMARK_ANDROGEN_RESPONSE                 HALLMARK_ANDROGEN_RESPONSE 1.654001</span></span>
+<span><span class="co">#&gt; HALLMARK_TNFA_SIGNALING_VIA_NFKB     HALLMARK_TNFA_SIGNALING_VIA_NFKB 1.615979</span></span>
+<span><span class="co">#&gt; HALLMARK_XENOBIOTIC_METABOLISM         HALLMARK_XENOBIOTIC_METABOLISM 1.507815</span></span>
+<span><span class="co">#&gt; HALLMARK_OXIDATIVE_PHOSPHORYLATION HALLMARK_OXIDATIVE_PHOSPHORYLATION 1.491037</span></span>
+<span><span class="co">#&gt; HALLMARK_APICAL_JUNCTION                     HALLMARK_APICAL_JUNCTION 1.473142</span></span>
+<span><span class="co">#&gt; HALLMARK_IL2_STAT5_SIGNALING             HALLMARK_IL2_STAT5_SIGNALING 1.453587</span></span>
+<span><span class="co">#&gt;                                          pvalue     p.adjust</span></span>
+<span><span class="co">#&gt; HALLMARK_ADIPOGENESIS              1.210205e-07 6.051025e-06</span></span>
+<span><span class="co">#&gt; HALLMARK_ANDROGEN_RESPONSE         1.601434e-03 2.669057e-02</span></span>
+<span><span class="co">#&gt; HALLMARK_TNFA_SIGNALING_VIA_NFKB   6.403582e-04 1.600895e-02</span></span>
+<span><span class="co">#&gt; HALLMARK_XENOBIOTIC_METABOLISM     3.901630e-03 3.901630e-02</span></span>
+<span><span class="co">#&gt; HALLMARK_OXIDATIVE_PHOSPHORYLATION 3.071152e-03 3.838940e-02</span></span>
+<span><span class="co">#&gt; HALLMARK_APICAL_JUNCTION           5.503714e-03 3.931224e-02</span></span>
+<span><span class="co">#&gt; HALLMARK_IL2_STAT5_SIGNALING       4.734781e-03 3.931224e-02</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="gsea-with-go-biological-process">GSEA with GO Biological Process<a class="anchor" aria-label="anchor" href="#gsea-with-go-biological-process"></a>
@@ -1721,28 +1729,28 @@ from your differential expression results.</p>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">gsea_go</span><span class="op">$</span><span class="va">enrich</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">gsea_go</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gsea_go</span><span class="op">$</span><span class="va">enrich</span><span class="op">@</span><span class="va">result</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Description"</span>, <span class="st">"NES"</span>, <span class="st">"pvalue"</span>, <span class="st">"p.adjust"</span><span class="op">)</span><span class="op">]</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt;                                                                           Description</span></span>
-<span><span class="co">#&gt; GO:0014888                                                 striated muscle adaptation</span></span>
-<span><span class="co">#&gt; GO:0035357               peroxisome proliferator activated receptor signaling pathway</span></span>
-<span><span class="co">#&gt; GO:0071276                                           cellular response to cadmium ion</span></span>
-<span><span class="co">#&gt; GO:0071294                                              cellular response to zinc ion</span></span>
-<span><span class="co">#&gt; GO:0035358 regulation of peroxisome proliferator activated receptor signaling pathway</span></span>
-<span><span class="co">#&gt; GO:0046688                                                     response to copper ion</span></span>
-<span><span class="co">#&gt; GO:0044060                                            regulation of endocrine process</span></span>
-<span><span class="co">#&gt; GO:0097501                                               stress response to metal ion</span></span>
-<span><span class="co">#&gt; GO:0071280                                            cellular response to copper ion</span></span>
-<span><span class="co">#&gt; GO:0060986                                                endocrine hormone secretion</span></span>
+<span><span class="co">#&gt;                                                             Description</span></span>
+<span><span class="co">#&gt; GO:0014888                                   striated muscle adaptation</span></span>
+<span><span class="co">#&gt; GO:0035357 peroxisome proliferator activated receptor signaling pathway</span></span>
+<span><span class="co">#&gt; GO:0071276                             cellular response to cadmium ion</span></span>
+<span><span class="co">#&gt; GO:0071294                                cellular response to zinc ion</span></span>
+<span><span class="co">#&gt; GO:0046688                                       response to copper ion</span></span>
+<span><span class="co">#&gt; GO:0044060                              regulation of endocrine process</span></span>
+<span><span class="co">#&gt; GO:0097501                                 stress response to metal ion</span></span>
+<span><span class="co">#&gt; GO:0071280                              cellular response to copper ion</span></span>
+<span><span class="co">#&gt; GO:0014896                                           muscle hypertrophy</span></span>
+<span><span class="co">#&gt; GO:1900024    regulation of substrate adhesion-dependent cell spreading</span></span>
 <span><span class="co">#&gt;                 NES       pvalue    p.adjust</span></span>
 <span><span class="co">#&gt; GO:0014888 2.173415 2.226967e-06 0.005564077</span></span>
 <span><span class="co">#&gt; GO:0035357 2.105064 6.608012e-05 0.022798908</span></span>
 <span><span class="co">#&gt; GO:0071276 2.101350 1.369619e-05 0.009777125</span></span>
 <span><span class="co">#&gt; GO:0071294 2.094459 8.048658e-06 0.009727138</span></span>
-<span><span class="co">#&gt; GO:0035358 2.039947 4.082184e-04 0.059684360</span></span>
 <span><span class="co">#&gt; GO:0046688 2.034456 2.290070e-04 0.049038254</span></span>
 <span><span class="co">#&gt; GO:0044060 2.030552 1.839123e-04 0.046606174</span></span>
 <span><span class="co">#&gt; GO:0097501 2.012979 7.586127e-06 0.009727138</span></span>
 <span><span class="co">#&gt; GO:0071280 2.012772 2.337896e-04 0.049038254</span></span>
-<span><span class="co">#&gt; GO:0060986 2.002814 5.223680e-04 0.059684360</span></span></code></pre></div>
+<span><span class="co">#&gt; GO:0014896 1.984920 8.710986e-05 0.027205498</span></span>
+<span><span class="co">#&gt; GO:1900024 1.954473 2.355249e-04 0.049038254</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="gsea-enrichment-overview">GSEA enrichment overview<a class="anchor" aria-label="anchor" href="#gsea-enrichment-overview"></a>
@@ -2159,7 +2167,7 @@ relationships</li>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 24.04.4 LTS</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 24.04.5 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 </span></span>
@@ -2183,66 +2191,65 @@ relationships</li>
 <span><span class="co">#&gt;  [3] AnnotationDbi_1.74.0        airway_1.32.0              </span></span>
 <span><span class="co">#&gt;  [5] SummarizedExperiment_1.42.0 Biobase_2.72.0             </span></span>
 <span><span class="co">#&gt;  [7] GenomicRanges_1.64.0        Seqinfo_1.2.0              </span></span>
-<span><span class="co">#&gt;  [9] IRanges_2.46.0              S4Vectors_0.50.1           </span></span>
+<span><span class="co">#&gt;  [9] IRanges_2.46.0              S4Vectors_0.50.3           </span></span>
 <span><span class="co">#&gt; [11] BiocGenerics_0.58.1         generics_0.1.4             </span></span>
 <span><span class="co">#&gt; [13] MatrixGenerics_1.24.0       matrixStats_1.5.0          </span></span>
-<span><span class="co">#&gt; [15] ggplot2_4.0.3               VISTA_1.1.5                </span></span>
+<span><span class="co">#&gt; [15] ggplot2_4.0.3               VISTA_1.1.6                </span></span>
 <span><span class="co">#&gt; [17] BiocStyle_2.40.0           </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;   [1] splines_4.6.1           ggplotify_0.1.3         tibble_3.3.1           </span></span>
-<span><span class="co">#&gt;   [4] ggpp_0.6.1              polyclip_1.10-7         enrichit_0.2.1         </span></span>
+<span><span class="co">#&gt;   [1] splines_4.6.1           ggplotify_0.1.4         tibble_3.3.1           </span></span>
+<span><span class="co">#&gt;   [4] ggpp_0.6.1              polyclip_1.10-7         enrichit_0.2.6         </span></span>
 <span><span class="co">#&gt;   [7] lifecycle_1.0.5         httr2_1.3.0             rstatix_1.1.0          </span></span>
-<span><span class="co">#&gt;  [10] edgeR_4.10.1            doParallel_1.0.17       processx_3.9.0         </span></span>
+<span><span class="co">#&gt;  [10] edgeR_4.10.6            doParallel_1.0.17       processx_3.9.0         </span></span>
 <span><span class="co">#&gt;  [13] lattice_0.22-9          MASS_7.3-65             backports_1.5.1        </span></span>
-<span><span class="co">#&gt;  [16] limma_3.68.4            sass_0.4.10             rmarkdown_2.31         </span></span>
+<span><span class="co">#&gt;  [16] limma_3.68.5            sass_0.4.10             rmarkdown_2.32         </span></span>
 <span><span class="co">#&gt;  [19] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             </span></span>
-<span><span class="co">#&gt;  [22] ggtangle_0.1.2          EnhancedVolcano_1.30.0  DBI_1.3.0              </span></span>
+<span><span class="co">#&gt;  [22] ggtangle_0.1.4          EnhancedVolcano_1.30.0  DBI_1.3.0              </span></span>
 <span><span class="co">#&gt;  [25] RColorBrewer_1.1-3      abind_1.4-8             purrr_1.2.2            </span></span>
-<span><span class="co">#&gt;  [28] msigdbr_26.1.0          yulab.utils_0.2.4       tweenr_2.0.3           </span></span>
-<span><span class="co">#&gt;  [31] rappdirs_0.3.4          aisdk_1.4.12            gdtools_0.5.1          </span></span>
-<span><span class="co">#&gt;  [34] circlize_0.4.18         enrichplot_1.32.0       ggrepel_0.9.8          </span></span>
+<span><span class="co">#&gt;  [28] msigdbr_26.1.1          yulab.utils_0.2.5       tweenr_2.0.3           </span></span>
+<span><span class="co">#&gt;  [31] rappdirs_0.3.4          aisdk_1.4.12            gdtools_0.5.2          </span></span>
+<span><span class="co">#&gt;  [34] circlize_0.4.18         enrichplot_1.32.1       ggrepel_0.9.8          </span></span>
 <span><span class="co">#&gt;  [37] tidytree_0.4.8          RSpectra_0.16-2         pkgdown_2.2.1          </span></span>
 <span><span class="co">#&gt;  [40] codetools_0.2-20        DelayedArray_0.38.2     DOSE_4.6.0             </span></span>
 <span><span class="co">#&gt;  [43] ggforce_0.5.0           tidyselect_1.2.1        shape_1.4.6.1          </span></span>
-<span><span class="co">#&gt;  [46] aplot_0.3.1             farver_2.1.2            jsonlite_2.0.0         </span></span>
+<span><span class="co">#&gt;  [46] aplot_0.3.2             farver_2.1.2            jsonlite_2.0.0         </span></span>
 <span><span class="co">#&gt;  [49] GetoptLong_1.1.1        Formula_1.2-6           ggridges_0.5.7         </span></span>
 <span><span class="co">#&gt;  [52] iterators_1.0.14        systemfonts_1.3.2       foreach_1.5.2          </span></span>
 <span><span class="co">#&gt;  [55] tools_4.6.1             ggnewscale_0.5.2        treeio_1.36.1          </span></span>
 <span><span class="co">#&gt;  [58] ragg_1.5.2              Rcpp_1.1.2              glue_1.8.1             </span></span>
-<span><span class="co">#&gt;  [61] gridExtra_2.3.1         SparseArray_1.12.2      xfun_0.60              </span></span>
+<span><span class="co">#&gt;  [61] gridExtra_2.3.1         SparseArray_1.12.3      xfun_0.62              </span></span>
 <span><span class="co">#&gt;  [64] DESeq2_1.52.0           qvalue_2.44.0           dplyr_1.2.1            </span></span>
 <span><span class="co">#&gt;  [67] withr_3.0.3             BiocManager_1.30.27     fastmap_1.2.0          </span></span>
 <span><span class="co">#&gt;  [70] GGally_2.4.0            ggpointdensity_0.2.1    callr_3.8.0            </span></span>
 <span><span class="co">#&gt;  [73] digest_0.6.39           R6_2.6.1                gridGraphics_0.5-1     </span></span>
-<span><span class="co">#&gt;  [76] textshaping_1.0.5       colorspace_2.1-3        GO.db_3.23.1           </span></span>
+<span><span class="co">#&gt;  [76] textshaping_1.0.5       colorspace_2.1-4        GO.db_3.23.1           </span></span>
 <span><span class="co">#&gt;  [79] RSQLite_3.53.3          ggrain_0.1.2            tidyr_1.3.2            </span></span>
-<span><span class="co">#&gt;  [82] fontLiberation_0.1.0    FNN_1.1.4.1             httr_1.4.8             </span></span>
-<span><span class="co">#&gt;  [85] htmlwidgets_1.6.4       S4Arrays_1.12.0         scatterpie_0.2.6       </span></span>
-<span><span class="co">#&gt;  [88] ggstats_0.13.0          uwot_0.2.4              pkgconfig_2.0.3        </span></span>
+<span><span class="co">#&gt;  [82] fontLiberation_0.1.0    FNN_1.1.4.1             httr_1.4.9             </span></span>
+<span><span class="co">#&gt;  [85] htmlwidgets_1.6.4       S4Arrays_1.12.1         scatterpie_0.2.6       </span></span>
+<span><span class="co">#&gt;  [88] ggstats_0.14.0          uwot_0.2.5              pkgconfig_2.0.3        </span></span>
 <span><span class="co">#&gt;  [91] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.28.0  </span></span>
-<span><span class="co">#&gt;  [94] S7_0.2.2                XVector_0.52.0          clusterProfiler_4.20.0 </span></span>
-<span><span class="co">#&gt;  [97] htmltools_0.5.9         carData_3.0-6           fontBitstreamVera_0.1.1</span></span>
-<span><span class="co">#&gt; [100] bookdown_0.47           clue_0.3-68             scales_1.4.0           </span></span>
-<span><span class="co">#&gt; [103] png_0.1-9               ggfun_0.2.1             knitr_1.51             </span></span>
+<span><span class="co">#&gt;  [94] S7_0.2.2                XVector_0.52.0          clusterProfiler_4.20.2 </span></span>
+<span><span class="co">#&gt;  [97] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          </span></span>
+<span><span class="co">#&gt; [100] bookdown_0.48           clue_0.3-68             scales_1.4.0           </span></span>
+<span><span class="co">#&gt; [103] png_0.1-9               ggfun_0.2.2             knitr_1.52             </span></span>
 <span><span class="co">#&gt; [106] reshape2_1.4.5          rjson_0.2.23            nlme_3.1-169           </span></span>
-<span><span class="co">#&gt; [109] curl_7.1.0              cachem_1.1.0            GlobalOptions_0.1.4    </span></span>
-<span><span class="co">#&gt; [112] stringr_1.6.0           parallel_4.6.1          desc_1.4.3             </span></span>
-<span><span class="co">#&gt; [115] pillar_1.11.1           grid_4.6.1              vctrs_0.7.3            </span></span>
-<span><span class="co">#&gt; [118] ggpubr_1.0.0            car_3.1-5               tidydr_0.0.6           </span></span>
-<span><span class="co">#&gt; [121] cluster_2.1.8.2         evaluate_1.0.5          cli_3.6.6              </span></span>
-<span><span class="co">#&gt; [124] locfit_1.5-9.12         compiler_4.6.1          rlang_1.3.0            </span></span>
-<span><span class="co">#&gt; [127] crayon_1.5.3            ggsignif_0.6.4          labeling_0.4.3         </span></span>
-<span><span class="co">#&gt; [130] ps_1.9.3                forcats_1.0.1           plyr_1.8.9             </span></span>
-<span><span class="co">#&gt; [133] fs_2.1.0                ggiraph_0.9.6           stringi_1.8.9          </span></span>
-<span><span class="co">#&gt; [136] viridisLite_0.4.3       BiocParallel_1.46.0     assertthat_0.2.1       </span></span>
-<span><span class="co">#&gt; [139] babelgene_22.9          Biostrings_2.80.1       lazyeval_0.2.3         </span></span>
-<span><span class="co">#&gt; [142] GOSemSim_2.38.3         fontquiver_0.2.1        Matrix_1.7-5           </span></span>
-<span><span class="co">#&gt; [145] patchwork_1.3.2         bit64_4.8.2             KEGGREST_1.52.2        </span></span>
-<span><span class="co">#&gt; [148] statmod_1.5.2           igraph_2.3.3            broom_1.0.13           </span></span>
-<span><span class="co">#&gt; [151] memoise_2.0.1           bslib_0.12.0            ggtree_4.2.0           </span></span>
-<span><span class="co">#&gt; [154] bit_4.6.0               ape_5.8-1               gson_0.2.1             </span></span>
-<span><span class="co">#&gt; [157] polynom_1.4-1</span></span></code></pre></div>
+<span><span class="co">#&gt; [109] cachem_1.1.0            GlobalOptions_0.1.4     stringr_1.6.0          </span></span>
+<span><span class="co">#&gt; [112] parallel_4.6.1          desc_1.4.3              pillar_1.11.1          </span></span>
+<span><span class="co">#&gt; [115] grid_4.6.1              vctrs_0.7.3             ggpubr_1.0.0           </span></span>
+<span><span class="co">#&gt; [118] car_3.1-5               tidydr_0.0.7            cluster_2.1.8.2        </span></span>
+<span><span class="co">#&gt; [121] evaluate_1.0.5          cli_3.6.6               locfit_1.5-9.12        </span></span>
+<span><span class="co">#&gt; [124] compiler_4.6.1          rlang_1.3.0             crayon_1.5.3           </span></span>
+<span><span class="co">#&gt; [127] ggsignif_0.6.4          labeling_0.4.3          ps_1.9.3               </span></span>
+<span><span class="co">#&gt; [130] forcats_1.0.1           plyr_1.8.9              fs_2.1.0               </span></span>
+<span><span class="co">#&gt; [133] ggiraph_0.9.6           stringi_1.8.9           viridisLite_0.4.3      </span></span>
+<span><span class="co">#&gt; [136] BiocParallel_1.46.0     assertthat_0.2.1        Biostrings_2.80.2      </span></span>
+<span><span class="co">#&gt; [139] lazyeval_0.2.3          GOSemSim_2.38.3         fontquiver_0.2.1       </span></span>
+<span><span class="co">#&gt; [142] Matrix_1.7-5            patchwork_1.3.2         bit64_4.8.6            </span></span>
+<span><span class="co">#&gt; [145] KEGGREST_1.52.2         statmod_1.5.2           igraph_2.3.4           </span></span>
+<span><span class="co">#&gt; [148] broom_1.0.13            memoise_2.0.1           bslib_0.12.0           </span></span>
+<span><span class="co">#&gt; [151] ggtree_4.2.0            bit_4.6.0               ape_5.8-1              </span></span>
+<span><span class="co">#&gt; [154] gson_0.2.2              polynom_1.4-1</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

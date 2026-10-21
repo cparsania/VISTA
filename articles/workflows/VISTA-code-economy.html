@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,8 +92,9 @@ Development Team</h4>
 </h2>
 <p>A standard RNA-seq differential expression analysis – from raw counts
 to publication-ready figures and enrichment results – requires
-assembling 6–10 packages, each with its own data structures, naming
-conventions, and implicit assumptions. The user is responsible for:</p>
+assembling many packages (11 in the version below), each with its own
+data structures, naming conventions, and implicit assumptions. The user
+is responsible for:</p>
 <ul>
 <li>
 <strong>Data plumbing</strong>: converting between
@@ -116,6 +117,24 @@ engineering overhead. VISTA eliminates them.</p>
 <p>This vignette makes that claim concrete: we perform the <strong>same
 analysis</strong> twice on the <strong>same data</strong> – once with
 standard packages, once with VISTA – and measure the difference.</p>
+<p><strong>How the code is counted.</strong> Every tally in this
+vignette is computed when the vignette is built, from the source of its
+own code chunks; none is typed by hand. A <em>line</em> is a line that
+is neither blank nor a pure comment. A <em>package</em> is one that a
+workflow attaches with <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> or <code><a href="https://rdrr.io/r/base/library.html" class="external-link">require()</a></code>
+or calls with <code>pkg::</code>. Packages that ship with R are not
+counted, and <code><a href="https://github.com/cparsania/VISTA" class="external-link">library(VISTA)</a></code> counts like any other
+<code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> call. The data chunk below is shared by both
+workflows and counted for neither; apart from the packages it attaches
+(airway and org.Hs.eg.db), each workflow attaches what its own code
+needs, so either runs on its own after that chunk. A step’s package
+count is the packages it adds, so the steps sum to the workflow’s total.
+The counting code is shown in the <a href="#counting-code">appendix</a>.</p>
+<p>Workflow A is written by hand for this comparison. Its figures are
+equivalent in kind to VISTA’s (a PCA plot, a volcano plot, a heatmap of
+the top 50 genes and a Hallmark enrichment plot, all from the same
+DESeq2 results), not identical in every default: point labels, colours
+and heatmap clustering, for example, differ.</p>
 </div>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -137,9 +156,10 @@ untreated.</p>
 <h2 id="workflow-a-standard-packages">Workflow A: Standard Packages<a class="anchor" aria-label="anchor" href="#workflow-a-standard-packages"></a>
 </h2>
 <p>The code below uses <strong>only</strong> established Bioconductor
-and CRAN packages – DESeq2, ggplot2, ComplexHeatmap, clusterProfiler,
-msigdbr, and AnnotationDbi. This is representative of real analysis
-scripts found in published supplementary materials.</p>
+and CRAN packages – DESeq2, ggplot2, ggrepel, dplyr, tibble,
+clusterProfiler, msigdbr, AnnotationDbi, ComplexHeatmap, circlize, and
+forcats. This is representative of real analysis scripts found in
+published supplementary materials.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thelovelab/DESeq2" class="external-link">DESeq2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -148,9 +168,8 @@ scripts found in published supplementary materials.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yulab-smu.top/contribution-knowledge-mining/" class="external-link">clusterProfiler</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://igordot.github.io/msigdbr/" class="external-link">msigdbr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/AnnotationDbi" class="external-link">AnnotationDbi</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span><span class="op">)</span></span></code></pre></div>
-<p><strong>9 library calls</strong> before a single line of
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/AnnotationDbi" class="external-link">AnnotationDbi</a></span><span class="op">)</span></span></code></pre></div>
+<p><strong>8 library calls</strong> before a single line of
 analysis.</p>
 <div class="section level3">
 <h3 id="step-1-differential-expression-standard">Step 1: Differential Expression (Standard)<a class="anchor" aria-label="anchor" href="#step-1-differential-expression-standard"></a>
@@ -184,7 +203,7 @@ analysis.</p>
 <span></span>
 <span><span class="co"># Get normalized counts for downstream plots</span></span>
 <span><span class="va">norm_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/counts.html">counts</a></span><span class="op">(</span><span class="va">dds</span>, normalized <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><strong>18 lines.</strong> The user must know:
+<p><strong>19 lines.</strong> The user must know:
 <code>DESeqDataSetFromMatrix</code>, formula syntax, manual filtering
 logic, <code><a href="https://rdrr.io/pkg/DESeq2/man/results.html" class="external-link">results()</a></code> contrast specification, fold-change and
 p-value cutoff application, and regulation classification.</p>
@@ -228,7 +247,7 @@ know the correct keytype, and deal with multi-mapping.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Untreated"</span> <span class="op">=</span> <span class="st">"#4575B4"</span>, <span class="st">"Dexamethasone"</span> <span class="op">=</span> <span class="st">"#D73027"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-code-economy_files/figure-html/standard-pca-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
-<p><strong>14 lines.</strong> The user must know: <code><a href="https://rdrr.io/pkg/DESeq2/man/vst.html" class="external-link">vst()</a></code>,
+<p><strong>12 lines.</strong> The user must know: <code><a href="https://rdrr.io/pkg/DESeq2/man/vst.html" class="external-link">vst()</a></code>,
 <code><a href="https://rdrr.io/pkg/BiocGenerics/man/plotPCA.html" class="external-link">plotPCA()</a></code> with <code>returnData</code>, how to extract
 percent variance from attributes, manual ggplot2 construction, and
 hardcoded colour assignment.</p>
@@ -262,52 +281,50 @@ logic, manual threshold lines, manual colour mapping.</p>
 <h3 id="step-5-expression-heatmap-standard">Step 5: Expression Heatmap (Standard)<a class="anchor" aria-label="anchor" href="#step-5-expression-heatmap-standard"></a>
 </h3>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ComplexHeatmap"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap" class="external-link">ComplexHeatmap</a></span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/circlize" class="external-link">circlize</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap" class="external-link">ComplexHeatmap</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/circlize" class="external-link">circlize</a></span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># Select top DE genes</span></span>
-<span>  <span class="va">top_genes</span> <span class="op">&lt;-</span> <span class="va">res_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">regulation</span> <span class="op">!=</span> <span class="st">"Other"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">padj</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">gene_id</span><span class="op">)</span></span>
+<span><span class="co"># Select top DE genes</span></span>
+<span><span class="va">top_genes</span> <span class="op">&lt;-</span> <span class="va">res_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">regulation</span> <span class="op">!=</span> <span class="st">"Other"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">padj</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">gene_id</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># Z-score transform</span></span>
-<span>  <span class="va">mat</span> <span class="op">&lt;-</span> <span class="va">norm_mat</span><span class="op">[</span><span class="va">top_genes</span>, <span class="op">]</span></span>
-<span>  <span class="va">mat_z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">mat</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Z-score transform</span></span>
+<span><span class="va">mat</span> <span class="op">&lt;-</span> <span class="va">norm_mat</span><span class="op">[</span><span class="va">top_genes</span>, <span class="op">]</span></span>
+<span><span class="va">mat_z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">mat</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># Column annotation</span></span>
-<span>  <span class="va">col_ann</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/HeatmapAnnotation.html" class="external-link">HeatmapAnnotation</a></span><span class="op">(</span></span>
-<span>    Treatment <span class="op">=</span> <span class="va">sample_meta</span><span class="op">$</span><span class="va">treatment</span>,</span>
-<span>    col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Untreated"</span> <span class="op">=</span> <span class="st">"#4575B4"</span>, <span class="st">"Dexamethasone"</span> <span class="op">=</span> <span class="st">"#D73027"</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
+<span><span class="co"># Column annotation</span></span>
+<span><span class="va">col_ann</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/HeatmapAnnotation.html" class="external-link">HeatmapAnnotation</a></span><span class="op">(</span></span>
+<span>  Treatment <span class="op">=</span> <span class="va">sample_meta</span><span class="op">$</span><span class="va">treatment</span>,</span>
+<span>  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Untreated"</span> <span class="op">=</span> <span class="st">"#4575B4"</span>, <span class="st">"Dexamethasone"</span> <span class="op">=</span> <span class="st">"#D73027"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># Map gene symbols for labels</span></span>
-<span>  <span class="va">row_labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">gene_symbols</span><span class="op">[</span><span class="va">top_genes</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>    <span class="va">gene_symbols</span><span class="op">[</span><span class="va">top_genes</span><span class="op">]</span>,</span>
-<span>    <span class="va">top_genes</span></span>
-<span>  <span class="op">)</span></span>
+<span><span class="co"># Map gene symbols for labels</span></span>
+<span><span class="va">row_labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
+<span>  <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">gene_symbols</span><span class="op">[</span><span class="va">top_genes</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  <span class="va">gene_symbols</span><span class="op">[</span><span class="va">top_genes</span><span class="op">]</span>,</span>
+<span>  <span class="va">top_genes</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html" class="external-link">Heatmap</a></span><span class="op">(</span></span>
-<span>    <span class="va">mat_z</span>,</span>
-<span>    name <span class="op">=</span> <span class="st">"Z-score"</span>,</span>
-<span>    top_annotation <span class="op">=</span> <span class="va">col_ann</span>,</span>
-<span>    row_labels <span class="op">=</span> <span class="va">row_labels</span>,</span>
-<span>    show_row_names <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    row_names_gp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/gpar.html" class="external-link">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>,</span>
-<span>    column_names_gp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/gpar.html" class="external-link">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">9</span><span class="op">)</span>,</span>
-<span>    clustering_distance_rows <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
-<span>    clustering_method_rows <span class="op">=</span> <span class="st">"ward.D2"</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html" class="external-link">Heatmap</a></span><span class="op">(</span></span>
+<span>  <span class="va">mat_z</span>,</span>
+<span>  name <span class="op">=</span> <span class="st">"Z-score"</span>,</span>
+<span>  top_annotation <span class="op">=</span> <span class="va">col_ann</span>,</span>
+<span>  row_labels <span class="op">=</span> <span class="va">row_labels</span>,</span>
+<span>  show_row_names <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  row_names_gp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/gpar.html" class="external-link">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>,</span>
+<span>  column_names_gp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/gpar.html" class="external-link">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">9</span><span class="op">)</span>,</span>
+<span>  clustering_distance_rows <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>  clustering_method_rows <span class="op">=</span> <span class="st">"ward.D2"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-code-economy_files/figure-html/standard-heatmap-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
-<p><strong>30 lines.</strong> The user must: load 2 more packages,
+<p><strong>29 lines.</strong> The user must: load 2 more packages,
 manually select top genes, compute z-scores, construct
 <code>HeatmapAnnotation</code> with manually repeated colours, map gene
 symbols for row labels, and configure <code><a href="https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html" class="external-link">Heatmap()</a></code> with 8
-parameters.</p>
+named arguments.</p>
 </div>
 <div class="section level3">
 <h3 id="step-6-msigdb-enrichment-standard">Step 6: MSigDB Enrichment (Standard)<a class="anchor" aria-label="anchor" href="#step-6-msigdb-enrichment-standard"></a>
@@ -330,7 +347,7 @@ parameters.</p>
 <span>  pvalueCutoff <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  qvalueCutoff <span class="op">=</span> <span class="fl">0.2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><strong>14 lines.</strong> The user must: filter and extract gene
+<p><strong>12 lines.</strong> The user must: filter and extract gene
 symbols manually, know the msigdbr column names, construct the TERM2GENE
 data frame, and call <code><a href="https://rdrr.io/pkg/clusterProfiler/man/enricher.html" class="external-link">enricher()</a></code> with correct
 parameters.</p>
@@ -368,7 +385,7 @@ reordering, manual ggplot2 construction.</p>
 <span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
-<caption>Standard workflow: 123 lines, 11 packages</caption>
+<caption>Standard workflow: 118 lines, 11 packages</caption>
 <thead><tr class="header">
 <th align="left">Step</th>
 <th align="right">Lines</th>
@@ -377,61 +394,60 @@ reordering, manual ggplot2 construction.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Library calls</td>
-<td align="right">9</td>
-<td align="right">9</td>
-</tr>
-<tr class="even">
-<td align="left">Differential expression</td>
-<td align="right">18</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">Gene annotation</td>
 <td align="right">8</td>
-<td align="right">0</td>
+<td align="right">8</td>
 </tr>
 <tr class="even">
-<td align="left">PCA plot</td>
-<td align="right">14</td>
+<td align="left">DE + annotation</td>
+<td align="right">27</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
+<td align="left">PCA plot</td>
+<td align="right">12</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
 <td align="left">Volcano plot</td>
 <td align="right">16</td>
 <td align="right">0</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Expression heatmap</td>
-<td align="right">30</td>
+<td align="right">29</td>
 <td align="right">2</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">MSigDB enrichment</td>
-<td align="right">14</td>
+<td align="right">12</td>
 <td align="right">0</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Enrichment plot</td>
 <td align="right">14</td>
-<td align="right">0</td>
+<td align="right">1</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Total: 123 lines of code, 11 packages loaded.</strong></p>
+<p><strong>Total: 118 lines of code, 11 packages used (DESeq2, ggplot2,
+ggrepel, dplyr, tibble, clusterProfiler, msigdbr, AnnotationDbi,
+ComplexHeatmap, circlize, and forcats).</strong></p>
 <p>Additional cognitive costs not captured in line count:</p>
 <ul>
 <li>
-<strong>5 data structure conversions</strong> (matrix -&gt;
-DESeqDataSet -&gt; results -&gt; data.frame -&gt; filtered subset)</li>
+<strong>Data structure conversions</strong> at each interface
+(matrix -&gt; DESeqDataSet -&gt; results -&gt; data.frame -&gt; filtered
+subset)</li>
 <li>
-<strong>2 manual ID mappings</strong> (Ensembl -&gt; Symbol for
-annotation and enrichment)</li>
+<strong>1 ID-mapping call</strong> (<code><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">mapIds()</a></code>), whose
+symbols are then carried by hand into the volcano labels, the enrichment
+input and the heatmap row labels</li>
 <li>
-<strong>3 hardcoded color vectors</strong> (one per plot type,
-manually kept consistent)</li>
+<strong>3 hand-typed colour vectors</strong> (PCA plot, Volcano
+plot, and Expression heatmap steps), kept consistent by hand</li>
 <li>
-<strong>0 structured persistence</strong> (all state lives in script
-variables)</li>
+<strong>No structured persistence</strong> (all state lives in
+script variables)</li>
 </ul>
 <hr>
 </div>
@@ -439,15 +455,18 @@ variables)</li>
 <div class="section level2">
 <h2 id="workflow-b-vista">Workflow B: VISTA<a class="anchor" aria-label="anchor" href="#workflow-b-vista"></a>
 </h2>
-<p>The same analysis, same data, same outputs.</p>
+<p>The same analysis, same data, same kinds of output.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cparsania/VISTA" class="external-link">VISTA</a></span><span class="op">)</span></span></code></pre></div>
-<p><strong>1 library call.</strong></p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cparsania/VISTA" class="external-link">VISTA</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>  <span class="co"># for reshaping the inputs below</span></span></code></pre></div>
+<p><strong>2 library calls.</strong> dplyr is attached here too because
+the next step reshapes the inputs with it; without it, this workflow
+would rely on Workflow A having attached it.</p>
 <div class="section level3">
 <h3 id="steps-12-differential-expression-annotation">Steps 1–2: Differential Expression + Annotation<a class="anchor" aria-label="anchor" href="#steps-12-differential-expression-annotation"></a>
 </h3>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Prepare inputs (same as standard workflow)</span></span>
+<code class="sourceCode R"><span><span class="co"># Reshape the shared inputs into the tables create_vista() expects</span></span>
 <span><span class="va">count_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">counts_matrix</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>gene_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts_matrix</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -481,8 +500,8 @@ variables)</li>
 <span>  columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SYMBOL"</span>, <span class="st">"GENENAME"</span>, <span class="st">"ENTREZID"</span><span class="op">)</span>,</span>
 <span>  keytype <span class="op">=</span> <span class="st">"ENSEMBL"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><strong>23 lines</strong> (including data preparation shared with
-both workflows).</p>
+<p><strong>28 lines</strong>, including the reshaping of the shared
+inputs that <code><a href="../../reference/create_vista.html">create_vista()</a></code> needs.</p>
 <p><code><a href="../../reference/create_vista.html">create_vista()</a></code> performed: count filtering, DESeq2
 pipeline execution, normalized count extraction, fold-change/p-value
 thresholding, regulation classification, colour palette assignment, and
@@ -508,7 +527,7 @@ Axis labels with variance percentages are generated automatically.</p>
 <span>  display_id <span class="op">=</span> <span class="st">"SYMBOL"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-code-economy_files/figure-html/vista-volcano-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
-<p><strong>4 lines.</strong> Threshold lines, gene labels, and colour
+<p><strong>5 lines.</strong> Threshold lines, gene labels, and colour
 scheme are derived from the stored cutoffs and palette.</p>
 </div>
 <div class="section level3">
@@ -533,7 +552,7 @@ scheme are derived from the stored cutoffs and palette.</p>
 <span>  summarise_replicates  <span class="op">=</span> <span class="cn">FALSE</span>  </span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="VISTA-code-economy_files/figure-html/vista-heatmap-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
-<p><strong>13 lines.</strong> Z-score transformation, column annotation
+<p><strong>15 lines.</strong> Z-score transformation, column annotation
 with consistent colours, and symbol mapping are handled internally.</p>
 </div>
 <div class="section level3">
@@ -548,7 +567,7 @@ with consistent colours, and symbol mapping are handled internally.</p>
 <span>  species     <span class="op">=</span> <span class="st">"Homo sapiens"</span>,</span>
 <span>  from_type   <span class="op">=</span> <span class="st">"ENSEMBL"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><strong>7 lines.</strong> Gene extraction, ID conversion, TERM2GENE
+<p><strong>8 lines.</strong> Gene extraction, ID conversion, TERM2GENE
 construction, and enrichment execution are handled internally.</p>
 </div>
 <div class="section level3">
@@ -566,48 +585,57 @@ construction, and enrichment execution are handled internally.</p>
 </h3>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="va">vista_counts</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Step"</span>, <span class="st">"Lines"</span><span class="op">)</span><span class="op">]</span>,</span>
-<span>  caption <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"VISTA workflow: "</span>, <span class="va">total_vista</span>, <span class="st">" lines, "</span>, <span class="va">total_pkg_vista</span>, <span class="st">" package"</span><span class="op">)</span>,</span>
-<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span><span class="op">)</span></span>
+<span>  <span class="va">vista_counts</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Step"</span>, <span class="st">"Lines"</span>, <span class="st">"Packages"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>  caption <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"VISTA workflow: "</span>, <span class="va">total_vista</span>, <span class="st">" lines, "</span>, <span class="fu">n_of</span><span class="op">(</span><span class="va">total_pkg_vista</span>, <span class="st">"package"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"l"</span>, <span class="st">"r"</span>, <span class="st">"r"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
-<caption>VISTA workflow: 52 lines, 1 package</caption>
+<caption>VISTA workflow: 62 lines, 3 packages</caption>
 <thead><tr class="header">
 <th align="left">Step</th>
 <th align="right">Lines</th>
+<th align="right">Packages</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">Library calls</td>
-<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">2</td>
 </tr>
 <tr class="even">
 <td align="left">DE + annotation</td>
-<td align="right">23</td>
+<td align="right">28</td>
+<td align="right">1</td>
 </tr>
 <tr class="odd">
 <td align="left">PCA plot</td>
 <td align="right">1</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">Volcano plot</td>
-<td align="right">4</td>
+<td align="right">5</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">Expression heatmap</td>
-<td align="right">13</td>
+<td align="right">15</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">MSigDB enrichment</td>
-<td align="right">7</td>
+<td align="right">8</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">Enrichment plot</td>
 <td align="right">3</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Total: 52 lines of code, 1 package loaded.</strong></p>
+<p><strong>Total: 62 lines of code, 3 packages used (VISTA, dplyr, and
+tibble).</strong></p>
 <hr>
 </div>
 </div>
@@ -615,7 +643,7 @@ construction, and enrichment execution are handled internally.</p>
 <h2 id="side-by-side-comparison">Side-by-Side Comparison<a class="anchor" aria-label="anchor" href="#side-by-side-comparison"></a>
 </h2>
 <table class="table">
-<caption>Lines of code: Standard (123) vs. VISTA (52)</caption>
+<caption>Lines of code: Standard (118) vs. VISTA (62)</caption>
 <thead><tr class="header">
 <th align="left">Step</th>
 <th align="right">Standard (lines)</th>
@@ -625,39 +653,39 @@ construction, and enrichment execution are handled internally.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Library calls</td>
-<td align="right">9</td>
-<td align="right">1</td>
-<td align="right">89%</td>
+<td align="right">8</td>
+<td align="right">2</td>
+<td align="right">75%</td>
 </tr>
 <tr class="even">
 <td align="left">DE + annotation</td>
-<td align="right">26</td>
-<td align="right">23</td>
-<td align="right">12%</td>
+<td align="right">27</td>
+<td align="right">28</td>
+<td align="right">-4%</td>
 </tr>
 <tr class="odd">
 <td align="left">PCA plot</td>
-<td align="right">14</td>
+<td align="right">12</td>
 <td align="right">1</td>
-<td align="right">93%</td>
+<td align="right">92%</td>
 </tr>
 <tr class="even">
 <td align="left">Volcano plot</td>
 <td align="right">16</td>
-<td align="right">4</td>
-<td align="right">75%</td>
+<td align="right">5</td>
+<td align="right">69%</td>
 </tr>
 <tr class="odd">
 <td align="left">Expression heatmap</td>
-<td align="right">30</td>
-<td align="right">13</td>
-<td align="right">57%</td>
+<td align="right">29</td>
+<td align="right">15</td>
+<td align="right">48%</td>
 </tr>
 <tr class="even">
 <td align="left">MSigDB enrichment</td>
-<td align="right">14</td>
-<td align="right">7</td>
-<td align="right">50%</td>
+<td align="right">12</td>
+<td align="right">8</td>
+<td align="right">33%</td>
 </tr>
 <tr class="odd">
 <td align="left">Enrichment plot</td>
@@ -665,8 +693,20 @@ construction, and enrichment execution are handled internally.</p>
 <td align="right">3</td>
 <td align="right">79%</td>
 </tr>
+<tr class="even">
+<td align="left">Total</td>
+<td align="right">118</td>
+<td align="right">62</td>
+<td align="right">47%</td>
+</tr>
 </tbody>
 </table>
+<p>Overall, Workflow B is 47% shorter than Workflow A (62 lines against
+118) and uses 3 packages against 11. The saving is not uniform: in the
+DE + annotation step VISTA needs 28 lines against 27, because the inputs
+must be reshaped for <code><a href="../../reference/create_vista.html">create_vista()</a></code> and its settings are
+passed as named arguments. Most of the saving is in the plotting and
+enrichment steps.</p>
 <p><img src="VISTA-code-economy_files/figure-html/comparison-plot-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
@@ -675,7 +715,7 @@ construction, and enrichment execution are handled internally.</p>
 <p>Line count is a proxy. The deeper value is in what the user
 <strong>does not have to think about</strong>:</p>
 <div class="section level3">
-<h3 id="data-structure-conversions-eliminated">Data structure conversions eliminated<a class="anchor" aria-label="anchor" href="#data-structure-conversions-eliminated"></a>
+<h3 id="data-structure-conversions">Data structure conversions<a class="anchor" aria-label="anchor" href="#data-structure-conversions"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -690,7 +730,8 @@ construction, and enrichment execution are handled internally.</p>
 <tr class="odd">
 <td>matrix -&gt; <code>DESeqDataSet</code>
 </td>
-<td>Handled internally</td>
+<td>matrix and sample table -&gt; tibbles, once, as
+<code><a href="../../reference/create_vista.html">create_vista()</a></code> input</td>
 </tr>
 <tr class="even">
 <td>
@@ -699,8 +740,8 @@ construction, and enrichment execution are handled internally.</p>
 </tr>
 <tr class="odd">
 <td>data.frame -&gt; filtered tibble</td>
-<td>Accessor: <code><a href="../../reference/VISTA-accessors.html">comparisons()</a></code>
-</td>
+<td>Accessor: <code><a href="../../reference/VISTA-accessors.html">comparisons()</a></code>, then subset by hand for the
+heatmap genes</td>
 </tr>
 <tr class="even">
 <td>matrix -&gt; z-score matrix</td>
@@ -713,10 +754,14 @@ construction, and enrichment execution are handled internally.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>5 manual conversions -&gt; 0.</strong></p>
+<p>These are not counted, because what counts as a conversion is a
+matter of judgement. Neither workflow is free of them: VISTA’s inputs
+are reshaped once before <code><a href="../../reference/create_vista.html">create_vista()</a></code>, and after that,
+results are read through <code><a href="../../reference/VISTA-accessors.html">comparisons()</a></code> and the VISTA
+plotting and enrichment functions.</p>
 </div>
 <div class="section level3">
-<h3 id="identifier-mappings-eliminated">Identifier mappings eliminated<a class="anchor" aria-label="anchor" href="#identifier-mappings-eliminated"></a>
+<h3 id="identifier-mappings">Identifier mappings<a class="anchor" aria-label="anchor" href="#identifier-mappings"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -745,8 +790,12 @@ construction, and enrichment execution are handled internally.</p>
 </tr>
 </tbody>
 </table>
-<p><strong>3 manual ID operations -&gt; 1 setup call + a
-parameter.</strong></p>
+<p><strong>ID-mapping calls: 1 in Workflow A (<code><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">mapIds()</a></code>), 1
+in Workflow B (<code><a href="../../reference/set_rowdata.html">set_rowdata()</a></code>).</strong> Both map
+identifiers once. The difference is what follows: Workflow A carries the
+symbols by hand into the volcano labels, the enrichment input and the
+heatmap row labels, while VISTA’s functions take the identifier type as
+a parameter.</p>
 </div>
 <div class="section level3">
 <h3 id="color-consistency-guaranteed-vs--manual">Color consistency: guaranteed vs. manual<a class="anchor" aria-label="anchor" href="#color-consistency-guaranteed-vs--manual"></a>
@@ -764,6 +813,10 @@ parameter.</strong></p>
 <p>If any of these diverge, figures become inconsistent. In VISTA, group
 colours are set once at object creation and propagated to every
 downstream plot automatically.</p>
+<p>Counted over all its steps, Workflow A’s code types 3 colour vectors
+and 11 colour values by hand (hex codes and R colour names, including
+the threshold lines and the enrichment gradient); Workflow B’s types 0
+colour vectors and 0 colour values.</p>
 </div>
 <div class="section level3">
 <h3 id="state-persistence-object-vs--variables">State persistence: object vs. variables<a class="anchor" aria-label="anchor" href="#state-persistence-object-vs--variables"></a>
@@ -799,51 +852,310 @@ object alone.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Total lines of code</td>
-<td align="center">123</td>
-<td align="center">52</td>
+<td align="center">118</td>
+<td align="center">62</td>
 </tr>
 <tr class="even">
-<td align="left">Packages loaded</td>
+<td align="left">Packages used</td>
 <td align="center">11</td>
-<td align="center">1</td>
+<td align="center">3</td>
 </tr>
 <tr class="odd">
-<td align="left">Data structure conversions</td>
-<td align="center">5</td>
-<td align="center">0</td>
+<td align="left">ID-mapping calls</td>
+<td align="center">1 (<code><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">mapIds()</a></code>)</td>
+<td align="center">1 (<code><a href="../../reference/set_rowdata.html">set_rowdata()</a></code>)</td>
 </tr>
 <tr class="even">
-<td align="left">Manual ID mappings</td>
-<td align="center">3</td>
-<td align="center">1 (setup)</td>
-</tr>
-<tr class="odd">
-<td align="left">Hardcoded color definitions</td>
+<td align="left">Hand-typed colour vectors</td>
 <td align="center">3</td>
 <td align="center">0</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Persistent analysis objects</td>
 <td align="center">0 (scripts)</td>
 <td align="center">1 (S4)</td>
 </tr>
 </tbody>
 </table>
-<p>VISTA does not introduce new statistical methods. DESeq2 and edgeR
-perform the same computations inside <code><a href="../../reference/create_vista.html">create_vista()</a></code> as they
-do standalone. What VISTA eliminates is the engineering overhead between
-these computations: the data reshaping, identifier juggling, colour
-coordination, and state management that consume the majority of analysis
-scripting time without contributing to scientific reasoning.</p>
+<p>VISTA does not introduce new statistical methods:
+<code><a href="../../reference/create_vista.html">create_vista()</a></code> runs DESeq2, edgeR or limma-voom rather than
+reimplementing them. The check below compares the DESeq2 results of the
+two workflows above gene by gene, counting for each column the genes
+whose values are not exactly equal (a missing value matches only a
+missing value).</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">vista_de</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/VISTA-accessors.html">comparisons</a></span><span class="op">(</span><span class="va">vista</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">std_de</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">[</span><span class="va">vista_de</span><span class="op">$</span><span class="va">gene_id</span>, <span class="op">]</span></span>
+<span><span class="va">std_de</span><span class="op">$</span><span class="va">regulation</span> <span class="op">&lt;-</span> <span class="va">res_df</span><span class="op">$</span><span class="va">regulation</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">vista_de</span><span class="op">$</span><span class="va">gene_id</span>, <span class="va">res_df</span><span class="op">$</span><span class="va">gene_id</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">same_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setequal</a></span><span class="op">(</span><span class="va">vista_de</span><span class="op">$</span><span class="va">gene_id</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">vista_de</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># VISTA column = standard column</span></span>
+<span><span class="va">de_columns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>baseMean <span class="op">=</span> <span class="st">"baseMean"</span>, log2fc <span class="op">=</span> <span class="st">"log2FoldChange"</span>,</span>
+<span>                lfcSE <span class="op">=</span> <span class="st">"lfcSE"</span>, stat <span class="op">=</span> <span class="st">"stat"</span>, pvalue <span class="op">=</span> <span class="st">"pvalue"</span>,</span>
+<span>                padj <span class="op">=</span> <span class="st">"padj"</span>, regulation <span class="op">=</span> <span class="st">"regulation"</span><span class="op">)</span></span>
+<span><span class="va">genes_differing</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">de_columns</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">col</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="va">vista_de</span><span class="op">[[</span><span class="va">col</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="va">b</span> <span class="op">&lt;-</span> <span class="va">std_de</span><span class="op">[[</span><span class="va">de_columns</span><span class="op">[[</span><span class="va">col</span><span class="op">]</span><span class="op">]</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">xor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">a</span> <span class="op">!=</span> <span class="va">b</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">same_genes</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="va">genes_differing</span></span>
+<span><span class="co">#&gt;   baseMean     log2fc      lfcSE       stat     pvalue       padj regulation </span></span>
+<span><span class="co">#&gt;          0          0          0          0          0          0          0</span></span></code></pre></div>
+<p>On this data, the two workflows test the same 17199 genes and give
+identical results in every column compared.</p>
+<p>What VISTA eliminates is the engineering overhead between these
+computations: the data reshaping, identifier juggling, colour
+coordination, and state management that take up scripting time without
+contributing to scientific reasoning.</p>
+</div>
+<div class="section level2">
+<h2 id="counting-code">Counting code<a class="anchor" aria-label="anchor" href="#counting-code"></a>
+</h2>
+<p>Every tally above is computed by this code, which reads the
+vignette’s own chunks with <code>knitr::knit_code$get()</code>.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The counting rule behind every code tally in this vignette. This chunk is</span></span>
+<span><span class="co"># the rule's only copy: a script that reports these tallies elsewhere (such</span></span>
+<span><span class="co"># as the manuscript's count_code_economy.R) extracts this chunk from this</span></span>
+<span><span class="co"># file and runs it, so both count alike.</span></span>
+<span></span>
+<span><span class="co"># The chunks that make up each step of each workflow. The shared</span></span>
+<span><span class="co"># `load-data` chunk is counted for neither workflow.</span></span>
+<span><span class="va">economy_steps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  Standard <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Library calls"</span>      <span class="op">=</span> <span class="st">"standard-packages"</span>,</span>
+<span>    <span class="st">"DE + annotation"</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"standard-de"</span>, <span class="st">"standard-annotation"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"PCA plot"</span>           <span class="op">=</span> <span class="st">"standard-pca"</span>,</span>
+<span>    <span class="st">"Volcano plot"</span>       <span class="op">=</span> <span class="st">"standard-volcano"</span>,</span>
+<span>    <span class="st">"Expression heatmap"</span> <span class="op">=</span> <span class="st">"standard-heatmap"</span>,</span>
+<span>    <span class="st">"MSigDB enrichment"</span>  <span class="op">=</span> <span class="st">"standard-enrichment"</span>,</span>
+<span>    <span class="st">"Enrichment plot"</span>    <span class="op">=</span> <span class="st">"standard-enrichment-plot"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  VISTA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Library calls"</span>      <span class="op">=</span> <span class="st">"vista-packages"</span>,</span>
+<span>    <span class="st">"DE + annotation"</span>    <span class="op">=</span> <span class="st">"vista-de"</span>,</span>
+<span>    <span class="st">"PCA plot"</span>           <span class="op">=</span> <span class="st">"vista-pca"</span>,</span>
+<span>    <span class="st">"Volcano plot"</span>       <span class="op">=</span> <span class="st">"vista-volcano"</span>,</span>
+<span>    <span class="st">"Expression heatmap"</span> <span class="op">=</span> <span class="st">"vista-heatmap"</span>,</span>
+<span>    <span class="st">"MSigDB enrichment"</span>  <span class="op">=</span> <span class="st">"vista-enrichment"</span>,</span>
+<span>    <span class="st">"Enrichment plot"</span>    <span class="op">=</span> <span class="st">"vista-enrichment-plot"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Packages that ship with R itself are never counted.</span></span>
+<span><span class="va">base_r_pkgs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"base"</span>, <span class="st">"compiler"</span>, <span class="st">"datasets"</span>, <span class="st">"graphics"</span>, <span class="st">"grDevices"</span>,</span>
+<span>                 <span class="st">"grid"</span>, <span class="st">"methods"</span>, <span class="st">"parallel"</span>, <span class="st">"splines"</span>, <span class="st">"stats"</span>,</span>
+<span>                 <span class="st">"stats4"</span>, <span class="st">"tcltk"</span>, <span class="st">"tools"</span>, <span class="st">"utils"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Calls that map gene identifiers. AnnotationDbi's select() is told apart</span></span>
+<span><span class="co"># from dplyr's select() by its `keytype` argument.</span></span>
+<span><span class="va">id_mapping_fns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mapIds"</span>, <span class="st">"bitr"</span>, <span class="st">"set_rowdata"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Lines: a line counts if it is not blank and not a pure comment.</span></span>
+<span><span class="va">count_lines</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">code</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">code</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/trimws.html" class="external-link">trimws</a></span><span class="op">(</span><span class="va">code</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">code</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">startsWith</a></span><span class="op">(</span><span class="va">code</span>, <span class="st">"#"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Every call in a piece of code, nested calls included.</span></span>
+<span><span class="va">code_calls</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">code</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">calls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">walk</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">calls</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">calls</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1L</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;&lt;-</span> <span class="va">x</span></span>
+<span>    <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/call.html" class="external-link">is.call</a></span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="fu">walk</span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">e</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>text <span class="op">=</span> <span class="va">code</span>, keep.source <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/call.html" class="external-link">is.call</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span> <span class="fu">walk</span><span class="op">(</span><span class="va">e</span><span class="op">)</span></span>
+<span>  <span class="va">calls</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># The function a call invokes: "f" for both f() and pkg::f().</span></span>
+<span><span class="va">call_fun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cl</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">f</span> <span class="op">&lt;-</span> <span class="va">cl</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/name.html" class="external-link">is.symbol</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/call.html" class="external-link">is.call</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/name.html" class="external-link">is.symbol</a></span><span class="op">(</span><span class="va">f</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">f</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"::"</span>, <span class="st">":::"</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">f</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="cn">NA_character_</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Packages: attached with library()/require() or called with pkg::.</span></span>
+<span><span class="va">code_packages</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">code</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">pkgs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">cl</span> <span class="kw">in</span> <span class="fu">code_calls</span><span class="op">(</span><span class="va">code</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">fn</span> <span class="op">&lt;-</span> <span class="fu">call_fun</span><span class="op">(</span><span class="va">cl</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">fn</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"library"</span>, <span class="st">"require"</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1L</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">pkg</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">cl</span><span class="op">$</span><span class="va">package</span><span class="op">)</span><span class="op">)</span> <span class="va">cl</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="kw">else</span> <span class="va">cl</span><span class="op">$</span><span class="va">package</span></span>
+<span>      <span class="va">pkgs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">pkgs</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">pkg</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">fn</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"::"</span>, <span class="st">":::"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">pkgs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">pkgs</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">cl</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">pkgs</span><span class="op">)</span>, <span class="va">base_r_pkgs</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Colour literals: a hex code or an R colour name, typed as a string.</span></span>
+<span><span class="va">is_colour</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^#([[:xdigit:]]{3}|[[:xdigit:]]{6}|[[:xdigit:]]{8})$"</span>, <span class="va">s</span><span class="op">)</span> <span class="op">||</span></span>
+<span>    <span class="va">s</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/colors.html" class="external-link">colors</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">colour_args</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cl</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">0L</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1L</span><span class="op">]</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">is.character</a></span><span class="op">(</span><span class="va">cl</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">cl</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1L</span> <span class="op">&amp;&amp;</span> <span class="fu">is_colour</span><span class="op">(</span><span class="va">cl</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">n</span> <span class="op">&lt;-</span> <span class="va">n</span> <span class="op">+</span> <span class="fl">1L</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">n</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># All tallies for one piece of code.</span></span>
+<span><span class="va">code_tally</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">code</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">calls</span>   <span class="op">&lt;-</span> <span class="fu">code_calls</span><span class="op">(</span><span class="va">code</span><span class="op">)</span></span>
+<span>  <span class="va">fns</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">calls</span>, <span class="va">call_fun</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">colours</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">calls</span>, <span class="va">colour_args</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">keytype</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">calls</span>, <span class="kw">function</span><span class="op">(</span><span class="va">cl</span><span class="op">)</span> <span class="st">"keytype"</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">id_map</span>  <span class="op">&lt;-</span> <span class="va">fns</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="va">id_mapping_fns</span> <span class="op">|</span> <span class="op">(</span><span class="va">fns</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="st">"select"</span> <span class="op">&amp;</span> <span class="va">keytype</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    lines          <span class="op">=</span> <span class="fu">count_lines</span><span class="op">(</span><span class="va">code</span><span class="op">)</span>,</span>
+<span>    packages       <span class="op">=</span> <span class="fu">code_packages</span><span class="op">(</span><span class="va">code</span><span class="op">)</span>,</span>
+<span>    library_calls  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">fns</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"library"</span>, <span class="st">"require"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    id_mapping     <span class="op">=</span> <span class="va">fns</span><span class="op">[</span><span class="va">id_map</span><span class="op">]</span>,</span>
+<span>    colour_vectors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">fns</span> <span class="op"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">%in%</a></span> <span class="st">"c"</span> <span class="op">&amp;</span> <span class="va">colours</span> <span class="op">&gt;</span> <span class="fl">0L</span><span class="op">)</span>,</span>
+<span>    colour_values  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">colours</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># One row per step and workflow. `get_code(label)` returns a chunk's source.</span></span>
+<span><span class="co"># A step's `packages` are those not already counted at an earlier step, so</span></span>
+<span><span class="co"># the steps of a workflow sum to its distinct packages.</span></span>
+<span><span class="va">code_economy</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">get_code</span>, <span class="va">steps</span> <span class="op">=</span> <span class="va">economy_steps</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">wf</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">steps</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">seen</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="kw">for</span> <span class="op">(</span><span class="va">st</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">steps</span><span class="op">[[</span><span class="va">wf</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">code</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">steps</span><span class="op">[[</span><span class="va">wf</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">st</span><span class="op">]</span><span class="op">]</span>, <span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">chunk</span> <span class="op">&lt;-</span> <span class="fu">get_code</span><span class="op">(</span><span class="va">label</span><span class="op">)</span></span>
+<span>        <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">chunk</span><span class="op">)</span> <span class="op">||</span> <span class="fu">count_lines</span><span class="op">(</span><span class="va">chunk</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0L</span><span class="op">)</span> <span class="op">{</span></span>
+<span>          <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"Chunk '"</span>, <span class="va">label</span>, <span class="st">"' is missing or has no countable code."</span><span class="op">)</span></span>
+<span>        <span class="op">}</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">chunk</span><span class="op">)</span></span>
+<span>      <span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span>      <span class="va">tally</span> <span class="op">&lt;-</span> <span class="fu">code_tally</span><span class="op">(</span><span class="va">code</span><span class="op">)</span></span>
+<span>      <span class="va">new_pkgs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">tally</span><span class="op">$</span><span class="va">packages</span>, <span class="va">seen</span><span class="op">)</span></span>
+<span>      <span class="va">seen</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">seen</span>, <span class="va">new_pkgs</span><span class="op">)</span></span>
+<span>      <span class="va">rows</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">rows</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1L</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>        step             <span class="op">=</span> <span class="va">st</span>,</span>
+<span>        workflow         <span class="op">=</span> <span class="va">wf</span>,</span>
+<span>        lines            <span class="op">=</span> <span class="va">tally</span><span class="op">$</span><span class="va">lines</span>,</span>
+<span>        packages         <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">new_pkgs</span><span class="op">)</span>,</span>
+<span>        package_names    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">new_pkgs</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>,</span>
+<span>        library_calls    <span class="op">=</span> <span class="va">tally</span><span class="op">$</span><span class="va">library_calls</span>,</span>
+<span>        id_mapping_calls <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tally</span><span class="op">$</span><span class="va">id_mapping</span><span class="op">)</span>,</span>
+<span>        id_mapping_fns   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">tally</span><span class="op">$</span><span class="va">id_mapping</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>,</span>
+<span>        colour_vectors   <span class="op">=</span> <span class="va">tally</span><span class="op">$</span><span class="va">colour_vectors</span>,</span>
+<span>        colour_values    <span class="op">=</span> <span class="va">tally</span><span class="op">$</span><span class="va">colour_values</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">rows</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># One "Total" row per workflow.</span></span>
+<span><span class="va">economy_totals</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">economy</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">per_wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/splitAsList.html" class="external-link">split</a></span><span class="op">(</span><span class="va">economy</span>, <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">economy</span><span class="op">$</span><span class="va">workflow</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">economy</span><span class="op">$</span><span class="va">workflow</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">per_wf</span>, <span class="kw">function</span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">join</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>      step             <span class="op">=</span> <span class="st">"Total"</span>,</span>
+<span>      workflow         <span class="op">=</span> <span class="va">d</span><span class="op">$</span><span class="va">workflow</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span>      lines            <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">lines</span><span class="op">)</span>,</span>
+<span>      packages         <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">packages</span><span class="op">)</span>,</span>
+<span>      package_names    <span class="op">=</span> <span class="fu">join</span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">package_names</span><span class="op">)</span>,</span>
+<span>      library_calls    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">library_calls</span><span class="op">)</span>,</span>
+<span>      id_mapping_calls <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">id_mapping_calls</span><span class="op">)</span>,</span>
+<span>      id_mapping_fns   <span class="op">=</span> <span class="fu">join</span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">id_mapping_fns</span><span class="op">)</span>,</span>
+<span>      colour_vectors   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">colour_vectors</span><span class="op">)</span>,</span>
+<span>      colour_values    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">colour_values</span><span class="op">)</span>,</span>
+<span>      row.names        <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co"># knitr has parsed every chunk before running any, so the whole document's</span></span>
+<span><span class="co"># code is available here.</span></span>
+<span><span class="va">economy</span>       <span class="op">&lt;-</span> <span class="fu">code_economy</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/knit_code.html" class="external-link">knit_code</a></span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">label</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">economy_total</span> <span class="op">&lt;-</span> <span class="fu">economy_totals</span><span class="op">(</span><span class="va">economy</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Shorthands for the counts quoted in the text.</span></span>
+<span><span class="va">eco</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">workflow</span>, <span class="va">step</span>, <span class="va">what</span> <span class="op">=</span> <span class="st">"lines"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">economy</span><span class="op">[</span><span class="va">economy</span><span class="op">$</span><span class="va">workflow</span> <span class="op">==</span> <span class="va">workflow</span> <span class="op">&amp;</span> <span class="va">economy</span><span class="op">$</span><span class="va">step</span> <span class="op">==</span> <span class="va">step</span>, <span class="va">what</span><span class="op">]</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">tot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">workflow</span>, <span class="va">what</span> <span class="op">=</span> <span class="st">"lines"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">economy_total</span><span class="op">[</span><span class="va">economy_total</span><span class="op">$</span><span class="va">workflow</span> <span class="op">==</span> <span class="va">workflow</span>, <span class="va">what</span><span class="op">]</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">chunk_lines</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="fu">count_lines</span><span class="op">(</span><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/knit_code.html" class="external-link">knit_code</a></span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">label</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">named_args</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">label</span>, <span class="va">fn</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">calls</span> <span class="op">&lt;-</span> <span class="fu">code_calls</span><span class="op">(</span><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/knit_code.html" class="external-link">knit_code</a></span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">label</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">cl</span> <span class="op">&lt;-</span> <span class="va">calls</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">fn</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">calls</span>, <span class="va">call_fun</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">n_of</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span>, <span class="va">what</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">n</span>, <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="va">what</span> <span class="kw">else</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">what</span>, <span class="st">"s"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pct_less</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">standard</span>, <span class="va">vista</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="op">(</span><span class="va">standard</span> <span class="op">-</span> <span class="va">vista</span><span class="op">)</span> <span class="op">/</span> <span class="va">standard</span><span class="op">)</span>, <span class="st">"%"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">pkg_list</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">workflow</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/combine_words.html" class="external-link">combine_words</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="fu">tot</span><span class="op">(</span><span class="va">workflow</span>, <span class="st">"package_names"</span><span class="op">)</span>, <span class="st">", "</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">fn_list</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fns</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">fns</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="st">"none"</span><span class="op">)</span></span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/combine_words.html" class="external-link">combine_words</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"`"</span>, <span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">fns</span>, <span class="st">", "</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="st">"()`"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">steps_with</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">workflow</span>, <span class="va">what</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">economy</span><span class="op">$</span><span class="va">step</span><span class="op">[</span><span class="va">economy</span><span class="op">$</span><span class="va">workflow</span> <span class="op">==</span> <span class="va">workflow</span> <span class="op">&amp;</span> <span class="va">economy</span><span class="op">[[</span><span class="va">what</span><span class="op">]</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Wording for the DESeq2 cross-check in the Summary section.</span></span>
+<span><span class="va">describe_de_check</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">genes_differing</span>, <span class="va">vista_de</span>, <span class="va">std_de</span>, <span class="va">same_genes</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">same_genes</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="st">"the two workflows do not test the same genes, so their results differ"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">same</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">genes_differing</span><span class="op">)</span><span class="op">[</span><span class="va">genes_differing</span> <span class="op">==</span> <span class="fl">0L</span><span class="op">]</span></span>
+<span>  <span class="va">diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">genes_differing</span><span class="op">)</span><span class="op">[</span><span class="va">genes_differing</span> <span class="op">&gt;</span> <span class="fl">0L</span><span class="op">]</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">diff</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"the two workflows test the same "</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">vista_de</span><span class="op">)</span>,</span>
+<span>                  <span class="st">" genes and give identical results in every column compared"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
+<span>    <span class="st">"the two workflows test the same genes and agree exactly in "</span>,</span>
+<span>    <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/combine_words.html" class="external-link">combine_words</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"`"</span>, <span class="va">same</span>, <span class="st">"`"</span><span class="op">)</span><span class="op">)</span>, <span class="st">" for all "</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">vista_de</span><span class="op">)</span>, <span class="st">" genes, and differ in "</span>,</span>
+<span>    <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/combine_words.html" class="external-link">combine_words</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"`"</span>, <span class="va">diff</span>, <span class="st">"` ("</span>, <span class="va">genes_differing</span><span class="op">[</span><span class="va">diff</span><span class="op">]</span>,</span>
+<span>                                <span class="st">" genes)"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">xor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">vista_de</span><span class="op">$</span><span class="va">pvalue</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">std_de</span><span class="op">$</span><span class="va">pvalue</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">diff</span>, <span class="st">"pvalue"</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">idx</span><span class="op">)</span> <span class="op">==</span> <span class="va">genes_differing</span><span class="op">[[</span><span class="st">"pvalue"</span><span class="op">]</span><span class="op">]</span> <span class="op">&amp;&amp;</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">std_de</span><span class="op">$</span><span class="va">pvalue</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">std_de</span><span class="op">$</span><span class="va">pvalue</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">idx</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
+<span>      <span class="va">out</span>, <span class="st">". These are exactly the genes for which DESeq2 reports no "</span>,</span>
+<span>      <span class="st">"p-value (`NA`); for them the installed VISTA ("</span>,</span>
+<span>      <span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/packageDescription.html" class="external-link">packageVersion</a></span><span class="op">(</span><span class="st">"VISTA"</span><span class="op">)</span>, <span class="st">") stores a p-value of "</span>,</span>
+<span>      <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/combine_words.html" class="external-link">combine_words</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">vista_de</span><span class="op">$</span><span class="va">pvalue</span><span class="op">[</span><span class="va">idx</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      <span class="st">" while leaving `padj` as `NA`"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">out</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="session-information">Session Information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 24.04.4 LTS</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 24.04.5 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 </span></span>
@@ -863,67 +1175,66 @@ scripting time without contributing to scientific reasoning.</p>
 <span><span class="co">#&gt; [8] methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] VISTA_1.1.5                 circlize_0.4.18            </span></span>
-<span><span class="co">#&gt;  [3] ComplexHeatmap_2.28.0       msigdbr_26.1.0             </span></span>
-<span><span class="co">#&gt;  [5] clusterProfiler_4.20.0      tibble_3.3.1               </span></span>
+<span><span class="co">#&gt;  [1] VISTA_1.1.6                 circlize_0.4.18            </span></span>
+<span><span class="co">#&gt;  [3] ComplexHeatmap_2.28.0       msigdbr_26.1.1             </span></span>
+<span><span class="co">#&gt;  [5] clusterProfiler_4.20.2      tibble_3.3.1               </span></span>
 <span><span class="co">#&gt;  [7] dplyr_1.2.1                 ggrepel_0.9.8              </span></span>
 <span><span class="co">#&gt;  [9] ggplot2_4.0.3               DESeq2_1.52.0              </span></span>
 <span><span class="co">#&gt; [11] org.Hs.eg.db_3.23.1         AnnotationDbi_1.74.0       </span></span>
 <span><span class="co">#&gt; [13] airway_1.32.0               SummarizedExperiment_1.42.0</span></span>
 <span><span class="co">#&gt; [15] Biobase_2.72.0              GenomicRanges_1.64.0       </span></span>
 <span><span class="co">#&gt; [17] Seqinfo_1.2.0               IRanges_2.46.0             </span></span>
-<span><span class="co">#&gt; [19] S4Vectors_0.50.1            BiocGenerics_0.58.1        </span></span>
+<span><span class="co">#&gt; [19] S4Vectors_0.50.3            BiocGenerics_0.58.1        </span></span>
 <span><span class="co">#&gt; [21] generics_0.1.4              MatrixGenerics_1.24.0      </span></span>
 <span><span class="co">#&gt; [23] matrixStats_1.5.0           BiocStyle_2.40.0           </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;   [1] splines_4.6.1           ggplotify_0.1.3         polyclip_1.10-7        </span></span>
-<span><span class="co">#&gt;   [4] enrichit_0.2.1          lifecycle_1.0.5         httr2_1.3.0            </span></span>
-<span><span class="co">#&gt;   [7] rstatix_1.1.0           edgeR_4.10.1            doParallel_1.0.17      </span></span>
+<span><span class="co">#&gt;   [1] splines_4.6.1           ggplotify_0.1.4         polyclip_1.10-7        </span></span>
+<span><span class="co">#&gt;   [4] enrichit_0.2.6          lifecycle_1.0.5         httr2_1.3.0            </span></span>
+<span><span class="co">#&gt;   [7] rstatix_1.1.0           edgeR_4.10.6            doParallel_1.0.17      </span></span>
 <span><span class="co">#&gt;  [10] processx_3.9.0          lattice_0.22-9          MASS_7.3-65            </span></span>
-<span><span class="co">#&gt;  [13] backports_1.5.1         magrittr_2.0.5          limma_3.68.4           </span></span>
-<span><span class="co">#&gt;  [16] sass_0.4.10             rmarkdown_2.31          jquerylib_0.1.4        </span></span>
-<span><span class="co">#&gt;  [19] yaml_2.3.12             otel_0.2.0              ggtangle_0.1.2         </span></span>
+<span><span class="co">#&gt;  [13] backports_1.5.1         magrittr_2.0.5          limma_3.68.5           </span></span>
+<span><span class="co">#&gt;  [16] sass_0.4.10             rmarkdown_2.32          jquerylib_0.1.4        </span></span>
+<span><span class="co">#&gt;  [19] yaml_2.3.12             otel_0.2.0              ggtangle_0.1.4         </span></span>
 <span><span class="co">#&gt;  [22] EnhancedVolcano_1.30.0  DBI_1.3.0               RColorBrewer_1.1-3     </span></span>
-<span><span class="co">#&gt;  [25] abind_1.4-8             purrr_1.2.2             yulab.utils_0.2.4      </span></span>
+<span><span class="co">#&gt;  [25] abind_1.4-8             purrr_1.2.2             yulab.utils_0.2.5      </span></span>
 <span><span class="co">#&gt;  [28] tweenr_2.0.3            rappdirs_0.3.4          aisdk_1.4.12           </span></span>
-<span><span class="co">#&gt;  [31] gdtools_0.5.1           enrichplot_1.32.0       tidytree_0.4.8         </span></span>
+<span><span class="co">#&gt;  [31] gdtools_0.5.2           enrichplot_1.32.1       tidytree_0.4.8         </span></span>
 <span><span class="co">#&gt;  [34] pkgdown_2.2.1           codetools_0.2-20        DelayedArray_0.38.2    </span></span>
 <span><span class="co">#&gt;  [37] DOSE_4.6.0              ggforce_0.5.0           tidyselect_1.2.1       </span></span>
-<span><span class="co">#&gt;  [40] shape_1.4.6.1           aplot_0.3.1             farver_2.1.2           </span></span>
+<span><span class="co">#&gt;  [40] shape_1.4.6.1           aplot_0.3.2             farver_2.1.2           </span></span>
 <span><span class="co">#&gt;  [43] jsonlite_2.0.0          GetoptLong_1.1.1        Formula_1.2-6          </span></span>
 <span><span class="co">#&gt;  [46] iterators_1.0.14        systemfonts_1.3.2       foreach_1.5.2          </span></span>
 <span><span class="co">#&gt;  [49] tools_4.6.1             ggnewscale_0.5.2        treeio_1.36.1          </span></span>
 <span><span class="co">#&gt;  [52] ragg_1.5.2              Rcpp_1.1.2              glue_1.8.1             </span></span>
-<span><span class="co">#&gt;  [55] SparseArray_1.12.2      xfun_0.60               qvalue_2.44.0          </span></span>
+<span><span class="co">#&gt;  [55] SparseArray_1.12.3      xfun_0.62               qvalue_2.44.0          </span></span>
 <span><span class="co">#&gt;  [58] withr_3.0.3             BiocManager_1.30.27     fastmap_1.2.0          </span></span>
 <span><span class="co">#&gt;  [61] GGally_2.4.0            callr_3.8.0             digest_0.6.39          </span></span>
 <span><span class="co">#&gt;  [64] R6_2.6.1                gridGraphics_0.5-1      textshaping_1.0.5      </span></span>
-<span><span class="co">#&gt;  [67] colorspace_2.1-3        GO.db_3.23.1            RSQLite_3.53.3         </span></span>
-<span><span class="co">#&gt;  [70] tidyr_1.3.2             fontLiberation_0.1.0    httr_1.4.8             </span></span>
-<span><span class="co">#&gt;  [73] htmlwidgets_1.6.4       S4Arrays_1.12.0         scatterpie_0.2.6       </span></span>
-<span><span class="co">#&gt;  [76] ggstats_0.13.0          pkgconfig_2.0.3         gtable_0.3.6           </span></span>
+<span><span class="co">#&gt;  [67] colorspace_2.1-4        GO.db_3.23.1            RSQLite_3.53.3         </span></span>
+<span><span class="co">#&gt;  [70] tidyr_1.3.2             fontLiberation_0.1.0    httr_1.4.9             </span></span>
+<span><span class="co">#&gt;  [73] htmlwidgets_1.6.4       S4Arrays_1.12.1         scatterpie_0.2.6       </span></span>
+<span><span class="co">#&gt;  [76] ggstats_0.14.0          pkgconfig_2.0.3         gtable_0.3.6           </span></span>
 <span><span class="co">#&gt;  [79] blob_1.3.0              S7_0.2.2                XVector_0.52.0         </span></span>
 <span><span class="co">#&gt;  [82] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          </span></span>
-<span><span class="co">#&gt;  [85] bookdown_0.47           clue_0.3-68             scales_1.4.0           </span></span>
-<span><span class="co">#&gt;  [88] png_0.1-9               ggfun_0.2.1             knitr_1.51             </span></span>
+<span><span class="co">#&gt;  [85] bookdown_0.48           clue_0.3-68             scales_1.4.0           </span></span>
+<span><span class="co">#&gt;  [88] png_0.1-9               ggfun_0.2.2             knitr_1.52             </span></span>
 <span><span class="co">#&gt;  [91] reshape2_1.4.5          rjson_0.2.23            nlme_3.1-169           </span></span>
-<span><span class="co">#&gt;  [94] curl_7.1.0              cachem_1.1.0            GlobalOptions_0.1.4    </span></span>
-<span><span class="co">#&gt;  [97] stringr_1.6.0           parallel_4.6.1          desc_1.4.3             </span></span>
-<span><span class="co">#&gt; [100] pillar_1.11.1           vctrs_0.7.3             ggpubr_1.0.0           </span></span>
-<span><span class="co">#&gt; [103] car_3.1-5               tidydr_0.0.6            cluster_2.1.8.2        </span></span>
-<span><span class="co">#&gt; [106] evaluate_1.0.5          cli_3.6.6               locfit_1.5-9.12        </span></span>
-<span><span class="co">#&gt; [109] compiler_4.6.1          rlang_1.3.0             crayon_1.5.3           </span></span>
-<span><span class="co">#&gt; [112] ggsignif_0.6.4          labeling_0.4.3          ps_1.9.3               </span></span>
-<span><span class="co">#&gt; [115] forcats_1.0.1           plyr_1.8.9              fs_2.1.0               </span></span>
-<span><span class="co">#&gt; [118] ggiraph_0.9.6           stringi_1.8.9           BiocParallel_1.46.0    </span></span>
-<span><span class="co">#&gt; [121] assertthat_0.2.1        babelgene_22.9          Biostrings_2.80.1      </span></span>
-<span><span class="co">#&gt; [124] lazyeval_0.2.3          GOSemSim_2.38.3         fontquiver_0.2.1       </span></span>
-<span><span class="co">#&gt; [127] Matrix_1.7-5            patchwork_1.3.2         bit64_4.8.2            </span></span>
-<span><span class="co">#&gt; [130] KEGGREST_1.52.2         statmod_1.5.2           igraph_2.3.3           </span></span>
-<span><span class="co">#&gt; [133] broom_1.0.13            memoise_2.0.1           bslib_0.12.0           </span></span>
-<span><span class="co">#&gt; [136] ggtree_4.2.0            bit_4.6.0               ape_5.8-1              </span></span>
-<span><span class="co">#&gt; [139] gson_0.2.1</span></span></code></pre></div>
+<span><span class="co">#&gt;  [94] cachem_1.1.0            GlobalOptions_0.1.4     stringr_1.6.0          </span></span>
+<span><span class="co">#&gt;  [97] parallel_4.6.1          desc_1.4.3              pillar_1.11.1          </span></span>
+<span><span class="co">#&gt; [100] vctrs_0.7.3             ggpubr_1.0.0            car_3.1-5              </span></span>
+<span><span class="co">#&gt; [103] tidydr_0.0.7            cluster_2.1.8.2         evaluate_1.0.5         </span></span>
+<span><span class="co">#&gt; [106] cli_3.6.6               locfit_1.5-9.12         compiler_4.6.1         </span></span>
+<span><span class="co">#&gt; [109] rlang_1.3.0             crayon_1.5.3            ggsignif_0.6.4         </span></span>
+<span><span class="co">#&gt; [112] labeling_0.4.3          ps_1.9.3                plyr_1.8.9             </span></span>
+<span><span class="co">#&gt; [115] forcats_1.0.1           fs_2.1.0                ggiraph_0.9.6          </span></span>
+<span><span class="co">#&gt; [118] stringi_1.8.9           BiocParallel_1.46.0     assertthat_0.2.1       </span></span>
+<span><span class="co">#&gt; [121] Biostrings_2.80.2       lazyeval_0.2.3          GOSemSim_2.38.3        </span></span>
+<span><span class="co">#&gt; [124] fontquiver_0.2.1        Matrix_1.7-5            patchwork_1.3.2        </span></span>
+<span><span class="co">#&gt; [127] bit64_4.8.6             KEGGREST_1.52.2         statmod_1.5.2          </span></span>
+<span><span class="co">#&gt; [130] igraph_2.3.4            broom_1.0.13            memoise_2.0.1          </span></span>
+<span><span class="co">#&gt; [133] bslib_0.12.0            ggtree_4.2.0            bit_4.6.0              </span></span>
+<span><span class="co">#&gt; [136] ape_5.8-1               gson_0.2.2</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

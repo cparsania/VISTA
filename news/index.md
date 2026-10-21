@@ -1,5 +1,222 @@
 # Changelog
 
+## VISTA 1.1.6
+
+### New features
+
+- **edgeR’s quasi-likelihood F-test.**
+  [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md),
+  [`run_edger_analysis()`](https://cparsania.github.io/VISTA/reference/run_deseq_analysis.md),
+  [`benchmark_vista_equivalence()`](https://cparsania.github.io/VISTA/reference/benchmark_vista_equivalence.md)
+  and
+  [`validate_vista_deep()`](https://cparsania.github.io/VISTA/reference/validate_vista_deep.md)
+  gain `edger_test = c("LRT", "QL")`. `"QL"` runs
+  `glmQLFit()`/`glmQLFTest()` (edgeR v4 pipeline), which the edgeR
+  authors recommend for bulk RNA-seq; the likelihood-ratio test treats
+  the dispersion as known and is liberal with few replicates. The test
+  used is recorded in `cutoffs(v)$edger_test`, and the report config
+  accepts `edger_test:`; for an edgeR object made before 1.1.6, which
+  does not record the test, the report states the likelihood-ratio test
+  and marks it as inferred. The equivalence check runs its own QL
+  reference. The vignettes now set `edger_test`.
+
+### Default changing in VISTA 1.4.0
+
+- **`edger_test` will default to `"QL"`.** It stays `"LRT"` in this
+  release so that no results change without warning. A call that runs
+  edgeR (`method = "edger"` or `"both"`) without setting `edger_test`,
+  or with `edger_test = NULL`, prints a message, classed
+  `vista_default_change` and throttled like the deprecation warnings,
+  saying so. Set `edger_test = "LRT"` to keep current results after the
+  change, or `edger_test = "QL"` to use the new default now; either
+  silences the message. DESeq2 and limma-voom analyses are not affected.
+  See `?VISTA-deprecated`.
+
+### Bug fixes
+
+- **tximport abundance or lengths could be analysed as counts.**
+  `read_vista_counts(format = "tximport", counts_from = "abundance")`
+  imported TPM, and `counts_from = "length"` transcript lengths, as if
+  they were counts, and edgeR and limma tested them without complaint.
+  Both now raise an error.
+
+- **tximport counts were analysed without transcript-length
+  correction.** tximport’s default `countsFromAbundance = "no"` leaves
+  estimated counts unscaled and expects the DE method to use length
+  offsets, which VISTA does not. Such input that carries `abundance` and
+  `length` (also when it does not say how it was scaled) is now
+  converted to length-scaled TPM counts (tximport’s
+  `countsFromAbundance = "lengthScaledTPM"`, recommended when the method
+  does not use offsets), with a message. With `tx2gene`,
+  transcript-level input is summarised to genes as tximport’s
+  `summarizeToGene()` does, which rebuilds gene counts from abundance
+  and length even when the transcript counts were already scaled;
+  summing them, as VISTA did, undid the gene-level length correction.
+  The results agree with tximport’s own to within numerical precision
+  (relative differences below 1e-14). `abundance` and `length` are
+  matched to `counts` by name, and missing or negative values, a sample
+  with zero total abundance, or a `tx2gene` that matches no transcript
+  are clear errors, as is an unrecognised `countsFromAbundance` value.
+  Without `abundance`/`length`, VISTA warns and uses the counts as
+  given. *Were you affected?* If you imported tximport output made with
+  the default `countsFromAbundance = "no"`, a hand-built list without
+  that field, or transcript-level `"lengthScaledTPM"`/`"dtuScaledTPM"`
+  output with `tx2gene` (scaledTPM sums to the same gene counts); re-run
+  those analyses.
+
+- **DESeq2 stopped on estimated counts.** Non-integer counts from
+  tximport or RSEM made `create_vista(method = "deseq2")` fail with
+  “some values in assay are not integers”. DESeq2 now receives them
+  rounded, with a message, as
+  [`DESeqDataSetFromTximport()`](https://rdrr.io/pkg/DESeq2/man/DESeqDataSet.html)
+  does. Filtering is applied to the counts as given, as for edgeR and
+  limma, so `method = "both"` keeps one set of genes, and its
+  `counts(v)` holds DESeq2’s rounded counts whichever source is active.
+
+- **Values that are not counts could be analysed without comment.** All
+  three engines now refuse negative values, and warn (class
+  `vista_not_counts_warning`) about non-integer values with an
+  unmistakable sign of not being counts: every sample summing to exactly
+  one million (TPM, CPM) or small, almost all fractional values (log
+  scale). These are warnings because no rule on the values alone
+  separates counts from normalised data: estimated counts from libraries
+  of about a million reads must not be refused, and TMM-CPM, FPKM or
+  filtered TPM cannot be recognised. Supply raw or estimated counts.
+  Integer counts are unaffected.
+
+- **RSEM TPM or FPKM could be imported as counts.** Where `count_column`
+  selects the values read from RSEM output, only RSEM’s count columns,
+  `expected_count` (the default) and `posterior_mean_count`, are now
+  accepted. A merged table whose sample columns are named in
+  `sample_names` is read as given.
+
+- **Untested genes were stored with `pvalue = 1`.** DESeq2 reports `NA`
+  for genes it does not test (Cook’s-distance count outliers); VISTA
+  replaced that with 1 when it stored the comparison, beside a `padj`
+  that stayed `NA`, so an untested gene read as tested and the row
+  disagreed with itself. On airway this affected 51 genes. Tables from
+  [`comparisons()`](https://cparsania.github.io/VISTA/reference/VISTA-accessors.md)
+  and those written by
+  [`export_vista_assets()`](https://cparsania.github.io/VISTA/reference/export_vista_assets.md)
+  now show `NA`, as the engine reported, and so do the per-backend
+  `pvalue_deseq2`/`pvalue_edger` columns of a consensus table. Plots and
+  rankings already substituted their own value for a missing p-value, so
+  figures are unchanged.
+
+- **Filtering a consensus table on `padj` returned the union, not the
+  intersection.** With `consensus_mode = "intersection"`, a gene called
+  by only one backend is not called, but its `padj` was that backend’s
+  significant value, contrary to the documented “less-significant of the
+  two”. Selecting `padj <= 0.05` on the table, as
+  [`get_foldchange_scatter()`](https://cparsania.github.io/VISTA/reference/get_foldchange_scatter.md)
+  and the volcano thresholds do, therefore picked up every
+  single-backend gene. Such genes now carry the less-significant
+  `pvalue` and `padj` of the two backends, and their `log2fc` follows
+  `consensus_log2fc` (the mean of the two by default) instead of the
+  calling backend’s estimate, as for every other uncalled gene. On
+  airway this changes `log2fc` for all 119 single-backend genes (by up
+  to 0.36) and the p-values of most of them. In union mode, where they
+  are called, they keep the calling backend’s values, as before.
+  `regulation` was always correct and is unchanged.
+
+- **DEG-count plots dropped comparisons with no DEGs.**
+  [`get_deg_count_barplot()`](https://cparsania.github.io/VISTA/reference/get_deg_count_barplot.md),
+  [`get_deg_count_pieplot()`](https://cparsania.github.io/VISTA/reference/get_deg_count_pieplot.md)
+  and
+  [`get_deg_count_donutplot()`](https://cparsania.github.io/VISTA/reference/get_deg_count_donutplot.md)
+  left out a comparison whose summary was all “Other”, asking for it by
+  name aborted with “not found in DEG summary”, and when no requested
+  comparison had any DEG they returned `NULL` with a warning. Such
+  comparisons are now drawn at zero. Comparison order is unchanged. A
+  summary that uses none of the labels `Up`, `Down` or `Other` (possible
+  with
+  [`as_vista()`](https://cparsania.github.io/VISTA/reference/as_vista.md))
+  is left out with a warning naming the labels found, rather than drawn
+  as zero.
+
+- **limma MA plots put the wrong quantity on the x axis.** For limma the
+  table’s `baseMean` is `AveExpr`, already log2-CPM, and
+  [`get_ma_plot()`](https://cparsania.github.io/VISTA/reference/get_ma_plot.md)
+  preferred it to the object’s mean expression, so the axis showed
+  `log10(log2-CPM + 1)`. It now uses the object’s mean expression for
+  every engine, as its own comment intended.
+
+- **An explicit intercept was not removed for edgeR and limma.** For
+  `design_formula = "~ 1 + cell + group"`, VISTA prefixed `0 +`, which
+  `+ 1` then undid, so the model kept its intercept. VISTA now reads the
+  intercept from the formula’s terms. The fitted model spans the same
+  space, so results differ only within numerical precision.
+
+### Verification
+
+- **[`benchmark_vista_equivalence()`](https://cparsania.github.io/VISTA/reference/benchmark_vista_equivalence.md)
+  no longer shares code with what it checks.** Its reference pipelines
+  used VISTA’s own helpers for sample matching, design construction,
+  contrasts, DEG calls and row alignment, so a defect in any of them was
+  reproduced on both sides and passed – which is how the first and third
+  defects above went unnoticed. The reference now calls only base R,
+  `stats` and the engines, re-implements the documented contract from
+  scratch (see
+  [`?benchmark_vista_equivalence`](https://cparsania.github.io/VISTA/reference/benchmark_vista_equivalence.md)),
+  derives contrasts from the design itself, reads VISTA’s tables through
+  its exported accessors and matches rows by identifier. It compares
+  every numeric column the engine reports, the retained gene set and the
+  set of comparisons; the summary gains `gene_sets_identical`,
+  `comparison_sets_identical`, `all_columns_within_tolerance` and
+  `columns_compared`. `baseMean_within_tolerance` is `NA` for edgeR,
+  which reports no `baseMean` (it was a vacuous `TRUE`); a numeric
+  column VISTA stores but the reference does not report
+  (`columns_not_in_reference`) counts as a mismatch; and a mismatch
+  between a value and `NA` is reported as an infinite difference instead
+  of 0. The MA, PCA and DEG-count checks now read the data
+  [`get_ma_plot()`](https://cparsania.github.io/VISTA/reference/get_ma_plot.md),
+  [`get_pca_plot()`](https://cparsania.github.io/VISTA/reference/get_pca_plot.md)
+  and the DEG-count plots draw, and the PCA check compares every
+  sample-sheet column; the volcano check still rebuilds its inputs from
+  the stored table.
+- Each method’s `reference` element has a new shape. Its `comparisons`
+  are data frames in VISTA’s column names (`gene_id`, `log2fc`, `stat`,
+  `pvalue`, `padj`, plus `baseMean` and `lfcSE` for DESeq2, `logCPM` for
+  edgeR, and `baseMean` (limma’s `AveExpr`), `B`, `P.Value` and
+  `adj.P.Val` for limma), not the engines’ own tables. `row_data` is
+  removed (use `rowMeans(reference$norm_counts)`), `group_column` is
+  added, and each `deg_summary` table has exactly two rows, `Up` and
+  `Down`.
+- New tests check that no reference function uses VISTA code – as a
+  call, as a function value, through `VISTA::`/`VISTA:::`, or by name in
+  a string. They inject defects into VISTA’s own helpers that the
+  benchmark must report: a flipped contrast sign, swapped Up/Down calls,
+  values under the wrong gene labels, samples matched to the wrong
+  metadata rows, a dropped covariate, untested genes stored as `p = 1`,
+  and a comparison dropped from DEG-count plot data. The 1.1.5 check
+  caught two of the first five; those five were chosen to target the
+  helpers it shared, so this shows the new check can fail where the old
+  one could not, not a detection rate.
+
+### Other changes
+
+- Objects record the VISTA and R versions and the installed DESeq2,
+  edgeR and limma versions in `metadata(x)$provenance`, as
+  `?VISTA-class` already described. The stored object behind
+  [`example_vista()`](https://cparsania.github.io/VISTA/reference/example_vista.md)
+  was regenerated to carry them.
+- [`?create_vista`](https://cparsania.github.io/VISTA/reference/create_vista.md)
+  documents how a sample sheet without `sample_names` is matched to
+  count columns, and what the consensus `padj` is: a conservative
+  ranking score, not an FDR-adjusted p-value of the consensus. In
+  simulations the intersection lowered, but did not control, the single
+  backends’ false discovery rate, and the union raised it.
+- The DESCRIPTION now names limma-voom among the engines.
+- The code-economy vignette now computes every tally from its own chunks
+  at build time, states its counting rule, attaches what each workflow
+  needs, and checks that both workflows give the same DESeq2 results.
+- `min_counts` and `min_replicates` in
+  [`benchmark_vista_equivalence()`](https://cparsania.github.io/VISTA/reference/benchmark_vista_equivalence.md)
+  and
+  [`validate_vista_deep()`](https://cparsania.github.io/VISTA/reference/validate_vista_deep.md)
+  are now described as they behave: `min_replicates` counts samples
+  across the whole experiment, not per group.
+
 ## VISTA 1.1.5
 
 ### New features

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -147,6 +147,11 @@ calling across all methods).</li>
 <code>design_formula</code>: Optional explicit design formula
 including <code>group_column</code>.</li>
 <li>
+<code>edger_test</code>: For <code>method = "edger"</code> or
+<code>"both"</code>, <code>"LRT"</code> (likelihood-ratio test; current
+default) or <code>"QL"</code> (quasi-likelihood F-test; default from
+VISTA 1.4.0). Set it explicitly to keep results stable.</li>
+<li>
 <code>consensus_mode</code>: For <code>method = "both"</code>,
 <code>"intersection"</code> or <code>"union"</code>.</li>
 <li>
@@ -255,7 +260,8 @@ named comparison colors.</li>
 mirror <code><a href="../../reference/create_vista.html">create_vista()</a></code>.</li>
 <li>
 <code>run_edger_analysis(...)</code>: edgeR pipeline; arguments
-mirror <code><a href="../../reference/create_vista.html">create_vista()</a></code>.</li>
+mirror <code><a href="../../reference/create_vista.html">create_vista()</a></code>, including
+<code>edger_test</code>.</li>
 <li>
 <code>run_limma_analysis(...)</code>: limma-voom pipeline; arguments
 mirror <code><a href="../../reference/create_vista.html">create_vista()</a></code>.</li>

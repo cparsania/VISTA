@@ -25,7 +25,8 @@ validate_vista_deep(
   design_formula = NULL,
   tolerance = 1e-08,
   return_plots = FALSE,
-  error = TRUE
+  error = TRUE,
+  edger_test = c("LRT", "QL")
 )
 ```
 
@@ -63,11 +64,13 @@ validate_vista_deep(
 
 - min_counts:
 
-  Minimum total counts per gene to retain.
+  Minimum count a gene must reach in a sample to count as detected
+  there; also the minimum row total.
 
 - min_replicates:
 
-  Minimum samples per group meeting filtering criteria.
+  Minimum number of samples, across the whole experiment, in which a
+  gene must reach `min_counts`.
 
 - log2fc_cutoff:
 
@@ -101,6 +104,12 @@ validate_vista_deep(
 - error:
 
   Logical; if `TRUE`, abort when any discrepancy is detected.
+
+- edger_test:
+
+  The edgeR test, `"LRT"` (the default until VISTA 1.4.0) or `"QL"`; see
+  [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
+  VISTA and the reference both use it.
 
 ## Value
 
@@ -151,18 +160,15 @@ validate_vista_deep(
   min_counts = 5,
   min_replicates = 1
 )
+#> The default `edger_test` in `validate_vista_deep()` changes from "LRT" to "QL" in VISTA 1.4.0. Set `edger_test = "LRT"` to keep the current results, or `edger_test = "QL"` to use the new default now. The edgeR authors recommend the quasi-likelihood F-test for bulk RNA-seq; the likelihood-ratio test is liberal with few replicates.
+#> This message is displayed once every 8 hours.
 #> estimating size factors
 #> estimating dispersions
 #> gene-wise dispersion estimates
 #> mean-dispersion relationship
 #> final dispersion estimates
 #> fitting model and testing
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
+#> converting counts to integer mode
 #> calcNormFactors has been renamed to normLibSizes
 #> calcNormFactors has been renamed to normLibSizes
 # }

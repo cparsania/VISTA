@@ -25,7 +25,7 @@ $group: list with column, palette, colors
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,7 +101,8 @@ all DE outputs and configuration live in <code>metadata(vista)</code>:</p><ul><l
 <span>  group_palette <span class="op">=</span> <span class="st">"Dark 2"</span>,</span>
 <span>  comparison_palette <span class="op">=</span> <span class="st">"Dark 3"</span>,</span>
 <span>  keep_raw_counts <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  validate <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  validate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  edger_test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LRT"</span>, <span class="st">"QL"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -110,12 +111,25 @@ all DE outputs and configuration live in <code>metadata(vista)</code>:</p><ul><l
 
 
 <dl><dt id="arg-counts">counts<a class="anchor" aria-label="anchor" href="#arg-counts"></a></dt>
-<dd><p>Raw counts (matrix/data.frame) with a gene-id column and sample columns.</p></dd>
+<dd><p>Raw counts (matrix/data.frame) with a gene-id column and sample columns.
+Estimated (non-integer) counts, e.g. from tximport or RSEM via
+<code><a href="read_vista_counts.html">read_vista_counts()</a></code>, are accepted and rounded for DESeq2 after filtering.
+Negative values are refused, and non-integer values summing to exactly one
+million per sample (TPM/CPM) or small and almost all fractional (log scale)
+draw a warning. VISTA cannot otherwise tell normalised values from counts,
+so supply raw or estimated counts.</p></dd>
 
 
 <dt id="arg-sample-info">sample_info<a class="anchor" aria-label="anchor" href="#arg-sample-info"></a></dt>
-<dd><p>Data frame with sample metadata. Must contain <code>sample_names</code>
-(or have rownames equal to sample columns in <code>counts</code>) and the <code>group_column</code>.</p></dd>
+<dd><p>Data frame with sample metadata, including the
+<code>group_column</code>. Samples are matched to count columns by a
+<code>sample_names</code> column. Without one, the rownames are used if they are
+unique and are not the default <code>1, 2, ...</code>; they are then used as they
+are and must name count columns, so reset the rownames of a row-subsetted
+sheet with <code>rownames(x) &lt;- NULL</code>. If neither is available, the first
+of <code>sample_name</code>, <code>sample</code>, <code>sample_id</code>, <code>Run</code>,
+<code>run</code>, <code>Sample</code> and <code>SampleName</code> whose values name count
+columns is used.</p></dd>
 
 
 <dt id="arg-column-geneid">column_geneid<a class="anchor" aria-label="anchor" href="#arg-column-geneid"></a></dt>
@@ -190,7 +204,7 @@ For single-method runs, this must match <code>method</code>.</p></dd>
 
 
 <dt id="arg-group-palette">group_palette<a class="anchor" aria-label="anchor" href="#arg-group-palette"></a></dt>
-<dd><p>Qualitative palette name for <code><a href="https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html" class="external-link">colorspace::qualitative_hcl()</a></code>.
+<dd><p>Qualitative palette name for <code><a href="https://zeileis.codeberg.page/colorspace/reference/hcl_palettes.html" class="external-link">colorspace::qualitative_hcl()</a></code>.
 One of <code>c("Pastel 1","Dark 2","Dark 3","Set 2","Set 3","Warm","Cold","Harmonic","Dynamic")</code>.
 Default: <code>"Dark 2"</code>.</p></dd>
 
@@ -203,13 +217,24 @@ comparison (stored in <code>metadata(v)$comparison$colors</code>). Defaults to <
 <dt id="arg-keep-raw-counts">keep_raw_counts<a class="anchor" aria-label="anchor" href="#arg-keep-raw-counts"></a></dt>
 <dd><p>Logical; if <code>TRUE</code> (default), the filtered raw
 count matrix is retained as a second assay named <code>"counts"</code>, reachable
-with <code>counts(v)</code> and required by <code><a href="as_deseq_dataset.html">as_deseq_dataset()</a></code>. This
+with <code>counts(v)</code> and required by <code><a href="as_deseq_dataset.html">as_deseq_dataset()</a></code>. For the
+DESeq2 backend these are the rounded counts DESeq2 analysed. This
 roughly doubles the assay footprint; set <code>FALSE</code> to omit it.</p></dd>
 
 
 <dt id="arg-validate">validate<a class="anchor" aria-label="anchor" href="#arg-validate"></a></dt>
 <dd><p>Logical; if <code>TRUE</code> (default), run full <code><a href="validate_vista.html">validate_vista()</a></code>
 checks before returning the object.</p></dd>
+
+
+<dt id="arg-edger-test">edger_test<a class="anchor" aria-label="anchor" href="#arg-edger-test"></a></dt>
+<dd><p>For <code>method = "edger"</code> or <code>"both"</code>, the edgeR test:
+<code>"LRT"</code> (likelihood-ratio test; the default) or <code>"QL"</code>
+(quasi-likelihood F-test, which the edgeR authors recommend for bulk RNA-seq
+and which is less liberal with few replicates). The default changes to
+<code>"QL"</code> in VISTA 1.4.0; until then, a call that runs edgeR without
+setting it (or with <code>NULL</code>) prints a notice. The test used is recorded
+in <code>cutoffs(v)$edger_test</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -226,10 +251,16 @@ Each DE table must have rownames identical to the final <code>norm_counts</code>
 When <code>method = "both"</code>, method-specific and consensus DE tables are stored in
 <code>metadata(v)$de_results_by_method</code> and <code>metadata(v)$de_summary_by_method</code>,
 and the active source is tracked in <code>metadata(v)$de_active_source</code>.</p>
-<p>In the consensus table, <code>log2fc</code> follows <code>consensus_log2fc</code> (with
-single-backend calls taking the contributing backend's estimate), while
+<p>In the consensus table, <code>log2fc</code> follows <code>consensus_log2fc</code>, while
 <code>pvalue</code> and <code>padj</code> carry the less-significant of the two backends
-so the columns remain continuous and usable for volcano/MA plots and ranking.
+(a gene a backend did not test counts as <code>p = 1</code>) so the columns remain
+continuous and usable for volcano/MA plots and ranking. With
+<code>consensus_mode = "union"</code>, genes called by a single backend take that
+backend's estimate and p-values instead, so every called gene's columns
+agree with its call. The merged <code>padj</code> is a conservative ranking score,
+not an FDR-adjusted p-value of the consensus, and <code>regulation</code> is the
+call: in simulations the intersection lowered, but did not control, the
+false discovery rate of the single backends, and the union raised it.
 Per-backend values are always preserved alongside them in
 <code>log2fc_deseq2</code>, <code>log2fc_edger</code>, <code>pvalue_deseq2</code>,
 <code>pvalue_edger</code>, <code>padj_deseq2</code>, and <code>padj_edger</code>, and the
@@ -239,7 +270,7 @@ Per-backend values are always preserved alongside them in
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><a href="as_vista.html">as_vista</a>, <a href="VISTA-class.html">VISTA-class</a>, <a href="https://colorspace.R-Forge.R-project.org/reference/hcl_palettes.html" class="external-link">qualitative_hcl</a></p></div>
+    <div class="dont-index"><p><a href="as_vista.html">as_vista</a>, <a href="VISTA-class.html">VISTA-class</a>, <a href="https://zeileis.codeberg.page/colorspace/reference/hcl_palettes.html" class="external-link">qualitative_hcl</a></p></div>
     </div>
 
     <div class="section level2">
@@ -328,6 +359,9 @@ Per-backend values are always preserved alongside them in
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $consensus_log2fc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $edger_test</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $active_source</span>

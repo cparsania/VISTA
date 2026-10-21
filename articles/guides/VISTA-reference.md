@@ -35,6 +35,10 @@ Arguments:
 - `covariates`: Optional additive covariate columns from `sample_info`.
 - `design_formula`: Optional explicit design formula including
   `group_column`.
+- `edger_test`: For `method = "edger"` or `"both"`, `"LRT"`
+  (likelihood-ratio test; current default) or `"QL"` (quasi-likelihood
+  F-test; default from VISTA 1.4.0). Set it explicitly to keep results
+  stable.
 - `consensus_mode`: For `method = "both"`, `"intersection"` or
   `"union"`.
 - `consensus_log2fc`: For consensus tables, how `log2fc` is populated.
@@ -94,7 +98,8 @@ Arguments:
 - `run_deseq_analysis(...)`: DESeq2 pipeline; arguments mirror
   [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
 - `run_edger_analysis(...)`: edgeR pipeline; arguments mirror
-  [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
+  [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md),
+  including `edger_test`.
 - `run_limma_analysis(...)`: limma-voom pipeline; arguments mirror
   [`create_vista()`](https://cparsania.github.io/VISTA/reference/create_vista.md).
 

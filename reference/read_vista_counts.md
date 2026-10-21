@@ -35,7 +35,9 @@ read_vista_counts(
 
   Count input. Supported values depend on `format` and include a matrix,
   data frame, single file path, vector of file paths, or a tximport-like
-  list with `counts`, `abundance`, and/or `length`.
+  list with a `counts` matrix (required) and, optionally, `abundance`
+  and `length` matrices and `countsFromAbundance`, which VISTA uses to
+  derive length-scaled counts when needed.
 
 - format:
 
@@ -67,6 +69,11 @@ read_vista_counts(
   Optional count column selector for formats that expose multiple count
   choices. For STAR, use one of `"unstranded"`, `"stranded_first"`, or
   `"stranded_second"`. For RSEM, this defaults to `"expected_count"`.
+  Where it selects the values read from RSEM output, only
+  `"expected_count"` and `"posterior_mean_count"` are accepted, since
+  RSEM's other columns (TPM, FPKM, lengths and their posterior
+  summaries) are not counts; a merged table whose sample columns are
+  named in `sample_names` is read as given.
 
 - tx2gene:
 
@@ -76,8 +83,22 @@ read_vista_counts(
 
 - counts_from:
 
-  Which matrix to extract from a tximport-like input: `"counts"`,
-  `"abundance"`, or `"length"`.
+  Which matrix of a tximport-like input to use. Only `"counts"` is
+  accepted: `"abundance"` (TPM) and `"length"` are not counts and now
+  raise an error. When the counts are not length-scaled (tximport's
+  default `countsFromAbundance = "no"`) and the input carries
+  `abundance` and `length`, VISTA converts them to length-scaled TPM
+  counts, tximport's recommendation for DE methods that do not use
+  length offsets. Scaled gene-level counts (`"scaledTPM"`,
+  `"lengthScaledTPM"`) are used as they are. With `tx2gene`,
+  transcript-level input is summarised to genes as tximport's
+  `summarizeToGene()` does: when `abundance` and `length` are present,
+  gene counts are rebuilt from them (`"scaledTPM"` input stays
+  scaledTPM; all other input becomes lengthScaledTPM), because summing
+  lengthScaledTPM transcript counts would undo the gene-level length
+  correction. An unrecognised `countsFromAbundance` value is an error.
+  `abundance` and `length` are matched to `counts` by row and column
+  names.
 
 - drop_technical:
 

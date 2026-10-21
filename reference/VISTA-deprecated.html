@@ -11,7 +11,7 @@ Deprecated arguments keep working exactly as before while they warn."><meta prop
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,14 +63,16 @@ Deprecated arguments keep working exactly as before while they warn.</p>
 
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Not applicable; this page documents argument deprecations only.</p>
+    <p>Not applicable; this page documents deprecations and default changes only.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The table below is generated from the package's internal registry, so it is
 always in sync with the code. Warnings are classed
-<code>c("vista_deprecated_arg", "deprecatedWarning")</code> and are emitted at most once
-per session per argument, so they will not flood a loop.</p>
+<code>c("vista_deprecated_arg", "deprecatedWarning")</code> and are throttled so they
+will not flood a loop: by default each is shown at most once every eight
+hours per argument. Set <code>options(vista.deprecation_frequency = "once")</code> for
+once per session, or <code>"always"</code> to see every occurrence.</p>
 <p>To silence them while you migrate:</p><div class="sourceCode"><pre><code><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_corr_heatmap.html">get_corr_heatmap</a></span><span class="op">(</span><span class="va">v</span>, show_corr_values <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 
@@ -86,6 +88,22 @@ errors:</p><div class="sourceCode"><pre><code><span></span>
 <p>The authoritative list lives in the package itself rather than being
 duplicated here, so it cannot drift out of date. Print it with the example
 below, or filter it to the function you are migrating.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="defaults-that-will-change">Defaults that will change<a class="anchor" aria-label="anchor" href="#defaults-that-will-change"></a></h2>
+
+
+<p>A default that is going to change is announced one release ahead, so
+results do not move without warning. The old default stays in force until
+the release named in <code>changes_in</code>; until then, a call that relies on it (by
+not setting the argument, or passing <code>NULL</code>) prints a message classed
+<code>vista_default_change</code>, throttled like the warnings above.
+Setting the argument explicitly, to either value, keeps results stable
+across the change and silences the message. In VISTA 1.2.0 this applies to
+<code>edger_test</code>, which moves from <code>"LRT"</code> (likelihood-ratio test) to <code>"QL"</code>
+(quasi-likelihood F-test) in VISTA 1.4.0, in <code><a href="create_vista.html">create_vista()</a></code>,
+<code><a href="run_deseq_analysis.html">run_edger_analysis()</a></code>, <code><a href="benchmark_vista_equivalence.html">benchmark_vista_equivalence()</a></code> and
+<code><a href="validate_vista_deep.html">validate_vista_deep()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -129,6 +147,14 @@ below, or filter it to the function you are migrating.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  show_corr_values       label      1.4.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   col_corr_values label_color      1.4.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 14       cluster_by    order_by      1.4.0</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Defaults that will change, and when</span></span></span>
+<span class="r-in"><span><span class="fu">VISTA</span><span class="fu">:::</span><span class="fu">.vista_default_changes</span><span class="op">(</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fun"</span>, <span class="st">"arg"</span>, <span class="st">"old_default"</span>, <span class="st">"new_default"</span>, <span class="st">"changes_in"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                           fun        arg old_default new_default changes_in</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                create_vista edger_test         LRT          QL      1.4.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          run_edger_analysis edger_test         LRT          QL      1.4.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 benchmark_vista_equivalence edger_test         LRT          QL      1.4.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         validate_vista_deep edger_test         LRT          QL      1.4.0</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

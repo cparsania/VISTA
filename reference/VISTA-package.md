@@ -1,11 +1,13 @@
 # VISTA: Visualization and Integrated System for Transcriptomic Analysis
 
-The VISTA (Visualization and Integrated System for Transcriptomic
-Analysis) platform streamlines differential expression workflows by
-wrapping DESeq2 and edgeR into a SummarizedExperiment-based container
-with consistent metadata. The package includes visualization utilities,
-MSigDB enrichment helpers, and optional deconvolution support to
-simplify interactive exploration of RNA-seq experiments.
+VISTA (Visualization and Integrated System for Transcriptomic Analysis)
+runs bulk RNA-seq differential expression with DESeq2, edgeR or
+limma-voom, or a DESeq2/edgeR consensus, and keeps counts, results for
+every contrast, gene annotation, colours and analysis parameters in one
+validated SummarizedExperiment-derived object. Plotting functions, GO,
+KEGG and MSigDB enrichment, optional cell-type deconvolution and a
+Quarto report all read that object, and an exported benchmark checks its
+results against independent DESeq2, edgeR and limma runs.
 
 ## See also
 

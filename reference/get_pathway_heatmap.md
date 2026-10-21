@@ -122,7 +122,7 @@ if (requireNamespace("msigdbr", quietly = TRUE)) {
   head(genes)
 }
 #> Warning: qvalue::qvalue() failed, returning NA for qvalue. Error: missing values and NaN's not allowed if 'na.rm' is FALSE
-#> [1] "ENSG00000003402" "ENSG00000004799"
+#> [1] "ENSG00000004799" "ENSG00000003402"
 
 # \donttest{
 data("count_data", package = "VISTA")
