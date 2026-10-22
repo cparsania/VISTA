@@ -2179,14 +2179,14 @@ sessionInfo()
 #>  [9] IRanges_2.46.0              S4Vectors_0.50.3           
 #> [11] BiocGenerics_0.58.1         generics_0.1.4             
 #> [13] MatrixGenerics_1.24.0       matrixStats_1.5.0          
-#> [15] ggplot2_4.0.3               VISTA_1.1.6                
+#> [15] ggplot2_4.0.3               VISTA_1.1.7                
 #> [17] BiocStyle_2.40.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] splines_4.6.1           ggplotify_0.1.4         tibble_3.3.1           
 #>   [4] ggpp_0.6.1              polyclip_1.10-7         enrichit_0.2.6         
 #>   [7] lifecycle_1.0.5         httr2_1.3.0             rstatix_1.1.0          
-#>  [10] edgeR_4.10.6            doParallel_1.0.17       processx_3.9.0         
+#>  [10] edgeR_4.10.7            doParallel_1.0.17       processx_3.9.0         
 #>  [13] lattice_0.22-9          MASS_7.3-65             backports_1.5.1        
 #>  [16] limma_3.68.5            sass_0.4.10             rmarkdown_2.32         
 #>  [19] jquerylib_0.1.4         yaml_2.3.12             otel_0.2.0             
@@ -2214,7 +2214,7 @@ sessionInfo()
 #>  [85] htmlwidgets_1.6.4       S4Arrays_1.12.1         scatterpie_0.2.6       
 #>  [88] ggstats_0.14.0          uwot_0.2.5              pkgconfig_2.0.3        
 #>  [91] gtable_0.3.6            blob_1.3.0              ComplexHeatmap_2.28.0  
-#>  [94] S7_0.2.2                XVector_0.52.0          clusterProfiler_4.20.2 
+#>  [94] S7_0.2.2                XVector_0.52.0          clusterProfiler_4.20.3 
 #>  [97] htmltools_0.5.9         fontBitstreamVera_0.1.1 carData_3.0-6          
 #> [100] bookdown_0.48           clue_0.3-68             scales_1.4.0           
 #> [103] png_0.1-9               ggfun_0.2.2             knitr_1.52             

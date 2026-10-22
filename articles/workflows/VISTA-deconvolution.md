@@ -196,19 +196,19 @@ dim(cell_fractions)
 #> [1]  8 43
 cell_fractions[1:min(4, nrow(cell_fractions)), 1:min(6, ncol(cell_fractions))]
 #>              neutrophil     monocyte megakaryocyte-erythroid progenitor cell
-#> SRR1039508 2.752619e-22 0.000000e+00                            0.000000e+00
-#> SRR1039509 4.663189e-23 0.000000e+00                            1.275113e-05
+#> SRR1039508 2.709519e-22 0.000000e+00                            2.940657e-23
+#> SRR1039509 4.167856e-23 0.000000e+00                            1.275113e-05
 #> SRR1039512 0.000000e+00 1.591268e-20                            5.104317e-05
-#> SRR1039513 4.705297e-22 0.000000e+00                            1.531342e-05
+#> SRR1039513 5.220638e-22 0.000000e+00                            1.531342e-05
 #>            CD4-positive, alpha-beta T cell regulatory T cell
-#> SRR1039508                    2.780816e-05                 0
-#> SRR1039509                    2.989538e-05                 0
-#> SRR1039512                    1.816742e-05                 0
-#> SRR1039513                    2.925070e-05                 0
+#> SRR1039508                    2.780816e-05      3.642472e-24
+#> SRR1039509                    2.989538e-05      0.000000e+00
+#> SRR1039512                    1.816742e-05      1.725551e-24
+#> SRR1039513                    2.925070e-05      0.000000e+00
 #>            central memory CD4-positive, alpha-beta T cell
-#> SRR1039508                                   4.065957e-23
-#> SRR1039509                                   4.855394e-31
-#> SRR1039512                                   2.745121e-23
+#> SRR1039508                                   0.000000e+00
+#> SRR1039509                                   8.447236e-44
+#> SRR1039512                                   5.905664e-23
 #> SRR1039513                                   0.000000e+00
 ```
 
@@ -315,7 +315,7 @@ sessionInfo()
 #> [11] Seqinfo_1.2.0               IRanges_2.46.0             
 #> [13] S4Vectors_0.50.3            BiocGenerics_0.58.1        
 #> [15] generics_0.1.4              MatrixGenerics_1.24.0      
-#> [17] matrixStats_1.5.0           VISTA_1.1.6                
+#> [17] matrixStats_1.5.0           VISTA_1.1.7                
 #> [19] BiocStyle_2.40.0           
 #> 
 #> loaded via a namespace (and not attached):
@@ -324,7 +324,7 @@ sessionInfo()
 #>   [5] graph_1.90.0                minpack.lm_1.2-4           
 #>   [7] enrichit_0.2.6              XML_3.99-0.25              
 #>   [9] lifecycle_1.0.5             httr2_1.3.0                
-#>  [11] rstatix_1.1.0               edgeR_4.10.6               
+#>  [11] rstatix_1.1.0               edgeR_4.10.7               
 #>  [13] processx_3.9.0              lattice_0.22-9             
 #>  [15] MASS_7.3-65                 backports_1.5.1            
 #>  [17] magrittr_2.0.5              limma_3.68.5               
@@ -364,7 +364,7 @@ sessionInfo()
 #>  [85] pkgconfig_2.0.3             gtable_0.3.6               
 #>  [87] blob_1.3.0                  S7_0.2.2                   
 #>  [89] SingleCellExperiment_1.34.0 XVector_0.52.0             
-#>  [91] clusterProfiler_4.20.2      htmltools_0.5.9            
+#>  [91] clusterProfiler_4.20.3      htmltools_0.5.9            
 #>  [93] fontBitstreamVera_0.1.1     carData_3.0-6              
 #>  [95] bookdown_0.48               zigg_0.0.2                 
 #>  [97] GSEABase_1.74.0             scales_1.4.0               

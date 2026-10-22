@@ -361,7 +361,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] tibble_3.3.1     dplyr_1.2.1      VISTA_1.1.6      BiocStyle_2.40.0
+#> [1] tibble_3.3.1     dplyr_1.2.1      VISTA_1.1.7      BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             
@@ -417,7 +417,7 @@ sessionInfo()
 #> [101] locfit_1.5-9.12             Biostrings_2.80.2          
 #> [103] knitr_1.52                  fontBitstreamVera_0.1.1    
 #> [105] bookdown_0.48               IRanges_2.46.0             
-#> [107] Seqinfo_1.2.0               edgeR_4.10.6               
+#> [107] Seqinfo_1.2.0               edgeR_4.10.7               
 #> [109] SummarizedExperiment_1.42.0 stats4_4.6.1               
 #> [111] xfun_0.62                   Biobase_2.72.0             
 #> [113] statmod_1.5.2               matrixStats_1.5.0          
@@ -431,7 +431,7 @@ sessionInfo()
 #> [129] Rcpp_1.1.2                  png_0.1-9                  
 #> [131] parallel_4.6.1              assertthat_0.2.1           
 #> [133] pkgdown_2.2.1               ggplot2_4.0.3              
-#> [135] blob_1.3.0                  clusterProfiler_4.20.2     
+#> [135] blob_1.3.0                  clusterProfiler_4.20.3     
 #> [137] DOSE_4.6.0                  tidytree_0.4.8             
 #> [139] ggiraph_0.9.6               enrichit_0.2.6             
 #> [141] scales_1.4.0                purrr_1.2.2                

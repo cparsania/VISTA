@@ -1,5 +1,20 @@
 # Changelog
 
+## VISTA 1.1.7
+
+### Internal
+
+- The test that PCA and MDS plots do not depend on the order genes are
+  supplied in no longer fails when an axis comes back negated. Shuffling
+  the input genes can make
+  [`prcomp()`](https://rdrr.io/r/stats/prcomp.html) return the mirror
+  image of the same embedding on some LAPACK/BLAS builds (it did on
+  Linux CI), which the test read as an order dependence. Axes are now
+  oriented with the same canonicalisation the 1.1.4 snapshots use, and a
+  new test checks that a sign flip passes while a moved point still
+  fails. No user-visible behaviour changes; only the test suite is
+  affected.
+
 ## VISTA 1.1.6
 
 ### New features

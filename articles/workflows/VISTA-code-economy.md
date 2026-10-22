@@ -963,9 +963,9 @@ sessionInfo()
 #> [8] methods   base     
 #> 
 #> other attached packages:
-#>  [1] VISTA_1.1.6                 circlize_0.4.18            
+#>  [1] VISTA_1.1.7                 circlize_0.4.18            
 #>  [3] ComplexHeatmap_2.28.0       msigdbr_26.1.1             
-#>  [5] clusterProfiler_4.20.2      tibble_3.3.1               
+#>  [5] clusterProfiler_4.20.3      tibble_3.3.1               
 #>  [7] dplyr_1.2.1                 ggrepel_0.9.8              
 #>  [9] ggplot2_4.0.3               DESeq2_1.52.0              
 #> [11] org.Hs.eg.db_3.23.1         AnnotationDbi_1.74.0       
@@ -979,7 +979,7 @@ sessionInfo()
 #> loaded via a namespace (and not attached):
 #>   [1] splines_4.6.1           ggplotify_0.1.4         polyclip_1.10-7        
 #>   [4] enrichit_0.2.6          lifecycle_1.0.5         httr2_1.3.0            
-#>   [7] rstatix_1.1.0           edgeR_4.10.6            doParallel_1.0.17      
+#>   [7] rstatix_1.1.0           edgeR_4.10.7            doParallel_1.0.17      
 #>  [10] processx_3.9.0          lattice_0.22-9          MASS_7.3-65            
 #>  [13] backports_1.5.1         magrittr_2.0.5          limma_3.68.5           
 #>  [16] sass_0.4.10             rmarkdown_2.32          jquerylib_0.1.4        

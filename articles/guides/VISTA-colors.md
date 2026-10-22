@@ -409,7 +409,7 @@ sessionInfo()
 #> 
 #> other attached packages:
 #> [1] colorspace_2.1-4 tibble_3.3.1     dplyr_1.2.1      ggplot2_4.0.3   
-#> [5] VISTA_1.1.6      BiocStyle_2.40.0
+#> [5] VISTA_1.1.7      BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             
@@ -465,7 +465,7 @@ sessionInfo()
 #> [101] Biostrings_2.80.2           knitr_1.52                 
 #> [103] fontBitstreamVera_0.1.1     bookdown_0.48              
 #> [105] IRanges_2.46.0              Seqinfo_1.2.0              
-#> [107] edgeR_4.10.6                SummarizedExperiment_1.42.0
+#> [107] edgeR_4.10.7                SummarizedExperiment_1.42.0
 #> [109] stats4_4.6.1                xfun_0.62                  
 #> [111] Biobase_2.72.0              statmod_1.5.2              
 #> [113] matrixStats_1.5.0           stringi_1.8.9              
@@ -478,7 +478,7 @@ sessionInfo()
 #> [127] jquerylib_0.1.4             Rcpp_1.1.2                 
 #> [129] png_0.1-9                   parallel_4.6.1             
 #> [131] assertthat_0.2.1            pkgdown_2.2.1              
-#> [133] blob_1.3.0                  clusterProfiler_4.20.2     
+#> [133] blob_1.3.0                  clusterProfiler_4.20.3     
 #> [135] DOSE_4.6.0                  tidytree_0.4.8             
 #> [137] ggiraph_0.9.6               enrichit_0.2.6             
 #> [139] scales_1.4.0                purrr_1.2.2                

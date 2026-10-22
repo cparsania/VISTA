@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">VISTA</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,13 @@
       <small>Source: <a href="https://github.com/cparsania/VISTA/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.7" id="vista-117">VISTA 1.1.7<a class="anchor" aria-label="anchor" href="#vista-117"></a></h2>
+<div class="section level3">
+<h3 id="internal-1-1-7">Internal<a class="anchor" aria-label="anchor" href="#internal-1-1-7"></a></h3>
+<ul><li>The test that PCA and MDS plots do not depend on the order genes are supplied in no longer fails when an axis comes back negated. Shuffling the input genes can make <code><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp()</a></code> return the mirror image of the same embedding on some LAPACK/BLAS builds (it did on Linux CI), which the test read as an order dependence. Axes are now oriented with the same canonicalisation the 1.1.4 snapshots use, and a new test checks that a sign flip passes while a moved point still fails. No user-visible behaviour changes; only the test suite is affected.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.6" id="vista-116">VISTA 1.1.6<a class="anchor" aria-label="anchor" href="#vista-116"></a></h2>
 <div class="section level3">
